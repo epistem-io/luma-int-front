@@ -73,6 +73,8 @@ const AccordionFullTrigger = React.forwardRef<
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));
+
+AccordionFullTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 AccordionTrigger.displayName = AccordionPrimitive.Trigger.displayName;
 
 function AccordionContent({

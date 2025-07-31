@@ -1,0 +1,11 @@
+<svg width="81" height="71" viewBox="0 0 81 71" fill="none" xmlns="http://www.w3.org/2000/svg">
+<foreignObject x="-1.66941" y="-0.477023" width="84.292" height="74.6957"><div xmlns="http://www.w3.org/1999/xhtml" style="backdrop-filter:blur(3.47px);clip-path:url(#bgblur_0_1286_3390_clip_path);height:100%;width:100%"></div></foreignObject><path data-figma-bg-blur-radius="6.93039" d="M9.6223 25.306L43.9273 8.49336C45.986 7.48437 48.4657 7.9824 49.9752 9.70807L72.9133 35.9307C75.2469 38.5984 74.1934 42.7759 70.8739 44.0181L13.6309 65.4386C10.3165 66.6789 6.7832 64.2285 6.7832 60.6896V29.8592C6.7832 27.924 7.88463 26.1576 9.6223 25.306Z" fill="white" fill-opacity="0.59" stroke="#CC4778" stroke-width="3.04442" stroke-linecap="round"/>
+<path d="M78 14.5059H71.6627V21H68.3373V14.5059H62V11.4941H68.3373V5H71.6627V11.4941H78V14.5059Z" fill="#CC4778"/>
+<circle cx="49.1113" cy="7.37302" r="4.89523" fill="white" stroke="#CC4778" stroke-width="3.04442" stroke-linecap="round"/>
+<circle cx="7.37302" cy="25.4609" r="4.89523" fill="white" stroke="#CC4778" stroke-width="3.04442" stroke-linecap="round"/>
+<circle cx="7.37302" cy="64.414" r="4.89523" fill="white" stroke="#CC4778" stroke-width="3.04442" stroke-linecap="round"/>
+<circle cx="74.1562" cy="40.7636" r="4.89523" fill="white" stroke="#CC4778" stroke-width="3.04442" stroke-linecap="round"/>
+<defs>
+<clipPath id="bgblur_0_1286_3390_clip_path" transform="translate(1.66941 0.477023)"><path d="M9.6223 25.306L43.9273 8.49336C45.986 7.48437 48.4657 7.9824 49.9752 9.70807L72.9133 35.9307C75.2469 38.5984 74.1934 42.7759 70.8739 44.0181L13.6309 65.4386C10.3165 66.6789 6.7832 64.2285 6.7832 60.6896V29.8592C6.7832 27.924 7.88463 26.1576 9.6223 25.306Z"/>
+</clipPath></defs>
+</svg>

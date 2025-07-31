@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { MapContextContainer } from "@/contexts/mapContext";
+import { GlobalContextContainer } from "@/contexts/globalContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -190,7 +192,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} antialiased`}
       >
         <NavBar />
-        {children}
+        <GlobalContextContainer>
+          <MapContextContainer>{children}</MapContextContainer>
+        </GlobalContextContainer>
       </body>
     </html>
   );
