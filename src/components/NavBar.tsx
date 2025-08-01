@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import Link from "next/link";
 
 interface NavBarProps {
   className?: string;
@@ -40,21 +41,23 @@ export function NavBar({ className }: NavBarProps) {
       <div className="w-full py-2 px-5">
         <div className="flex items-center justify-between">
           {/* Logo and Title */}
-          <div className="flex items-center space-x-3">
-            <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg overflow-hidden">
-              <Image
-                src="/images/epistem-logo.webp"
-                alt="Epistem Logo"
-                width={50}
-                height={50}
-                className="object-contain"
-                priority
-              />
+          <Link href="/">
+            <div className="flex items-center space-x-3">
+              <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg overflow-hidden">
+                <Image
+                  src="/images/epistem-logo.webp"
+                  alt="Epistem Logo"
+                  width={50}
+                  height={50}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <h1 className="text-xl font-medium text-black font-inter">
+                Epistem-X
+              </h1>
             </div>
-            <h1 className="text-xl font-medium text-black font-inter">
-              Epistem-X
-            </h1>
-          </div>
+          </Link>
 
           {/* Navigation and Language Picker */}
           <div className="flex items-center space-x-10">

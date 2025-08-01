@@ -10,6 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { MapContext } from "@/contexts/mapContext";
+import { Info, SlidersHorizontal, Upload } from "lucide-react";
 import { useContext } from "react";
 
 interface EvaluatePanelProps {
@@ -86,6 +87,46 @@ export function EvaluatePanel({
             <p className="text-center font-lato font-bold text-[22px] text-[rgba(239,162,47,1)]">
               76.0%
             </p>
+          </div>
+          <div className="p-3 rounded-md bg-[rgba(253,247,249,1)] border border-neutral-400 space-y-3 mt-5">
+            <div className="flex flex-row items-center space-x-2">
+              <div className="mt-0.5">
+                <Info
+                  className="h-5 w-5"
+                  fill="rgba(37, 37, 37, 1)"
+                  color="rgba(253, 247, 249, 1)"
+                />
+              </div>
+              <p className="text-m-semibold">Improve Accuracy:</p>
+            </div>
+            <div className="grid grid-cols-2 space-x-3">
+              <div className="">
+                <button
+                  type="button"
+                  disabled
+                  // onClick={() => {
+                  //   onClickReselect();
+                  // }}
+                  className="w-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
+                >
+                  <p className="text-xs-semibold ">Readjust Parameter</p>
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="">
+                <button
+                  type="button"
+                  disabled
+                  // onClick={() => {
+                  //   onClickReselect();
+                  // }}
+                  className="w-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
+                >
+                  <p className="text-xs-semibold ">Upload New Data</p>
+                  <Upload className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -30,8 +30,8 @@ const titleArr = [
 
 export function FloatingPanel({ className }: FloatingPanelProps) {
   const [panelStage, setPanelStage] = useState<PANEL_STAGE>(
-    PANEL_STAGE.ANALYSIS,
-    // PANEL_STAGE.EVALUATE,
+    // PANEL_STAGE.ANALYSIS,
+    PANEL_STAGE.EVALUATE,
   );
 
   const [isExpanded, setIsExpanded] = useState(true);
