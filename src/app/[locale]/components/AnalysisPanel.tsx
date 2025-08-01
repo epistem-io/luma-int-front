@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ChevronDown, Upload } from "lucide-react";
+import { ChevronDown, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Draw } from "ol/interaction";
@@ -9,8 +9,8 @@ import { z } from "zod";
 import dayjs from "dayjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
-import { Label } from "../../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
+import { Label } from "../../../components/ui/label";
 import {
   Select,
   SelectContent,
@@ -18,13 +18,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "../../components/ui/input";
+import { Input } from "../../../components/ui/input";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Textarea } from "../../components/ui/textarea";
+import { Textarea } from "../../../components/ui/textarea";
 
 import {
   Accordion,
@@ -33,9 +33,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Switch } from "../../components/ui/switch";
-import { Slider } from "../../components/ui/slider";
-import { Checkbox } from "../../components/ui/checkbox";
+import { Switch } from "../../../components/ui/switch";
+import { Slider } from "../../../components/ui/slider";
+import { Checkbox } from "../../../components/ui/checkbox";
 import { ChangeEvent, useContext, useState } from "react";
 import { LayerLegend, MapContext } from "@/contexts/mapContext";
 import VectorSource from "ol/source/Vector";
@@ -55,7 +55,12 @@ import {
 } from "@/components/ui/form";
 import { Coordinate } from "ol/coordinate";
 import VectorLayer from "ol/layer/Vector";
-import { GlobalContext, SATELLITE } from "@/contexts/globalContext";
+import {
+  AnalysisResult,
+  GlobalContext,
+  SATELLITE,
+} from "@/contexts/globalContext";
+import { useTranslations } from "next-intl";
 
 interface AnalysisPanelProps {
   nextStage?: () => void;
@@ -96,12 +101,15 @@ interface LULCClassificationRes {
     name: string;
     url: string;
   }[];
+  legends: Record<
+    string,
+    (Record<string, string> | Record<string, string[]>)[]
+  >;
   message: string;
-}
-
-enum PANEL_STAGE {
-  ANALYSIS = "analysis",
-  EVALUATE = "evaluate",
+  results: {
+    kappa_coefficient: number;
+    overall_accuracy: number;
+  };
 }
 
 enum DRAW_UPLOAD {
@@ -168,7 +176,7 @@ const formSchema = z.object({
   startDate: z.iso.date(),
   endDate: z.iso.date(),
   satellite: z.enum([...Object.values(SATELLITE)]),
-  cloudCover: z.number().min(1).max(30),
+  cloudCover: z.number().min(0).max(50),
 });
 
 function CollapsibleSection({
@@ -212,6 +220,8 @@ export function AnalysisPanel({
   nextStage = () => {},
   prevStage = () => {},
 }: AnalysisPanelProps) {
+  const t = useTranslations("AnalysisPanel");
+
   const {
     setPolygon,
     polygon,
@@ -221,8 +231,13 @@ export function AnalysisPanel({
     setLayerLegendArray,
   } = useContext(MapContext);
 
-  const { polygonData, setPolygonData, analysisConfig, setAnalysisConfig } =
-    useContext(GlobalContext);
+  const {
+    polygonData,
+    setPolygonData,
+    analysisConfig,
+    setAnalysisConfig,
+    setAnalysisResult,
+  } = useContext(GlobalContext);
 
   const [stage, setStage] = useState<POLYGON_STAGE>(POLYGON_STAGE.COLLECT);
   const [drawOrUpload, setDrawOrUpload] = useState<"" | DRAW_UPLOAD>("");
@@ -493,6 +508,7 @@ export function AnalysisPanel({
       end_date: endDate,
       landsat_version: satellite,
       cloud_cover: cloudCover,
+      test_timeout: true,
     };
 
     setAnalysisConfig(data);
@@ -514,9 +530,41 @@ export function AnalysisPanel({
           url: item.url,
           currentOrder: index,
           originalOrder: index,
+          legend: {
+            isVisible: true,
+            items: json.legends[item.name].map((ite) => {
+              const arr: (
+                | { name: string; color: string }
+                | { name: string; color: string[] }
+              )[] = [];
+
+              Object.entries(ite).forEach(([key, value]) => {
+                // console.log('foreee', key, value)
+                arr.push({
+                  name: key,
+                  color: value,
+                });
+              });
+              // console.log("arro", arr[0]);
+
+              return arr[0];
+            }),
+            // json.legends[item.name]
+          },
         }));
 
+        console.log("leg arr", arr);
+
         setLayerLegendArray(arr);
+
+        const { kappa_coefficient, overall_accuracy } = json.results;
+
+        const result: AnalysisResult = {
+          kappa_coefficient,
+          overall_accuracy,
+        };
+
+        setAnalysisResult(result);
 
         nextStage();
       })
@@ -532,7 +580,10 @@ export function AnalysisPanel({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="">
         <div className="bg-white z-30 mb-32">
-          <CollapsibleSection title="Scope Your Area" defaultOpen={true}>
+          <CollapsibleSection
+            title={t("Section1.scopeYourArea")}
+            defaultOpen={true}
+          >
             <div className="space-y-5">
               {stage === POLYGON_STAGE.CONFIRMATION && (
                 <div className="rounded-md space-y-4 bg-[rgba(253,247,249,1)] [box-shadow:0_2px_8px_0_rgba(87,_86,_86,_0.08)] p-3 border border-neutral-400">
@@ -583,11 +634,10 @@ export function AnalysisPanel({
                           className="object-contain h-6 w-auto"
                         />
                         <p className="text-l-bold text-text-icons-base-main mt-3 text-left">
-                          Draw Polygon
+                          {t("Section1.drawPolygon")}
                         </p>
                         <p className="text-xs-regular text-neutral-700 mt-2 text-left">
-                          Draw the area by forming a polygon based on the
-                          desired point on map
+                          {t("Section1.drawPolygonDesc")}
                         </p>
                       </button>
                       <button
@@ -605,11 +655,10 @@ export function AnalysisPanel({
                           className="object-contain h-6 w-auto"
                         />
                         <p className="text-l-bold text-text-icons-base-main mt-3 text-left">
-                          Upload SHP
+                          {t("Section1.uploadSHP")}
                         </p>
                         <p className="text-xs-regular text-neutral-700 mt-2 text-left">
-                          Upload a previously owned SHP format file for specific
-                          geofencing areas
+                          {t("Section1.uploadSHPDesc")}
                         </p>
                       </button>
                     </div>
@@ -626,18 +675,17 @@ export function AnalysisPanel({
                       />
                       <div className="space-y-2">
                         <p className="text-l-bold text-text-icons-base-main">
-                          Draw Polygon
+                          {t("Section1.drawPolygon")}
                         </p>
                         <p className="text-xs-regular text-text-icons-light-base-second">
-                          Select any location to start draw polygon. Double
-                          click to finish it
+                          {t("Section1.drawPolygonInstruction")}
                         </p>
                         <button
                           type="button"
                           className="py-1.5 px-2 w-full bg-primary-pink cursor-pointer hover:brightness-105 transition-all duration-300"
                         >
                           <p className="text-xs-semibold text-text-icons-on-color">
-                            Finish drawing
+                            {t("Section1.finishDrawing")}
                           </p>
                         </button>
                       </div>
@@ -657,12 +705,10 @@ export function AnalysisPanel({
                           />
                           <div className="space-y-2">
                             <p className="text-l-bold text-text-icons-base-main">
-                              Upload SHP File
+                              {t("Section1.uploadSHP")}
                             </p>
                             <p className="text-xs-regular text-text-icons-light-base-second">
-                              Drop your SHP file here to generate the current
-                              condition data. Accepted format .zip (.shp, .shx,
-                              .dbf, .prj), .kml, .kmz
+                              {t("Section1.uploadSHPInstruction")}
                             </p>
                           </div>
                         </div>
@@ -671,7 +717,7 @@ export function AnalysisPanel({
                         <label htmlFor="file-upload">
                           <div className="py-1.5 px-2 w-full bg-primary-pink cursor-pointer hover:brightness-105 transition-all duration-300">
                             <p className="text-xs-semibold text-text-icons-on-color text-center">
-                              or Click to browse from your computer
+                              {t("Section1.uploadSHPInstructionCont")}
                             </p>
                           </div>
                         </label>
@@ -692,7 +738,7 @@ export function AnalysisPanel({
 
               <div className="space-y-4">
                 <p className="bold-body-400 text-[#002F3D]">
-                  Spatial Resolution:
+                  {t("Section1.spatialResolution")}
                 </p>
                 <RadioGroup defaultValue="">
                   <div className="grid grid-rows-2 space-y-6">
@@ -710,7 +756,7 @@ export function AnalysisPanel({
                             className="text-muted-foreground"
                             htmlFor="spatial-resolution-30"
                           >
-                            30 x 30 m2
+                            30 x 30 m²
                           </Label>
                         </div>
                       </div>
@@ -727,7 +773,7 @@ export function AnalysisPanel({
                             className="text-muted-foreground"
                             htmlFor="spatial-resolution-100"
                           >
-                            100 x 100 m2
+                            100 x 100 m²
                           </Label>
                         </div>
                       </div>
@@ -746,7 +792,7 @@ export function AnalysisPanel({
                             className="text-muted-foreground"
                             htmlFor="spatial-resolution-500"
                           >
-                            500 x 500 m2
+                            500 x 500 m²
                           </Label>
                         </div>
                       </div>
@@ -763,7 +809,7 @@ export function AnalysisPanel({
                             className="text-muted-foreground"
                             htmlFor="spatial-resolution-1000"
                           >
-                            1 x 1 km2
+                            1 x 1 km²
                           </Label>
                         </div>
                       </div>
@@ -774,35 +820,34 @@ export function AnalysisPanel({
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title="Select Time Period ">
+          <CollapsibleSection title={t("Section2.selectTimePeriod")}>
             <div className="space-y-5 border border-neutral-400 p-3">
               <p className="text-l-bold text-text-icons-base-main">
-                Temporal Coverage
+                {t("Section2.temporalCoverage")}
               </p>
               <div className="space-y-2">
                 <Label htmlFor="time-period" className="">
                   <p className="text-m-medium text-neutral-900">
-                    What time period would you like to be shown on the land use
-                    and land cover (LULC) map?
+                    {t("Section2.timePeriodLabel")}
                   </p>
                 </Label>
-                <Select disabled>
+                <Select defaultValue={t("Section2.timePeriodDefault")} disabled>
                   <SelectTrigger
                     id="time-period"
                     className="w-full rounded-none border-neutral-400"
                   >
-                    <SelectValue placeholder="Time Period" />
+                    <SelectValue placeholder={t("Section2.timePeriod")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="system">System</SelectItem>
+                    {/* <SelectItem value="light">Light</SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="time-period-month" className="">
-                  <p className="text-m-medium text-neutral-900">Select</p>
+                  <p className="text-m-medium text-neutral-900">
+                    {t("Section2.select")}
+                  </p>
                 </Label>
                 <div className="grid grid-cols-2 space-x-2">
                   <div>
@@ -811,13 +856,9 @@ export function AnalysisPanel({
                         id="time-period-month"
                         className="w-full rounded-none border-neutral-400"
                       >
-                        <SelectValue placeholder="Month" />
+                        <SelectValue placeholder={t("Section2.month")} />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
+                      <SelectContent></SelectContent>
                     </Select>
                   </div>
                   <div>
@@ -826,13 +867,9 @@ export function AnalysisPanel({
                         id="time-period-year"
                         className="w-full rounded-none border-neutral-400"
                       >
-                        <SelectValue placeholder="Year" />
+                        <SelectValue placeholder={t("Section2.year")} />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
+                      <SelectContent></SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -841,7 +878,7 @@ export function AnalysisPanel({
               <div className="flex flex-col">
                 <div className="py-2 px-4 bg-neutral-100">
                   <p className="text-l-bold text-text-icons-base-main">
-                    Satellite Temporal Extent
+                    {t("Section2.satelliteTemporalExtent")}
                   </p>
                 </div>
                 <div className="pt-5 p-3 grid grid-cols-2 space-x-3 border border-t-0">
@@ -852,7 +889,9 @@ export function AnalysisPanel({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            <p className="text-m-semibold">Start Date</p>
+                            <p className="text-m-semibold">
+                              {t("Section2.startDate")}
+                            </p>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -873,7 +912,9 @@ export function AnalysisPanel({
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            <p className="text-m-semibold">End Date</p>
+                            <p className="text-m-semibold">
+                              {t("Section2.endDate")}
+                            </p>
                           </FormLabel>
                           <FormControl>
                             <Input
@@ -892,7 +933,7 @@ export function AnalysisPanel({
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title="Define Land Use/Cover Classes">
+          <CollapsibleSection title={t("Section3.defineLC")}>
             <div className="space-y-5">
               <Collapsible>
                 <div className="bg-aneh p-[1px] [box-shadow:0_4px_4px_0_rgba(243,_235,_126,_0.25),_0_2px_8px_0_rgba(249,_245,_195,_0.29)]">
@@ -908,9 +949,7 @@ export function AnalysisPanel({
                             className="object-contain h-4 w-auto text-primary-500"
                           />
                         </div>
-                        <p className="text-l-bold">
-                          Try EPISTEM-AI Recommendation
-                        </p>
+                        <p className="text-l-bold">{t("Section3.tryAI")}</p>
                       </div>
 
                       <ChevronDown
@@ -922,26 +961,26 @@ export function AnalysisPanel({
                     <CollapsibleContent>
                       <div className="pt-4 space-y-2">
                         <p className="text-m-medium italic">
-                          Please define the output you want to see on area. It
-                          can be the condition, classification, geographical of
-                          area, etc.
+                          {t("Section3.tryAICaption")}
                           <br />
                           <b className="font-extrabold">
-                            Let’s our AI process the most suitable LULC list for
-                            you!
+                            {t("Section3.tryAICaptionCont")}
                           </b>
                         </p>
-                        <Textarea disabled />
+                        <Textarea
+                          defaultValue={t("Section3.tryAICaptionDefaultValue")}
+                          disabled
+                        />
                         <div className="flex flex-row justify-between items-center">
                           <p className="text-xs-regular text-neutrals-600">
-                            Max 500 charachter
+                            {t("Section3.tryAICaptionInstruction")}
                           </p>
                           <button
                             type="button"
                             className="rounded-none bg-primary-pink py-1.5 px-2"
                           >
                             <p className="text-xs-semibold text-text-icons-on-color">
-                              Go
+                              {t("Section3.tryAICaptionSubmitButtonLabel")}
                             </p>
                           </button>
                         </div>
@@ -953,7 +992,7 @@ export function AnalysisPanel({
 
               <div className="p-5 border border-neutral-400 bg-neutral-100 space-y-6">
                 <p className="text-l-bold text-text-icons-base-main">
-                  Land Use/Cover Hierarchy
+                  {t("Section3.LUHierarchy")}
                 </p>
                 <div className="space-y-4">
                   <Accordion type="multiple">
@@ -962,7 +1001,7 @@ export function AnalysisPanel({
                         <div className="flex flex-row items-center space-x-2.5">
                           <Switch disabled />
                           <p className="text-l-semibold text-muted-foreground">
-                            Vegetation
+                            {t("Section3.vegetation")}
                           </p>
                         </div>
                         <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -974,7 +1013,7 @@ export function AnalysisPanel({
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Tree Based System
+                                  {t("Section3.TBS")}
                                 </p>
                               </div>
                               <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -983,19 +1022,19 @@ export function AnalysisPanel({
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Agroforestry
+                                  {t("Section3.agroforestry")}
                                 </p>
                               </div>
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Monoculture Plantation
+                                  {t("Section3.monoculturePlantation")}
                                 </p>
                               </div>
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Natural Forest
+                                  {t("Section3.naturalForest")}
                                 </p>
                               </div>
                             </AccordionContent>
@@ -1007,7 +1046,7 @@ export function AnalysisPanel({
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Non-Tree Based System
+                                  {t("Section3.nonTBS")}
                                 </p>
                               </div>
                               <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -1016,19 +1055,19 @@ export function AnalysisPanel({
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Grass or Savanna
+                                  {t("Section3.grassSavanna")}
                                 </p>
                               </div>
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Shrub
+                                  {t("Section3.shrub")}
                                 </p>
                               </div>
                               <div className="flex flex-row items-center space-x-2.5">
                                 <Switch disabled />
                                 <p className="text-l-medium text-muted-foreground">
-                                  Cropland
+                                  {t("Section3.cropland")}
                                 </p>
                               </div>
                             </AccordionContent>
@@ -1044,7 +1083,7 @@ export function AnalysisPanel({
                         <div className="flex flex-row items-center space-x-2.5">
                           <Switch disabled />
                           <p className="text-l-semibold text-muted-foreground">
-                            Non-Vegetation
+                            {t("Section3.nonVegetation")}
                           </p>
                         </div>
                         <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -1053,19 +1092,19 @@ export function AnalysisPanel({
                         <div className="flex flex-row items-center space-x-2.5">
                           <Switch disabled />
                           <p className="text-l-medium text-muted-foreground">
-                            Settlement
+                            {t("Section3.settlement")}
                           </p>
                         </div>
                         <div className="flex flex-row items-center space-x-2.5">
                           <Switch disabled />
                           <p className="text-l-medium text-muted-foreground">
-                            Cleared Land
+                            {t("Section3.clearedLand")}
                           </p>
                         </div>
                         <div className="flex flex-row items-center space-x-2.5">
                           <Switch disabled />
                           <p className="text-l-medium text-muted-foreground">
-                            Waterbody
+                            {t("Section3.water")}
                           </p>
                         </div>
                       </AccordionContent>
@@ -1076,13 +1115,15 @@ export function AnalysisPanel({
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title="Select LULC List Parameters">
+          <CollapsibleSection title={t("Section4.selectLULCParams")}>
             <Accordion type="multiple">
               <div className="space-y-5">
                 <AccordionItem value="satelite-composite">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
                     <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">Satelite Composite</p>
+                      <p className="text-l-bold ">
+                        {t("Section4.satelliteComposite")}
+                      </p>
                     </AccordionFullTrigger>
                     <AccordionContent className="space-y-5 pb-0">
                       <div className="mt-5 space-y-2">
@@ -1092,7 +1133,9 @@ export function AnalysisPanel({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                <p className="regular-caption-300">Satelite</p>
+                                <p className="regular-caption-300">
+                                  {t("Section4.satellite")}
+                                </p>
                               </FormLabel>
                               <Select
                                 disabled={field.disabled}
@@ -1131,7 +1174,7 @@ export function AnalysisPanel({
                             <FormItem>
                               <FormLabel>
                                 <p className="regular-caption-300">
-                                  Cloud Coverage
+                                  {t("Section4.cloudCoverage")}
                                 </p>
                               </FormLabel>
 
@@ -1144,7 +1187,7 @@ export function AnalysisPanel({
                                     }}
                                     defaultValue={[field.value]}
                                     min={0}
-                                    max={30}
+                                    max={50}
                                     step={1}
                                     disabled={field.disabled}
                                   />
@@ -1156,17 +1199,7 @@ export function AnalysisPanel({
                                     </div>
                                     <div className="">
                                       <p className="bold-caption-300 text-primary-500 text-center">
-                                        5%
-                                      </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
                                         10%
-                                      </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        15%
                                       </p>
                                     </div>
                                     <div className="">
@@ -1176,12 +1209,17 @@ export function AnalysisPanel({
                                     </div>
                                     <div className="">
                                       <p className="bold-caption-300 text-primary-500 text-center">
-                                        25%
+                                        30%
                                       </p>
                                     </div>
                                     <div className="">
                                       <p className="bold-caption-300 text-primary-500 text-center">
-                                        30%
+                                        40%
+                                      </p>
+                                    </div>
+                                    <div className="">
+                                      <p className="bold-caption-300 text-primary-500 text-center">
+                                        50%
                                       </p>
                                     </div>
                                   </div>
@@ -1191,32 +1229,6 @@ export function AnalysisPanel({
                             </FormItem>
                           )}
                         />
-
-                        {/* <div className="px-1">
-                                  <div className="mt-5 py-2 px-3 bg-semantics-error-100 border border-semantics-error-500 flex flex-row space-x-2">
-                                    <div className="mt-0.5">
-                                      <CircleAlert
-                                        className="h-5 w-5"
-                                        color="rgba(255, 239, 237, 1)"
-                                        fill="rgba(193, 17, 1, 1)"
-                                      />
-                                    </div>
-                                    <div className="text-semantics-error-900">
-                                      <p className="">
-                                        <span className="text-l-semibold">
-                                          Error:
-                                        </span>
-                                        <br />
-                                        <span className="text-s-regular">
-                                          The cloud coverage within this area is
-                                          greater than 30%. Use other satellite
-                                          or change the time range of analysis
-                                          to fix.
-                                        </span>
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div> */}
                       </div>
                     </AccordionContent>
                   </div>
@@ -1224,7 +1236,9 @@ export function AnalysisPanel({
                 <AccordionItem value="select-predictor">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
                     <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">Select Predictor</p>
+                      <p className="text-l-bold ">
+                        {t("Section4.selectPredictor")}
+                      </p>
                     </AccordionFullTrigger>
                     <AccordionContent className="pt-5 pb-0 space-y-5">
                       <div className="space-y-2.5">
@@ -1352,21 +1366,21 @@ export function AnalysisPanel({
                       </div>
                       <div className="bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 space-y-4 brightness-90 cursor-not-allowed">
                         <p className="text-l-bold text-[#002F3D] text-center">
-                          Provide predictors by your own data
+                          {t("Section4.selectPredictorDesc")}
                         </p>
                         <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
                           <Upload className="text-text-icons-base-main h-5 w-5" />
                         </div>
                         <div className="text-center">
                           <p className="text-l-medium text-text-icons-base-main">
-                            Drag and Drop or{" "}
+                            {t("Section4.fileUploadDesc1")}{" "}
                             <b className="text-primary-pink underline">
-                              choose your file
+                              {t("Section4.fileUploadDesc2")}
                             </b>{" "}
-                            for upload
+                            {t("Section4.fileUploadDesc3")}
                           </p>
                           <p className="text-s-medium text-text-icons-light-base-second">
-                            Supported Format file: SHP or KML
+                            {t("Section4.fileUploadSupportedFiles")}
                           </p>
                         </div>
                       </div>
@@ -1376,32 +1390,30 @@ export function AnalysisPanel({
                 <AccordionItem value="random-forest">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
                     <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">
-                        Classify The Random Forest Variable
-                      </p>
+                      <p className="text-l-bold ">{t("Section4.RFVariable")}</p>
                     </AccordionFullTrigger>
                     <AccordionContent className="pt-5">
                       <div className="grid grid-cols-2 space-x-5">
                         <div className="space-y-2">
                           <Label>
                             <p className="regular-caption-300 text-neutrals-900">
-                              Number of Trees
+                              {t("Section4.nOfTree")}
                             </p>
                           </Label>
                           <Input className="" disabled />
                           <p className="regular-caption-200 text-neutrals-600">
-                            Fill with number, range 10-500
+                            {t("Section4.fillWNum", { min: 10, max: 500 })}
                           </p>
                         </div>
                         <div className="space-y-2">
                           <Label>
                             <p className="regular-caption-300 text-neutrals-900">
-                              Minimum Leaf Population
+                              {t("Section4.minLeafPop")}
                             </p>
                           </Label>
                           <Input className="" disabled />
                           <p className="regular-caption-200 text-neutrals-600">
-                            Fill with number, range 1-50
+                            {t("Section4.fillWNum", { min: 1, max: 50 })}
                           </p>
                         </div>
                       </div>
@@ -1419,7 +1431,7 @@ export function AnalysisPanel({
             type="submit"
             className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
           >
-            <p className="text-xs-semibold text-white">Generate Map</p>
+            <p className="text-xs-semibold text-white">{t("generateMap")}</p>
             {/* <div className="w-full h-10 flex flex-row justify-center">
                           </div> */}
             {LULCLoading && <span className="loader sm "></span>}

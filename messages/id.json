@@ -1,0 +1,82 @@
+{
+  "AnalysisPanel": {
+    "title": "Analisis Area Penggunaan/Penutupan Lahan",
+    "generateMap": "Hasilkan Peta",
+    "Section1": {
+      "scopeYourArea": "Tentukan Area Anda",
+      "drawPolygon": "Gambar Poligon",
+      "drawPolygonDesc": "Menggambar area dengan membentuk poligon berdasarkan titik-titik yang diinginkan pada peta",
+      "drawPolygonInstruction": "Pilih lokasi mana pun untuk mulai menggambar poligon. Klik dua kali untuk menyelesaikannya.",
+      "uploadSHP": "Unggah File Spasial",
+      "uploadSHPDesc": "Unggah file spasial yang Anda miliki sebelumnya untuk area geofencing tertentu",
+      "uploadSHPInstruction": "Unggah file spasial Anda di sini untuk menentukan area. Format yang diterima: .zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
+      "uploadSHPInstructionCont": "Klik untuk menelusuri dari komputer Anda",
+      "approxArea": "Lokasi yang Anda pilih memiliki luas total sekitar",
+      "spatialResolution": "Resolusi Spasial",
+      "finishDrawing": "Selesai"
+    },
+    "Section2": {
+      "selectTimePeriod": "Pilih Periode Waktu",
+      "temporalCoverage": "Cakupan Temporal",
+      "timePeriod": "Periode Waktu",
+      "timePeriodLabel": "Periode waktu apa yang ingin Anda tampilkan pada peta penggunaan lahan dan penutupan lahan (LULC)?",
+      "timePeriodDefault": "Bulan tertentu di tahun tertentu",
+      "select": "Pilih",
+      "satelliteTemporalExtent": "Jangkauan Temporal Satelit",
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Berakhir",
+      "month": "Bulan",
+      "year": "Tahun"
+    },
+    "Section3": {
+      "defineLC": "Pendefinisian Kelas Penggunaan/Penutupan Lahan",
+      "tryAI": "Coba Rekomendasi EPISTEM-AI",
+      "tryAICaption": "Silakan tentukan output yang ingin Anda lihat berdasarkan area. Output tersebut bisa berupa kondisi, klasifikasi, geografis area, dll.",
+      "tryAICaptionCont": "Biarkan AI kami memproses daftar LULC yang paling sesuai untuk Anda!",
+      "tryAICaptionDefaultValue": "Saya perlu memetakan wilayah hutan yang tidak terdapat aktivitas manusia selain kebutuhan subsisten",
+      "tryAICaptionSubmitButtonLabel": "Jalankan",
+      "tryAICaptionInstruction": "Maksimal 500 karakter",
+      "LUHierarchy": "Hirarki Penggunaan/Penutupan Lahan",
+      "vegetation": "Vegetasi",
+      "TBS": "Sistem Berbasis Pohon",
+      "agroforestry": "Agroforestri",
+      "monoculturePlantation": "Perkebunan Monokultur",
+      "naturalForest": "Hutan Alam",
+      "nonTBS": "Sistem Berbasis Non-Pohon",
+      "grassSavanna": "Rumput atau Sabana",
+      "shrub": "Belukar",
+      "cropland": "Lahan pertanian",
+      "nonVegetation": "Non-Vegetasi",
+      "settlement": "Hunian",
+      "clearedLand": "Lahan yang Dibersihkan",
+      "water": "Perairan"
+    },
+    "Section4": {
+      "selectLULCParams": "Pilih Parameter Daftar LULC",
+      "satelliteComposite": "Satelit Komposit",
+      "satellite": "Satelit",
+      "cloudCoverage": "Tutupan Awan",
+      "error": "Kesalahan",
+      "errorCloudCoverage": "Tutupan awan di area ini lebih dari 30%. Gunakan satelit lain atau ubah rentang waktu analisis untuk memperbaikinya.",
+      "selectPredictor": "Pilih Prediktor",
+      "selectPredictorDesc": "Gunakan data prediktor Anda sendiri",
+      "fileUploadDesc1": "Jatuhkan file disini atau",
+      "fileUploadDesc2": "pilih file",
+      "fileUploadDesc3": "untuk diunggah",
+      "fileUploadSupportedFiles": "Format file yang didukung: SHP atau KML",
+      "RFVariable": "Penentuan Variabel Random Forest",
+      "nOfTree": "Jumlah Pohon",
+      "minLeafPop": "Populasi Daun Minimum",
+      "fillWNum": "Isi dengan angka, rentang {min}-{max}"
+    }
+  },
+  "EvaluationPanel": {
+    "title": "Penilaian Akurasi",
+    "subtitle": "Hasil di bawah merupakan nilai prediksi akurasi keseluruhan dari model machine learning untuk semua kelas. Ini memberikan gambaran umum tentang kinerja model dengan menghitung proporsi prediksi yang benar dari total prediksi yang dibuat",
+    "accuracyTitle": "Agregasi Akurasi Keseluruhan kelas LULC",
+    "improveAccuracy": "Tingkatkan Akurasi",
+    "readjustParameter": "Sesuaikan Ulang Parameter",
+    "uploadNewData": "Unggah Data Latihan Baru"
+  },
+  "error": "Error"
+}

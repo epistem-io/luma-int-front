@@ -9,8 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { Info, SlidersHorizontal, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useContext } from "react";
 
 interface EvaluatePanelProps {
@@ -27,7 +29,10 @@ export function EvaluatePanel({
   nextStage = () => {},
   prevStage = () => {},
 }: EvaluatePanelProps) {
-  const { layerLegendArray } = useContext(MapContext);
+  const { analysisResult } = useContext(GlobalContext);
+
+  // const { layerLegendArray } = useContext(MapContext);
+  const t = useTranslations("EvaluationPanel");
 
   const onClickAdjustParameter = () => {
     prevStage();
@@ -80,12 +85,11 @@ export function EvaluatePanel({
             </Table>
           </div> */}
           <div className="p-3 rounded-md bg-[rgba(253,247,249,1)] border border-neutral-400 space-y-3">
-            <p className="text-m-semibold">
-              Aggregation of Accuracy by Selected LULC Class
-            </p>
+            <p className="text-m-semibold">{t("accuracyTitle")}</p>
             <hr className="bg-neutral-900 h-[1px] w-full" />
             <p className="text-center font-lato font-bold text-[22px] text-[rgba(239,162,47,1)]">
-              76.0%
+              {Number((analysisResult?.overall_accuracy || 0) * 100).toFixed(2)}
+              %
             </p>
           </div>
           <div className="p-3 rounded-md bg-[rgba(253,247,249,1)] border border-neutral-400 space-y-3 mt-5">
@@ -97,7 +101,7 @@ export function EvaluatePanel({
                   color="rgba(253, 247, 249, 1)"
                 />
               </div>
-              <p className="text-m-semibold">Improve Accuracy:</p>
+              <p className="text-m-semibold">{t("improveAccuracy")}</p>
             </div>
             <div className="grid grid-cols-2 space-x-3">
               <div className="">
@@ -107,9 +111,9 @@ export function EvaluatePanel({
                   // onClick={() => {
                   //   onClickReselect();
                   // }}
-                  className="w-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
+                  className="w-full h-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
                 >
-                  <p className="text-xs-semibold ">Readjust Parameter</p>
+                  <p className="text-xs-semibold ">{t("readjustParameter")}</p>
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -120,9 +124,9 @@ export function EvaluatePanel({
                   // onClick={() => {
                   //   onClickReselect();
                   // }}
-                  className="w-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
+                  className="w-full h-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row justify-center items-center space-x-2"
                 >
-                  <p className="text-xs-semibold ">Upload New Data</p>
+                  <p className="text-xs-semibold ">{t("uploadNewData")}</p>
                   <Upload className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -138,7 +142,9 @@ export function EvaluatePanel({
           }}
           className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
         >
-          <p className="text-xs-semibold text-white">Readjust Parameter</p>
+          <p className="text-xs-semibold text-white">
+            {t("readjustParameter")}
+          </p>
         </button>
       </div>
     </>

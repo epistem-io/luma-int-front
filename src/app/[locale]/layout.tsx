@@ -6,6 +6,10 @@ import { NavBar } from "@/components/NavBar";
 import { MapContextContainer } from "@/contexts/mapContext";
 import { GlobalContextContainer } from "@/contexts/globalContext";
 
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,13 +21,13 @@ const geistMono = Geist_Mono({
 });
 
 const inter = localFont({
-  src: "../../public/fonts/Inter-VariableFont_opsz,wght.ttf",
+  src: "../../../public/fonts/Inter-VariableFont_opsz,wght.ttf",
   variable: "--font-inter",
   display: "swap",
 });
 
 const notoSans = localFont({
-  src: "../../public/fonts/NotoSans-VariableFont_wdth,wght.ttf",
+  src: "../../../public/fonts/NotoSans-VariableFont_wdth,wght.ttf",
   variable: "--font-noto-sans",
   display: "swap",
 });
@@ -31,27 +35,27 @@ const notoSans = localFont({
 const lato = localFont({
   src: [
     {
-      path: "../../public/fonts/Lato-Thin.ttf",
+      path: "../../../public/fonts/Lato-Thin.ttf",
       weight: "100",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Lato-Light.ttf",
+      path: "../../../public/fonts/Lato-Light.ttf",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Lato-Regular.ttf",
+      path: "../../../public/fonts/Lato-Regular.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Lato-Bold.ttf",
+      path: "../../../public/fonts/Lato-Bold.ttf",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Lato-Black.ttf",
+      path: "../../../public/fonts/Lato-Black.ttf",
       weight: "900",
       style: "normal",
     },
@@ -62,62 +66,62 @@ const lato = localFont({
 const aptos = localFont({
   src: [
     {
-      path: "../../public/fonts/Aptos-Light.ttf",
+      path: "../../../public/fonts/Aptos-Light.ttf",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos.ttf",
+      path: "../../../public/fonts/Aptos.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos-SemiBold.ttf",
+      path: "../../../public/fonts/Aptos-SemiBold.ttf",
       weight: "600",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos-Bold.ttf",
+      path: "../../../public/fonts/Aptos-Bold.ttf",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos-ExtraBold.ttf",
+      path: "../../../public/fonts/Aptos-ExtraBold.ttf",
       weight: "800",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos-Black.ttf",
+      path: "../../../public/fonts/Aptos-Black.ttf",
       weight: "900",
       style: "normal",
     },
     {
-      path: "../../public/fonts/Aptos-Light-Italic.ttf",
+      path: "../../../public/fonts/Aptos-Light-Italic.ttf",
       weight: "300",
       style: "italic",
     },
     {
-      path: "../../public/fonts/Aptos-Italic.ttf",
+      path: "../../../public/fonts/Aptos-Italic.ttf",
       weight: "400",
       style: "italic",
     },
     {
-      path: "../../public/fonts/Aptos-SemiBold-Italic.ttf",
+      path: "../../../public/fonts/Aptos-SemiBold-Italic.ttf",
       weight: "600",
       style: "italic",
     },
     {
-      path: "../../public/fonts/Aptos-Bold-Italic.ttf",
+      path: "../../../public/fonts/Aptos-Bold-Italic.ttf",
       weight: "700",
       style: "italic",
     },
     {
-      path: "../../public/fonts/Aptos-ExtraBold-Italic.ttf",
+      path: "../../../public/fonts/Aptos-ExtraBold-Italic.ttf",
       weight: "800",
       style: "italic",
     },
     {
-      path: "../../public/fonts/Aptos-Black-Italic.ttf",
+      path: "../../../public/fonts/Aptos-Black-Italic.ttf",
       weight: "900",
       style: "italic",
     },
@@ -128,47 +132,47 @@ const aptos = localFont({
 const acumin = localFont({
   src: [
     {
-      path: "../../public/fonts/AcuminPro-ExtraLight.ttf",
+      path: "../../../public/fonts/AcuminPro-ExtraLight.ttf",
       weight: "100",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Light.ttf",
+      path: "../../../public/fonts/AcuminPro-Light.ttf",
       weight: "200",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Thin.ttf",
+      path: "../../../public/fonts/AcuminPro-Thin.ttf",
       weight: "300",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Regular.ttf",
+      path: "../../../public/fonts/AcuminPro-Regular.ttf",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Medium.ttf",
+      path: "../../../public/fonts/AcuminPro-Medium.ttf",
       weight: "500",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Semibold.ttf",
+      path: "../../../public/fonts/AcuminPro-Semibold.ttf",
       weight: "600",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Bold.ttf",
+      path: "../../../public/fonts/AcuminPro-Bold.ttf",
       weight: "700",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-Black.ttf",
+      path: "../../../public/fonts/AcuminPro-Black.ttf",
       weight: "800",
       style: "normal",
     },
     {
-      path: "../../public/fonts/AcuminPro-UltraBlack.ttf",
+      path: "../../../public/fonts/AcuminPro-UltraBlack.ttf",
       weight: "900",
       style: "normal",
     },
@@ -181,20 +185,29 @@ export const metadata: Metadata = {
   description: "Generated by create next app",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} antialiased`}
       >
-        <NavBar />
-        <GlobalContextContainer>
-          <MapContextContainer>{children}</MapContextContainer>
-        </GlobalContextContainer>
+        <NextIntlClientProvider>
+          <NavBar />
+          <GlobalContextContainer>
+            <MapContextContainer>{children}</MapContextContainer>
+          </GlobalContextContainer>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

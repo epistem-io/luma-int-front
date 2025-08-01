@@ -1,0 +1,82 @@
+{
+  "AnalysisPanel": {
+    "title": "Land Use/Cover Area Analysis",
+    "generateMap": "Generate Map",
+    "Section1": {
+      "scopeYourArea": "Scope Your Area",
+      "drawPolygon": "Draw Polygon",
+      "drawPolygonDesc": "Draw the area by forming a polygon based on the desired point on map",
+      "drawPolygonInstruction": "Select any location to start draw polygon. Double click to finish it",
+      "uploadSHP": "Upload SHP",
+      "uploadSHPDesc": "Upload a previously owned SHP format file for specific geofencing areas",
+      "uploadSHPInstruction": "Drop your SHP file here to generate the current condition data. Accepted format: .zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
+      "uploadSHPInstructionCont": "or Click to browse from your computer",
+      "approxArea": "Your selected location has total area approximatelly",
+      "spatialResolution": "Spatial Resolution",
+      "finishDrawing": "Finish Drawing"
+    },
+    "Section2": {
+      "selectTimePeriod": "Select Time Period",
+      "temporalCoverage": "Temporal Coverage",
+      "timePeriod": "Time Period",
+      "timePeriodLabel": "What time period would you like to be shown on the land use and land cover (LULC) map?",
+      "timePeriodDefault": "Specific month in specific year",
+      "select": "Select",
+      "satelliteTemporalExtent": "Satellite Temporal Extent",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "month": "Month",
+      "year": "Year"
+    },
+    "Section3": {
+      "defineLC": "Define Land Use/Cover Class",
+      "tryAI": "Try EPISTEM-AI Recommendation",
+      "tryAICaption": "Please define the output you want to see on area. It can be the condition, classification, geographical of area, etc",
+      "tryAICaptionCont": "Let's our AI process the most suitable LULC list for you!",
+      "tryAICaptionDefaultValue": "I need to map forested  areas with no presence of human activities beyond subsistence needs",
+      "tryAICaptionSubmitButtonLabel": "Go",
+      "tryAICaptionInstruction": "Max 500 characters",
+      "LUHierarchy": "Land Use/Cover Hierarchy",
+      "vegetation": "Vegetation",
+      "TBS": "Tree Based System",
+      "agroforestry": "Agroforestry",
+      "monoculturePlantation": "Monoculture Plantation",
+      "naturalForest": "Natural Forest",
+      "nonTBS": "Non-Tree Based System",
+      "grassSavanna": "Grass or Savanna",
+      "shrub": "Shrub",
+      "cropland": "Cropland",
+      "nonVegetation": "Non-Vegetation",
+      "settlement": "Settlement",
+      "clearedLand": "Cleared Land",
+      "water": "Waterbody"
+    },
+    "Section4": {
+      "selectLULCParams": "Select LULC List Parameters",
+      "satelliteComposite": "Satellite Composite",
+      "satellite": "Satellite",
+      "cloudCoverage": "Cloud Coverage",
+      "error": "Error",
+      "errorCloudCoverage": "The cloud coverage within this area is greater than 30%. Use other satellite or change the time range of analysis to fix.",
+      "selectPredictor": "Select Predictor",
+      "selectPredictorDesc": "Provide predictors by your own data",
+      "fileUploadDesc1": "Drag and Drop or choose your file for upload",
+      "fileUploadDesc2": "choose your file",
+      "fileUploadDesc3": "file for upload",
+      "fileUploadSupportedFiles": "Supported format file: SHP or KML",
+      "RFVariable": "Classify The Random Forest  Variable",
+      "nOfTree": "Number of Trees",
+      "minLeafPop": "Minimum Leaf Population",
+      "fillWNum": "Fill with number, range {min}-{max}"
+    }
+  },
+  "EvaluationPanel": {
+    "title": "Accuracy Assessement",
+    "subtitle": "The variable importance plot highlights that NDVI 25th percentile, Green median, and Temperature are the most influential predictors in the model, contributing the highest relative importance among the top 15 variables",
+    "accuracyTitle": "Aggregation of Accuracy by Selected LULC Class",
+    "improveAccuracy": "Improve Accuracy",
+    "readjustParameter": "Readjust Parameter",
+    "uploadNewData": "Upload New Data"
+  },
+  "error": "Error"
+}

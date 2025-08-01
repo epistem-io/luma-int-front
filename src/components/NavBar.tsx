@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
@@ -10,7 +8,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import LanguageToggle from "./LanguageToggle";
 
 interface NavBarProps {
   className?: string;
@@ -29,7 +28,7 @@ const dataMethodsItems: MenuItem[] = [
 ];
 
 export function NavBar({ className }: NavBarProps) {
-  const [currentLanguage, setCurrentLanguage] = React.useState("EN");
+  // const [currentLanguage, setCurrentLanguage] = React.useState("EN");
 
   return (
     <header
@@ -93,8 +92,9 @@ export function NavBar({ className }: NavBarProps) {
               </a>
             </nav>
 
+            <LanguageToggle />
             {/* Language Picker */}
-            <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
+            {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button
                 onClick={() => setCurrentLanguage("EN")}
                 className={cn(
@@ -118,7 +118,7 @@ export function NavBar({ className }: NavBarProps) {
               >
                 ID
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

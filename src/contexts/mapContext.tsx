@@ -40,8 +40,19 @@ import {
 //   // parent_name?: string;
 // }
 
+interface SingleColor {
+  name: string;
+  color: string;
+}
+
+interface Gradient {
+  name: string;
+  color: string[];
+}
+
 interface LegendItem {
   isVisible: boolean;
+  items?: (SingleColor | Gradient)[];
   // opacity: number;
   // constrainToPolygon: boolean;
 }

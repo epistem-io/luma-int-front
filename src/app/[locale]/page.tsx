@@ -1,4 +1,4 @@
-import { FloatingPanel } from "@/app/components/FloatingPanel";
+import { FloatingPanel } from "./components/FloatingPanel";
 import Map1 from "./components/Map";
 
 export default function Home() {
