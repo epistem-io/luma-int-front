@@ -221,10 +221,7 @@ function CollapsibleSection({
   );
 }
 
-export function AnalysisPanel({
-  nextStage = () => {},
-  prevStage = () => {},
-}: AnalysisPanelProps) {
+export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
   const t = useTranslations("AnalysisPanel");
 
   const {

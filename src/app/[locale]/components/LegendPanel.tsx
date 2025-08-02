@@ -37,7 +37,7 @@ function colorsToStyle(colors: string[]) {
 }
 
 export const LegendPanel = () => {
-  const { layerLegendArray, setLayerLegendArray } = useContext(MapContext);
+  const { layerLegendArray } = useContext(MapContext);
 
   const [visArr, setVisArr] = useState<boolean[]>([]);
 

@@ -1,14 +1,14 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+// import {
+//   Table,
+//   TableBody,
+//   TableCaption,
+//   TableCell,
+//   TableHead,
+//   TableHeader,
+//   TableRow,
+// } from "@/components/ui/table";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { clearMap } from "@/utils/mapHelper";
@@ -22,14 +22,11 @@ interface EvaluatePanelProps {
   className?: string;
 }
 
-function compareNumbers(a: number, b: number) {
-  return a - b;
-}
+// function compareNumbers(a: number, b: number) {
+//   return a - b;
+// }
 
-export function EvaluatePanel({
-  nextStage = () => {},
-  prevStage = () => {},
-}: EvaluatePanelProps) {
+export function EvaluatePanel({ prevStage = () => {} }: EvaluatePanelProps) {
   const { analysisResult } = useContext(GlobalContext);
   const { mapInstance, setLayerLegendArray } = useContext(MapContext);
 

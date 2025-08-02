@@ -71,25 +71,25 @@ export function NavBar({ className }: NavBarProps) {
                 <DropdownMenuContent align="start" className="w-48">
                   {dataMethodsItems.map((item) => (
                     <DropdownMenuItem key={item.href} asChild>
-                      <a href={item.href}>{item.label}</a>
+                      <Link href={item.href}>{item.label}</Link>
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
 
               {/* Other Menu Items */}
-              <a
+              <Link
                 href="/launch-tool"
                 className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
               >
                 Launch Tool
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/map-utilization"
                 className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
               >
                 Map Utilization
-              </a>
+              </Link>
             </nav>
 
             <LanguageToggle />
