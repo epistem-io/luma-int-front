@@ -30,6 +30,7 @@ export interface AnalysisConfig {
 export interface AnalysisResult {
   kappa_coefficient: number;
   overall_accuracy: number;
+  accuracy_assessment: string;
 }
 
 interface ContextType {

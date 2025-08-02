@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
+import { clearMap } from "@/utils/mapHelper";
 import { Info, SlidersHorizontal, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
@@ -30,11 +31,17 @@ export function EvaluatePanel({
   prevStage = () => {},
 }: EvaluatePanelProps) {
   const { analysisResult } = useContext(GlobalContext);
+  const { mapInstance, setLayerLegendArray } = useContext(MapContext);
 
   // const { layerLegendArray } = useContext(MapContext);
   const t = useTranslations("EvaluationPanel");
 
   const onClickAdjustParameter = () => {
+    if (!mapInstance) return;
+
+    clearMap(mapInstance);
+    setLayerLegendArray([]);
+
     prevStage();
   };
 
@@ -85,11 +92,18 @@ export function EvaluatePanel({
             </Table>
           </div> */}
           <div className="p-3 rounded-md bg-[rgba(253,247,249,1)] border border-neutral-400 space-y-3">
-            <p className="text-m-semibold">{t("accuracyTitle")}</p>
+            <p className="text-m-semibold text-text-icons-base-main">
+              {t("accuracyTitle")}
+            </p>
             <hr className="bg-neutral-900 h-[1px] w-full" />
             <p className="text-center font-lato font-bold text-[22px] text-[rgba(239,162,47,1)]">
               {Number((analysisResult?.overall_accuracy || 0) * 100).toFixed(2)}
               %
+            </p>
+            <p className="text-left text-text-icons-base-main font-lato font-medium text-sm">
+              Dengan koefisien Kappa{" "}
+              {Number((analysisResult?.kappa_coefficient || 0) * 1).toFixed(2)},{" "}
+              {analysisResult?.accuracy_assessment}
             </p>
           </div>
           <div className="p-3 rounded-md bg-[rgba(253,247,249,1)] border border-neutral-400 space-y-3 mt-5">
@@ -101,7 +115,9 @@ export function EvaluatePanel({
                   color="rgba(253, 247, 249, 1)"
                 />
               </div>
-              <p className="text-m-semibold">{t("improveAccuracy")}</p>
+              <p className="text-m-semibold text-text-icons-base-main">
+                {t("improveAccuracy")}
+              </p>
             </div>
             <div className="grid grid-cols-2 space-x-3">
               <div className="">

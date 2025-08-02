@@ -61,6 +61,10 @@ import {
   SATELLITE,
 } from "@/contexts/globalContext";
 import { useTranslations } from "next-intl";
+import TileLayer from "ol/layer/Tile";
+import { ImageTile } from "ol/source";
+import { clipLayerToVector } from "@/utils/mapHelper";
+import { toast } from "sonner";
 
 interface AnalysisPanelProps {
   nextStage?: () => void;
@@ -109,6 +113,7 @@ interface LULCClassificationRes {
   results: {
     kappa_coefficient: number;
     overall_accuracy: number;
+    accuracy_assessment: string;
   };
 }
 
@@ -352,6 +357,10 @@ export function AnalysisPanel({
       .then(async (response) => {
         const json: GeosAoiRes = await response.json();
 
+        if (!response.ok) {
+          throw new Error(JSON.stringify(json?.message || response.text));
+        }
+
         if (json.geometry.type === "MultiPolygon") {
           const coordinates = json.geometry.coordinates as Coordinate[][][];
 
@@ -431,9 +440,27 @@ export function AnalysisPanel({
           session_id: json.data.session_id,
         });
 
+        // const wmsSource = new ImageTile({
+        //   url: "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/ef9090a913bd2204898ba04c7f375bca-a98a3c6c10a5c5ca4023fcf7e21b46de/tiles/{z}/{x}/{y}",
+        // });
+
+        // const imgLayer = new TileLayer({
+        //   source: wmsSource,
+        //   className: `added-layer`,
+        // });
+
+        // mapInstance.addLayer(imgLayer);
+
+        // clipLayerToVector(imgLayer, vectorLayer);
+
         setStage(POLYGON_STAGE.CONFIRMATION);
       })
       .catch((e) => {
+        toast.error(`Error on uploading file: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
         console.log("errorr", e);
       })
       .finally(() => {
@@ -477,6 +504,10 @@ export function AnalysisPanel({
       .then(async (response) => {
         const json: GeosAoiRes = await response.json();
 
+        if (!response.ok) {
+          throw new Error(JSON.stringify(json?.message || response.text));
+        }
+
         setPolygonData({
           area_size: json.data.area_size,
           id: json.data.id,
@@ -485,6 +516,11 @@ export function AnalysisPanel({
         setStage(POLYGON_STAGE.CONFIRMATION);
       })
       .catch((e) => {
+        toast.error(`Error on submitting polygon: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
         console.log("errorr", e);
       })
       .finally(() => {
@@ -493,9 +529,6 @@ export function AnalysisPanel({
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-
     if (polygonLoading) return;
 
     setLULCLoading(true);
@@ -523,15 +556,38 @@ export function AnalysisPanel({
       .then(async (response) => {
         const json: LULCClassificationRes = await response.json();
 
-        // console.log("jsonn", json);
+        if (!response.ok) {
+          throw new Error(JSON.stringify(json?.message || response.text));
+        }
+
+        // const wmsSource = new ImageTile({
+        //   url: "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/ef9090a913bd2204898ba04c7f375bca-a98a3c6c10a5c5ca4023fcf7e21b46de/tiles/{z}/{x}/{y}",
+        // });
+
+        // const imgLayer = new TileLayer({
+        //   source: wmsSource,
+        //   className: `added-layer`,
+        // });
+
+        // mapInstance.addLayer(imgLayer);
 
         const arr: LayerLegend[] = json.layers.map((item, index) => ({
           name: item.name,
           url: item.url,
           currentOrder: index,
           originalOrder: index,
+          layer: new TileLayer({
+            source: new ImageTile({
+              url: item.url,
+            }),
+            className: "added-layer",
+            // properties: {
+            //   visible: true,
+            // },
+          }),
           legend: {
             isVisible: true,
+            opacity: 100,
             items: json.legends[item.name].map((ite) => {
               const arr: (
                 | { name: string; color: string }
@@ -539,29 +595,36 @@ export function AnalysisPanel({
               )[] = [];
 
               Object.entries(ite).forEach(([key, value]) => {
-                // console.log('foreee', key, value)
                 arr.push({
                   name: key,
                   color: value,
                 });
               });
-              // console.log("arro", arr[0]);
 
               return arr[0];
             }),
-            // json.legends[item.name]
           },
         }));
 
-        console.log("leg arr", arr);
+        arr.map((item) => {
+          if (!vectorLayer) return;
+
+          mapInstance?.addLayer(item.layer);
+
+          clipLayerToVector(item.layer, vectorLayer);
+        });
+
+        // console.log("leg arr", arr);
 
         setLayerLegendArray(arr);
 
-        const { kappa_coefficient, overall_accuracy } = json.results;
+        const { kappa_coefficient, overall_accuracy, accuracy_assessment } =
+          json.results;
 
         const result: AnalysisResult = {
           kappa_coefficient,
           overall_accuracy,
+          accuracy_assessment,
         };
 
         setAnalysisResult(result);
@@ -569,7 +632,11 @@ export function AnalysisPanel({
         nextStage();
       })
       .catch((e) => {
-        console.log("errorr", e);
+        toast.error(`Error on LULC Classification: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
       })
       .finally(() => {
         setLULCLoading(false);
@@ -628,6 +695,7 @@ export function AnalysisPanel({
                       >
                         <Image
                           src="/images/polygon-draw.svg"
+                          unoptimized
                           alt="Draw"
                           width={29.33}
                           height={25}
@@ -649,9 +717,10 @@ export function AnalysisPanel({
                       >
                         <Image
                           src="/images/upload.svg"
+                          unoptimized
                           alt="Upload"
-                          width={24}
-                          height={24}
+                          width={16}
+                          height={16}
                           className="object-contain h-6 w-auto"
                         />
                         <p className="text-l-bold text-text-icons-base-main mt-3 text-left">
@@ -668,6 +737,7 @@ export function AnalysisPanel({
                     <div className="flex flex-row space-x-[27px] p-5">
                       <Image
                         src="/images/polygon-draw-plus.svg"
+                        unoptimized
                         alt="Draw Plus"
                         width={74}
                         height={64}
@@ -698,6 +768,7 @@ export function AnalysisPanel({
                         <div className="flex flex-row space-x-[27px]">
                           <Image
                             src="/images/upload-file.svg"
+                            unoptimized
                             alt="Upload File"
                             width={64}
                             height={64}
@@ -943,6 +1014,7 @@ export function AnalysisPanel({
                         <div className="w-fit p-2 rounded-sm border border-primary-300">
                           <Image
                             src="/images/shimmer.svg"
+                            unoptimized
                             alt="Draw"
                             width={16}
                             height={16}

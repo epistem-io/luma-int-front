@@ -46,9 +46,9 @@ export function NavBar({ className }: NavBarProps) {
                 <Image
                   src="/images/epistem-logo.webp"
                   alt="Epistem Logo"
-                  width={50}
-                  height={50}
-                  className="object-contain"
+                  width={270}
+                  height={265}
+                  className="object-contain h-[50px] w-[50px]"
                   priority
                 />
               </div>

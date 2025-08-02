@@ -9,6 +9,13 @@ import { fromLonLat } from "ol/proj";
 import { MapContext } from "@/contexts/mapContext";
 import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
+import { ImageTile, ImageWMS, Source, TileArcGISRest, XYZ } from "ol/source";
+import ImageLayer from "ol/layer/Image";
+import { getVectorContext } from "ol/render";
+import Feature from "ol/Feature";
+import Style from "ol/style/Style";
+import Fill from "ol/style/Fill";
+import TileSource from "ol/source/Tile";
 
 const Map1 = () => {
   const { setMapInstance, setVectorLayer, setVectorSource } =
@@ -21,7 +28,20 @@ const Map1 = () => {
     const vectorLayer = new VectorLayer({ source });
 
     const baseMapOSM = new TileLayer({
-      source: new OSM({ crossOrigin: "anonymous" }),
+      // source: new OSM({ crossOrigin: "anonymous",  }),
+
+      // source: new TileArcGISRest({
+      //   url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      //   crossOrigin: "anonymous",
+      // }),
+
+      // source: new XYZ({
+      //   url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+      // }),
+
+      source: new ImageTile({
+        url: "https://{a-c}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+      }),
       className: "basemap",
       // properties: {
       //   name: BASEMAP_OSM_LAYER,

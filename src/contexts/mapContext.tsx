@@ -11,6 +11,7 @@ import {
   SetStateAction,
   useState,
 } from "react";
+import TileLayer from "ol/layer/Tile";
 
 // interface LayerItem {
 //   citation: string;
@@ -52,18 +53,18 @@ interface Gradient {
 
 interface LegendItem {
   isVisible: boolean;
-  items?: (SingleColor | Gradient)[];
-  // opacity: number;
+  opacity: number;
+  items: (SingleColor | Gradient)[];
   // constrainToPolygon: boolean;
 }
 
 export interface LayerLegend {
-  // layer: LayerItem;
+  layer: TileLayer;
   name: string;
   url: string;
   originalOrder: number;
   currentOrder: number;
-  legend?: LegendItem;
+  legend: LegendItem;
 }
 
 interface MapContextType {

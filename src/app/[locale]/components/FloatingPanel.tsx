@@ -17,21 +17,19 @@ enum PANEL_STAGE {
   EVALUATE = "evaluate",
 }
 
-const titleArr = [
-  {
-    key: PANEL_STAGE.ANALYSIS,
-    title: "Land Use/Cover Area Analysis ",
-    messageKey: "AnalysisPanel.title",
-  },
-  {
-    key: PANEL_STAGE.EVALUATE,
-    title: "Accuracy Assessment",
-    messageKey: "EvaluationPanel.title",
-  },
-];
-
 export function FloatingPanel({ className }: FloatingPanelProps) {
   const t = useTranslations();
+
+  const titleArr = [
+    {
+      key: PANEL_STAGE.ANALYSIS,
+      message: t("AnalysisPanel.title"),
+    },
+    {
+      key: PANEL_STAGE.EVALUATE,
+      message: t("EvaluationPanel.title"),
+    },
+  ];
 
   const [panelStage, setPanelStage] = useState<PANEL_STAGE>(
     PANEL_STAGE.ANALYSIS,
@@ -57,10 +55,8 @@ export function FloatingPanel({ className }: FloatingPanelProps) {
             )}
           >
             <p className="py-[18px] px-5 headline-xxs-desktop-bold text-text-icons-base-main">
-              {t(
-                titleArr.find((item) => item.key === panelStage)?.messageKey ||
-                  "error",
-              )}
+              {titleArr.find((item) => item.key === panelStage)?.message ||
+                t("error")}
             </p>
           </div>
           <div
