@@ -78,5 +78,10 @@
     "readjustParameter": "Readjust Parameter",
     "uploadNewData": "Upload New Data"
   },
+  "Legends": {
+    "legend": "Legend",
+    "activeLayer": "({numOfLayer, plural, =0 {No active layer} =1 {# active layer} other {# active layers}})",
+    "opacity": "Opacity"
+  },
   "error": "Error"
 }

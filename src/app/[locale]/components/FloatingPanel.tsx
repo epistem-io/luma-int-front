@@ -81,6 +81,7 @@ export function FloatingPanel({ className }: FloatingPanelProps) {
 
       {/* Toggle Button - positioned relative to panel edge */}
       <button
+        name="openClosePanel"
         onClick={() => setIsExpanded(!isExpanded)}
         className={cn(
           "absolute top-0.5 z-50 flex h-[62px] px-0.5 items-center justify-center rounded-r-md bg-[#EEEFF3] transition-all duration-300 ease-in-out hover:bg-accent cursor-pointer",

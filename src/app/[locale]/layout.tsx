@@ -182,8 +182,9 @@ const acumin = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Epistem X",
-  description: "Epistem X",
+  title: "EPISTEM",
+  description:
+    "Bersama Membangun Sistem Digital untuk Solusi Alami Perubahan Iklim",
 };
 
 export default async function RootLayout({

@@ -15,6 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import { MapContext } from "@/contexts/mapContext";
 import { cn } from "@/lib/utils";
 import { Eye, EyeOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 
@@ -38,6 +39,8 @@ function colorsToStyle(colors: string[]) {
 
 export const LegendPanel = () => {
   const { layerLegendArray } = useContext(MapContext);
+
+  const t = useTranslations("Legends");
 
   const [visArr, setVisArr] = useState<boolean[]>([]);
 
@@ -71,9 +74,11 @@ export const LegendPanel = () => {
           <AccordionItem className="" value="legend-accordion">
             <AccordionFullTrigger className="px-4 py-1.5 hover:no-underline shadow z-40">
               <p className="bold-body-400">
-                Legend{"  "}
+                {t("legend")}
+                {"  "}
                 <span className="regular-body-400">
-                  ({layerLegendArray.length} active layers)
+                  {t("activeLayer", { numOfLayer: layerLegendArray.length })}
+                  {/* ({layerLegendArray.length} active layers) */}
                 </span>
               </p>
             </AccordionFullTrigger>
@@ -131,7 +136,6 @@ export const LegendPanel = () => {
                             <p className="">Opacity</p>
                             <Slider
                               onValueChange={(val: number[]) => {
-                                console.log("vall", val);
                                 layer.setOpacity(val[0] / 100);
                               }}
                               min={0}

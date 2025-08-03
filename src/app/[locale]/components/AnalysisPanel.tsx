@@ -36,7 +36,13 @@ import {
 import { Switch } from "../../../components/ui/switch";
 import { Slider } from "../../../components/ui/slider";
 import { Checkbox } from "../../../components/ui/checkbox";
-import { ChangeEvent, useContext, useState } from "react";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useState,
+} from "react";
 import { LayerLegend, MapContext } from "@/contexts/mapContext";
 import VectorSource from "ol/source/Vector";
 import { MultiPoint, MultiPolygon, Polygon, SimpleGeometry } from "ol/geom";
@@ -75,6 +81,9 @@ interface AnalysisPanelProps {
 interface CollapsibleSectionProps {
   title: string;
   children: React.ReactNode;
+  isOpen: boolean;
+  index: number;
+  onClickToggle: (idx: number) => void;
   defaultOpen?: boolean;
 }
 
@@ -187,15 +196,19 @@ const formSchema = z.object({
 function CollapsibleSection({
   title,
   children,
-  defaultOpen = false,
-}: CollapsibleSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+  isOpen,
+  index,
+  onClickToggle,
+}: // defaultOpen = false,
+CollapsibleSectionProps) {
+  // const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
     <div className="">
       <button
+        name={`${title}CollapseExpand`}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => onClickToggle(index)}
         className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
       >
         <span className="headline-xxs-desktop-medium text-text-icons-base-main">
@@ -245,6 +258,13 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
   const [drawOrUpload, setDrawOrUpload] = useState<"" | DRAW_UPLOAD>("");
   const [polygonLoading, setPolygonLoading] = useState(false);
   const [LULCLoading, setLULCLoading] = useState(false);
+
+  const [sectionVisArr, setSectionVisArr] = useState([
+    true,
+    false,
+    false,
+    false,
+  ]);
 
   const defaultValues = !!analysisConfig
     ? {
@@ -398,6 +418,8 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           });
 
           setStage(POLYGON_STAGE.CONFIRMATION);
+
+          return;
         }
 
         const coordinates = json.geometry.coordinates as Coordinate[][];
@@ -458,7 +480,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           dismissible: true,
           closeButton: true,
         });
-        console.log("errorr", e);
+        // console.log("errorr", e);
       })
       .finally(() => {
         setPolygonLoading(false);
@@ -518,7 +540,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           dismissible: true,
           closeButton: true,
         });
-        console.log("errorr", e);
+        // console.log("errorr", e);
       })
       .finally(() => {
         setPolygonLoading(false);
@@ -568,6 +590,79 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
 
         // mapInstance.addLayer(imgLayer);
 
+        const tempp: Record<
+          string,
+          (Record<string, string> | Record<string, string[]>)[]
+        > = {
+          "Area of Interest (AOI)": [
+            {
+              "Area of Interest (AOI)": "#FF0000",
+            },
+          ],
+          "Composite (RGB)": [
+            {
+              "Composite (RGB)": "#FFFFFF",
+            },
+          ],
+          "Land Cover Classification (2018)": [
+            { "Undisturbed dry-land forest": "#006400" },
+            { "Logged-over dry-land forest": "#228B22" },
+            { "Undisturbed mangrove": "#4169E1" },
+            { "Logged-over mangrove": "#87CEEB" },
+            { "Undisturbed swamp forest": "#2E8B57" },
+            { "Logged-over swamp forest": "#8FBC8F" },
+            { Agroforestry: "#9ACD32" },
+            { "Plantation forest": "#32CD32" },
+            { "Rubber monoculture": "#8B4513" },
+            { "Oil palm monoculture": "#FF8C00" },
+            { "Other monoculture": "#DAA520" },
+            { "Grass/savanna": "#ADFF2F" },
+            { Shrub: "#90EE90" },
+            { Cropland: "#FFFF00" },
+            { Settlement: "#FF0000" },
+            { "Cleared land": "#D2B48C" },
+            { Waterbody: "#0000FF" },
+          ],
+          NDVI: [
+            {
+              NDVI: [
+                "#d73027",
+                "#f46d43",
+                "#fdae61",
+                "#fee08b",
+                "#d9ef8b",
+                "#a6d96a",
+                "#66bd63",
+                "#1a9641",
+              ],
+            },
+          ],
+          NDWI: [
+            {
+              NDWI: [
+                "#8B4513",
+                "#DAA520",
+                "#FFFF00",
+                "#ADFF2F",
+                "#00FF00",
+                "#00FFFF",
+                "#0000FF",
+                "#000080",
+              ],
+            },
+          ],
+          "Training Points": [
+            {
+              "Training Points": "#0000FF",
+            },
+          ],
+          "Validation Points": [
+            {
+              "Validation Points": "#FFA500",
+            },
+          ],
+        };
+
         const arr: LayerLegend[] = json.layers.map((item, index) => ({
           name: item.name,
           url: item.url,
@@ -578,14 +673,11 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
               url: item.url,
             }),
             className: "added-layer",
-            // properties: {
-            //   visible: true,
-            // },
           }),
           legend: {
             isVisible: true,
             opacity: 100,
-            items: json.legends[item.name].map((ite) => {
+            items: tempp[item.name].map((ite) => {
               const arr: (
                 | { name: string; color: string }
                 | { name: string; color: string[] }
@@ -640,13 +732,35 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
       });
   }
 
+  const toggleSection = (idx: number) => {
+    if (idx >= sectionVisArr.length) return;
+
+    if (sectionVisArr[idx]) {
+      return setSectionVisArr((oldState) => {
+        const temp = [...oldState];
+
+        temp[idx] = false;
+
+        return temp;
+      });
+    }
+
+    return setSectionVisArr((oldState) => {
+      const temp = [...oldState].map((_, index) => index === idx);
+
+      return temp;
+    });
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="">
         <div className="bg-white z-30 mb-32">
           <CollapsibleSection
             title={t("Section1.scopeYourArea")}
-            defaultOpen={true}
+            index={0}
+            isOpen={sectionVisArr[0]}
+            onClickToggle={toggleSection}
           >
             <div className="space-y-5">
               {stage === POLYGON_STAGE.CONFIRMATION && (
@@ -888,7 +1002,12 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title={t("Section2.selectTimePeriod")}>
+          <CollapsibleSection
+            index={1}
+            isOpen={sectionVisArr[1]}
+            onClickToggle={toggleSection}
+            title={t("Section2.selectTimePeriod")}
+          >
             <div className="space-y-5 border border-neutral-400 p-3">
               <p className="text-l-bold text-text-icons-base-main">
                 {t("Section2.temporalCoverage")}
@@ -902,6 +1021,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                 <Select defaultValue={t("Section2.timePeriodDefault")} disabled>
                   <SelectTrigger
                     id="time-period"
+                    name="time-period"
                     className="w-full rounded-none border-neutral-400"
                   >
                     <SelectValue placeholder={t("Section2.timePeriod")} />
@@ -922,6 +1042,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                     <Select disabled>
                       <SelectTrigger
                         id="time-period-month"
+                        name="time-period-month"
                         className="w-full rounded-none border-neutral-400"
                       >
                         <SelectValue placeholder={t("Section2.month")} />
@@ -933,6 +1054,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                     <Select disabled>
                       <SelectTrigger
                         id="time-period-year"
+                        name="time-period-year"
                         className="w-full rounded-none border-neutral-400"
                       >
                         <SelectValue placeholder={t("Section2.year")} />
@@ -1001,7 +1123,12 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title={t("Section3.defineLC")}>
+          <CollapsibleSection
+            index={2}
+            isOpen={sectionVisArr[2]}
+            onClickToggle={toggleSection}
+            title={t("Section3.defineLC")}
+          >
             <div className="space-y-5">
               <Collapsible>
                 <div className="bg-aneh p-[1px] [box-shadow:0_4px_4px_0_rgba(243,_235,_126,_0.25),_0_2px_8px_0_rgba(249,_245,_195,_0.29)]">
@@ -1184,7 +1311,12 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
             </div>
           </CollapsibleSection>
 
-          <CollapsibleSection title={t("Section4.selectLULCParams")}>
+          <CollapsibleSection
+            index={3}
+            isOpen={sectionVisArr[3]}
+            onClickToggle={toggleSection}
+            title={t("Section4.selectLULCParams")}
+          >
             <Accordion type="multiple">
               <div className="space-y-5">
                 <AccordionItem value="satelite-composite">

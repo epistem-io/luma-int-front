@@ -78,5 +78,10 @@
     "readjustParameter": "Sesuaikan Ulang Parameter",
     "uploadNewData": "Unggah Data Latihan Baru"
   },
+  "Legends": {
+    "legend": "Legenda",
+    "activeLayer": "({numOfLayer, plural, =0 {Tidak ada} other {# numOfLayer}} layer)",
+    "opacity": "Opacity"
+  },
   "error": "Error"
 }
