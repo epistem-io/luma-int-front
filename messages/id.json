@@ -11,7 +11,8 @@
       "uploadSHPDesc": "Unggah file spasial yang Anda miliki sebelumnya untuk area geofencing tertentu",
       "uploadSHPInstruction": "Unggah file spasial Anda di sini untuk menentukan area. Format yang diterima: .zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
       "uploadSHPInstructionCont": "Klik untuk menelusuri dari komputer Anda",
-      "approxArea": "Lokasi yang Anda pilih memiliki luas total sekitar",
+      "reselect": "Pilih ulang",
+      "approxArea": "Lokasi yang Anda pilih memiliki luas sekitar",
       "spatialResolution": "Resolusi Spasial",
       "finishDrawing": "Selesai"
     },
@@ -52,14 +53,19 @@
       "water": "Perairan"
     },
     "Section4": {
-      "selectLULCParams": "Pilih Parameter Daftar LULC",
+      "selectLULCParams": "Pilih Parameter LULC",
       "satelliteComposite": "Satelit Komposit",
       "satellite": "Satelit",
       "cloudCoverage": "Tutupan Awan",
+      "userDataTraining": "Pelatihan Data Pengguna",
       "error": "Kesalahan",
       "errorCloudCoverage": "Tutupan awan di area ini lebih dari 30%. Gunakan satelit lain atau ubah rentang waktu analisis untuk memperbaikinya.",
       "selectPredictor": "Pilih Prediktor",
       "selectPredictorDesc": "Gunakan data prediktor Anda sendiri",
+      "trainingFileUploadDesc1": "Jatuhkan file disini atau",
+      "trainingFileUploadDesc2": "pilih file",
+      "trainingFileUploadDesc3": "untuk diunggah",
+      "trainingFileUploadSupportedFiles": "Format file yang didukung: .zip (.shp)",
       "fileUploadDesc1": "Jatuhkan file disini atau",
       "fileUploadDesc2": "pilih file",
       "fileUploadDesc3": "untuk diunggah",
@@ -80,7 +86,7 @@
   },
   "Legends": {
     "legend": "Legenda",
-    "activeLayer": "({numOfLayer, plural, =0 {Tidak ada} other {# numOfLayer}} layer)",
+    "activeLayer": "({numOfLayer, plural, =0 {Tidak ada} other {#}} lapisan)",
     "opacity": "Opacity"
   },
   "error": "Error"

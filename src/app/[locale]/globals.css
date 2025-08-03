@@ -58,11 +58,13 @@
   --color-neutral-700-baru: rgba(87, 86, 86, 1);
   --color-neutral-900: rgba(0, 0, 0, 1);
 
+  --color-neutrals-300: rgba(231, 230, 230, 1);
   --color-neutrals-600: rgba(104, 103, 103, 1);
   --color-neutrals-800: rgba(26, 25, 25, 1);
   --color-neutrals-900: rgba(0, 0, 0, 1);
 
   --color-primary-100: rgba(248, 251, 252, 1);
+  --color-primary-200: rgba(226, 239, 243, 1);
   --color-primary-300: rgba(212, 231, 237, 1);
   --color-primary-500: rgba(0, 84, 109, 1);
 
@@ -157,7 +159,7 @@
 .headline-xxs-desktop-bold {
   /* Headline XXS/Desktop/Bold */
   font-family: var(--font-noto-sans);
-  font-size: 20px;
+  font-size: 18px;
   /* font-style: normal; */
   font-weight: 700;
   line-height: 28px; /* 140% */
@@ -167,7 +169,7 @@
 .headline-xxs-desktop-semibold {
   /* Headline XXS/Desktop/Medium */
   font-family: var(--font-noto-sans);
-  font-size: 20px;
+  font-size: 18px;
   /* font-style: normal; */
   font-weight: 700;
   line-height: 28px; /* 140% */
@@ -177,7 +179,7 @@
 .headline-xxs-desktop-medium {
   /* Headline XXS/Desktop/Medium */
   font-family: var(--font-noto-sans);
-  font-size: 20px;
+  font-size: 18px;
   /* font-style: normal; */
   font-weight: 600;
   line-height: 28px; /* 140% */
@@ -221,7 +223,7 @@
 .text-xs-semibold {
   /* Text XS/Semibold */
   font-family: var(--font-aptos);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 18px; /* 138.462% */
 }
@@ -229,7 +231,7 @@
 .text-xs-regular {
   /* Text XS/Regular */
   font-family: var(--font-aptos);
-  font-size: 13px;
+  font-size: 16px;
   /* font-style: normal; */
   font-weight: 400;
   line-height: 18px; /* 138.462% */

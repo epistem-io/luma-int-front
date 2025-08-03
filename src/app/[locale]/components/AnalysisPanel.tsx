@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Upload } from "lucide-react";
+import { ChevronDown, Trash, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Draw } from "ol/interaction";
@@ -36,13 +36,7 @@ import {
 import { Switch } from "../../../components/ui/switch";
 import { Slider } from "../../../components/ui/slider";
 import { Checkbox } from "../../../components/ui/checkbox";
-import {
-  ChangeEvent,
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useState,
-} from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { LayerLegend, MapContext } from "@/contexts/mapContext";
 import VectorSource from "ol/source/Vector";
 import { MultiPoint, MultiPolygon, Polygon, SimpleGeometry } from "ol/geom";
@@ -62,6 +56,7 @@ import {
 import { Coordinate } from "ol/coordinate";
 import VectorLayer from "ol/layer/Vector";
 import {
+  AnalysisConfig,
   AnalysisResult,
   GlobalContext,
   SATELLITE,
@@ -126,7 +121,13 @@ interface LULCClassificationRes {
   };
 }
 
+interface UploadTrainingDataRes {
+  message: string;
+  session_id: string;
+}
+
 enum DRAW_UPLOAD {
+  NULL = "",
   DRAW = "draw",
   UPLOAD = "upload",
 }
@@ -139,10 +140,11 @@ enum POLYGON_STAGE {
 
 const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
 const FETCH_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/upload`;
+const FETCH_UPLOAD_TRAINING_DATA_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/lulc-classification/upload-training-dataset`;
 const FETCH_LULC_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/lulc-classification
 `;
 
-const NUM_AREA_SIZE_DIVISION = 10000;
+const NUM_AREA_SIZE_DIVISION = 1;
 
 const SATELLITE_SELECTION: { label: string; value: SATELLITE }[] = [
   {
@@ -154,6 +156,13 @@ const SATELLITE_SELECTION: { label: string; value: SATELLITE }[] = [
     value: SATELLITE.LANDSAT9,
   },
 ];
+
+// const ACCEPTED_FILE_TYPES = [
+//   "application/zip",
+//   "application/x-zip",
+//   "application/x-zip-compressed",
+//   "application/octet-stream",
+// ];
 
 const styles = (strokeWidth: number) => [
   new Style({
@@ -191,6 +200,16 @@ const formSchema = z.object({
   endDate: z.iso.date(),
   satellite: z.enum([...Object.values(SATELLITE)]),
   cloudCover: z.number().min(0).max(50),
+  userTrainingData: z.string().optional(),
+  // userTrainingFilename: z.string().optional(),
+  // userTrainingFile: z
+  //   .instanceof(File)
+  //   .optional()
+  //   .refine((file) => {
+  //     if (!file) return false;
+
+  //     return ACCEPTED_FILE_TYPES.includes(file.type);
+  //   }, "File must be a ZIP"),
 });
 
 function CollapsibleSection({
@@ -252,12 +271,21 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
     analysisConfig,
     setAnalysisConfig,
     setAnalysisResult,
+    sessionId,
+    setSessionId,
   } = useContext(GlobalContext);
 
   const [stage, setStage] = useState<POLYGON_STAGE>(POLYGON_STAGE.COLLECT);
-  const [drawOrUpload, setDrawOrUpload] = useState<"" | DRAW_UPLOAD>("");
+  const [drawOrUpload, setDrawOrUpload] = useState<DRAW_UPLOAD>(
+    DRAW_UPLOAD.NULL,
+  );
   const [polygonLoading, setPolygonLoading] = useState(false);
+  const [trainingDataLoading, setTrainingDataLoading] = useState(false);
   const [LULCLoading, setLULCLoading] = useState(false);
+
+  const [filename, setFilename] = useState(
+    analysisConfig?.training_filename || "",
+  );
 
   const [sectionVisArr, setSectionVisArr] = useState([
     true,
@@ -272,12 +300,14 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
         endDate: analysisConfig.end_date,
         satellite: analysisConfig.landsat_version,
         cloudCover: analysisConfig.cloud_cover,
+        // userTrainingFilename: "",
       }
     : {
         startDate: dayjs().startOf("y").format("YYYY-MM-DD"),
         endDate: dayjs().endOf("y").format("YYYY-MM-DD"),
         satellite: SATELLITE.LANDSAT8,
         cloudCover: 1,
+        // userTrainingFilename: "",
       };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -356,13 +386,15 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
     const target = e.target;
     const files = target?.files;
 
+    // console.log("sessionid", sessionId);
+
     if (!files) return;
 
     setPolygonLoading(true);
 
     const body = new FormData();
     body.append("file", files[0]);
-    body.append("session_id", String(polygonData?.session_id));
+    body.append("session_id", String(sessionId));
 
     fetch(FETCH_UPLOAD_URL, {
       method: "POST",
@@ -414,8 +446,9 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           setPolygonData({
             area_size: json.data.area_size,
             id: json.data.id,
-            session_id: json.data.session_id,
           });
+
+          setSessionId(json.data.session_id);
 
           setStage(POLYGON_STAGE.CONFIRMATION);
 
@@ -456,8 +489,9 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
         setPolygonData({
           area_size: json.data.area_size,
           id: json.data.id,
-          session_id: json.data.session_id,
         });
+
+        setSessionId(json.data.session_id);
 
         // const wmsSource = new ImageTile({
         //   url: "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/ef9090a913bd2204898ba04c7f375bca-a98a3c6c10a5c5ca4023fcf7e21b46de/tiles/{z}/{x}/{y}",
@@ -488,9 +522,11 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
   };
 
   const onClickReselect = () => {
+    if (polygonLoading || trainingDataLoading || LULCLoading) return;
+
     vectorLayer?.getSource()?.clear();
 
-    setDrawOrUpload("");
+    setDrawOrUpload(DRAW_UPLOAD.NULL);
     setStage(POLYGON_STAGE.COLLECT);
     setPolygon(null);
   };
@@ -510,7 +546,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
         type: transformed.getType(),
         coordinates: transformed.getCoordinates(),
       },
-      session_id: "",
+      session_id: sessionId,
     };
 
     fetch(FETCH_POLYGON_URL, {
@@ -530,8 +566,12 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
         setPolygonData({
           area_size: json.data.area_size,
           id: json.data.id,
-          session_id: json.data.session_id,
+          // session_id: json.data.session_id,
         });
+
+        setSessionId(json.data.session_id);
+
+        setDrawOrUpload(DRAW_UPLOAD.NULL);
         setStage(POLYGON_STAGE.CONFIRMATION);
       })
       .catch((e) => {
@@ -547,23 +587,73 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
       });
   };
 
+  const onUploadTrainingData = (
+    e: ChangeEvent<HTMLInputElement>,
+    cb: () => void,
+  ) => {
+    const target = e.target;
+    const files = target?.files;
+
+    // console.log("filess", files);
+
+    if (!files) return;
+
+    setTrainingDataLoading(true);
+
+    const body = new FormData();
+    body.append("file", files[0]);
+    body.append("session_id", sessionId);
+
+    fetch(FETCH_UPLOAD_TRAINING_DATA_URL, {
+      method: "POST",
+      body,
+    })
+      .then(async (response) => {
+        const json: UploadTrainingDataRes = await response.json();
+
+        if (!response.ok) {
+          throw new Error(JSON.stringify(json?.message || response.text));
+        }
+
+        setSessionId(json.session_id);
+
+        cb();
+      })
+      .catch((e) => {
+        toast.error(`Error on upload training data: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+
+        setFilename("");
+      })
+      .finally(() => {
+        setTrainingDataLoading(false);
+      });
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (polygonLoading) return;
+
+    // console.log("valuees", values);
 
     setLULCLoading(true);
 
     const { startDate, endDate, satellite, cloudCover } = values;
 
-    const data = {
-      session_id: polygonData?.session_id || "",
+    const data: AnalysisConfig = {
+      session_id: sessionId || "",
       start_date: startDate,
       end_date: endDate,
       landsat_version: satellite,
       cloud_cover: cloudCover,
       test_timeout: true,
+      use_own_dataset: !!filename,
+      // training_filename: filename,
     };
 
-    setAnalysisConfig(data);
+    // setAnalysisConfig(data);
 
     fetch(FETCH_LULC_URL, {
       method: "POST",
@@ -579,90 +669,6 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           throw new Error(JSON.stringify(json?.message || response.text));
         }
 
-        // const wmsSource = new ImageTile({
-        //   url: "https://earthengine.googleapis.com/v1/projects/earthengine-legacy/maps/ef9090a913bd2204898ba04c7f375bca-a98a3c6c10a5c5ca4023fcf7e21b46de/tiles/{z}/{x}/{y}",
-        // });
-
-        // const imgLayer = new TileLayer({
-        //   source: wmsSource,
-        //   className: `added-layer`,
-        // });
-
-        // mapInstance.addLayer(imgLayer);
-
-        const tempp: Record<
-          string,
-          (Record<string, string> | Record<string, string[]>)[]
-        > = {
-          "Area of Interest (AOI)": [
-            {
-              "Area of Interest (AOI)": "#FF0000",
-            },
-          ],
-          "Composite (RGB)": [
-            {
-              "Composite (RGB)": "#FFFFFF",
-            },
-          ],
-          "Land Cover Classification (2018)": [
-            { "Undisturbed dry-land forest": "#006400" },
-            { "Logged-over dry-land forest": "#228B22" },
-            { "Undisturbed mangrove": "#4169E1" },
-            { "Logged-over mangrove": "#87CEEB" },
-            { "Undisturbed swamp forest": "#2E8B57" },
-            { "Logged-over swamp forest": "#8FBC8F" },
-            { Agroforestry: "#9ACD32" },
-            { "Plantation forest": "#32CD32" },
-            { "Rubber monoculture": "#8B4513" },
-            { "Oil palm monoculture": "#FF8C00" },
-            { "Other monoculture": "#DAA520" },
-            { "Grass/savanna": "#ADFF2F" },
-            { Shrub: "#90EE90" },
-            { Cropland: "#FFFF00" },
-            { Settlement: "#FF0000" },
-            { "Cleared land": "#D2B48C" },
-            { Waterbody: "#0000FF" },
-          ],
-          NDVI: [
-            {
-              NDVI: [
-                "#d73027",
-                "#f46d43",
-                "#fdae61",
-                "#fee08b",
-                "#d9ef8b",
-                "#a6d96a",
-                "#66bd63",
-                "#1a9641",
-              ],
-            },
-          ],
-          NDWI: [
-            {
-              NDWI: [
-                "#8B4513",
-                "#DAA520",
-                "#FFFF00",
-                "#ADFF2F",
-                "#00FF00",
-                "#00FFFF",
-                "#0000FF",
-                "#000080",
-              ],
-            },
-          ],
-          "Training Points": [
-            {
-              "Training Points": "#0000FF",
-            },
-          ],
-          "Validation Points": [
-            {
-              "Validation Points": "#FFA500",
-            },
-          ],
-        };
-
         const arr: LayerLegend[] = json.layers.map((item, index) => ({
           name: item.name,
           url: item.url,
@@ -677,7 +683,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
           legend: {
             isVisible: true,
             opacity: 100,
-            items: tempp[item.name].map((ite) => {
+            items: json.legends[item.name].map((ite) => {
               const arr: (
                 | { name: string; color: string }
                 | { name: string; color: string[] }
@@ -718,6 +724,12 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
 
         setAnalysisResult(result);
 
+        // delete data.training_filename;
+        delete data.test_timeout;
+        delete data.use_own_dataset;
+
+        setAnalysisConfig({ ...data, training_filename: filename });
+
         nextStage();
       })
       .catch((e) => {
@@ -752,6 +764,17 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
     });
   };
 
+  useEffect(() => {
+    // console.log("configgg", analysisConfig);
+    // console.log("polygon", polygon);
+    // console.log("polygonData", polygonData);
+    // console.log("sessionId", sessionId);
+
+    if (!analysisConfig) return;
+
+    setStage(POLYGON_STAGE.CONFIRMATION);
+  }, []);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="">
@@ -775,14 +798,18 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                     ha
                   </p>
                   <button
-                    disabled={LULCLoading}
+                    disabled={
+                      polygonLoading || trainingDataLoading || LULCLoading
+                    }
                     type="button"
                     onClick={() => {
                       onClickReselect();
                     }}
                     className="w-full border border-primary-pink bg-white disabled:border-muted-foreground disabled:text-muted-foreground text-primary-pink disabled:hover:brightness-100 disabled:hover:cursor-not-allowed py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300"
                   >
-                    <p className="text-xs-semibold ">Reselect</p>
+                    <p className="text-xs-semibold ">
+                      {t("Section1.reselect")}
+                    </p>
                   </button>
                 </div>
               )}
@@ -798,6 +825,9 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                   {drawOrUpload === "" && (
                     <div className="grid grid-cols-2 space-x-4">
                       <button
+                        disabled={
+                          polygonLoading || trainingDataLoading || LULCLoading
+                        }
                         type="button"
                         onClick={() => {
                           onClickDraw();
@@ -820,6 +850,9 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                         </p>
                       </button>
                       <button
+                        disabled={
+                          polygonLoading || trainingDataLoading || LULCLoading
+                        }
                         type="button"
                         onClick={() => {
                           onClickUpload();
@@ -1317,7 +1350,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
             onClickToggle={toggleSection}
             title={t("Section4.selectLULCParams")}
           >
-            <Accordion type="multiple">
+            <Accordion type="single" collapsible>
               <div className="space-y-5">
                 <AccordionItem value="satelite-composite">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
@@ -1434,6 +1467,7 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                     </AccordionContent>
                   </div>
                 </AccordionItem>
+
                 <AccordionItem value="select-predictor">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
                     <AccordionFullTrigger className=" hover:no-underline">
@@ -1588,6 +1622,150 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                     </AccordionContent>
                   </div>
                 </AccordionItem>
+
+                <AccordionItem value="user-data-training">
+                  <div className="p-3 border border-neutral-400 bg-neutral-100">
+                    <AccordionFullTrigger className=" hover:no-underline">
+                      <p className="text-l-bold ">
+                        {t("Section4.userDataTraining")}
+                      </p>
+                    </AccordionFullTrigger>
+                    <AccordionContent className="pt-0 pb-0 space-y-5">
+                      <FormField
+                        disabled={
+                          polygonLoading ||
+                          trainingDataLoading ||
+                          LULCLoading ||
+                          (stage === POLYGON_STAGE.COLLECT &&
+                            drawOrUpload !== DRAW_UPLOAD.NULL)
+                        }
+                        control={form.control}
+                        name="userTrainingData"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              {(!filename || trainingDataLoading) && (
+                                <div
+                                  className={cn(
+                                    "bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 mt-4 space-y-4 transition-all duration-300 w-full",
+                                    field.disabled
+                                      ? "hover:cursor-not-allowed brightness-90"
+                                      : "hover:cursor-pointer hover:brightness-95 ",
+                                  )}
+                                >
+                                  <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
+                                    <Upload className="text-text-icons-base-main h-5 w-5" />
+                                  </div>
+                                  <div className="text-center space-y-1">
+                                    <p className="text-l-medium text-text-icons-base-main">
+                                      {t("Section4.trainingFileUploadDesc1")}{" "}
+                                      <b className="text-primary-pink underline">
+                                        {t("Section4.trainingFileUploadDesc2")}
+                                      </b>{" "}
+                                      {t("Section4.trainingFileUploadDesc3")}
+                                    </p>
+                                    <p className="text-s-medium text-text-icons-light-base-second">
+                                      {t(
+                                        "Section4.trainingFileUploadSupportedFiles",
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
+                            </FormLabel>
+
+                            {filename && (
+                              <div className="mt-3">
+                                <p className="font-semibold">File Terunggah:</p>
+                                <div className="flex flex-row items-center space-x-3 px-3">
+                                  <p className="">{filename}</p>
+                                  {trainingDataLoading && (
+                                    <div className="flex flex-row items-center">
+                                      <span className="loader sm "></span>
+                                    </div>
+                                  )}
+                                  {!trainingDataLoading && (
+                                    <button
+                                      disabled={
+                                        polygonLoading ||
+                                        LULCLoading ||
+                                        trainingDataLoading
+                                      }
+                                      onClick={() => {
+                                        if (
+                                          polygonLoading ||
+                                          LULCLoading ||
+                                          trainingDataLoading
+                                        )
+                                          return;
+
+                                        // form.setValue(
+                                        //   "userTrainingFilename",
+                                        //   undefined,
+                                        // );
+                                        setFilename("");
+                                      }}
+                                      className="p-1 rounded-full hover:cursor-pointer hover:brightness-95 transition-all duration-300 bg-neutral-100"
+                                    >
+                                      <Trash className="text-red-500 fill-neutral-100 h-4 w-4" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            <FormControl>
+                              <Input
+                                {...field}
+                                disabled={field.disabled}
+                                type="file"
+                                className="hidden"
+                                accept="application/zip,application/x-zip,application/x-zip-compressed,application/octet-stream"
+                                multiple={false}
+                                onChange={(
+                                  e: ChangeEvent<HTMLInputElement>,
+                                ) => {
+                                  // console.log("evennnt", e.target.files);
+                                  // // console.log("valuee", e.target.value);
+                                  if (
+                                    !e.target.files ||
+                                    e.target.files.length <= 0
+                                  )
+                                    return;
+
+                                  setFilename(e.target.files[0].name);
+
+                                  // form.setValue(
+                                  //   "userTrainingFile",
+                                  //   e.target.files[0],
+                                  // );
+
+                                  // console.log("namee", e.target.files[0].name);
+
+                                  onUploadTrainingData(e, () => {
+                                    // if (
+                                    //   !e.target.files ||
+                                    //   e.target.files.length <= 0
+                                    // )
+                                    //   return;
+                                    // form.setValue(
+                                    //   "userTrainingFilename",
+                                    //   e.target.files[0].name,
+                                    // );
+                                  });
+                                  // field.onChange("");
+                                }}
+                                // onChange={onUploadFile}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </AccordionContent>
+                  </div>
+                </AccordionItem>
+
                 <AccordionItem value="random-forest">
                   <div className="p-3 border border-neutral-400 bg-neutral-100">
                     <AccordionFullTrigger className=" hover:no-underline">
@@ -1628,9 +1806,16 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
 
         <div className="fixed bottom-0 p-4 w-[455px] bg-neutral-100 [box-shadow:0_0_12px_0_rgba(0,_84,_109,_0.24)]">
           <button
-            disabled={!polygon || !polygonData || polygonLoading || LULCLoading}
+            disabled={
+              !polygon ||
+              !polygonData ||
+              !sessionId ||
+              polygonLoading ||
+              LULCLoading ||
+              trainingDataLoading
+            }
             type="submit"
-            className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
+            className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
           >
             <p className="text-xs-semibold text-white">{t("generateMap")}</p>
             {/* <div className="w-full h-10 flex flex-row justify-center">

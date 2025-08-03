@@ -1,6 +1,7 @@
 import { FloatingPanel } from "./components/FloatingPanel";
 import { LegendPanel } from "./components/LegendPanel";
 import Map1 from "./components/Map";
+import { ZoomButton } from "./components/ZoomButton";
 
 export default function Home() {
   return (
@@ -8,6 +9,7 @@ export default function Home() {
       <FloatingPanel />
       <Map1 />
       <LegendPanel />
+      <ZoomButton />
     </div>
   );
 }

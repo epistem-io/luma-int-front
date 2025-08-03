@@ -12,6 +12,7 @@
       "uploadSHPInstruction": "Drop your SHP file here to generate the current condition data. Accepted format: .zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
       "uploadSHPInstructionCont": "or Click to browse from your computer",
       "approxArea": "Your selected location has total area approximatelly",
+      "reselect": "Reselect",
       "spatialResolution": "Spatial Resolution",
       "finishDrawing": "Finish Drawing"
     },
@@ -56,13 +57,18 @@
       "satelliteComposite": "Satellite Composite",
       "satellite": "Satellite",
       "cloudCoverage": "Cloud Coverage",
+      "userDataTraining": "User Data Training",
       "error": "Error",
       "errorCloudCoverage": "The cloud coverage within this area is greater than 30%. Use other satellite or change the time range of analysis to fix.",
       "selectPredictor": "Select Predictor",
       "selectPredictorDesc": "Provide predictors by your own data",
-      "fileUploadDesc1": "Drag and Drop or choose your file for upload",
+      "trainingFileUploadDesc1": "Drag and Drop or",
+      "trainingFileUploadDesc2": "choose your file",
+      "trainingFileUploadDesc3": "for upload",
+      "trainingFileUploadSupportedFiles": "Supported format file: .zip (.shp)",
+      "fileUploadDesc1": "Drag and Drop or",
       "fileUploadDesc2": "choose your file",
-      "fileUploadDesc3": "file for upload",
+      "fileUploadDesc3": "for upload",
       "fileUploadSupportedFiles": "Supported format file: SHP or KML",
       "RFVariable": "Classify The Random Forest  Variable",
       "nOfTree": "Number of Trees",
@@ -80,7 +86,7 @@
   },
   "Legends": {
     "legend": "Legend",
-    "activeLayer": "({numOfLayer, plural, =0 {No active layer} =1 {# active layer} other {# active layers}})",
+    "activeLayer": "({numOfLayer, plural, =0 {No active layer} =1 {# layer} other {# layers}})",
     "opacity": "Opacity"
   },
   "error": "Error"

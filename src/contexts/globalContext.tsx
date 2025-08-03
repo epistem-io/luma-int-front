@@ -11,7 +11,7 @@ import {
 interface PolygonData {
   area_size: number;
   id: string;
-  session_id: string;
+  // session_id: string;
 }
 
 export enum SATELLITE {
@@ -20,11 +20,14 @@ export enum SATELLITE {
 }
 
 export interface AnalysisConfig {
-  session_id: string;
   start_date: string;
   end_date: string;
   landsat_version: SATELLITE;
   cloud_cover: number;
+  test_timeout?: boolean;
+  session_id?: string;
+  training_filename?: string;
+  use_own_dataset?: boolean;
 }
 
 export interface AnalysisResult {
@@ -34,6 +37,8 @@ export interface AnalysisResult {
 }
 
 interface ContextType {
+  sessionId: string;
+  setSessionId: Dispatch<SetStateAction<string>>;
   polygonData: PolygonData | null;
   setPolygonData: Dispatch<SetStateAction<null | PolygonData>>;
   analysisConfig: AnalysisConfig | null;
@@ -49,11 +54,14 @@ const DEFAULT_VALUE: ContextType = {
   setAnalysisConfig: () => {},
   analysisResult: null,
   setAnalysisResult: () => {},
+  sessionId: "",
+  setSessionId: () => {},
 };
 
 const GlobalContext = createContext(DEFAULT_VALUE);
 
 const GlobalContextContainer = (props: PropsWithChildren) => {
+  const [sessionId, setSessionId] = useState<string>("");
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
   const [analysisConfig, setAnalysisConfig] = useState<null | AnalysisConfig>(
     null,
@@ -69,6 +77,8 @@ const GlobalContextContainer = (props: PropsWithChildren) => {
     setAnalysisConfig,
     analysisResult,
     setAnalysisResult,
+    sessionId,
+    setSessionId,
   };
 
   return (

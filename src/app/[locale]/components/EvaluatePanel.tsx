@@ -153,7 +153,7 @@ export function EvaluatePanel({ prevStage = () => {} }: EvaluatePanelProps) {
           onClick={() => {
             onClickAdjustParameter();
           }}
-          className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink py-1.5 px-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
+          className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
         >
           <p className="text-xs-semibold text-white">
             {t("readjustParameter")}

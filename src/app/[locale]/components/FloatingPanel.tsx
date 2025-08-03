@@ -72,7 +72,9 @@ export function FloatingPanel({ className }: FloatingPanelProps) {
             )}
             {panelStage === PANEL_STAGE.EVALUATE && (
               <EvaluatePanel
-                prevStage={() => setPanelStage(PANEL_STAGE.ANALYSIS)}
+                prevStage={() => {
+                  setPanelStage(PANEL_STAGE.ANALYSIS);
+                }}
               />
             )}
           </div>

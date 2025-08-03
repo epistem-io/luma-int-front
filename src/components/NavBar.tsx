@@ -1,13 +1,13 @@
 import * as React from "react";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
+// import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/navigation";
 import LanguageToggle from "./LanguageToggle";
 
@@ -15,17 +15,17 @@ interface NavBarProps {
   className?: string;
 }
 
-interface MenuItem {
-  label: string;
-  href: string;
-}
+// interface MenuItem {
+//   label: string;
+//   href: string;
+// }
 
-const dataMethodsItems: MenuItem[] = [
-  { label: "Data Collection", href: "/data-collection" },
-  { label: "Data Processing", href: "/data-processing" },
-  { label: "Analysis Methods", href: "/analysis-methods" },
-  { label: "Validation", href: "/validation" },
-];
+// const dataMethodsItems: MenuItem[] = [
+//   { label: "Data Collection", href: "/data-collection" },
+//   { label: "Data Processing", href: "/data-processing" },
+//   { label: "Analysis Methods", href: "/analysis-methods" },
+//   { label: "Validation", href: "/validation" },
+// ];
 
 export function NavBar({ className }: NavBarProps) {
   // const [currentLanguage, setCurrentLanguage] = React.useState("EN");
@@ -63,7 +63,7 @@ export function NavBar({ className }: NavBarProps) {
             {/* Navigation Menu */}
             <nav className="flex items-center space-x-8">
               {/* Data and Methods Dropdown */}
-              <DropdownMenu>
+              {/* <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center space-x-1 font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground">
                   <span>Data and Methods</span>
                   <ChevronDown className="h-4 w-4" />
@@ -75,10 +75,10 @@ export function NavBar({ className }: NavBarProps) {
                     </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
-              </DropdownMenu>
+              </DropdownMenu> */}
 
               {/* Other Menu Items */}
-              <Link
+              {/* <Link
                 href="/launch-tool"
                 className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
               >
@@ -89,7 +89,7 @@ export function NavBar({ className }: NavBarProps) {
                 className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
               >
                 Map Utilization
-              </Link>
+              </Link> */}
             </nav>
 
             <LanguageToggle />
