@@ -4,7 +4,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { useEffect } from "react";
 import Clarity from "@microsoft/clarity";
 
-export const Analytis = () => {
+export const Analytics = () => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       Clarity.init(process.env.NEXT_PUBLIC_CL_ID!);
