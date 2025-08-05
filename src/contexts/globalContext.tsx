@@ -27,6 +27,7 @@ export interface AnalysisConfig {
   test_timeout?: boolean;
   session_id?: string;
   training_filename?: string;
+  validation_filename?: string;
   use_own_dataset?: boolean;
 }
 

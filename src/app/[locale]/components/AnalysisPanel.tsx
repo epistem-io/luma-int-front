@@ -66,10 +66,12 @@ import TileLayer from "ol/layer/Tile";
 import { ImageTile } from "ol/source";
 import { clipLayerToVector } from "@/utils/mapHelper";
 import { toast } from "sonner";
+import { ROUTE_KEYS } from "./FloatingPanel";
 
 interface AnalysisPanelProps {
   nextStage?: () => void;
   prevStage?: () => void;
+  selected: ROUTE_KEYS | "";
   className?: string;
 }
 
@@ -201,6 +203,7 @@ const formSchema = z.object({
   satellite: z.enum([...Object.values(SATELLITE)]),
   cloudCover: z.number().min(0).max(50),
   userTrainingData: z.string().optional(),
+  userValidationData: z.string().optional(),
   // userTrainingFilename: z.string().optional(),
   // userTrainingFile: z
   //   .instanceof(File)
@@ -253,7 +256,10 @@ CollapsibleSectionProps) {
   );
 }
 
-export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
+export function AnalysisPanel({
+  nextStage = () => {},
+  selected,
+}: AnalysisPanelProps) {
   const t = useTranslations("AnalysisPanel");
 
   const {
@@ -281,10 +287,19 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
   );
   const [polygonLoading, setPolygonLoading] = useState(false);
   const [trainingDataLoading, setTrainingDataLoading] = useState(false);
+  const [validationDataLoading, setValidationDataLoading] = useState(false);
   const [LULCLoading, setLULCLoading] = useState(false);
+
+  const [timeo, setTimeo] = useState<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const [filename, setFilename] = useState(
     analysisConfig?.training_filename || "",
+  );
+
+  const [validationFilename, setValidationFilename] = useState(
+    analysisConfig?.validation_filename || "",
   );
 
   const [sectionVisArr, setSectionVisArr] = useState([
@@ -617,6 +632,10 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
 
         setSessionId(json.session_id);
 
+        if (validationDataLoading) {
+          setValidationDataLoading(false);
+        }
+
         cb();
       })
       .catch((e) => {
@@ -631,6 +650,33 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
       .finally(() => {
         setTrainingDataLoading(false);
       });
+  };
+
+  const onUploadValidationData = (
+    e: ChangeEvent<HTMLInputElement>,
+    // cb: () => void,
+  ) => {
+    const target = e.target;
+    const files = target?.files;
+
+    // console.log("filess", files);
+
+    if (!files) return;
+
+    setValidationDataLoading(true);
+
+    if (trainingDataLoading) return;
+
+    const time = setTimeout(() => {
+      setValidationDataLoading(false);
+      setTimeo(null);
+    }, 3000);
+
+    setTimeo(time);
+
+    // const body = new FormData();
+    // body.append("file", files[0]);
+    // body.append("session_id", sessionId);
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -777,15 +823,22 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="">
-        <div className="bg-white z-30 mb-32">
-          <CollapsibleSection
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col justify-between h-[calc(100vh-8rem-48px-64px)] overflow-y-scroll"
+      >
+        <div className="bg-white z-30 px-5 py-5 pb-24">
+          {/* <CollapsibleSection
             title={t("Section1.scopeYourArea")}
             index={0}
             isOpen={sectionVisArr[0]}
             onClickToggle={toggleSection}
-          >
+          > */}
+          {selected === ROUTE_KEYS.AREA && (
             <div className="space-y-5">
+              <p className="headline-xxs-desktop-medium text-text-icons-base-main">
+                {t("Section1.scopeYourArea")}
+              </p>
               {stage === POLYGON_STAGE.CONFIRMATION && (
                 <div className="rounded-md space-y-4 bg-[rgba(253,247,249,1)] [box-shadow:0_2px_8px_0_rgba(87,_86,_86,_0.08)] p-3 border border-neutral-400">
                   <p className="text-l-semibold text-text-icons-light-base-second">
@@ -1033,136 +1086,152 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                 </RadioGroup>
               </div>
             </div>
-          </CollapsibleSection>
+          )}
+          {/* </CollapsibleSection> */}
 
-          <CollapsibleSection
+          {/* <CollapsibleSection
             index={1}
             isOpen={sectionVisArr[1]}
             onClickToggle={toggleSection}
             title={t("Section2.selectTimePeriod")}
-          >
-            <div className="space-y-5 border border-neutral-400 p-3">
-              <p className="text-l-bold text-text-icons-base-main">
-                {t("Section2.temporalCoverage")}
+          > */}
+          {selected === ROUTE_KEYS.TIME && (
+            <>
+              <p className="headline-xxs-desktop-medium text-text-icons-base-main mb-5">
+                {t("Section2.selectTimePeriod")}
               </p>
-              <div className="space-y-2">
-                <Label htmlFor="time-period" className="">
-                  <p className="text-m-medium text-neutral-900">
-                    {t("Section2.timePeriodLabel")}
-                  </p>
-                </Label>
-                <Select defaultValue={t("Section2.timePeriodDefault")} disabled>
-                  <SelectTrigger
-                    id="time-period"
-                    name="time-period"
-                    className="w-full rounded-none border-neutral-400"
+              <div className="space-y-5 border border-neutral-400 p-3">
+                <p className="text-l-bold text-text-icons-base-main">
+                  {t("Section2.temporalCoverage")}
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="time-period" className="">
+                    <p className="text-m-medium text-neutral-900">
+                      {t("Section2.timePeriodLabel")}
+                    </p>
+                  </Label>
+                  <Select
+                    defaultValue={t("Section2.timePeriodDefault")}
+                    disabled
                   >
-                    <SelectValue placeholder={t("Section2.timePeriod")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {/* <SelectItem value="light">Light</SelectItem> */}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="time-period-month" className="">
-                  <p className="text-m-medium text-neutral-900">
-                    {t("Section2.select")}
-                  </p>
-                </Label>
-                <div className="grid grid-cols-2 space-x-2">
-                  <div>
-                    <Select disabled>
-                      <SelectTrigger
-                        id="time-period-month"
-                        name="time-period-month"
-                        className="w-full rounded-none border-neutral-400"
-                      >
-                        <SelectValue placeholder={t("Section2.month")} />
-                      </SelectTrigger>
-                      <SelectContent></SelectContent>
-                    </Select>
+                    <SelectTrigger
+                      id="time-period"
+                      name="time-period"
+                      className="w-full rounded-none border-neutral-400"
+                    >
+                      <SelectValue placeholder={t("Section2.timePeriod")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {/* <SelectItem value="light">Light</SelectItem> */}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="time-period-month" className="">
+                    <p className="text-m-medium text-neutral-900">
+                      {t("Section2.select")}
+                    </p>
+                  </Label>
+                  <div className="grid grid-cols-2 space-x-2">
+                    <div>
+                      <Select disabled>
+                        <SelectTrigger
+                          id="time-period-month"
+                          name="time-period-month"
+                          className="w-full rounded-none border-neutral-400"
+                        >
+                          <SelectValue placeholder={t("Section2.month")} />
+                        </SelectTrigger>
+                        <SelectContent></SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Select disabled>
+                        <SelectTrigger
+                          id="time-period-year"
+                          name="time-period-year"
+                          className="w-full rounded-none border-neutral-400"
+                        >
+                          <SelectValue placeholder={t("Section2.year")} />
+                        </SelectTrigger>
+                        <SelectContent></SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div>
-                    <Select disabled>
-                      <SelectTrigger
-                        id="time-period-year"
-                        name="time-period-year"
-                        className="w-full rounded-none border-neutral-400"
-                      >
-                        <SelectValue placeholder={t("Section2.year")} />
-                      </SelectTrigger>
-                      <SelectContent></SelectContent>
-                    </Select>
+                </div>
+                <hr className="bg-neutral-600" />
+                <div className="flex flex-col">
+                  <div className="py-2 px-4 bg-neutral-100">
+                    <p className="text-l-bold text-text-icons-base-main">
+                      {t("Section2.satelliteTemporalExtent")}
+                    </p>
+                  </div>
+                  <div className="pt-5 p-3 grid grid-cols-2 space-x-3 border border-t-0">
+                    <div className="">
+                      <FormField
+                        control={form.control}
+                        name="startDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              <p className="text-m-semibold">
+                                {t("Section2.startDate")}
+                              </p>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                className="datepicker shadow-none border-0"
+                                type="date"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="">
+                      <FormField
+                        control={form.control}
+                        name="endDate"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              <p className="text-m-semibold">
+                                {t("Section2.endDate")}
+                              </p>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                className="datepicker shadow-none border-0"
+                                type="date"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-              <hr className="bg-neutral-600" />
-              <div className="flex flex-col">
-                <div className="py-2 px-4 bg-neutral-100">
-                  <p className="text-l-bold text-text-icons-base-main">
-                    {t("Section2.satelliteTemporalExtent")}
-                  </p>
-                </div>
-                <div className="pt-5 p-3 grid grid-cols-2 space-x-3 border border-t-0">
-                  <div className="">
-                    <FormField
-                      control={form.control}
-                      name="startDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            <p className="text-m-semibold">
-                              {t("Section2.startDate")}
-                            </p>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              className="datepicker shadow-none border-0"
-                              type="date"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <div className="">
-                    <FormField
-                      control={form.control}
-                      name="endDate"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            <p className="text-m-semibold">
-                              {t("Section2.endDate")}
-                            </p>
-                          </FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              className="datepicker shadow-none border-0"
-                              type="date"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CollapsibleSection>
+            </>
+          )}
+          {/* </CollapsibleSection> */}
 
-          <CollapsibleSection
+          {/* <CollapsibleSection
             index={2}
             isOpen={sectionVisArr[2]}
             onClickToggle={toggleSection}
             title={t("Section3.defineLC")}
-          >
+          > */}
+          {selected === ROUTE_KEYS.LAND && (
             <div className="space-y-5">
+              <p className="headline-xxs-desktop-medium text-text-icons-base-main">
+                {t("Section3.defineLC")}
+              </p>
+
               <Collapsible>
                 <div className="bg-aneh p-[1px] [box-shadow:0_4px_4px_0_rgba(243,_235,_126,_0.25),_0_2px_8px_0_rgba(249,_245,_195,_0.29)]">
                   <div className="bg-neutral-100 p-3 h-fit">
@@ -1342,487 +1411,608 @@ export function AnalysisPanel({ nextStage = () => {} }: AnalysisPanelProps) {
                 </div>
               </div>
             </div>
-          </CollapsibleSection>
+          )}
+          {/* </CollapsibleSection> */}
 
-          <CollapsibleSection
+          {/* <CollapsibleSection
             index={3}
             isOpen={sectionVisArr[3]}
             onClickToggle={toggleSection}
             title={t("Section4.selectLULCParams")}
-          >
-            <Accordion type="single" collapsible>
-              <div className="space-y-5">
-                <AccordionItem value="satelite-composite">
-                  <div className="p-3 border border-neutral-400 bg-neutral-100">
-                    <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">
-                        {t("Section4.satelliteComposite")}
-                      </p>
-                    </AccordionFullTrigger>
-                    <AccordionContent className="space-y-5 pb-0">
-                      <div className="mt-5 space-y-2">
-                        <FormField
-                          control={form.control}
-                          name="satellite"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                <p className="regular-caption-300">
-                                  {t("Section4.satellite")}
-                                </p>
-                              </FormLabel>
-                              <Select
-                                disabled={field.disabled}
-                                onValueChange={field.onChange}
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger
-                                    id="satelite-select"
-                                    className="w-full rounded-sm border-neutral-400"
-                                  >
-                                    <SelectValue placeholder="Theme" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {SATELLITE_SELECTION.map((item) => (
-                                    <SelectItem
-                                      key={`satellite-select-${item.value}`}
-                                      value={item.value}
+          > */}
+          {selected === ROUTE_KEYS.LULC && (
+            <>
+              <p className="headline-xxs-desktop-medium text-text-icons-base-main mb-5">
+                {t("Section4.selectLULCParams")}
+              </p>
+              <Accordion type="single" collapsible>
+                <div className="space-y-5">
+                  <AccordionItem value="satelite-composite">
+                    <div className="p-3 border border-neutral-400 bg-neutral-100">
+                      <AccordionFullTrigger className=" hover:no-underline">
+                        <p className="text-l-bold ">
+                          {t("Section4.satelliteComposite")}
+                        </p>
+                      </AccordionFullTrigger>
+                      <AccordionContent className="space-y-5 pb-0">
+                        <div className="mt-5 space-y-2">
+                          <FormField
+                            control={form.control}
+                            name="satellite"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  <p className="regular-caption-300">
+                                    {t("Section4.satellite")}
+                                  </p>
+                                </FormLabel>
+                                <Select
+                                  disabled={field.disabled}
+                                  onValueChange={field.onChange}
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger
+                                      id="satelite-select"
+                                      className="w-full rounded-sm border-neutral-400"
                                     >
-                                      {item.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="space-y-2">
+                                      <SelectValue placeholder="Theme" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {SATELLITE_SELECTION.map((item) => (
+                                      <SelectItem
+                                        key={`satellite-select-${item.value}`}
+                                        value={item.value}
+                                      >
+                                        {item.label}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <FormField
+                            control={form.control}
+                            name="cloudCover"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  <p className="regular-caption-300">
+                                    {t("Section4.cloudCoverage")}
+                                  </p>
+                                </FormLabel>
+
+                                <FormControl>
+                                  <div className="px-2">
+                                    <Slider
+                                      id="cloud-coverage"
+                                      onValueChange={(val: number[]) => {
+                                        field.onChange(val[0]);
+                                      }}
+                                      defaultValue={[field.value]}
+                                      min={0}
+                                      max={50}
+                                      step={1}
+                                      disabled={field.disabled}
+                                    />
+                                    <div className="flex flex-row justify-between mt-2">
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          0%
+                                        </p>
+                                      </div>
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          10%
+                                        </p>
+                                      </div>
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          20%
+                                        </p>
+                                      </div>
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          30%
+                                        </p>
+                                      </div>
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          40%
+                                        </p>
+                                      </div>
+                                      <div className="">
+                                        <p className="bold-caption-300 text-primary-500 text-center">
+                                          50%
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      </AccordionContent>
+                    </div>
+                  </AccordionItem>
+
+                  <AccordionItem value="select-predictor">
+                    <div className="p-3 border border-neutral-400 bg-neutral-100">
+                      <AccordionFullTrigger className=" hover:no-underline">
+                        <p className="text-l-bold ">
+                          {t("Section4.selectPredictor")}
+                        </p>
+                      </AccordionFullTrigger>
+                      <AccordionContent className="pt-5 pb-0 space-y-5">
+                        <div className="space-y-2.5">
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Elevation
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Shuttle Radar Topography Mission (SRTM)
+                                elevation
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Slope
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Shuttle Radar Topography Mission (SRTM) slope
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                NDVI
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Normalized Difference Vegetation Index
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                NDWI
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Normalized Difference Water Index
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                BG
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Normalized Difference Blue Green
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Blue
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Blue band
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Green
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Green band
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Red
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Red band
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                NIR
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Near Infrared Band
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Distance to Road
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Measuring closest road available
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex flex-row space-x-3">
+                            <Checkbox disabled className="mt-0.5" />
+                            <div className="space-y-1">
+                              <p className="text-m-semibold text-neutrals-800">
+                                Distance to River
+                              </p>
+                              <p className="text-xs-regular text-neutrals-600">
+                                Measuring closest river available
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 space-y-4 brightness-90 cursor-not-allowed">
+                          <p className="text-l-bold text-[#002F3D] text-center">
+                            {t("Section4.selectPredictorDesc")}
+                          </p>
+                          <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
+                            <Upload className="text-text-icons-base-main h-5 w-5" />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-l-medium text-text-icons-base-main">
+                              {t("Section4.fileUploadDesc1")}{" "}
+                              <b className="text-primary-pink underline">
+                                {t("Section4.fileUploadDesc2")}
+                              </b>{" "}
+                              {t("Section4.fileUploadDesc3")}
+                            </p>
+                            <p className="text-s-medium text-text-icons-light-base-second">
+                              {t("Section4.fileUploadSupportedFiles")}
+                            </p>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </div>
+                  </AccordionItem>
+
+                  <AccordionItem value="user-data-training">
+                    <div className="p-3 border border-neutral-400 bg-neutral-100">
+                      <AccordionFullTrigger className=" hover:no-underline">
+                        <p className="text-l-bold ">
+                          {t("Section4.userDataTraining")}
+                        </p>
+                      </AccordionFullTrigger>
+                      <AccordionContent className="pt-0 pb-0 space-y-5">
                         <FormField
+                          disabled={
+                            polygonLoading ||
+                            trainingDataLoading ||
+                            LULCLoading ||
+                            (stage === POLYGON_STAGE.COLLECT &&
+                              drawOrUpload !== DRAW_UPLOAD.NULL)
+                          }
                           control={form.control}
-                          name="cloudCover"
+                          name="userTrainingData"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>
-                                <p className="regular-caption-300">
-                                  {t("Section4.cloudCoverage")}
-                                </p>
-                              </FormLabel>
-
-                              <FormControl>
-                                <div className="px-2">
-                                  <Slider
-                                    id="cloud-coverage"
-                                    onValueChange={(val: number[]) => {
-                                      field.onChange(val[0]);
-                                    }}
-                                    defaultValue={[field.value]}
-                                    min={0}
-                                    max={50}
-                                    step={1}
-                                    disabled={field.disabled}
-                                  />
-                                  <div className="flex flex-row justify-between mt-2">
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        0%
-                                      </p>
+                                {(!filename || trainingDataLoading) && (
+                                  <div
+                                    className={cn(
+                                      "bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 mt-4 space-y-4 transition-all duration-300 w-full",
+                                      field.disabled
+                                        ? "hover:cursor-not-allowed brightness-90"
+                                        : "hover:cursor-pointer hover:brightness-95 ",
+                                    )}
+                                  >
+                                    <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
+                                      <Upload className="text-text-icons-base-main h-5 w-5" />
                                     </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        10%
+                                    <div className="text-center space-y-1">
+                                      <p className="text-l-medium text-text-icons-base-main">
+                                        {t("Section4.trainingFileUploadDesc1")}{" "}
+                                        <b className="text-primary-pink underline">
+                                          {t(
+                                            "Section4.trainingFileUploadDesc2",
+                                          )}
+                                        </b>{" "}
+                                        {t("Section4.trainingFileUploadDesc3")}
                                       </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        20%
-                                      </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        30%
-                                      </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        40%
-                                      </p>
-                                    </div>
-                                    <div className="">
-                                      <p className="bold-caption-300 text-primary-500 text-center">
-                                        50%
+                                      <p className="text-s-medium text-text-icons-light-base-second">
+                                        {t(
+                                          "Section4.trainingFileUploadSupportedFiles",
+                                        )}
                                       </p>
                                     </div>
                                   </div>
+                                )}
+                              </FormLabel>
+
+                              {filename && (
+                                <div className="mt-3">
+                                  <p className="font-semibold">
+                                    {t("Section4.fileUploaded")}
+                                  </p>
+                                  <div className="flex flex-row items-center space-x-3 px-3">
+                                    <p className="">{filename}</p>
+                                    {trainingDataLoading && (
+                                      <div className="flex flex-row items-center">
+                                        <span className="loader sm "></span>
+                                      </div>
+                                    )}
+                                    {!trainingDataLoading && (
+                                      <button
+                                        disabled={
+                                          polygonLoading ||
+                                          LULCLoading ||
+                                          trainingDataLoading
+                                        }
+                                        onClick={() => {
+                                          if (
+                                            polygonLoading ||
+                                            LULCLoading ||
+                                            trainingDataLoading
+                                          )
+                                            return;
+
+                                          // form.setValue(
+                                          //   "userTrainingFilename",
+                                          //   undefined,
+                                          // );
+                                          setFilename("");
+                                        }}
+                                        className="p-1 rounded-full hover:cursor-pointer hover:brightness-95 transition-all duration-300 bg-neutral-100"
+                                      >
+                                        <Trash className="text-red-500 fill-neutral-100 h-4 w-4" />
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
+                              )}
+
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  disabled={field.disabled}
+                                  type="file"
+                                  className="hidden"
+                                  accept="application/zip,application/x-zip,application/x-zip-compressed,application/octet-stream"
+                                  multiple={false}
+                                  onChange={(
+                                    e: ChangeEvent<HTMLInputElement>,
+                                  ) => {
+                                    // console.log("evennnt", e.target.files);
+                                    // // console.log("valuee", e.target.value);
+                                    if (
+                                      !e.target.files ||
+                                      e.target.files.length <= 0
+                                    )
+                                      return;
+
+                                    setFilename(e.target.files[0].name);
+
+                                    onUploadTrainingData(e, () => {});
+                                  }}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
-                      </div>
-                    </AccordionContent>
-                  </div>
-                </AccordionItem>
+                      </AccordionContent>
+                    </div>
+                  </AccordionItem>
 
-                <AccordionItem value="select-predictor">
-                  <div className="p-3 border border-neutral-400 bg-neutral-100">
-                    <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">
-                        {t("Section4.selectPredictor")}
-                      </p>
-                    </AccordionFullTrigger>
-                    <AccordionContent className="pt-5 pb-0 space-y-5">
-                      <div className="space-y-2.5">
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Elevation
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Shuttle Radar Topography Mission (SRTM) elevation
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Slope
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Shuttle Radar Topography Mission (SRTM) slope
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              NDVI
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Normalized Difference Vegetation Index
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              NDWI
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Normalized Difference Water Index
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              BG
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Normalized Difference Blue Green
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Blue
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Blue band
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Green
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Green band
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Red
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Red band
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              NIR
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Near Infrared Band
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Distance to Road
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Measuring closest road available
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-row space-x-3">
-                          <Checkbox disabled className="mt-0.5" />
-                          <div className="space-y-1">
-                            <p className="text-m-semibold text-neutrals-800">
-                              Distance to River
-                            </p>
-                            <p className="text-xs-regular text-neutrals-600">
-                              Measuring closest river available
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 space-y-4 brightness-90 cursor-not-allowed">
-                        <p className="text-l-bold text-[#002F3D] text-center">
-                          {t("Section4.selectPredictorDesc")}
+                  <AccordionItem value="user-data-validation">
+                    <div className="p-3 border border-neutral-400 bg-neutral-100">
+                      <AccordionFullTrigger className=" hover:no-underline">
+                        <p className="text-l-bold ">
+                          {t("Section4.userDataValidation")}
                         </p>
-                        <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
-                          <Upload className="text-text-icons-base-main h-5 w-5" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-l-medium text-text-icons-base-main">
-                            {t("Section4.fileUploadDesc1")}{" "}
-                            <b className="text-primary-pink underline">
-                              {t("Section4.fileUploadDesc2")}
-                            </b>{" "}
-                            {t("Section4.fileUploadDesc3")}
-                          </p>
-                          <p className="text-s-medium text-text-icons-light-base-second">
-                            {t("Section4.fileUploadSupportedFiles")}
-                          </p>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </div>
-                </AccordionItem>
-
-                <AccordionItem value="user-data-training">
-                  <div className="p-3 border border-neutral-400 bg-neutral-100">
-                    <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">
-                        {t("Section4.userDataTraining")}
-                      </p>
-                    </AccordionFullTrigger>
-                    <AccordionContent className="pt-0 pb-0 space-y-5">
-                      <FormField
-                        disabled={
-                          polygonLoading ||
-                          trainingDataLoading ||
-                          LULCLoading ||
-                          (stage === POLYGON_STAGE.COLLECT &&
-                            drawOrUpload !== DRAW_UPLOAD.NULL)
-                        }
-                        control={form.control}
-                        name="userTrainingData"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              {(!filename || trainingDataLoading) && (
-                                <div
-                                  className={cn(
-                                    "bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 mt-4 space-y-4 transition-all duration-300 w-full",
-                                    field.disabled
-                                      ? "hover:cursor-not-allowed brightness-90"
-                                      : "hover:cursor-pointer hover:brightness-95 ",
-                                  )}
-                                >
-                                  <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
-                                    <Upload className="text-text-icons-base-main h-5 w-5" />
+                      </AccordionFullTrigger>
+                      <AccordionContent className="pt-0 pb-0 space-y-5">
+                        <FormField
+                          disabled={
+                            polygonLoading ||
+                            validationDataLoading ||
+                            LULCLoading ||
+                            (stage === POLYGON_STAGE.COLLECT &&
+                              drawOrUpload !== DRAW_UPLOAD.NULL)
+                          }
+                          control={form.control}
+                          name="userValidationData"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                {(!validationFilename ||
+                                  validationDataLoading) && (
+                                  <div
+                                    className={cn(
+                                      "bg-white rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 mt-4 space-y-4 transition-all duration-300 w-full",
+                                      field.disabled
+                                        ? "hover:cursor-not-allowed brightness-90"
+                                        : "hover:cursor-pointer hover:brightness-95 ",
+                                    )}
+                                  >
+                                    <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
+                                      <Upload className="text-text-icons-base-main h-5 w-5" />
+                                    </div>
+                                    <div className="text-center space-y-1">
+                                      <p className="text-l-medium text-text-icons-base-main">
+                                        {t("Section4.trainingFileUploadDesc1")}{" "}
+                                        <b className="text-primary-pink underline">
+                                          {t(
+                                            "Section4.trainingFileUploadDesc2",
+                                          )}
+                                        </b>{" "}
+                                        {t("Section4.trainingFileUploadDesc3")}
+                                      </p>
+                                      <p className="text-s-medium text-text-icons-light-base-second">
+                                        {t(
+                                          "Section4.trainingFileUploadSupportedFiles",
+                                        )}
+                                      </p>
+                                    </div>
                                   </div>
-                                  <div className="text-center space-y-1">
-                                    <p className="text-l-medium text-text-icons-base-main">
-                                      {t("Section4.trainingFileUploadDesc1")}{" "}
-                                      <b className="text-primary-pink underline">
-                                        {t("Section4.trainingFileUploadDesc2")}
-                                      </b>{" "}
-                                      {t("Section4.trainingFileUploadDesc3")}
-                                    </p>
-                                    <p className="text-s-medium text-text-icons-light-base-second">
-                                      {t(
-                                        "Section4.trainingFileUploadSupportedFiles",
-                                      )}
-                                    </p>
+                                )}
+                              </FormLabel>
+
+                              {validationFilename && (
+                                <div className="mt-3">
+                                  <p className="font-semibold">
+                                    File Terunggah:
+                                  </p>
+                                  <div className="flex flex-row items-center space-x-3 px-3">
+                                    <p className="">{validationFilename}</p>
+                                    {validationDataLoading && (
+                                      <div className="flex flex-row items-center">
+                                        <span className="loader sm "></span>
+                                      </div>
+                                    )}
+                                    {!validationDataLoading && (
+                                      <button
+                                        disabled={
+                                          polygonLoading ||
+                                          LULCLoading ||
+                                          validationDataLoading
+                                        }
+                                        onClick={() => {
+                                          if (
+                                            polygonLoading ||
+                                            LULCLoading ||
+                                            validationDataLoading
+                                          )
+                                            return;
+
+                                          setValidationFilename("");
+                                        }}
+                                        className="p-1 rounded-full hover:cursor-pointer hover:brightness-95 transition-all duration-300 bg-neutral-100"
+                                      >
+                                        <Trash className="text-red-500 fill-neutral-100 h-4 w-4" />
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               )}
-                            </FormLabel>
 
-                            {filename && (
-                              <div className="mt-3">
-                                <p className="font-semibold">File Terunggah:</p>
-                                <div className="flex flex-row items-center space-x-3 px-3">
-                                  <p className="">{filename}</p>
-                                  {trainingDataLoading && (
-                                    <div className="flex flex-row items-center">
-                                      <span className="loader sm "></span>
-                                    </div>
-                                  )}
-                                  {!trainingDataLoading && (
-                                    <button
-                                      disabled={
-                                        polygonLoading ||
-                                        LULCLoading ||
-                                        trainingDataLoading
-                                      }
-                                      onClick={() => {
-                                        if (
-                                          polygonLoading ||
-                                          LULCLoading ||
-                                          trainingDataLoading
-                                        )
-                                          return;
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  disabled={field.disabled}
+                                  type="file"
+                                  className="hidden"
+                                  accept="application/zip,application/x-zip,application/x-zip-compressed,application/octet-stream"
+                                  multiple={false}
+                                  onChange={(
+                                    e: ChangeEvent<HTMLInputElement>,
+                                  ) => {
+                                    if (
+                                      !e.target.files ||
+                                      e.target.files.length <= 0
+                                    )
+                                      return;
 
-                                        // form.setValue(
-                                        //   "userTrainingFilename",
-                                        //   undefined,
-                                        // );
-                                        setFilename("");
-                                      }}
-                                      className="p-1 rounded-full hover:cursor-pointer hover:brightness-95 transition-all duration-300 bg-neutral-100"
-                                    >
-                                      <Trash className="text-red-500 fill-neutral-100 h-4 w-4" />
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            )}
+                                    setValidationFilename(
+                                      e.target.files[0].name,
+                                    );
 
-                            <FormControl>
-                              <Input
-                                {...field}
-                                disabled={field.disabled}
-                                type="file"
-                                className="hidden"
-                                accept="application/zip,application/x-zip,application/x-zip-compressed,application/octet-stream"
-                                multiple={false}
-                                onChange={(
-                                  e: ChangeEvent<HTMLInputElement>,
-                                ) => {
-                                  // console.log("evennnt", e.target.files);
-                                  // // console.log("valuee", e.target.value);
-                                  if (
-                                    !e.target.files ||
-                                    e.target.files.length <= 0
-                                  )
-                                    return;
+                                    onUploadValidationData(e);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </AccordionContent>
+                    </div>
+                  </AccordionItem>
 
-                                  setFilename(e.target.files[0].name);
-
-                                  // form.setValue(
-                                  //   "userTrainingFile",
-                                  //   e.target.files[0],
-                                  // );
-
-                                  // console.log("namee", e.target.files[0].name);
-
-                                  onUploadTrainingData(e, () => {
-                                    // if (
-                                    //   !e.target.files ||
-                                    //   e.target.files.length <= 0
-                                    // )
-                                    //   return;
-                                    // form.setValue(
-                                    //   "userTrainingFilename",
-                                    //   e.target.files[0].name,
-                                    // );
-                                  });
-                                  // field.onChange("");
-                                }}
-                                // onChange={onUploadFile}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </AccordionContent>
-                  </div>
-                </AccordionItem>
-
-                <AccordionItem value="random-forest">
-                  <div className="p-3 border border-neutral-400 bg-neutral-100">
-                    <AccordionFullTrigger className=" hover:no-underline">
-                      <p className="text-l-bold ">{t("Section4.RFVariable")}</p>
-                    </AccordionFullTrigger>
-                    <AccordionContent className="pt-5">
-                      <div className="grid grid-cols-2 space-x-5">
-                        <div className="space-y-2">
-                          <Label>
-                            <p className="regular-caption-300 text-neutrals-900">
-                              {t("Section4.nOfTree")}
+                  <AccordionItem value="random-forest">
+                    <div className="p-3 border border-neutral-400 bg-neutral-100">
+                      <AccordionFullTrigger className=" hover:no-underline">
+                        <p className="text-l-bold ">
+                          {t("Section4.RFVariable")}
+                        </p>
+                      </AccordionFullTrigger>
+                      <AccordionContent className="pt-5">
+                        <div className="grid grid-cols-2 space-x-5">
+                          <div className="space-y-2">
+                            <Label>
+                              <p className="regular-caption-300 text-neutrals-900">
+                                {t("Section4.nOfTree")}
+                              </p>
+                            </Label>
+                            <Input className="" disabled />
+                            <p className="regular-caption-200 text-neutrals-600">
+                              {t("Section4.fillWNum", { min: 10, max: 500 })}
                             </p>
-                          </Label>
-                          <Input className="" disabled />
-                          <p className="regular-caption-200 text-neutrals-600">
-                            {t("Section4.fillWNum", { min: 10, max: 500 })}
-                          </p>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>
-                            <p className="regular-caption-300 text-neutrals-900">
-                              {t("Section4.minLeafPop")}
+                          </div>
+                          <div className="space-y-2">
+                            <Label>
+                              <p className="regular-caption-300 text-neutrals-900">
+                                {t("Section4.minLeafPop")}
+                              </p>
+                            </Label>
+                            <Input className="" disabled />
+                            <p className="regular-caption-200 text-neutrals-600">
+                              {t("Section4.fillWNum", { min: 1, max: 50 })}
                             </p>
-                          </Label>
-                          <Input className="" disabled />
-                          <p className="regular-caption-200 text-neutrals-600">
-                            {t("Section4.fillWNum", { min: 1, max: 50 })}
-                          </p>
+                          </div>
                         </div>
-                      </div>
-                    </AccordionContent>
-                  </div>
-                </AccordionItem>
-              </div>
-            </Accordion>
-          </CollapsibleSection>
+                      </AccordionContent>
+                    </div>
+                  </AccordionItem>
+                </div>
+              </Accordion>
+            </>
+          )}
+          {/* </CollapsibleSection> */}
         </div>
 
-        <div className="fixed bottom-0 p-4 w-[455px] bg-neutral-100 [box-shadow:0_0_12px_0_rgba(0,_84,_109,_0.24)]">
-          <button
-            disabled={
-              !polygon ||
-              !polygonData ||
-              !sessionId ||
-              polygonLoading ||
-              LULCLoading ||
-              trainingDataLoading
-            }
-            type="submit"
-            className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
-          >
-            <p className="text-xs-semibold text-white">{t("generateMap")}</p>
-            {/* <div className="w-full h-10 flex flex-row justify-center">
-                          </div> */}
-            {LULCLoading && <span className="loader sm "></span>}
-          </button>
-        </div>
+        <button
+          disabled={
+            !polygon ||
+            !polygonData ||
+            !sessionId ||
+            polygonLoading ||
+            LULCLoading ||
+            trainingDataLoading
+          }
+          type="submit"
+          className="py-3 mt-auto w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center absolute bottom-0 z-40"
+        >
+          <p className="text-xs-semibold text-white">{t("generateMap")}</p>
+          {LULCLoading && <span className="loader sm "></span>}
+        </button>
+
+        {/* <div className="fixed bottom-0 p-4 w-[455px] bg-neutral-100 [box-shadow:0_0_12px_0_rgba(0,_84,_109,_0.24)]">
+          
+        </div> */}
       </form>
     </Form>
   );

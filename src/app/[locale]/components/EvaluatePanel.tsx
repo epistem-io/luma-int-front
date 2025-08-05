@@ -49,8 +49,8 @@ export function EvaluatePanel({ prevStage = () => {} }: EvaluatePanelProps) {
     //   </form>
     // </Form>
     <>
-      <div className="bg-white z-30 mb-32">
-        <div className="px-6 pt-4">
+      <div className="bg-white z-30">
+        <div className="px-6 pt-4 pb-12">
           {/* HIDE DULU */}
           {/* <div className="space-y-1">
             <p className="headline-xxs-desktop-medium text-text-icons-base-main">
@@ -146,20 +146,20 @@ export function EvaluatePanel({ prevStage = () => {} }: EvaluatePanelProps) {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="fixed bottom-0 p-4 w-[455px] bg-neutral-100 [box-shadow:0_0_12px_0_rgba(0,_84,_109,_0.24)]">
         <button
           onClick={() => {
             onClickAdjustParameter();
           }}
-          className="w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center"
+          className="absolute bottom-0 w-full disabled:bg-muted-foreground disabled:hover:cursor-not-allowed disabled:hover:brightness-100 bg-primary-pink p-2 cursor-pointer hover:brightness-95 transition-all duration-300 flex flex-row space-x-2 items-center justify-center mt-3"
         >
           <p className="text-xs-semibold text-white">
             {t("readjustParameter")}
           </p>
         </button>
       </div>
+
+      {/* <div className="fixed bottom-0 p-4 w-[455px] bg-neutral-100 [box-shadow:0_0_12px_0_rgba(0,_84,_109,_0.24)]">
+      </div> */}
     </>
   );
 }
