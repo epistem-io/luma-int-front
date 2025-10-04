@@ -388,6 +388,8 @@ export function AnalysisPanel({
           updatedDraw.removeLastPoint();
         }
       });
+
+      mapInstance.removeInteraction(updatedDraw);
     });
 
     mapInstance.addInteraction(updatedDraw);
