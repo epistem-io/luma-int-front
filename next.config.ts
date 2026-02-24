@@ -3,6 +3,8 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // HAD PROBLEM WITH MAP LISTENER
+  reactStrictMode: false,
 };
 
 const withNextIntl = createNextIntlPlugin();

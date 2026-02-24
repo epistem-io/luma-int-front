@@ -8,12 +8,6 @@ import {
   useState,
 } from "react";
 
-interface PolygonData {
-  area_size: number;
-  id: string;
-  // session_id: string;
-}
-
 export enum SATELLITE {
   LANDSAT8 = "LC08",
   LANDSAT9 = "LC09",
@@ -55,14 +49,16 @@ const DEFAULT_VALUE: ContextType = {
   setAnalysisConfig: () => {},
   analysisResult: null,
   setAnalysisResult: () => {},
-  sessionId: "",
+  // sessionId: "",
+  // WIP
+  sessionId: "b9214cca-bcae-4d7e-983f-f6651ccb476b",
   setSessionId: () => {},
 };
 
 const GlobalContext = createContext(DEFAULT_VALUE);
 
 const GlobalContextContainer = (props: PropsWithChildren) => {
-  const [sessionId, setSessionId] = useState<string>("");
+  const [sessionId, setSessionId] = useState<string>(DEFAULT_VALUE.sessionId);
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
   const [analysisConfig, setAnalysisConfig] = useState<null | AnalysisConfig>(
     null,

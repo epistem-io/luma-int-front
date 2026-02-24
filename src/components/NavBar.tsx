@@ -2,53 +2,52 @@ import * as React from "react";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/navigation";
 import LanguageToggle from "./LanguageToggle";
+import { ChevronDown } from "lucide-react";
 
 interface NavBarProps {
   className?: string;
 }
 
-// interface MenuItem {
-//   label: string;
-//   href: string;
-// }
+interface MenuItem {
+  label: string;
+  href: string;
+}
 
-// const dataMethodsItems: MenuItem[] = [
-//   { label: "Data Collection", href: "/data-collection" },
-//   { label: "Data Processing", href: "/data-processing" },
-//   { label: "Analysis Methods", href: "/analysis-methods" },
-//   { label: "Validation", href: "/validation" },
-// ];
+const dataMethodsItems: MenuItem[] = [
+  { label: "Data Collection", href: "/data-collection" },
+  { label: "Data Processing", href: "/data-processing" },
+  { label: "Analysis Methods", href: "/analysis-methods" },
+  { label: "Validation", href: "/validation" },
+];
 
 export function NavBar({ className }: NavBarProps) {
   // const [currentLanguage, setCurrentLanguage] = React.useState("EN");
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full shadow bg-neutral-100",
-        className,
-      )}
+    <nav
+      className={cn("z-50 w-full bg-neutral-100", className)}
+      // className={cn("sticky top-0 z-50 w-full bg-neutral-100", className)}
     >
       <div className="w-full py-2 px-5">
         <div className="flex items-center justify-between">
           {/* Logo and Title */}
           <Link href="/">
             <div className="flex items-center space-x-3">
-              <div className="flex h-[50px] w-[50px] items-center justify-center rounded-lg overflow-hidden">
+              <div className="flex h-12.5 w-12.5 items-center justify-center rounded-lg overflow-hidden">
                 <Image
-                  src="/images/epistem-logo.webp"
+                  src="/images/logo-epistem.webp"
                   alt="Epistem Logo"
                   width={270}
                   height={265}
-                  className="object-contain h-[50px] w-[50px]"
+                  className="object-contain h-12.5 w-12.5"
                   priority
                 />
               </div>
@@ -63,33 +62,37 @@ export function NavBar({ className }: NavBarProps) {
             {/* Navigation Menu */}
             <nav className="flex items-center space-x-8">
               {/* Data and Methods Dropdown */}
-              {/* <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center space-x-1 font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center space-x-1 font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground hover:cursor-pointer">
                   <span>Data and Methods</span>
                   <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuContent align="start" className="">
                   {dataMethodsItems.map((item) => (
-                    <DropdownMenuItem key={item.href} asChild>
-                      <Link href={item.href}>{item.label}</Link>
-                    </DropdownMenuItem>
+                    <div key={item.href}>
+                      <Link href={item.href}>
+                        <DropdownMenuItem className="hover:cursor-pointer">
+                          {item.label}
+                        </DropdownMenuItem>
+                      </Link>
+                    </div>
                   ))}
                 </DropdownMenuContent>
-              </DropdownMenu> */}
+              </DropdownMenu>
 
               {/* Other Menu Items */}
-              {/* <Link
+              <Link
                 href="/launch-tool"
-                className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
+                className="font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground"
               >
                 Launch Tool
               </Link>
               <Link
                 href="/map-utilization"
-                className="font-lato text-md font-regular text-muted-foreground transition-colors hover:text-foreground"
+                className="font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground"
               >
                 Map Utilization
-              </Link> */}
+              </Link>
             </nav>
 
             <LanguageToggle />
@@ -122,6 +125,6 @@ export function NavBar({ className }: NavBarProps) {
           </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }

@@ -416,9 +416,6 @@ export function AnalysisPanel({
     fetch(FETCH_UPLOAD_URL, {
       method: "POST",
       body,
-      // headers: {
-      //   "Content-Type": "multipart/form-data",
-      // },
     })
       .then(async (response) => {
         const json: GeosAoiRes = await response.json();
