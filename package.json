@@ -7,7 +7,7 @@
     "build:production": "cp .env.production .env.local && next build",
     "build:staging": "cp .env.staging .env.local && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "biome check",
     "deploy:production": "cp .env.production .env.local && next build && next start",
     "deploy:staging": "cp .env.staging .env.local && next build && next start"
   },
