@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Plus_Jakarta_Sans, Roboto } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
@@ -11,6 +11,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
+import { MapGenerationContextContainer } from "@/contexts/mapGenerationContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
   subsets: ["latin"],
 });
 
@@ -32,6 +38,11 @@ const notoSans = localFont({
   src: "../../../public/fonts/NotoSans-VariableFont_wdth,wght.ttf",
   variable: "--font-noto-sans",
   display: "swap",
+});
+
+const pjs = Plus_Jakarta_Sans({
+  variable: "--font-pjs",
+  subsets: ["latin"],
 });
 
 const lato = localFont({
@@ -203,15 +214,19 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} ${roboto.variable} ${pjs.variable} antialiased`}
       >
         <NextIntlClientProvider>
-          <NavBar />
           <GlobalContextContainer>
             <MapContextContainer>
-              {children}
-              <Toaster />
-              <Analytics />
+              <MapGenerationContextContainer>
+                <div className="relative">
+                  <NavBar />
+                  {children}
+                  <Toaster />
+                  <Analytics />
+                </div>
+              </MapGenerationContextContainer>
             </MapContextContainer>
           </GlobalContextContainer>
         </NextIntlClientProvider>
