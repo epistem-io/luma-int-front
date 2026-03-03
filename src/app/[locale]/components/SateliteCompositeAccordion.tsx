@@ -16,8 +16,11 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { BASIC_INFORMATION_ACCORDION_TYPE } from "@/constants";
 import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const SateliteCompositeAccordion = () => {
+  const t = useTranslations("InteractivePanel");
+
   return (
     <AccordionItem
       value={BASIC_INFORMATION_ACCORDION_TYPE.COMPOSITE}
@@ -30,7 +33,7 @@ export const SateliteCompositeAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          Satelite Composite
+          {t("satelliteComposite")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -39,12 +42,12 @@ export const SateliteCompositeAccordion = () => {
           <Field className="space-y-2">
             <Label className="m-0">
               <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-third ">
-                Satelite
+                {t("satellite")}
               </p>
             </Label>
             <Select disabled>
               <SelectTrigger className="w-full bg-white">
-                <SelectValue placeholder="Select a Satellite" />
+                <SelectValue placeholder={t("selectSatellitePlaceholder")} />
               </SelectTrigger>
               <SelectContent position="item-aligned"></SelectContent>
             </Select>
@@ -52,7 +55,7 @@ export const SateliteCompositeAccordion = () => {
           <Field className="space-y-2.5">
             <Label className="m-0">
               <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-third ">
-                Cloud Coverage
+                {t("cloudCoverage")}
               </p>
             </Label>
             <Slider className="mt-1" trackBgColor="bg-neutral-300" disabled />
@@ -99,7 +102,7 @@ export const SateliteCompositeAccordion = () => {
             variant={"primary"}
             className="mt-2 bg-neutral-300 text-neutral-500"
           >
-            Set Satellite Composite
+            {t("setSatelliteComposite")}
           </Button>
         </div>
       </AccordionContent>

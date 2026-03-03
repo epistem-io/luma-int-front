@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { MapContext } from "@/contexts/mapContext";
+import { useTranslations } from "next-intl";
 
 export const DataTrainingComponent = () => {
   const { sessionId } = useContext(GlobalContext);
@@ -59,6 +60,8 @@ export const DataTrainingComponent = () => {
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
   } = useContext(MapGenerationContext);
+
+  const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
 
@@ -199,16 +202,15 @@ export const DataTrainingComponent = () => {
             <div className="px-1.5">
               <TabsList className="w-full">
                 <TabsTrigger value="upload">
-                  Upload Data Training File
+                  {t("uploadDataTraining")}
                 </TabsTrigger>
-                <TabsTrigger value="oss">On Screen Sampling</TabsTrigger>
+                <TabsTrigger value="oss">{t("onScreenSampling")}</TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="upload">
               <div className="space-y-6">
                 <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                  Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
-                  Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum
+                  {t("uploadDataTrainingDescription")}
                 </p>
                 <div className="space-y-6">
                   <div
@@ -267,8 +269,12 @@ export const DataTrainingComponent = () => {
                         <div className="space-y-3">
                           <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                            Drag & drop your file here to upload. <br />
-                            Accepted format .zip
+                            {/* Drag & drop your file here to upload. <br />
+                            Accepted format .zip */}
+                            {t("dragAndDrop")} <br />
+                            {t("acceptedFormat", {
+                              extensions: ".zip",
+                            })}
                           </p>
                         </div>
                         <Label
@@ -287,7 +293,7 @@ export const DataTrainingComponent = () => {
                             )}
                           >
                             <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                              Browse File
+                              {t("browseFile")}
                             </p>
                           </div>
                         </Label>
@@ -299,7 +305,7 @@ export const DataTrainingComponent = () => {
                         <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                            Drop here
+                            {t("dropHere")}
                           </p>
                         </div>
                       </>
@@ -426,7 +432,7 @@ export const DataTrainingComponent = () => {
                               </div>
                               <div className="">
                                 <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                  Something wrong with the file
+                                  {t("fileError")}
                                 </p>
                                 <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                                   {trainingFileError}
@@ -488,11 +494,10 @@ export const DataTrainingComponent = () => {
                                 </div>
                                 <div className="">
                                   <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                    The file is too big
+                                    {t("fileTooBigError")}
                                   </p>
                                   <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                    File exceeds 500MB. Please select another
-                                    file
+                                    {t("fileTooBigError", { limit: "500MB" })}
                                   </p>
                                 </div>
                               </div>
@@ -515,14 +520,13 @@ export const DataTrainingComponent = () => {
             <TabsContent value="oss">
               <div className="space-y-6">
                 <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                  Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
-                  Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum
+                  {t("onScreenSamplingDescription")}
                 </p>
                 <div className="space-y-2">
                   <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                    Recorded LULC Feature
+                    {t("recordedLULC")}
                   </p>
-                  <LUCClassTable />
+                  <LUCClassTable summary={false} />
                 </div>
                 <Tabs defaultValue="pinpoint" className="gap-y-3 mb-0">
                   <div className="px-0">
@@ -531,14 +535,14 @@ export const DataTrainingComponent = () => {
                         value="pinpoint"
                         className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink rounded-none"
                       >
-                        Pin Point
+                        {t("pinPoint")}
                       </TabsTrigger>
                       <TabsTrigger
                         disabled
                         value="draw"
                         className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink border-b-text-icons-disabled rounded-none"
                       >
-                        Draw Polygon
+                        {t("drawPolygon")}
                       </TabsTrigger>
                     </TabsList>
                   </div>
@@ -546,11 +550,10 @@ export const DataTrainingComponent = () => {
                     <div className="mt-4 space-y-5.5">
                       <div className="">
                         <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                          Pin Your Point
+                          {t("pinYourPoint")}
                         </p>
                         <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
-                          Select a point on the map, and select LULC class
-                          information, then click “Add Feature” to save it.
+                          {t("pinYourPointDescription")}
                         </p>
                       </div>
                       <RadioGroup
@@ -595,12 +598,10 @@ export const DataTrainingComponent = () => {
                             </div>
                             <div className="">
                               <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                Single Point Input
+                                {t("singlePoint")}
                               </p>
                               <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                You can add multiple points (up to 10 points) at
-                                once and assign the same class to all selected
-                                points.
+                                {t("singlePointDescription")}
                               </p>
                             </div>
                           </div>
@@ -640,26 +641,28 @@ export const DataTrainingComponent = () => {
                               </div>
                               <div className="">
                                 <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                  Bulk Point Input
+                                  {t("bulkPoint")}
                                 </p>
                                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                  You can add multiple points (up to 10 points)
-                                  at once and assign the same class to all
-                                  selected points.
+                                  {t("bulkPointDescription")}
                                 </p>
                               </div>
                             </div>
                             {pointingType === "bulk" && (
                               <div className="ml-8 space-y-2">
                                 <p className="font-aptos text-[15px] font-regular leading-4.5">
-                                  Select LULC Class
+                                  {t("selectLULCClass")}
                                 </p>
                                 <Select
                                   value={selectedClass}
                                   onValueChange={setSelectedClass}
                                 >
                                   <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select LULC Class" />
+                                    <SelectValue
+                                      placeholder={t(
+                                        "selectLULCClassPlaceholder",
+                                      )}
+                                    />
                                   </SelectTrigger>
                                   <SelectContent position="item-aligned">
                                     {classArray.map((item) => (
@@ -685,7 +688,7 @@ export const DataTrainingComponent = () => {
                             onClickStartPointing();
                           }}
                         >
-                          Start Pointing
+                          {t("startPointing")}
                         </Button>
                       </RadioGroup>
                     </div>
@@ -706,10 +709,15 @@ export const DataTrainingFooter = () => {
 
   const { sessionId } = useContext(GlobalContext);
 
+  const { markerVectorLayer } = useContext(MapContext);
+
+  const t = useTranslations("InteractivePanel");
+
   const isNextDisabled = isUploadingTrainingFile;
 
   const onClickNext = () => {
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
+    markerVectorLayer?.setOpacity(0);
     setProgressPanelIndex(3);
   };
 
@@ -724,7 +732,7 @@ export const DataTrainingFooter = () => {
         variant="primary"
         className=""
       >
-        Next
+        {t("next")}
       </Button>
     </div>
   );

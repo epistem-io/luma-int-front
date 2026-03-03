@@ -1,3 +1,5 @@
+import { TFunction } from "./i18n/types";
+
 export enum PANEL_COMPONENT_KEY {
   NULL = "",
   BASIC_INFORMATION = "basic_information",
@@ -31,26 +33,31 @@ export const DATA_TRAINING_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 export const TEMPORAL_COVERAGE_ARRAY = [
   {
     value: "1",
+    labelFunction: (i18n: TFunction) => i18n("byYear"),
     label: "By Year",
     // default: true,
   },
   {
     value: "2",
+    labelFunction: (i18n: TFunction) => i18n("bySemester"),
     label: "By Semester (coming soon)",
     disabled: true,
   },
   {
     value: "3",
+    labelFunction: (i18n: TFunction) => i18n("byQuarter"),
     label: "By Quarter (coming soon)",
     disabled: true,
   },
   {
     value: "4",
+    labelFunction: (i18n: TFunction) => i18n("byMonth"),
     label: "By Month (coming soon)",
     disabled: true,
   },
   {
     value: "5",
+    labelFunction: (i18n: TFunction) => i18n("customDate"),
     label: "Custom Date (coming soon)",
     disabled: true,
   },
@@ -66,6 +73,10 @@ export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lu
 
 export const TRAINING_DATA_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/upload`;
 export const TRAINING_DATA_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data`;
+
+export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/input-summary`;
+
+export const FETCH_GENERATE_MAP = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-map`;
 
 export const THOUSAND_SEPARATOR = ".";
 

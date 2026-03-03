@@ -42,7 +42,7 @@ export const DataValidationAccordion = () => {
     areaScopingPolygonArea,
   } = useContext(MapGenerationContext);
 
-  const t = useTranslations("AnalysisPanel");
+  const t = useTranslations("InteractivePanel");
 
   return (
     <AccordionItem
@@ -56,7 +56,7 @@ export const DataValidationAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          Data Validation
+          {t("dataValidation")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -71,8 +71,12 @@ export const DataValidationAccordion = () => {
           <div className="space-y-3">
             <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
             <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-              Drag & drop your file here to upload. <br />
-              Accepted format .zip
+              {/* Drag & drop your file here to upload. <br />
+              Accepted format .zip */}
+              {t("dragAndDrop")} <br />
+              {t("acceptedFormat", {
+                extensions: ".zip",
+              })}
             </p>
           </div>
           <Label
@@ -94,7 +98,7 @@ export const DataValidationAccordion = () => {
                   true && "text-text-icons-base-third",
                 )}
               >
-                Browse File
+                {t("browseFile")}
               </p>
             </div>
           </Label>

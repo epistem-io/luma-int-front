@@ -1,5 +1,6 @@
 import { FloatingPanel } from "./components/FloatingPanel";
 import { LegendPanel } from "./components/LegendPanel";
+import { LegendPanelNew } from "./components/LegendPanelNew";
 import Map1 from "./components/Map";
 import { NewFloatingPanel } from "./components/NewFloatingPanel";
 import { ProgressPanel } from "./components/ProgressPanel";
@@ -15,6 +16,7 @@ export default function Home() {
       </div>
       <Map1 />
       {/* <LegendPanel /> */}
+      <LegendPanelNew />
       {/* <ZoomButton /> */}
     </div>
   );

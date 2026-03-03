@@ -30,18 +30,21 @@ import {
   TrashIcon,
   UploadIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Coordinate } from "ol/coordinate";
+import { EventsKey } from "ol/events";
 import Feature from "ol/Feature";
 import { MultiPoint, MultiPolygon, Polygon, SimpleGeometry } from "ol/geom";
 import { Draw } from "ol/interaction";
 import VectorLayer from "ol/layer/Vector";
+import { unByKey } from "ol/Observable";
 import VectorSource from "ol/source/Vector";
 import CircleStyle from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Style, { GeometryFunction } from "ol/style/Style";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 // const styles = (strokeWidth: number) => [
@@ -103,9 +106,18 @@ export const AreaScopingComponent = () => {
     setLayerLegendArray,
   } = useContext(MapContext);
 
+  const t = useTranslations("InteractivePanel");
+
+  const drawInteractionRef = useRef<Draw | null>(null);
+
   const { sessionId, setSessionId } = useContext(GlobalContext);
 
   const [fileEnter, setFileEnter] = useState(false);
+  const [drawInteraction, setDrawInteraction] = useState<Draw | null>(null);
+  const [drawStartNumber, setDrawStartNumber] = useState<EventsKey | null>(
+    null,
+  );
+  const [drawEndNumber, setDrawEndNumber] = useState<EventsKey | null>(null);
 
   const onUploadFile = (
     e: ChangeEvent<HTMLInputElement>,
@@ -135,8 +147,6 @@ export const AreaScopingComponent = () => {
 
   const onClickDraw = () => {
     // setPolygon(null);
-    console.log("onclickdraw");
-
     if (!vectorLayer || !mapInstance) return;
 
     const vSource = vectorLayer.getSource();
@@ -156,7 +166,9 @@ export const AreaScopingComponent = () => {
       style: (feature) => drawStyle(feature),
     });
 
-    updatedDraw.on("drawstart", () => {
+    setDrawInteraction(updatedDraw);
+
+    const temp1 = updatedDraw.on("drawstart", () => {
       vectorLayer.getSource()?.clear();
       // Backspace to undo drawn polygon
       document.addEventListener("keydown", (e) => {
@@ -166,7 +178,7 @@ export const AreaScopingComponent = () => {
       });
     });
 
-    updatedDraw.on("drawend", (e) => {
+    const temp2 = updatedDraw.on("drawend", (e) => {
       const feature: Feature<Polygon> = e.feature as Feature<Polygon>;
       feature.setStyle(stylesTransparentFill(3));
       // feature.setStyle(styles(3));
@@ -197,7 +209,13 @@ export const AreaScopingComponent = () => {
       });
 
       mapInstance.removeInteraction(updatedDraw);
+
+      setDrawStartNumber(null);
+      setDrawEndNumber(null);
     });
+
+    setDrawStartNumber(temp1);
+    setDrawEndNumber(temp2);
 
     mapInstance.addInteraction(updatedDraw);
   };
@@ -256,7 +274,6 @@ export const AreaScopingComponent = () => {
           dismissible: true,
           closeButton: true,
         });
-        // console.log("errorr", e);
       })
       .finally(() => {
         setIsAreaScopingLoading(false);
@@ -268,6 +285,25 @@ export const AreaScopingComponent = () => {
       onClickDraw();
     }
   }, [polygonData]);
+
+  useEffect(() => {
+    drawInteractionRef.current = drawInteraction;
+  }, [drawInteraction]);
+
+  useEffect(() => {
+    return () => {
+      if (drawInteractionRef.current && mapInstance) {
+        unByKey(drawStartNumber || []);
+        unByKey(drawEndNumber || []);
+
+        setDrawStartNumber(null);
+        setDrawEndNumber(null);
+
+        mapInstance.removeInteraction(drawInteractionRef.current);
+        setDrawInteraction(null);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -283,10 +319,13 @@ export const AreaScopingComponent = () => {
             />
             <div className="space-y-2">
               <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-                Upload SHP File
+                {t("uploadSHPFile")}
               </p>
               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
-                Here to generate the current <br /> condition data.
+                {/* Here to generate the current <br /> condition data. */}
+                {t.rich("uploadSHPSubtitleBR", {
+                  br: () => <br></br>,
+                })}
               </p>
             </div>
           </div>
@@ -413,11 +452,10 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            The area is too big
+                            {t("fileTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            Project area exceeds 100,000 Ha. Please adjust it
-                            accordingly!
+                            {t("fileTooBigError", { limit: "100,000 Ha" })}
                           </p>
                         </div>
                       </div>
@@ -469,10 +507,10 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            The file is too big
+                            {t("fileTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            File exceeds 500MB. Please select another file
+                            {t("fileTooBigError", { limit: "500MB" })}
                           </p>
                         </div>
                       </div>
@@ -519,15 +557,14 @@ export const AreaScopingComponent = () => {
                               setAreaScopingPolygonUrl(file);
                               setAreaScopingPolygonFileSize(file.size);
                               setAreaScopingPolygonFileName(file.name);
-                              console.log("fileee", file);
                             }
                             // console.log(`items file[${i}].name = ${file?.name}`);
                           }
                         });
                       } else {
-                        [...e.dataTransfer.files].forEach((file, i) => {
-                          console.log(`… file[${i}].name = ${file.name}`);
-                        });
+                        // [...e.dataTransfer.files].forEach((file, i) => {
+                        //   console.log(`… file[${i}].name = ${file.name}`);
+                        // });
                       }
                     }}
                   >
@@ -536,9 +573,13 @@ export const AreaScopingComponent = () => {
                         <div className="space-y-3">
                           <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                            Drag & drop your file here to upload. <br />
-                            Accepted format .zip (.shp, .shx, .dbf, .prj), .kml,
-                            .kmz
+                            {/* Accepted format .zip (.shp, .shx, .dbf, .prj), .kml,
+                            .kmz */}
+                            {t("dragAndDrop")} <br />
+                            {t("acceptedFormat", {
+                              extensions:
+                                ".zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
+                            })}
                           </p>
                         </div>
                         <Label
@@ -547,7 +588,7 @@ export const AreaScopingComponent = () => {
                         >
                           <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
                             <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                              Browse File
+                              {t("browseFile")}
                             </p>
                           </div>
                         </Label>
@@ -696,11 +737,10 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            The area is too big
+                            {t("fileTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            Project area exceeds 100,000 Ha. Please adjust it
-                            accordingly!
+                            {t("fileTooBigError", { limit: "100,000 Ha" })}
                           </p>
                         </div>
                       </div>
@@ -719,7 +759,7 @@ export const AreaScopingComponent = () => {
               <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
                 <ComingSoon />
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                  Spatial Resolution:
+                  {t("spatialResolution")}:
                 </p>
                 <div className="">
                   <RadioGroup
@@ -977,7 +1017,9 @@ export const AreaScopingFooter = () => {
     )
       return;
 
-    onSubmitShp();
+    if (areaScopingType === AREA_SCOPING_TYPE.UPLOAD && !polygonData) {
+      onSubmitShp();
+    }
 
     if (
       areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT ||

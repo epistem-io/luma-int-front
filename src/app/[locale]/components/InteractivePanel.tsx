@@ -50,6 +50,7 @@ import {
 import { OSSComponent, OSSFooter } from "./OSSComponent";
 import { LULCParamsComponent, LULCParamsFooter } from "./LULCParamsComponent";
 import { YourMapComponent, YourMapFooter } from "./YourMapComponent";
+import { useTranslations } from "next-intl";
 
 interface PanelComponent {
   component: JSX.Element;
@@ -73,6 +74,8 @@ export const InteractivePanel = () => {
     setPolygonData,
   } = useContext(MapGenerationContext);
 
+  const t = useTranslations("InteractivePanel");
+
   const { vectorSource, removeMarkerCursor } = useContext(MapContext);
 
   const PANEL_COMPONENT_ARRAY: Record<PANEL_COMPONENT_KEY, PanelComponent> = {
@@ -83,14 +86,13 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.BASIC_INFORMATION]: {
       component: <BasicInformationComponent />,
       footer: <BasicInformationFooter />,
-      title: "Basic Information",
-      subtitle:
-        "Start by providing the fundamental details needed to generate your LULC map.In this step, you'll:",
+      title: t("basicInformationTitle"),
+      subtitle: t("basicInformationCaption"),
     },
     [PANEL_COMPONENT_KEY.AREA_SCOPING]: {
       component: <AreaScopingComponent />,
       footer: <AreaScopingFooter />,
-      title: "Area Scoping",
+      title: t("areaScoping"),
       onClickBackCallback: () => {
         setAreaScopingPolygonArea(0);
         setAreaScopingPolygonFileName("");
@@ -105,30 +107,26 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY]: {
       component: <BasicInformationSummaryComponent />,
       footer: <BasicInformationSummaryFooter />,
-      title: "Basic Information",
-      subtitle:
-        "Start by providing the fundamental details needed to generate your LULC map.In this step, you'll:",
+      title: t("basicInformationTitle"),
+      subtitle: t("basicInformationCaption"),
     },
     [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
       component: <DefineLUCComponent />,
       footer: <DefineLUCFooter />,
-      title: "Define Land Use/Cover Classes",
-      subtitle:
-        "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum",
+      title: t("defineLUCTitle"),
+      subtitle: t("defineLUCDescription"),
     },
     [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
       component: <DataTrainingComponent />,
       footer: <DataTrainingFooter />,
-      title: "Data Training",
-      subtitle:
-        "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum",
+      title: t("dataTrainingTitle"),
+      subtitle: t("dataTrainingDescription"),
     },
     [PANEL_COMPONENT_KEY.OSS]: {
       component: <OSSComponent />,
       footer: <OSSFooter />,
-      title: "On Screen Sampling",
-      subtitle:
-        "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum",
+      title: t("onScreenSamplingPanel"),
+      subtitle: t("onScreenSamplingPanelDescription"),
       onClickBackCallback: () => {
         // removeMarkerCursor()
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
@@ -137,16 +135,14 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
       component: <LULCParamsComponent />,
       footer: <LULCParamsFooter />,
-      title: "Select LULC List Parameters",
-      subtitle:
-        "Default settings are automatically applied for optimal results. Adjust these step only if you want more specialized analysis.",
+      title: t("selectLULCListParams"),
+      subtitle: t("selectLULCListParamsDescription"),
     },
     [PANEL_COMPONENT_KEY.YOUR_MAP]: {
       component: <YourMapComponent />,
       footer: <YourMapFooter />,
-      title: "Your Map",
-      subtitle:
-        "Your LULC map is ready. This map reflects the area, time period, and all settings you defined in the previous steps.",
+      title: t("yourMapPanelTitle"),
+      subtitle: t("yourMapPanelDescription"),
     },
   };
 

@@ -81,6 +81,7 @@ const Map1 = () => {
           height: 30,
         }),
       }),
+      zIndex: 100,
     });
 
     map1.addLayer(markerLayer);

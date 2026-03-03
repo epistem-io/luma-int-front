@@ -5,6 +5,7 @@ import { AccordionContent } from "@radix-ui/react-accordion";
 import Image from "next/image";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   areaSizeString: string;
@@ -23,6 +24,8 @@ export const AreaScopingSummary = ({
     return "Error";
   }
 
+  const t = useTranslations("InteractivePanel");
+
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   return (
@@ -36,12 +39,12 @@ export const AreaScopingSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              Area of Interest
+              {t("areaOfInterest")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-0 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
-                  Your selected area has total area approximately:
+                  {t("selectedAreaHasTotalArea")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {areaSizeString}
@@ -78,10 +81,10 @@ export const AreaScopingSummary = ({
               setIsConfirmModalVisible(false);
               onClickEdit();
             }}
-            title={"Are You Sure Want to Change the Input?"}
-            subtitle="Data yang sudah ada pada part yang anda pilih akan hilang, selain itu akan tetap ada"
-            confirmButtonCaption="Change Input"
-            cancelButtonCaption="Cancel Change Input"
+            title={t("changeInput")}
+            subtitle={t("confirmSubtitle")}
+            confirmButtonCaption={t("changeInput")}
+            cancelButtonCaption={t("cancelChangeInput")}
           />
         </>
       )}

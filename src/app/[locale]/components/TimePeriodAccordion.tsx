@@ -26,8 +26,38 @@ import { Controller, useForm } from "react-hook-form";
 
 import * as z from "zod";
 import { TimePeriodSummary } from "./TimePeriodSummary";
+import { NamespaceKeys, useTranslations } from "next-intl";
+import { TFunction } from "@/i18n/types";
 
 const YEAR_ARRAY = [
+  {
+    value: "2013",
+    label: "2013",
+  },
+  {
+    value: "2014",
+    label: "2014",
+  },
+  {
+    value: "2015",
+    label: "2015",
+  },
+  {
+    value: "2016",
+    label: "2016",
+  },
+  {
+    value: "2017",
+    label: "2017",
+  },
+  {
+    value: "2018",
+    label: "2018",
+  },
+  {
+    value: "2019",
+    label: "2019",
+  },
   {
     value: "2020",
     label: "2020",
@@ -64,6 +94,8 @@ export const TimePeriodAccordion = () => {
     setisEditingTemporalCoverage,
   } = useContext(MapGenerationContext);
 
+  const t = useTranslations("InteractivePanel");
+
   const scopingFormSchema = z.object({
     temporal_coverage: z.string().min(1, "Please select a temporal coverage."),
     scoping_unit: z.string().min(1, "Please select one."),
@@ -79,7 +111,7 @@ export const TimePeriodAccordion = () => {
 
   function onSubmitScoping(data: z.infer<typeof scopingFormSchema>) {
     // Do something with the form values.
-    console.log(data);
+    // console.log(data);
 
     const { temporal_coverage, scoping_unit } = data;
 
@@ -109,7 +141,7 @@ export const TimePeriodAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          Time Period
+          {t("timePeriod")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 px-3 pb-0 space-y-4">
@@ -117,11 +149,10 @@ export const TimePeriodAccordion = () => {
           <>
             <div className="space-y-3">
               <p className="font-noto-sans text-lg font-medium leading-6 tracking-[-0.18px] text-text-icons-base-main">
-                Temporal Coverage
+                {t("temporalCoverage")}
               </p>
               <p className="font-aptos text-md font-regular leading-5 text-text-icons-base-main">
-                What time period would you like to be shown on the land use and
-                land cover (LULC) map?
+                {t("temporalCoverageLabel")}
               </p>
             </div>
             <form onSubmit={scopingForm.handleSubmit(onSubmitScoping)}>
@@ -143,7 +174,9 @@ export const TimePeriodAccordion = () => {
                           aria-invalid={fieldState.invalid}
                           className="w-full"
                         >
-                          <SelectValue placeholder="Select Temporal Coverage" />
+                          <SelectValue
+                            placeholder={t("temporalCoveragePlaceholder")}
+                          />
                         </SelectTrigger>
                         <SelectContent position="item-aligned">
                           {TEMPORAL_COVERAGE_ARRAY.map((item) => (
@@ -152,7 +185,7 @@ export const TimePeriodAccordion = () => {
                               value={item.value}
                               disabled={item.disabled}
                             >
-                              {item.label}
+                              {item.labelFunction(t as TFunction)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -189,7 +222,9 @@ export const TimePeriodAccordion = () => {
                               aria-invalid={fieldState.invalid}
                               className="w-full"
                             >
-                              <SelectValue placeholder="Select Year" />
+                              <SelectValue
+                                placeholder={t("byYearPlaceholder")}
+                              />
                             </SelectTrigger>
                             <SelectContent position="item-aligned">
                               {YEAR_ARRAY.map((item) => (
@@ -209,7 +244,7 @@ export const TimePeriodAccordion = () => {
                 </>
               )}
               <Button variant={"primary"} className="mt-4">
-                Set Time Period
+                {t("setTimePeriod")}
               </Button>
             </form>
           </>
@@ -219,7 +254,7 @@ export const TimePeriodAccordion = () => {
             temporalResolutionLabel={
               TEMPORAL_COVERAGE_ARRAY.find(
                 (item) => item.value === temporalCoverage,
-              )?.label || "Error"
+              )?.labelFunction(t as TFunction) || "Error"
             }
             specificPeriod={temporalCoverageUnit}
             dateRange={getTemporalRangeText(

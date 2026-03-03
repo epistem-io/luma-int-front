@@ -31,6 +31,7 @@ import { Coordinate } from "ol/coordinate";
 import Overlay from "ol/Overlay";
 import { EventsKey } from "ol/events";
 import { unByKey } from "ol/Observable";
+import { set } from "zod";
 
 // interface LayerItem {
 //   citation: string;
@@ -110,14 +111,27 @@ interface MapContextType {
   setIsPreviewingMosaic: Dispatch<SetStateAction<boolean>>;
   isMosaicLoading: boolean;
   setIsMosaicLoading: Dispatch<SetStateAction<boolean>>;
-  addMosaicLayer: () => void;
+  addMosaicLayer: (mos: { name: string; url: string }[]) => void;
   removeMosaicLayer: () => void;
+  resetMosaicLayer: () => void;
   getMosaicMap: (params: {
     sessionId: string;
     polygonData: PolygonData | null;
     temporalCoverage: string;
     temporalCoverageUnit: string;
   }) => void;
+  mosaicLayerArray: TileLayer[];
+  setMosaicLayerArray: Dispatch<SetStateAction<TileLayer[]>>;
+  finalLayer: TileLayer | null;
+  setFinalLayer: Dispatch<SetStateAction<TileLayer | null>>;
+  finalLayerVisible: boolean;
+  setFinalLayerVisible: Dispatch<SetStateAction<boolean>>;
+  mosaicLayerVisibilityArray: boolean[];
+  setMosaicLayerVisibilityArray: Dispatch<SetStateAction<boolean[]>>;
+  markerLayerVisibilityArray: string[];
+  setMarkerLayerVisibilityArray: Dispatch<SetStateAction<string[]>>;
+  vectorVisible: boolean;
+  setVectorVisible: Dispatch<SetStateAction<boolean>>;
   markerCursor: (pointingType: POINTING_TYPE, selectedClass?: string) => void;
   removeMarkerCursor: () => void;
   overlay: Overlay | null;
@@ -130,6 +144,8 @@ interface MapContextType {
   pointingType: POINTING_TYPE;
   setPointingType: Dispatch<SetStateAction<POINTING_TYPE>>;
   renderArrayToMarkerVector: (arr: Marker[]) => void;
+  mosaicStatistic: MosaicStatistics | null;
+  setMosaicStatistic: Dispatch<SetStateAction<MosaicStatistics | null>>;
 }
 
 const DEFAULT_VALUE: MapContextType = {
@@ -156,6 +172,19 @@ const DEFAULT_VALUE: MapContextType = {
   addMosaicLayer: () => {},
   removeMosaicLayer: () => {},
   getMosaicMap: () => {},
+  resetMosaicLayer: () => {},
+  mosaicLayerArray: [],
+  setMosaicLayerArray: () => {},
+  finalLayer: null,
+  setFinalLayer: () => {},
+  finalLayerVisible: true,
+  setFinalLayerVisible: () => {},
+  mosaicLayerVisibilityArray: [],
+  setMosaicLayerVisibilityArray: () => {},
+  markerLayerVisibilityArray: [],
+  setMarkerLayerVisibilityArray: () => {},
+  vectorVisible: true,
+  setVectorVisible: () => {},
   markerCursor: () => {},
   removeMarkerCursor: () => {},
   overlay: null,
@@ -167,6 +196,8 @@ const DEFAULT_VALUE: MapContextType = {
   markerArray: [],
   setMarkerArray: () => {},
   renderArrayToMarkerVector: () => {},
+  mosaicStatistic: null,
+  setMosaicStatistic: () => {},
 };
 
 const MapContext = createContext(DEFAULT_VALUE);
@@ -197,7 +228,32 @@ const MapContextContainer = (props: PropsWithChildren) => {
   const [pointingType, setPointingType] = useState<POINTING_TYPE>(
     DEFAULT_VALUE.pointingType,
   );
+  const [mosaicStatistic, setMosaicStatistic] =
+    useState<MosaicStatistics | null>(DEFAULT_VALUE.mosaicStatistic);
 
+  const [mosaicLayerArray, setMosaicLayerArray] = useState<TileLayer[]>(
+    DEFAULT_VALUE.mosaicLayerArray,
+  );
+
+  const [mosaicLayerVisibilityArray, setMosaicLayerVisibilityArray] = useState<
+    boolean[]
+  >(DEFAULT_VALUE.mosaicLayerVisibilityArray);
+
+  const [markerLayerVisibilityArray, setMarkerLayerVisibilityArray] = useState<
+    string[]
+  >(DEFAULT_VALUE.markerLayerVisibilityArray);
+
+  const [vectorVisible, setVectorVisible] = useState<boolean>(
+    DEFAULT_VALUE.vectorVisible,
+  );
+
+  const [finalLayer, setFinalLayer] = useState<TileLayer | null>(
+    DEFAULT_VALUE.finalLayer,
+  );
+
+  const [finalLayerVisible, setFinalLayerVisible] = useState<boolean>(
+    DEFAULT_VALUE.finalLayerVisible,
+  );
   // NON VALUE
   const [cursorVectorLayer, setCursorVectorLayer] =
     useState<VectorLayer | null>(null);
@@ -260,8 +316,18 @@ const MapContextContainer = (props: PropsWithChildren) => {
           );
         }
 
-        addMosaicLayer(json.layers);
-        setMosaicData(json.layers);
+        // console.log("jsonn", json);
+
+        addMosaicLayer(json.results.layers);
+        setMosaicData(json.results.layers);
+
+        const temp: MosaicStatistics = {
+          statistics: json.results.statistics,
+          summary: json.results.summary,
+          download_url: json.results.download_url,
+        };
+
+        setMosaicStatistic(temp);
       })
       .catch((e) => {
         toast.error(`Error on upload training data: ${e}`, {
@@ -275,15 +341,18 @@ const MapContextContainer = (props: PropsWithChildren) => {
       });
   };
 
-  const addMosaicLayer = (mos?: { name: string; url: string }[]) => {
-    const arr: { name: string; url: string }[] = mos || mosaicData;
+  const addMosaicLayer = (mos: { name: string; url: string }[]) => {
+    // const arr: { name: string; url: string }[] = mosaicData;
+    const arr: { name: string; url: string }[] = mos;
 
     if (arr.length === 0) return;
 
-    arr.forEach((item) => {
-      // WIP filter only Composite - True Color (RGB)
+    const temp: TileLayer[] = [];
 
-      if (item.name !== "Composite - True Color (RGB)") return;
+    arr.forEach((item) => {
+      // filter only Composite - True Color (RGB)
+
+      // if (item.name !== "Composite - True Color (RGB)") return;
 
       const xyzLayer = new TileLayer({
         source: new XYZ({
@@ -291,16 +360,20 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
           // Optional: Add attributions if required by the tile service provider
         }),
-        className: "mosaic",
+        className: `mosaic`,
+        zIndex: 10,
+        opacity: 0,
       });
 
-      console.log("xlayer", xyzLayer);
-
+      // console.log("xlayer", xyzLayer);
+      temp.push(xyzLayer);
       mapInstance?.addLayer(xyzLayer);
     });
 
     vectorLayer?.setStyle(stylesTransparentFill(3));
     setIsPreviewingMosaic(true);
+    setMosaicLayerArray(temp);
+    setMosaicLayerVisibilityArray(temp.map(() => false));
 
     return;
   };
@@ -313,8 +386,18 @@ const MapContextContainer = (props: PropsWithChildren) => {
       mapInstance?.removeLayer(layer);
     });
 
-    vectorLayer?.setStyle(styles(3));
+    setMosaicLayerArray([]);
+    setMosaicLayerVisibilityArray([]);
+    // vectorLayer?.setStyle(styles(3));
     setIsPreviewingMosaic(false);
+  };
+
+  const resetMosaicLayer = () => {
+    removeMosaicLayer();
+    setMosaicLayerArray([]);
+    setMosaicLayerVisibilityArray([]);
+    setMosaicData([]);
+    setMosaicStatistic(null);
   };
 
   const insertMarkerArr = (marker: Marker) => {
@@ -330,7 +413,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
   ) => {
     if (!mapInstance) return;
 
-    console.log("runmarkercursor");
+    // console.log("runmarkercursor");
 
     const markerFeature = new Feature({
       geometry: new Point([0, 0]),
@@ -355,6 +438,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
     const vl = new VectorLayer({
       source: vs,
       properties: { name: "marker layer" },
+      zIndex: 150,
     });
 
     const coordinates = [
@@ -485,12 +569,12 @@ const MapContextContainer = (props: PropsWithChildren) => {
       if (featt?.length) {
         const el = featt[0];
         const id = el.getProperties().id;
-        console.log("ell", el, el.getProperties().id, el.getGeometry());
+        // console.log("ell", el, el.getProperties().id, el.getGeometry());
 
         const geom = el.getGeometry() as Point;
         overlay?.setPosition(geom.getCoordinates());
 
-        console.log("markerid", id);
+        // console.log("markerid", id);
         setMarkerId(id);
         return;
       }
@@ -719,6 +803,9 @@ const MapContextContainer = (props: PropsWithChildren) => {
       const markerFeature = new Feature({
         geometry: new Point(item.coordinates),
         id: item.id,
+        property: {
+          class_name: item.name,
+        },
       });
 
       markerFeature.setStyle(
@@ -791,6 +878,21 @@ const MapContextContainer = (props: PropsWithChildren) => {
     pointingType,
     setPointingType,
     renderArrayToMarkerVector,
+    mosaicStatistic,
+    setMosaicStatistic,
+    resetMosaicLayer,
+    mosaicLayerArray,
+    setMosaicLayerArray,
+    mosaicLayerVisibilityArray,
+    setMosaicLayerVisibilityArray,
+    markerLayerVisibilityArray,
+    setMarkerLayerVisibilityArray,
+    vectorVisible,
+    setVectorVisible,
+    finalLayer,
+    setFinalLayer,
+    finalLayerVisible,
+    setFinalLayerVisible,
   };
 
   return (

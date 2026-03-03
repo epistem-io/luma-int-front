@@ -346,6 +346,13 @@ input[type="date"].datepicker::-webkit-calendar-picker-indicator {
   animation: rotation 1s linear infinite;
 }
 
+.loader.md {
+  width: 32px;
+  height: 32px;
+  border: 4px solid #eee;
+  border-bottom-color: #ff3d00;
+}
+
 .loader.sm {
   width: 16px;
   height: 16px;

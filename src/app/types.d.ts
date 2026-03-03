@@ -25,10 +25,37 @@ interface GeosAoiRes extends ErrorableResponse {
 
 interface GetMosaicRes extends ErrorableResponse {
   message: string;
-  layers: {
-    name: string;
-    url: string;
+  results: {
+    layers: {
+      name: string;
+      url: string;
+    }[];
+    statistics: {
+      max: number;
+      mean: number;
+      min: number;
+    };
+    summary: {
+      scene_id: string;
+      tanggal_perekaman: string;
+      tutupan_awan: number;
+    }[];
+    download_url: string;
+  };
+}
+
+interface MosaicStatistics {
+  statistics: {
+    max: number;
+    mean: number;
+    min: number;
+  };
+  summary: {
+    scene_id: string;
+    tanggal_perekaman: string;
+    tutupan_awan: number;
   }[];
+  download_url: string;
 }
 
 interface PolygonData extends ErrorableResponse {
@@ -71,6 +98,61 @@ interface TrainingDataUploadRes extends ErrorableResponse {
   }[];
 }
 
+interface InputSummaryRes extends ErrorableResponse {
+  message: string;
+  data: {
+    aoi: {
+      id: number;
+      area_size: number;
+      session_id: string;
+      created_date: string;
+      modified_date: string;
+    };
+    luma_params: {
+      end_date: string;
+      session_id: string;
+      start_date: string;
+      cloud_cover: number;
+      created_date: string;
+      modified_date: string;
+      landsat_version: string;
+    };
+    training_data_summary: {
+      class_id: number;
+      class_name: string;
+      class_color: string;
+      total_items: number;
+    }[];
+  };
+}
+
+// interface GenerateMapRes extends ErrorableResponse {
+//   message: string;
+//   results: {
+//     layers: {
+//       url: string;
+//       name: string;
+//     }[];
+//     importance: {
+//       Band: string;
+//       Importance: number;
+//     }[];
+//     model_quality: {
+//       kappa: number;
+//       gmean_score: number;
+//       average_f1_score: number;
+//       overall_accuracy: number;
+//     };
+//     lulc_composition: {
+//       class_id: number;
+//       class_name: string;
+//       class_color: string;
+//       area_m2: number;
+//       proportion: number;
+//     }[];
+//   };
+// }
+
 interface LUCClass {
   class_color: string;
   class_id: number;
@@ -100,4 +182,61 @@ interface FileTrainingObject extends FileObject {
       };
     } & LUCClass
   >;
+}
+
+interface GenerateMapStream {
+  process: string;
+  data: unknown;
+  w: number;
+  a: number;
+  next: string;
+}
+
+interface GenerateMapDataVisualization {
+  layers: {
+    name: string;
+    url: string;
+  }[];
+}
+
+interface GenerateMapDataLULCComp {
+  lulc_composition: {
+    class_id: number;
+    class_name: string;
+    class_color: string;
+    area_m2: number;
+    proportion: number;
+  }[];
+}
+
+interface GenerateMapDataSampleDataQuality {
+  lowest_separability: {
+    min_td: number;
+    result_dict: {
+      Class1_ID: string;
+      Class1_Name: string;
+      Class2_ID: string;
+      Class2_Name: string;
+      Interpretation: string;
+      Separability_Level: string;
+      TD_Distance: number;
+    }[];
+  };
+}
+
+interface GenerateMapDataFeatureImportance {
+  feature_importance: { Band: string; Importance: number }[];
+}
+
+interface GenerateMapDataEvalModelQuality {
+  model_quality: {
+    overall_accuracy: number;
+    kappa: number;
+    average_f1_score: number;
+    gmean_score: number;
+  };
+}
+
+interface GenerateMapDataDownloadURL {
+  download_url: string;
 }

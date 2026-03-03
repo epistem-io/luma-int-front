@@ -13,7 +13,18 @@ import {
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { useContext, useEffect, useState } from "react";
 import { LUCClassTable } from "./LUCClassTable";
-import { PANEL_COMPONENT_KEY } from "@/constants";
+import {
+  FETCH_INPUT_SUMMARY,
+  PANEL_COMPONENT_KEY,
+  TEMPORAL_COVERAGE_ARRAY,
+} from "@/constants";
+import { GlobalContext } from "@/contexts/globalContext";
+import { toast } from "sonner";
+import { set } from "zod";
+import { useTranslations } from "next-intl";
+import { TFunction } from "@/i18n/types";
+import { getTemporalRangeText } from "@/lib/utils";
+import { MapContext } from "@/contexts/mapContext";
 
 export const FinalSummaryDialog = () => {
   // const [isVisible, setIsVisible] = useState(false);
@@ -22,11 +33,24 @@ export const FinalSummaryDialog = () => {
     setIsSummaryDialogOpen,
     setStepKey,
     setProgressPanelIndex,
+    temporalCoverage,
+    temporalCoverageUnit,
+    summaryData,
+    setSummaryData,
   } = useContext(MapGenerationContext);
 
-  useEffect(() => {
-    console.log("isSummaryDialogOpen", isSummaryDialogOpen);
-  }, [isSummaryDialogOpen]);
+  const { resetMosaicLayer } = useContext(MapContext);
+
+  const { sessionId } = useContext(GlobalContext);
+
+  const t = useTranslations("InteractivePanel");
+
+  // useEffect(() => {
+  //   console.log("isSummaryDialogOpen", isSummaryDialogOpen);
+  // }, [isSummaryDialogOpen]);
+
+  const [isLoading, setIsLoading] = useState(false);
+  // const [summaryData, setSummaryData] = useState<InputSummaryRes | null>(null);
 
   const onCancel = () => {
     setIsSummaryDialogOpen(false);
@@ -34,27 +58,69 @@ export const FinalSummaryDialog = () => {
 
   const onConfirm = () => {
     setStepKey(PANEL_COMPONENT_KEY.YOUR_MAP);
+    // resetMosaicLayer();
     setProgressPanelIndex(5);
     setIsSummaryDialogOpen(false);
   };
 
-  const CLASS_ARR = [
-    "Sawah",
-    "Hutan",
-    "Badan Air",
-    "Kelapa Sawit",
-    "Hunian",
-    "Ladang",
-    "Semak",
-  ];
+  const getSummary = () => {
+    setIsLoading(true);
 
-  const CLASS_ARR_FIRST_HALF = CLASS_ARR.slice(
-    0,
-    Math.ceil(CLASS_ARR.length / 2),
-  );
-  const CLASS_ARR_SECOND_HALF = CLASS_ARR.slice(
-    Math.ceil(CLASS_ARR.length / 2),
-  );
+    const data = {
+      session_id: sessionId,
+    };
+
+    fetch(`${FETCH_INPUT_SUMMARY}?${new URLSearchParams(data)}`, {
+      method: "GET",
+    })
+      .then(async (response) => {
+        const json: InputSummaryRes = await response.json();
+
+        if (!response.ok) {
+          throw new Error(JSON.stringify(json?.message || response.text));
+        }
+
+        console.log("jsson", json);
+
+        setSummaryData(json);
+      })
+      .catch((e) => {
+        toast.error(`Error fetching summary: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  // const CLASS_ARR = [
+  //   "Sawah",
+  //   "Hutan",
+  //   "Badan Air",
+  //   "Kelapa Sawit",
+  //   "Hunian",
+  //   "Ladang",
+  //   "Semak",
+  // ];
+
+  const CLASS_ARR_FIRST_HALF =
+    summaryData?.data.training_data_summary.slice(
+      0,
+      Math.ceil(summaryData?.data.training_data_summary.length / 2),
+    ) || [];
+  const CLASS_ARR_SECOND_HALF =
+    summaryData?.data.training_data_summary.slice(
+      Math.ceil(summaryData?.data.training_data_summary.length / 2),
+    ) || [];
+
+  useEffect(() => {
+    if (!isSummaryDialogOpen) return;
+
+    getSummary();
+  }, [isSummaryDialogOpen]);
 
   return (
     <Dialog
@@ -69,167 +135,192 @@ export const FinalSummaryDialog = () => {
       >
         <DialogHeader className="flex flex-col gap-x-3 items-center">
           <DialogTitle className="text-center text-primary-pink font-aptos text-[32px] font-bold tracking-[-0.32px] pr-8">
-            Ready to generate your map?
+            {t("finalSummaryTitle")}
           </DialogTitle>
           <DialogDescription className="text-center font-aptos text-md font-regular text-text-icons-base-main pr-8">
-            We’ll generate your land use and land cover map based on the inputs
-            you’ve defined in the previous steps.
+            {t("finalSummarySubtitle")}
           </DialogDescription>
           <div className="py-10 space-y-7.5 w-full max-h-[calc(100vh-250px)] overflow-y-scroll pr-4 mr-4">
-            <div className="space-y-2">
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
-                Summary of Basic Information
-              </p>
-              <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
-                <div className="">
-                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                    Area of Interest
-                  </p>
-                  <div className="grid grid-cols-2 gap-y-1 gap-x-3">
-                    <div className="col-span-2">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Location :
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        Surabaya, East Java
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Your selected area has total area approximately:
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        5.422.222 Ha
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="">
-                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                    Time Period
-                  </p>
-                  <div className="grid grid-cols-2 gap-y-1 gap-x-3">
-                    <div className="col-span-1">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Temporal Resolution
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        Yearly
-                      </p>
-                    </div>
-                    <div className="col-span-1">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Specific Period
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        2020
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Date Range of Satellite Input
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        1 January - 31 December 2020
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="">
-                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                    Satelite Composite
-                  </p>
-                  <div className="grid grid-cols-2 gap-y-1 gap-x-3">
-                    <div className="col-span-1">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Satelite
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        Landsat 08
-                      </p>
-                    </div>
-                    <div className="col-span-1">
-                      <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                        Cloud Coverage
-                      </p>
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        15%
-                      </p>
-                    </div>
-                  </div>
-                </div>
+            {isLoading && (
+              <div className="w-full h-10 flex flex-row justify-center">
+                <span className="loader "></span>
               </div>
-            </div>
-            <div className="space-y-2">
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
-                Summary of LULC Class and Sampling
-              </p>
-              <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
-                <div className="">
-                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                    Total Class
+            )}
+            {!isLoading && (
+              <>
+                <div className="space-y-2">
+                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
+                    {t("summaryOfBasicInformation")}
                   </p>
-                  <div className="grid grid-cols-2 gap-y-1 gap-x-3">
-                    <div className="col-span-2">
-                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                        {CLASS_ARR.length} Class
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <div className="grid grid-cols-2 gap-x-3">
-                        <div className="col-span-1">
-                          {CLASS_ARR_FIRST_HALF.map((item, index) => {
-                            return (
-                              <div key={`${item}${index}`}>
-                                <div className="flex flex-row items-center gap-x-2">
-                                  <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
-                                  <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                                    {item}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                        <div className="col-span-1">
-                          {CLASS_ARR_SECOND_HALF.map((item, index) => {
-                            return (
-                              <div key={`${item}${index}`}>
-                                <div className="flex flex-row items-center gap-x-2">
-                                  <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
-                                  <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                                    {item}
-                                  </p>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <div className="flex flex-row gap-x-3.5 items-start">
+                  <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
                     <div className="">
                       <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        Time Period
+                        {t("areaOfInterest")}
                       </p>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                         <div className="col-span-2">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("location")} :
+                          </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                            16 Points
+                            {/* WIP NO LOCATION */}
+                            Surabaya
+                          </p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("selectedAreaHasTotalArea")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {summaryData?.data.aoi.area_size} m<sup>2</sup>
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="flex-1">
-                      <LUCClassTable />
+                    <div className="">
+                      <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+                        {t("timePeriod")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+                        <div className="col-span-1">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("temporalResolution")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {/* WIP NO RESOLUTION */}
+                            {/* {summaryData?.data.luma_params} */}
+                            {TEMPORAL_COVERAGE_ARRAY.find(
+                              (item) => item.value === temporalCoverage,
+                            )?.labelFunction(t as TFunction) || "Error"}
+                          </p>
+                        </div>
+                        <div className="col-span-1">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("specificPeriod")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {/* WIP NO PERIOD */}
+                            {/* {summaryData?.data} */}
+                            {temporalCoverageUnit}
+                          </p>
+                        </div>
+                        <div className="col-span-2">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("satelliteInputDateRange")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {/* WIP NO RANGE */}
+                            {/* 1 January - 31 December 2020 */}
+                            {getTemporalRangeText(
+                              temporalCoverage,
+                              temporalCoverageUnit,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="">
+                      <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+                        {t("satelliteComposite")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+                        <div className="col-span-1">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("satellite")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {summaryData?.data.luma_params.landsat_version}
+                          </p>
+                        </div>
+                        <div className="col-span-1">
+                          <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
+                            {t("cloudCoverage")}
+                          </p>
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {summaryData?.data.luma_params.cloud_cover}%
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+                <div className="space-y-2">
+                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
+                    {t("summaryOfLULCSampling")}
+                  </p>
+                  <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
+                    <div className="">
+                      <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+                        {t("totalClass")}
+                      </p>
+                      <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+                        <div className="col-span-2">
+                          <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                            {summaryData?.data.training_data_summary.length}{" "}
+                            {t("class")}
+                          </p>
+                        </div>
+                        <div className="col-span-2">
+                          <div className="grid grid-cols-2 gap-x-3">
+                            <div className="col-span-1">
+                              {CLASS_ARR_FIRST_HALF.map((item, index) => {
+                                return (
+                                  <div key={`${item}${index}`}>
+                                    <div className="flex flex-row items-center gap-x-2">
+                                      <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
+                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                                        {item.class_name}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                            <div className="col-span-1">
+                              {CLASS_ARR_SECOND_HALF.map((item, index) => {
+                                return (
+                                  <div key={`${item}${index}`}>
+                                    <div className="flex flex-row items-center gap-x-2">
+                                      <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
+                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                                        {item.class_name}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <div className="flex flex-row gap-x-3.5 items-start">
+                        <div className="">
+                          <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+                            {t("timePeriod")}
+                          </p>
+                          <div className="grid grid-cols-2 gap-y-1 gap-x-3">
+                            <div className="col-span-2">
+                              <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                                {summaryData?.data.training_data_summary.reduce(
+                                  (acc, cur) => acc + cur.total_items,
+                                  0,
+                                )}{" "}
+                                {t("points")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <LUCClassTable summary />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </DialogHeader>
         <div className="grid grid-cols-1 mt-0 pr-8">
@@ -237,9 +328,10 @@ export const FinalSummaryDialog = () => {
             onClick={() => {
               onConfirm();
             }}
+            disabled={isLoading}
             variant={"primary"}
           >
-            Generate Map
+            {t("generateMap")}
           </Button>
         </div>
       </DialogContent>

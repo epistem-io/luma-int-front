@@ -49,9 +49,9 @@ const DEFAULT_VALUE: ContextType = {
   setAnalysisConfig: () => {},
   analysisResult: null,
   setAnalysisResult: () => {},
-  // sessionId: "",
+  sessionId: "",
   // WIP
-  sessionId: "b9214cca-bcae-4d7e-983f-f6651ccb476b",
+  // sessionId: "46c352ed-3b08-4862-96e6-2d03121a1f99",
   setSessionId: () => {},
 };
 

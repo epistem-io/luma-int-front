@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface Props {
   temporalResolutionLabel: string;
@@ -22,6 +23,8 @@ export const TimePeriodSummary = ({
   isEditing = false,
   onClickEdit,
 }: Props) => {
+  const t = useTranslations("InteractivePanel");
+
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   if (!accordion && !onClickEdit) {
@@ -33,12 +36,12 @@ export const TimePeriodSummary = ({
         <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second">
           <div className="space-y-3">
             <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-              Your selected time period :
+              {t("yourSelectedTimePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Temporal Resolution
+                  {t("temporalResolution")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {temporalResolutionLabel}
@@ -46,7 +49,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Specific Period
+                  {t("specificPeriod")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {specificPeriod}
@@ -54,7 +57,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Date Range of Satellite Input
+                  {t("satelliteInputDateRange")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {dateRange}
@@ -68,12 +71,12 @@ export const TimePeriodSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              Time Period
+              {t("timePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Temporal Resolution
+                  {t("temporalResolution")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {temporalResolutionLabel}
@@ -81,7 +84,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Specific Period
+                  {t("specificPeriod")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {specificPeriod}
@@ -89,7 +92,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  Date Range of Satellite Input
+                  {t("satelliteInputDateRange")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {dateRange}
@@ -126,10 +129,10 @@ export const TimePeriodSummary = ({
               setIsConfirmModalVisible(false);
               onClickEdit();
             }}
-            title={"Are You Sure Want to Change the Input?"}
-            subtitle="Data yang sudah ada pada part yang anda pilih akan hilang, selain itu akan tetap ada"
-            confirmButtonCaption="Change Input"
-            cancelButtonCaption="Cancel Change Input"
+            title={t("changeInput")}
+            subtitle={t("confirmSubtitle")}
+            confirmButtonCaption={t("changeInput")}
+            cancelButtonCaption={t("cancelChangeInput")}
           />
         </>
       )}

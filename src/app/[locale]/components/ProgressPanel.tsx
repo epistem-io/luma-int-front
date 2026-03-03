@@ -5,9 +5,11 @@ import Image from "next/image";
 import { StepBar } from "./StepBar";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { useContext } from "react";
+import { useTranslations } from "next-intl";
 
 export const ProgressPanel = () => {
   const { progressPanelIndex } = useContext(MapGenerationContext);
+  const t = useTranslations("InteractivePanel");
 
   return (
     <div className="bg-content-gray rounded-2xl w-120.75 p-4">
@@ -25,7 +27,8 @@ export const ProgressPanel = () => {
               className="h-6 aspect-square text-text-icons-on-color!"
             />
             <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px]">
-              Generate LULC Map
+              {/* Generate LULC Map */}
+              {t("generateLULCMap")}
             </p>
           </Button>
           <Button className="py-1 px-1 aspect-square flex flex-row gap-2 items-center bg-content-gray hover:cursor-pointer">
@@ -47,7 +50,8 @@ export const ProgressPanel = () => {
             />
           </Button>
         </div>
-        <StepBar stepIndex={progressPanelIndex} />
+        {/* <StepBar stepIndex={progressPanelIndex} /> */}
+        <StepBar />
       </div>
     </div>
   );

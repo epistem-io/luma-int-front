@@ -30,8 +30,12 @@ import { cn, getTemporalRangeText, numberThousandSeparator } from "@/lib/utils";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { useTranslations } from "next-intl";
+import { TFunction } from "@/i18n/types";
 
 export const BasicInformationSummaryComponent = () => {
+  const { resetMosaicLayer } = useContext(MapContext);
+
   const {
     basicInformationOpenAccordion,
     areaScopingPolygonArea,
@@ -56,6 +60,8 @@ export const BasicInformationSummaryComponent = () => {
 
   const { vectorSource } = useContext(MapContext);
 
+  const t = useTranslations("InteractivePanel");
+
   // const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false)
 
   return (
@@ -63,7 +69,7 @@ export const BasicInformationSummaryComponent = () => {
       <div className="space-y-6">
         <div className="space-y-3">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            Summary of Basic Information
+            {t("summaryOfBasicInformation")}
           </p>
           <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second space-y-4">
             <AreaScopingSummary
@@ -86,6 +92,8 @@ export const BasicInformationSummaryComponent = () => {
                 );
                 setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
                 setIsBasicInformationChangeInput(false);
+
+                resetMosaicLayer();
               }}
             />
             <div className="h-0.5 w-full bg-secondary-purple-light-active" />
@@ -94,7 +102,7 @@ export const BasicInformationSummaryComponent = () => {
               temporalResolutionLabel={
                 TEMPORAL_COVERAGE_ARRAY.find(
                   (item) => item.value === temporalCoverage,
-                )?.label || "Error"
+                )?.labelFunction(t as TFunction) || "Error"
               }
               specificPeriod={temporalCoverageUnit}
               dateRange={getTemporalRangeText(
@@ -112,6 +120,8 @@ export const BasicInformationSummaryComponent = () => {
                 );
                 setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
                 setIsBasicInformationChangeInput(false);
+
+                resetMosaicLayer();
               }}
             />
             <div className="h-0.5 w-full bg-secondary-purple-light-active" />
@@ -126,6 +136,8 @@ export const BasicInformationSummaryComponent = () => {
                 );
                 setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
                 setIsBasicInformationChangeInput(false);
+
+                resetMosaicLayer();
               }}
             />
           </div>
@@ -175,15 +187,17 @@ export const BasicInformationSummaryFooter = () => {
     isMosaicLoading,
   } = useContext(MapContext);
 
-  const isNextDisabled =
-    isPreviewingMosaic || isBasicInformationChangeInput || isMosaicLoading;
+  const t = useTranslations("InteractivePanel");
+
+  const isNextDisabled = isBasicInformationChangeInput || isMosaicLoading;
+  // isPreviewingMosaic || isBasicInformationChangeInput || isMosaicLoading;
   const isCancelDisabled = isMosaicLoading;
 
   const onCancelClick = () => {
-    if (isPreviewingMosaic) {
-      removeMosaicLayer();
-      return;
-    }
+    // if (isPreviewingMosaic) {
+    //   removeMosaicLayer();
+    //   return;
+    // }
 
     if (isBasicInformationChangeInput) {
       setIsBasicInformationChangeInput(false);
@@ -204,9 +218,9 @@ export const BasicInformationSummaryFooter = () => {
         variant="primary"
         className={cn()}
       >
-        {isPreviewingMosaic || isBasicInformationChangeInput
-          ? "Cancel"
-          : "Change Input"}
+        {/* {isPreviewingMosaic || isBasicInformationChangeInput */}
+        {/* {isBasicInformationChangeInput ? "Cancel" : "Change Input"} */}
+        {t("changeInput")}
       </Button>
       <Button
         onClick={() => {
@@ -217,7 +231,7 @@ export const BasicInformationSummaryFooter = () => {
         variant="primary"
         className=""
       >
-        Next
+        {t("next")}
       </Button>
     </div>
   );

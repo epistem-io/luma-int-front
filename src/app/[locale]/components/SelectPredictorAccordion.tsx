@@ -43,6 +43,8 @@ export const SelectPredictorAccordion = () => {
 
   const t = useTranslations("AnalysisPanel");
 
+  const tInteractive = useTranslations("InteractivePanel");
+
   return (
     <AccordionItem
       value={"predictor"}
@@ -55,7 +57,7 @@ export const SelectPredictorAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          Select Predictor
+          {tInteractive("selectPredictor")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">

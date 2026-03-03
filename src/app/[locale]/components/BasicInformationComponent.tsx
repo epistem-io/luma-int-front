@@ -19,6 +19,7 @@ import {
   AREA_SCOPING_POLYGON_AREA_LIMIT,
   PANEL_COMPONENT_KEY,
 } from "@/constants";
+import { useTranslations } from "next-intl";
 
 export const BasicInformationComponent = () => {
   const { basicInformationOpenAccordion, setBasicInformationOpenAccordion } =
@@ -50,6 +51,8 @@ export const BasicInformationFooter = () => {
     areaScopingPolygonArea,
   } = useContext(MapGenerationContext);
 
+  const t = useTranslations("InteractivePanel");
+
   const isNextDisabled =
     !temporalCoverage ||
     !temporalCoverageUnit ||
@@ -66,7 +69,7 @@ export const BasicInformationFooter = () => {
         variant="primary"
         className="w-39.25"
       >
-        Next
+        {t("next")}
       </Button>
     </div>
   );

@@ -59,7 +59,7 @@ import { toast } from "sonner";
 // };
 
 export const DefineLUCComponent = () => {
-  const t = useTranslations("AnalysisPanel");
+  const t = useTranslations("InteractivePanel");
 
   const {
     defaultArray,
@@ -130,13 +130,13 @@ export const DefineLUCComponent = () => {
     const target = e.target;
     const files = target?.files;
 
-    console.log("fffiless", files);
+    // console.log("fffiless", files);
 
     if (!files) return;
 
     const file = files[0];
 
-    console.log("fffile", file);
+    // console.log("fffile", file);
 
     setLUCFile(file);
     setLUCFilename(file.name);
@@ -175,7 +175,7 @@ export const DefineLUCComponent = () => {
                     className="object-contain h-4 w-auto text-primary-500"
                   />
                 </div>
-                <p className="text-l-bold">{t("Section3.tryAI")}</p>
+                <p className="text-l-bold">{t("tryAI")}</p>
               </div>
 
               <ChevronDown
@@ -190,8 +190,7 @@ export const DefineLUCComponent = () => {
 
               {!aiAccordionOpen && (
                 <p className="font-aptos text-[15px] font-regular leading-5.5 text-neutrals-600 italic mt-3">
-                  Unsure which land cover classes to choose? Let EPISTEM-AI
-                  suggest the most suitable configuration
+                  {t("tryAITagline")}
                 </p>
               )}
 
@@ -199,22 +198,20 @@ export const DefineLUCComponent = () => {
                 <div className="space-y-2">
                   <div>
                     <p className="text-m-medium italic">
-                      {t("Section3.tryAICaption")}{" "}
-                      <b className="font-extrabold">
-                        {t("Section3.tryAICaptionCont")}
-                      </b>
+                      {t("tryAICaption")}{" "}
+                      <b className="font-extrabold">{t("tryAICaptionCont")}</b>
                     </p>
                   </div>
                   <div>
                     <Textarea
                       className="m-0"
-                      defaultValue={t("Section3.tryAICaptionDefaultValue")}
+                      defaultValue={t("tryAICaptionDefaultValue")}
                       disabled
                     />
                   </div>
                   <div className="flex flex-row justify-between items-center space-y-2">
                     <p className="text-xs-regular text-neutrals-600 m-0">
-                      {t("Section3.tryAICaptionInstruction")}
+                      {t("tryAICaptionInstruction")}
                     </p>
                     <Button
                       type="button"
@@ -222,9 +219,7 @@ export const DefineLUCComponent = () => {
                       disabled
                       // className="rounded-none bg-primary-pink py-1.5 px-2"
                     >
-                      <p className="">
-                        {t("Section3.tryAICaptionSubmitButtonLabel")}
-                      </p>
+                      <p className="">{t("tryAICaptionSubmitButtonLabel")}</p>
                     </Button>
                   </div>
                 </div>
@@ -236,30 +231,28 @@ export const DefineLUCComponent = () => {
       <div className="rounded-[12px] bg-white p-3 border border-neutral-400 space-y-6">
         <div className="space-y-3">
           <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-            Land Use/Cover Hierarchy
+            {t("LUCHierarchy")}
           </p>
           <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-            Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem
-            IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum
+            {t("LUCHierarchyDescription")}
           </p>
         </div>
         {/* <div className="space-y-3"> */}
         <Tabs defaultValue="custom" className="gap-y-6 mb-0">
-          <div className="px-1.5">
-            <TabsList className="w-full">
+          <div className="px-0 py-0">
+            <TabsList className="w-full py-0 px-1.5">
               <TabsTrigger disabled={selectedDefault} value="custom">
-                Classify your own template
+                {t("classifyOwnTemplate")}
               </TabsTrigger>
               <TabsTrigger disabled={selectedCustom} value="default">
-                Use Default Scheme
+                {t("useDefaultScheme")}
               </TabsTrigger>
             </TabsList>
           </div>
           <TabsContent value="custom">
             <div className="space-y-6">
               <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
-                Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum
+                {t("classifyOwnTemplateDescription")}
               </p>
               {haveDownloadedFile && (
                 <>
@@ -329,10 +322,10 @@ export const DefineLUCComponent = () => {
                               </div>
                               <div className="">
                                 <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                  The file is too big
+                                  {t("fileTooBigError")}
                                 </p>
                                 <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                  File exceeds 500MB. Please select another file
+                                  {t("fileTooBigError", { limit: "500MB" })}
                                 </p>
                               </div>
                             </div>
@@ -384,7 +377,7 @@ export const DefineLUCComponent = () => {
                                 // setAreaScopingPolygonUrl(file);
                                 // setAreaScopingPolygonFileSize(file.size);
                                 // setAreaScopingPolygonFileName(file.name);
-                                console.log("fileee", file);
+                                // console.log("fileee", file);
 
                                 setLUCFile(file);
                                 setLUCFilename(file.name);
@@ -394,9 +387,9 @@ export const DefineLUCComponent = () => {
                             }
                           });
                         } else {
-                          [...e.dataTransfer.files].forEach((file, i) => {
-                            console.log(`… file[${i}].name = ${file.name}`);
-                          });
+                          // [...e.dataTransfer.files].forEach((file, i) => {
+                          //   console.log(`… file[${i}].name = ${file.name}`);
+                          // });
                         }
                       }}
                     >
@@ -405,8 +398,12 @@ export const DefineLUCComponent = () => {
                           <div className="space-y-3">
                             <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
                             <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                              Drag & drop your file here to upload. <br />
-                              Accepted format .csv, .xls, .xlsx
+                              {/* Drag & drop your file here to upload. <br />
+                              Accepted format .csv, .xls, .xlsx */}
+                              {t("dragAndDrop")} <br />
+                              {t("acceptedFormat", {
+                                extensions: ".csv, .xls, .xlsx",
+                              })}
                             </p>
                           </div>
                           <Label
@@ -415,7 +412,7 @@ export const DefineLUCComponent = () => {
                           >
                             <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
                               <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                                Browse File
+                                {t("browseFile")}
                               </p>
                             </div>
                           </Label>
@@ -427,7 +424,7 @@ export const DefineLUCComponent = () => {
                           <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                             <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                             <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                              Drop here
+                              {t("useDefaultSchemeDescription")}
                             </p>
                           </div>
                         </>
@@ -446,7 +443,7 @@ export const DefineLUCComponent = () => {
                       onClickDownloadFile();
                     }}
                   >
-                    Download File
+                    {t("downloadFile")}
                   </Button>
                 </>
               )}
@@ -455,8 +452,7 @@ export const DefineLUCComponent = () => {
           <TabsContent value="default">
             <div className="space-y-6">
               <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum
-                Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum
+                {t("useDefaultSchemeDescription")}
               </p>
               <div className="space-y-5">
                 <Accordion type="multiple">
@@ -465,7 +461,7 @@ export const DefineLUCComponent = () => {
                       <div className="flex flex-row items-center space-x-2.5">
                         {/* <Switch /> */}
                         <p className="text-l-semibold text-muted-foreground">
-                          {t("Section3.vegetation")}
+                          {t("vegetation")}
                         </p>
                       </div>
                       <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -477,7 +473,7 @@ export const DefineLUCComponent = () => {
                             <div className="flex flex-row items-center space-x-2.5">
                               {/* <Switch /> */}
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.TBS")}
+                                {t("treeBasedSystem")}
                               </p>
                             </div>
                             <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -491,7 +487,7 @@ export const DefineLUCComponent = () => {
                                 checked={defaultArray.includes(7)}
                               />
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.agroforestry")}
+                                {t("agroforestry")}
                               </p>
                             </div>
                             {/* <div className="flex flex-row items-center space-x-2.5">
@@ -502,7 +498,7 @@ export const DefineLUCComponent = () => {
                                 checked={defaultArray.includes(9)}
                               />
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.monoculturePlantation")}
+                                {t("monoculturePlantation")}
                               </p>
                             </div> */}
 
@@ -512,8 +508,8 @@ export const DefineLUCComponent = () => {
                                   <div className="flex flex-row items-center space-x-2.5">
                                     {/* <Switch /> */}
                                     <p className="text-l-medium text-muted-foreground">
-                                      Monoculture Plantation
-                                      {/* {t("Section3.TBS")} */}
+                                      {t("monoculturePlantation")}
+                                      {/* {t("TBS")} */}
                                     </p>
                                   </div>
                                   <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -527,7 +523,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(8)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Tree Plantation
+                                      {t("treePlantation")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -538,7 +534,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(9)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Rubber Monoculture
+                                      {t("rubberPlantation")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -549,7 +545,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(10)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Oil Palm Monoculture
+                                      {t("oilPalmPlantation")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -560,7 +556,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(11)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Other Monoculture
+                                      {t("otherPlantation")}
                                     </p>
                                   </div>
                                 </AccordionContent>
@@ -573,8 +569,8 @@ export const DefineLUCComponent = () => {
                                   <div className="flex flex-row items-center space-x-2.5">
                                     {/* <Switch /> */}
                                     <p className="text-l-medium text-muted-foreground">
-                                      Natural Forest
-                                      {/* {t("Section3.TBS")} */}
+                                      {t("naturalForest")}
+                                      {/* {t("TBS")} */}
                                     </p>
                                   </div>
                                   <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -588,7 +584,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(1)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Undisturbed Dryland Forest
+                                      {t("undisturbedDryLandForest")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -599,7 +595,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(2)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Logged-Over Dryland Forest
+                                      {t("loggedOverDryLandForest")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -610,7 +606,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(3)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Undisturbed Mangrove Forest
+                                      {t("undisturbedMangroveForest")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -621,7 +617,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(4)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Logged-Over Mangrove Forest
+                                      {t("loggedOverMangroveForest")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -632,7 +628,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(5)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Undisturbed Swamp Forest
+                                      {t("undisturbedSwampForest")}
                                     </p>
                                   </div>
                                   <div className="flex flex-row items-center space-x-2.5">
@@ -643,7 +639,7 @@ export const DefineLUCComponent = () => {
                                       checked={defaultArray.includes(6)}
                                     />
                                     <p className="text-l-medium text-muted-foreground">
-                                      Logged-Over Swamp Forest
+                                      {t("loggedOverSwampForest")}
                                     </p>
                                   </div>
                                 </AccordionContent>
@@ -658,7 +654,7 @@ export const DefineLUCComponent = () => {
                             <div className="flex flex-row items-center space-x-2.5">
                               {/* <Switch /> */}
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.nonTBS")}
+                                {t("nonTreeBasedSystem")}
                               </p>
                             </div>
                             <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -672,7 +668,7 @@ export const DefineLUCComponent = () => {
                                 checked={defaultArray.includes(12)}
                               />
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.grassSavanna")}
+                                {t("grassSavanna")}
                               </p>
                             </div>
                             <div className="flex flex-row items-center space-x-2.5">
@@ -683,7 +679,7 @@ export const DefineLUCComponent = () => {
                                 checked={defaultArray.includes(13)}
                               />
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.shrub")}
+                                {t("shrub")}
                               </p>
                             </div>
                             <div className="flex flex-row items-center space-x-2.5">
@@ -694,7 +690,7 @@ export const DefineLUCComponent = () => {
                                 checked={defaultArray.includes(14)}
                               />
                               <p className="text-l-medium text-muted-foreground">
-                                {t("Section3.cropland")}
+                                {t("cropland")}
                               </p>
                             </div>
                           </AccordionContent>
@@ -710,7 +706,7 @@ export const DefineLUCComponent = () => {
                       <div className="flex flex-row items-center space-x-2.5">
                         {/* <Switch /> */}
                         <p className="text-l-semibold text-muted-foreground">
-                          {t("Section3.nonVegetation")}
+                          {t("nonVegetation")}
                         </p>
                       </div>
                       <AccordionTrigger className="p-2"></AccordionTrigger>
@@ -724,7 +720,7 @@ export const DefineLUCComponent = () => {
                           checked={defaultArray.includes(15)}
                         />
                         <p className="text-l-medium text-muted-foreground">
-                          {t("Section3.settlement")}
+                          {t("settlement")}
                         </p>
                       </div>
                       <div className="flex flex-row items-center space-x-2.5">
@@ -735,7 +731,7 @@ export const DefineLUCComponent = () => {
                           checked={defaultArray.includes(16)}
                         />
                         <p className="text-l-medium text-muted-foreground">
-                          {t("Section3.clearedLand")}
+                          {t("clearedLand")}
                         </p>
                       </div>
                       <div className="flex flex-row items-center space-x-2.5">
@@ -746,7 +742,7 @@ export const DefineLUCComponent = () => {
                           checked={defaultArray.includes(17)}
                         />
                         <p className="text-l-medium text-muted-foreground">
-                          {t("Section3.water")}
+                          {t("water")}
                         </p>
                       </div>
                     </AccordionContent>
@@ -776,7 +772,7 @@ export const DefineLUCComponent = () => {
       >
         <div className="">
           <p className="text-text-icons-base-third font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-            Reset input
+            {t("resetInput")}
           </p>
         </div>
       </Button>
@@ -801,6 +797,8 @@ export const DefineLUCFooter = () => {
     setIsLUCLoading,
     setClassArray,
   } = useContext(MapGenerationContext);
+
+  const t = useTranslations("InteractivePanel");
 
   const { sessionId } = useContext(GlobalContext);
 
@@ -916,8 +914,8 @@ export const DefineLUCFooter = () => {
     <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
       <div></div>
       {isLUCLoading && (
-        <div className="w-full h-10 flex flex-row justify-center">
-          <span className="loader sm"></span>
+        <div className="w-full h-10 flex flex-row justify-center items-center">
+          <span className="loader md"></span>
         </div>
       )}
       {!isLUCLoading && (
@@ -931,7 +929,7 @@ export const DefineLUCFooter = () => {
           variant="primary"
           className=""
         >
-          Next
+          {t("next")}
         </Button>
       )}
     </div>

@@ -114,6 +114,32 @@ interface ContextType {
   setIsUploadingTrainingFile: Dispatch<SetStateAction<boolean>>;
   isSummaryDialogOpen: boolean;
   setIsSummaryDialogOpen: Dispatch<SetStateAction<boolean>>;
+  // mapGenerationResult: GenerateMapRes | null;
+  // setMapGenerationResult: Dispatch<SetStateAction<null | GenerateMapRes>>;
+  generateMapDataVisualization: GenerateMapDataVisualization | null;
+  setGenerateMapDataVisualization: Dispatch<
+    SetStateAction<GenerateMapDataVisualization | null>
+  >;
+  generateMapLULC: GenerateMapDataLULCComp | null;
+  setGenerateMapLULC: Dispatch<SetStateAction<GenerateMapDataLULCComp | null>>;
+  generateMapSampleQuality: GenerateMapDataSampleDataQuality | null;
+  setGenerateMapSampleQuality: Dispatch<
+    SetStateAction<GenerateMapDataSampleDataQuality | null>
+  >;
+  generateMapFeatureImportance: GenerateMapDataFeatureImportance | null;
+  setGenerateMapFeatureImportance: Dispatch<
+    SetStateAction<GenerateMapDataFeatureImportance | null>
+  >;
+  generateMapModelQuality: GenerateMapDataEvalModelQuality | null;
+  setGenerateMapModelQuality: Dispatch<
+    SetStateAction<GenerateMapDataEvalModelQuality | null>
+  >;
+  generateMapDownloadURL: GenerateMapDataDownloadURL | null;
+  setGenerateMapDownloadURL: Dispatch<
+    SetStateAction<GenerateMapDataDownloadURL | null>
+  >;
+  summaryData: InputSummaryRes | null;
+  setSummaryData: Dispatch<SetStateAction<InputSummaryRes | null>>;
 }
 
 const DEFAULT_VALUE: ContextType = {
@@ -121,7 +147,7 @@ const DEFAULT_VALUE: ContextType = {
   setProgressPanelIndex: () => {},
   stepKey: PANEL_COMPONENT_KEY.BASIC_INFORMATION,
   // WIP
-  // stepKey: PANEL_COMPONENT_KEY.DEFINE_LUC,
+  // stepKey: PANEL_COMPONENT_KEY.YOUR_MAP,
   // stepKey: PANEL_COMPONENT_KEY.DATA_TRAINING,
   // stepKey: PANEL_COMPONENT_KEY.LULC_PARAMS,
   setStepKey: () => {},
@@ -174,6 +200,22 @@ const DEFAULT_VALUE: ContextType = {
   setIsUploadingTrainingFile: () => {},
   isSummaryDialogOpen: false,
   setIsSummaryDialogOpen: () => {},
+  // mapGenerationResult: null,
+  // setMapGenerationResult: () => {},
+  generateMapDataVisualization: null,
+  setGenerateMapDataVisualization: () => {},
+  generateMapLULC: null,
+  setGenerateMapLULC: () => {},
+  generateMapSampleQuality: null,
+  setGenerateMapSampleQuality: () => {},
+  generateMapFeatureImportance: null,
+  setGenerateMapFeatureImportance: () => {},
+  generateMapModelQuality: null,
+  setGenerateMapModelQuality: () => {},
+  generateMapDownloadURL: null,
+  setGenerateMapDownloadURL: () => {},
+  summaryData: null,
+  setSummaryData: () => {},
 };
 
 const MapGenerationContext = createContext(DEFAULT_VALUE);
@@ -249,7 +291,32 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(
     DEFAULT_VALUE.isSummaryDialogOpen,
   );
-  //
+
+  const [generateMapDataVisualization, setGenerateMapDataVisualization] =
+    useState(DEFAULT_VALUE.generateMapDataVisualization);
+
+  const [generateMapLULC, setGenerateMapLULC] = useState(
+    DEFAULT_VALUE.generateMapLULC,
+  );
+
+  const [generateMapSampleQuality, setGenerateMapSampleQuality] = useState(
+    DEFAULT_VALUE.generateMapSampleQuality,
+  );
+
+  const [generateMapFeatureImportance, setGenerateMapFeatureImportance] =
+    useState(DEFAULT_VALUE.generateMapFeatureImportance);
+
+  const [generateMapModelQuality, setGenerateMapModelQuality] = useState(
+    DEFAULT_VALUE.generateMapModelQuality,
+  );
+
+  const [generateMapDownloadURL, setGenerateMapDownloadURL] = useState(
+    DEFAULT_VALUE.generateMapDownloadURL,
+  );
+
+  const [summaryData, setSummaryData] = useState<InputSummaryRes | null>(
+    DEFAULT_VALUE.summaryData,
+  );
 
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
 
@@ -304,6 +371,22 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsUploadingTrainingFile,
     isSummaryDialogOpen,
     setIsSummaryDialogOpen,
+    // mapGenerationResult,
+    // setMapGenerationResult,
+    generateMapDataVisualization,
+    setGenerateMapDataVisualization,
+    generateMapLULC,
+    setGenerateMapLULC,
+    generateMapSampleQuality,
+    setGenerateMapSampleQuality,
+    generateMapFeatureImportance,
+    setGenerateMapFeatureImportance,
+    generateMapModelQuality,
+    setGenerateMapModelQuality,
+    generateMapDownloadURL,
+    setGenerateMapDownloadURL,
+    summaryData,
+    setSummaryData,
   };
 
   return (

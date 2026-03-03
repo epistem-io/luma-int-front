@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 interface Props {
@@ -24,16 +25,18 @@ export const SatelliteCompositeSummary = ({
     return "Error";
   }
 
+  const t = useTranslations("InteractivePanel");
+
   return (
     <>
       <div className="space-y-2 relative">
         <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-          Satelite Composite
+          {t("satelliteComposite")}
         </p>
         <div className="gap-y-5 grid grid-cols-2">
           <div className="space-y-1 col-span-1">
             <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-              Satelite
+              {t("satellite")}
             </p>
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
               {sateliteString}
@@ -41,7 +44,7 @@ export const SatelliteCompositeSummary = ({
           </div>
           <div className="space-y-1 col-span-1">
             <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-              Cloud Coverage
+              {t("cloudCoverage")}
             </p>
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
               {cloudCoverageString}

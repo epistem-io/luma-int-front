@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { LUCClassTable } from "./LUCClassTable";
 import { MapContext } from "@/contexts/mapContext";
 import { PANEL_COMPONENT_KEY, POINTING_TYPE } from "@/constants";
+import { useTranslations } from "next-intl";
 
 export const OSSComponent = () => {
   const { pointingType, selectedClass } = useContext(MapGenerationContext);
@@ -23,7 +24,7 @@ export const OSSComponent = () => {
     markerCursor(pointingType, selectedClass);
 
     return () => {
-      console.log("cleanup marker cursor");
+      // console.log("cleanup marker cursor");
       removeMarkerCursor();
     };
   }, []);
@@ -41,6 +42,8 @@ export const OSSFooter = () => {
     useContext(MapContext);
 
   const { sessionId } = useContext(GlobalContext);
+
+  const t = useTranslations("InteractivePanel");
 
   const allMarkerClassFilled = markerArray.every(
     (item) => item.class_id !== -1,
@@ -77,7 +80,7 @@ export const OSSFooter = () => {
         variant="primary"
         className=""
       >
-        End Pointing
+        {t("endPointing")}
       </Button>
     </div>
   );
