@@ -5,6 +5,7 @@ import { FETCH_GENERATE_MAP } from "@/constants";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { numberThousandSeparator } from "@/lib/utils";
 import { AlertCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
@@ -210,12 +211,12 @@ export const YourMapComponent = () => {
         )}
         {!isLoading && (
           <>
+            <ModelAccuracyAssessment />
             <LULCCompositionSummary />
             {generateMapSampleQuality &&
               generateMapSampleQuality.lowest_separability.result_dict.length >
                 0 && <TrainingDataQuality />}
-            <PredictorImportances />
-            <ModelAccuracyAssessment />
+            {/* <PredictorImportances /> */}
             <ThematicAccuracyAssessment />
           </>
         )}
@@ -340,8 +341,8 @@ const LULCCompositionSummary = () => {
                       {item.class_name}
                     </p>
                     <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {/* WIP */}
-                      {"-"} points
+                      {numberThousandSeparator(item.area_m2.toFixed(0))} m
+                      <sup>2</sup>
                     </p>
                   </div>
 
@@ -374,8 +375,8 @@ const LULCCompositionSummary = () => {
                       {item.class_name}
                     </p>
                     <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {/* WIP */}
-                      {"-"} points
+                      {numberThousandSeparator(item.area_m2.toFixed(0))} m
+                      <sup>2</sup>
                     </p>
                   </div>
 

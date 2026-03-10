@@ -210,7 +210,7 @@ export const TimePeriodAccordion = () => {
                         >
                           <Label className="m-0">
                             <p className="font-aptos text-[15px] font-regular leading-4.5 text-text-icons-base-main ">
-                              Year
+                              {t("year")}
                             </p>
                           </Label>
                           <Select

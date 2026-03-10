@@ -59,6 +59,8 @@ export const DataTrainingComponent = () => {
     setStepKey,
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
+    defaultArray,
+    LUCfile,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -194,269 +196,213 @@ export const DataTrainingComponent = () => {
 
   const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
 
+  const selectedDefault = defaultArray.length > 0;
+  const selectedCustom = LUCfile !== null;
+
   return (
     <>
       <div className="">
         <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
-          <Tabs defaultValue="upload" className="gap-y-3 mb-0">
-            <div className="px-1.5">
-              <TabsList className="w-full">
-                <TabsTrigger value="upload">
-                  {t("uploadDataTraining")}
-                </TabsTrigger>
-                <TabsTrigger value="oss">{t("onScreenSampling")}</TabsTrigger>
-              </TabsList>
-            </div>
-            <TabsContent value="upload">
-              <div className="space-y-6">
-                <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                  {t("uploadDataTrainingDescription")}
-                </p>
+          {selectedDefault && <LUCClassTable summary={false} />}
+          {selectedCustom && (
+            <Tabs defaultValue="upload" className="gap-y-3 mb-0">
+              <div className="px-1.5">
+                <TabsList className="w-full">
+                  <TabsTrigger value="upload">
+                    {t("uploadDataTraining")}
+                  </TabsTrigger>
+                  <TabsTrigger value="oss">{t("onScreenSampling")}</TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="upload">
                 <div className="space-y-6">
-                  <div
-                    className={cn(
-                      "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
-                      "min-h-40.5",
-                      fileEnter && "border-primary-red-pink-normal",
-                    )}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setFileEnter(true);
-                    }}
-                    onDragLeave={(e) => {
-                      setFileEnter(false);
-                    }}
-                    onDragEnd={(e) => {
-                      e.preventDefault();
-                      setFileEnter(false);
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setFileEnter(false);
-                      if (e.dataTransfer.items) {
-                        [...e.dataTransfer.items].forEach((item, i) => {
-                          if (item.kind === "file") {
-                            const file = item.getAsFile();
-                            if (file) {
-                              // const blobUrl = URL.createObjectURL(file);
-                              // setAreaScopingPolygonUrl(file);
-                              // setAreaScopingPolygonFileSize(file.size);
-                              // setAreaScopingPolygonFileName(file.name);
-                              // console.log("fileee", file);
-
-                              // setTrainingFile(file);
-                              // setTrainingFilename(file.name);
-                              // setTrainingFilesize(file.size);
-
-                              submitFile({
-                                file,
-                                filename: file.name,
-                                filesize: file.size,
-                              });
-                            }
-                            // console.log(`items file[${i}].name = ${file?.name}`);
-                          }
-                        });
-                      } else {
-                        [...e.dataTransfer.files].forEach((file, i) => {
-                          console.log(`… file[${i}].name = ${file.name}`);
-                        });
-                      }
-                    }}
-                  >
-                    {!fileEnter && (
-                      <>
-                        <div className="space-y-3">
-                          <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
-                          <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                            {/* Drag & drop your file here to upload. <br />
-                            Accepted format .zip */}
-                            {t("dragAndDrop")} <br />
-                            {t("acceptedFormat", {
-                              extensions: ".zip",
-                            })}
-                          </p>
-                        </div>
-                        <Label
-                          htmlFor="data-training-file-upload"
-                          className={cn(
-                            "w-50 mx-auto flex flex-row justify-center mb-0",
-                            isFormDisabled &&
-                              "pointer-events-none cursor-not-allowed",
-                          )}
-                        >
-                          <div
-                            className={cn(
-                              "rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200",
-                              isFormDisabled &&
-                                "bg-text-icons-disabled text-text-icons-base-third",
-                            )}
-                          >
-                            <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                              {t("browseFile")}
-                            </p>
-                          </div>
-                        </Label>
-                      </>
-                    )}
-
-                    {fileEnter && !isFormDisabled && (
-                      <>
-                        <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                          <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
-                          <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                            {t("dropHere")}
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  {uploadedFilesArray.map((item, index) => {
-                    return (
+                  <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+                    {t("uploadDataTrainingDescription")}
+                  </p>
+                  <div className="space-y-6">
+                    {uploadedFilesArray.length === 0 && (
                       <div
-                        key={`uploaded-file-${item.filename}-${index}`}
-                        className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second"
-                      >
-                        <div className="flex flex-row gap-x-4 items-center">
-                          <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-                            <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-                          </div>
-                          <div className="">
-                            <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
-                              {item.filename}
-                            </p>
-                            <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                              {shortenKiloByte(item.filesize)}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="">
-                          {/* {!isUploadingTrainingFile && (
-                          )} */}
-                          <Button
-                            disabled={isUploadingTrainingFile}
-                            variant={"ghost"}
-                            className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                            onClick={() => {
-                              // setTrainingFile(null);
-                              // setTrainingFilename("");
-                              // setTrainingFilesize(0);
-                            }}
-                          >
-                            <Trash2Icon className="text-secondary-purple-dark size-5" />
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {trainingFile && (
-                    <>
-                      {trainingFilesize <= DATA_TRAINING_FILE_SIZE_LIMIT &&
-                        !trainingFileError && (
-                          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                            <div className="flex flex-row gap-x-4 items-center">
-                              <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-                                <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-                              </div>
-                              <div className="">
-                                <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
-                                  {trainingFilename}
-                                </p>
-                                <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                                  {shortenKiloByte(trainingFilesize)}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="">
-                              {isUploadingTrainingFile && (
-                                <div className="">
-                                  <div className="loader"></div>
-                                </div>
-                              )}
-                              {!isUploadingTrainingFile && (
-                                <Button
-                                  disabled={isUploadingTrainingFile}
-                                  variant={"ghost"}
-                                  className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                  onClick={() => {
-                                    setTrainingFile(null);
-                                    setTrainingFilename("");
-                                    setTrainingFilesize(0);
-                                    setTrainingFileError("");
-                                  }}
-                                >
-                                  <Trash2Icon className="text-secondary-purple-dark size-5" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
+                        className={cn(
+                          "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
+                          "min-h-40.5",
+                          fileEnter && "border-primary-red-pink-normal",
                         )}
-                      {trainingFileError && (
-                        <>
-                          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                            <div className="flex flex-row gap-x-4 items-center">
-                              <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
-                                <FileTextIcon className="text-danger-700 size-12 aspect-square" />
-                              </div>
-                              <div className="">
-                                <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
-                                  {trainingFilename}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setFileEnter(true);
+                        }}
+                        onDragLeave={(e) => {
+                          setFileEnter(false);
+                        }}
+                        onDragEnd={(e) => {
+                          e.preventDefault();
+                          setFileEnter(false);
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          setFileEnter(false);
+                          if (e.dataTransfer.items) {
+                            [...e.dataTransfer.items].forEach((item, i) => {
+                              if (item.kind === "file") {
+                                const file = item.getAsFile();
+                                if (file) {
+                                  // const blobUrl = URL.createObjectURL(file);
+                                  // setAreaScopingPolygonUrl(file);
+                                  // setAreaScopingPolygonFileSize(file.size);
+                                  // setAreaScopingPolygonFileName(file.name);
+                                  // console.log("fileee", file);
+
+                                  // setTrainingFile(file);
+                                  // setTrainingFilename(file.name);
+                                  // setTrainingFilesize(file.size);
+
+                                  submitFile({
+                                    file,
+                                    filename: file.name,
+                                    filesize: file.size,
+                                  });
+                                }
+                                // console.log(`items file[${i}].name = ${file?.name}`);
+                              }
+                            });
+                          } else {
+                            [...e.dataTransfer.files].forEach((file, i) => {
+                              console.log(`… file[${i}].name = ${file.name}`);
+                            });
+                          }
+                        }}
+                      >
+                        {!fileEnter && (
+                          <>
+                            <div className="space-y-3">
+                              <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
+                              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
+                                {/* Drag & drop your file here to upload. <br />
+                            Accepted format .zip */}
+                                {t("dragAndDrop")} <br />
+                                {t("acceptedFormat", {
+                                  extensions: ".zip",
+                                })}
+                              </p>
+                            </div>
+                            <Label
+                              htmlFor="data-training-file-upload"
+                              className={cn(
+                                "w-50 mx-auto flex flex-row justify-center mb-0",
+                                isFormDisabled &&
+                                  "pointer-events-none cursor-not-allowed",
+                              )}
+                            >
+                              <div
+                                className={cn(
+                                  "rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200",
+                                  isFormDisabled &&
+                                    "bg-text-icons-disabled text-text-icons-base-third",
+                                )}
+                              >
+                                <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
+                                  {t("browseFile")}
                                 </p>
-                                <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
-                                  {shortenKiloByte(trainingFilesize)}
-                                </p>
                               </div>
+                            </Label>
+                          </>
+                        )}
+
+                        {fileEnter && !isFormDisabled && (
+                          <>
+                            <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                              <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
+                              <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
+                                {t("dropHere")}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+                    {uploadedFilesArray.map((item, index) => {
+                      return (
+                        <div
+                          key={`uploaded-file-${item.filename}-${index}`}
+                          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second"
+                        >
+                          <div className="flex flex-row gap-x-4 items-center">
+                            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
+                              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                             </div>
                             <div className="">
-                              <Button
-                                disabled={isUploadingTrainingFile}
-                                variant={"ghost"}
-                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                onClick={() => {
-                                  setTrainingFile(null);
-                                  setTrainingFilename("");
-                                  setTrainingFilesize(0);
-                                  setTrainingFileError("");
-                                }}
-                              >
-                                <Trash2Icon className="text-danger-700 size-5" />
-                              </Button>
+                              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
+                                {item.filename}
+                              </p>
+                              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
+                                {shortenKiloByte(item.filesize)}
+                              </p>
                             </div>
                           </div>
-                          <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                            <div className="flex flex-row gap-x-4 items-center">
-                              <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                                <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
+
+                          <div className="">
+                            {/* {!isUploadingTrainingFile && (
+                          )} */}
+                            <Button
+                              disabled={isUploadingTrainingFile}
+                              variant={"ghost"}
+                              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+                              onClick={() => {
+                                // setTrainingFile(null);
+                                // setTrainingFilename("");
+                                // setTrainingFilesize(0);
+                              }}
+                            >
+                              <Trash2Icon className="text-secondary-purple-dark size-5" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {trainingFile && (
+                      <>
+                        {trainingFilesize <= DATA_TRAINING_FILE_SIZE_LIMIT &&
+                          !trainingFileError && (
+                            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
+                              <div className="flex flex-row gap-x-4 items-center">
+                                <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
+                                  <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
+                                </div>
+                                <div className="">
+                                  <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
+                                    {trainingFilename}
+                                  </p>
+                                  <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
+                                    {shortenKiloByte(trainingFilesize)}
+                                  </p>
+                                </div>
                               </div>
+
                               <div className="">
-                                <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                  {t("fileError")}
-                                </p>
-                                <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                  {trainingFileError}
-                                </p>
+                                {isUploadingTrainingFile && (
+                                  <div className="">
+                                    <div className="loader"></div>
+                                  </div>
+                                )}
+                                {!isUploadingTrainingFile && (
+                                  <Button
+                                    disabled={isUploadingTrainingFile}
+                                    variant={"ghost"}
+                                    className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+                                    onClick={() => {
+                                      setTrainingFile(null);
+                                      setTrainingFilename("");
+                                      setTrainingFilesize(0);
+                                      setTrainingFileError("");
+                                    }}
+                                  >
+                                    <Trash2Icon className="text-secondary-purple-dark size-5" />
+                                  </Button>
+                                )}
                               </div>
                             </div>
-                            {/* <div className="">
-                              <Button
-                                variant={"ghost"}
-                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                onClick={() => {
-                                  setLUCFile(null);
-                                  setLUCFilename("");
-                                  setLUCFilesize(0);
-                                }}
-                              >
-                                <Trash2Icon className="text-white size-5" />
-                              </Button>
-                            </div> */}
-                          </div>
-                        </>
-                      )}
-                      {trainingFilesize > DATA_TRAINING_FILE_SIZE_LIMIT &&
-                        !trainingFileError && (
+                          )}
+                        {trainingFileError && (
                           <>
                             <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
                               <div className="flex flex-row gap-x-4 items-center">
@@ -481,6 +427,7 @@ export const DataTrainingComponent = () => {
                                     setTrainingFile(null);
                                     setTrainingFilename("");
                                     setTrainingFilesize(0);
+                                    setTrainingFileError("");
                                   }}
                                 >
                                   <Trash2Icon className="text-danger-700 size-5" />
@@ -494,137 +441,156 @@ export const DataTrainingComponent = () => {
                                 </div>
                                 <div className="">
                                   <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                    {t("fileTooBigError")}
+                                    {t("fileError")}
                                   </p>
                                   <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                    {t("fileTooBigError", { limit: "500MB" })}
+                                    {trainingFileError}
                                   </p>
                                 </div>
                               </div>
+                              {/* <div className="">
+                              <Button
+                                variant={"ghost"}
+                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+                                onClick={() => {
+                                  setLUCFile(null);
+                                  setLUCFilename("");
+                                  setLUCFilesize(0);
+                                }}
+                              >
+                                <Trash2Icon className="text-white size-5" />
+                              </Button>
+                            </div> */}
                             </div>
                           </>
                         )}
-                    </>
-                  )}
-                </div>
-              </div>
-              <input
-                id="data-training-file-upload"
-                type="file"
-                className="hidden"
-                accept=".zip"
-                multiple={false}
-                onChange={onUploadFile}
-              />
-            </TabsContent>
-            <TabsContent value="oss">
-              <div className="space-y-6">
-                <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                  {t("onScreenSamplingDescription")}
-                </p>
-                <div className="space-y-2">
-                  <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                    {t("recordedLULC")}
-                  </p>
-                  <LUCClassTable summary={false} />
-                </div>
-                <Tabs defaultValue="pinpoint" className="gap-y-3 mb-0">
-                  <div className="px-0">
-                    <TabsList className="w-full bg-transparent rounded-none border-0 p-0 gap-0">
-                      <TabsTrigger
-                        value="pinpoint"
-                        className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink rounded-none"
-                      >
-                        {t("pinPoint")}
-                      </TabsTrigger>
-                      <TabsTrigger
-                        disabled
-                        value="draw"
-                        className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink border-b-text-icons-disabled rounded-none"
-                      >
-                        {t("drawPolygon")}
-                      </TabsTrigger>
-                    </TabsList>
+                        {trainingFilesize > DATA_TRAINING_FILE_SIZE_LIMIT &&
+                          !trainingFileError && (
+                            <>
+                              <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
+                                <div className="flex flex-row gap-x-4 items-center">
+                                  <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
+                                    <FileTextIcon className="text-danger-700 size-12 aspect-square" />
+                                  </div>
+                                  <div className="">
+                                    <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
+                                      {trainingFilename}
+                                    </p>
+                                    <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
+                                      {shortenKiloByte(trainingFilesize)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="">
+                                  <Button
+                                    disabled={isUploadingTrainingFile}
+                                    variant={"ghost"}
+                                    className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+                                    onClick={() => {
+                                      setTrainingFile(null);
+                                      setTrainingFilename("");
+                                      setTrainingFilesize(0);
+                                    }}
+                                  >
+                                    <Trash2Icon className="text-danger-700 size-5" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
+                                <div className="flex flex-row gap-x-4 items-center">
+                                  <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
+                                    <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
+                                  </div>
+                                  <div className="">
+                                    <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
+                                      {t("fileTooBigError")}
+                                    </p>
+                                    <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
+                                      {t("fileTooBigError", { limit: "500MB" })}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                      </>
+                    )}
                   </div>
-                  <TabsContent value="pinpoint">
-                    <div className="mt-4 space-y-5.5">
-                      <div className="">
-                        <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                          {t("pinYourPoint")}
-                        </p>
-                        <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
-                          {t("pinYourPointDescription")}
-                        </p>
-                      </div>
-                      <RadioGroup
-                        onValueChange={(val: POINTING_TYPE) => {
-                          setPointingType(val);
-                        }}
-                        value={pointingType}
-                        // defaultValue="single"
-                        className="space-y-3"
-                      >
-                        <Label
-                          htmlFor="single-radio"
-                          className=" mb-0 hover:brightness-95 cursor-pointer bg-white transition-all duration-200"
+                </div>
+                <input
+                  id="data-training-file-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".zip"
+                  multiple={false}
+                  onChange={onUploadFile}
+                />
+              </TabsContent>
+              <TabsContent value="oss">
+                <div className="space-y-6">
+                  <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+                    {t("onScreenSamplingDescription")}
+                  </p>
+                  <div className="space-y-2">
+                    <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
+                      {t("recordedLULC")}
+                    </p>
+                    <LUCClassTable summary={false} />
+                  </div>
+                  <Tabs defaultValue="pinpoint" className="gap-y-3 mb-0">
+                    <div className="px-0">
+                      <TabsList className="w-full bg-transparent rounded-none border-0 p-0 gap-0">
+                        <TabsTrigger
+                          value="pinpoint"
+                          className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink rounded-none"
                         >
-                          <div
-                            className={cn(
-                              "p-3 flex flex-row items-center gap-x-3 rounded-[12px] border-2 border-text-icons-disabled",
-                              pointingType === POINTING_TYPE.SINGLE &&
-                                "border-primary-pink",
-                            )}
-                          >
-                            <div className="">
-                              <RadioGroupItem
-                                value={POINTING_TYPE.SINGLE}
-                                id="single-radio"
-                                className={cn(
-                                  "size-5.5 border-text-icons-disabled border-2",
-                                  pointingType === POINTING_TYPE.SINGLE &&
-                                    "border-primary-red-pink-normal-active",
-                                )}
-                                indicatorClassName="size-4 text-primary-pink fill-primary-pink"
-                              />
-                            </div>
-                            <div className="">
-                              <Image
-                                src="/images/single-point.webp"
-                                width={164}
-                                height={140}
-                                alt="Single Point"
-                                className="w-22.5"
-                              />
-                            </div>
-                            <div className="">
-                              <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                {t("singlePoint")}
-                              </p>
-                              <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                {t("singlePointDescription")}
-                              </p>
-                            </div>
-                          </div>
-                        </Label>
-                        <Label
-                          htmlFor="bulk-radio"
-                          className=" mb-0 hover:brightness-95 cursor-pointer bg-white transition-all duration-200"
+                          {t("pinPoint")}
+                        </TabsTrigger>
+                        <TabsTrigger
+                          disabled
+                          value="draw"
+                          className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink border-b-text-icons-disabled rounded-none"
                         >
-                          <div
-                            className={cn(
-                              "p-3 rounded-[12px] border-2 border-text-icons-disabled flex flex-col gap-y-4",
-                              pointingType === POINTING_TYPE.BULK &&
-                                "border-primary-pink",
-                            )}
+                          {t("drawPolygon")}
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
+                    <TabsContent value="pinpoint">
+                      <div className="mt-4 space-y-5.5">
+                        <div className="">
+                          <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
+                            {t("pinYourPoint")}
+                          </p>
+                          <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
+                            {t("pinYourPointDescription")}
+                          </p>
+                        </div>
+                        <RadioGroup
+                          onValueChange={(val: POINTING_TYPE) => {
+                            setPointingType(val);
+                          }}
+                          value={pointingType}
+                          // defaultValue="single"
+                          className="space-y-3"
+                        >
+                          <Label
+                            htmlFor="single-radio"
+                            className=" mb-0 hover:brightness-95 cursor-pointer bg-white transition-all duration-200"
                           >
-                            <div className="flex flex-row items-center gap-x-3">
+                            <div
+                              className={cn(
+                                "p-3 flex flex-row items-center gap-x-3 rounded-[12px] border-2 border-text-icons-disabled",
+                                pointingType === POINTING_TYPE.SINGLE &&
+                                  "border-primary-pink",
+                              )}
+                            >
                               <div className="">
                                 <RadioGroupItem
-                                  value={POINTING_TYPE.BULK}
-                                  id="bulk-radio"
+                                  value={POINTING_TYPE.SINGLE}
+                                  id="single-radio"
                                   className={cn(
                                     "size-5.5 border-text-icons-disabled border-2",
-                                    pointingType === POINTING_TYPE.BULK &&
+                                    pointingType === POINTING_TYPE.SINGLE &&
                                       "border-primary-red-pink-normal-active",
                                   )}
                                   indicatorClassName="size-4 text-primary-pink fill-primary-pink"
@@ -632,71 +598,115 @@ export const DataTrainingComponent = () => {
                               </div>
                               <div className="">
                                 <Image
-                                  src="/images/bulk-point.webp"
-                                  width={165}
-                                  height={102}
-                                  alt="Bulk Point"
+                                  src="/images/single-point.webp"
+                                  width={164}
+                                  height={140}
+                                  alt="Single Point"
                                   className="w-22.5"
                                 />
                               </div>
                               <div className="">
                                 <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                  {t("bulkPoint")}
+                                  {t("singlePoint")}
                                 </p>
                                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                  {t("bulkPointDescription")}
+                                  {t("singlePointDescription")}
                                 </p>
                               </div>
                             </div>
-                            {pointingType === "bulk" && (
-                              <div className="ml-8 space-y-2">
-                                <p className="font-aptos text-[15px] font-regular leading-4.5">
-                                  {t("selectLULCClass")}
-                                </p>
-                                <Select
-                                  value={selectedClass}
-                                  onValueChange={setSelectedClass}
-                                >
-                                  <SelectTrigger className="w-full">
-                                    <SelectValue
-                                      placeholder={t(
-                                        "selectLULCClassPlaceholder",
-                                      )}
-                                    />
-                                  </SelectTrigger>
-                                  <SelectContent position="item-aligned">
-                                    {classArray.map((item) => (
-                                      <SelectItem
-                                        key={`key-${item.class_id}`}
-                                        value={String(item.class_id)}
-                                        // disabled={item.disabled}
-                                      >
-                                        {item.class_name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                          </Label>
+                          <Label
+                            htmlFor="bulk-radio"
+                            className=" mb-0 hover:brightness-95 cursor-pointer bg-white transition-all duration-200"
+                          >
+                            <div
+                              className={cn(
+                                "p-3 rounded-[12px] border-2 border-text-icons-disabled flex flex-col gap-y-4",
+                                pointingType === POINTING_TYPE.BULK &&
+                                  "border-primary-pink",
+                              )}
+                            >
+                              <div className="flex flex-row items-center gap-x-3">
+                                <div className="">
+                                  <RadioGroupItem
+                                    value={POINTING_TYPE.BULK}
+                                    id="bulk-radio"
+                                    className={cn(
+                                      "size-5.5 border-text-icons-disabled border-2",
+                                      pointingType === POINTING_TYPE.BULK &&
+                                        "border-primary-red-pink-normal-active",
+                                    )}
+                                    indicatorClassName="size-4 text-primary-pink fill-primary-pink"
+                                  />
+                                </div>
+                                <div className="">
+                                  <Image
+                                    src="/images/bulk-point.webp"
+                                    width={165}
+                                    height={102}
+                                    alt="Bulk Point"
+                                    className="w-22.5"
+                                  />
+                                </div>
+                                <div className="">
+                                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                                    {t("bulkPoint")}
+                                  </p>
+                                  <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
+                                    {t("bulkPointDescription")}
+                                  </p>
+                                </div>
                               </div>
-                            )}
-                          </div>
-                        </Label>
-                        <Button
-                          disabled={isNextDisabled}
-                          variant={"primary"}
-                          className="text-[16px]"
-                          onClick={() => {
-                            onClickStartPointing();
-                          }}
-                        >
-                          {t("startPointing")}
-                        </Button>
-                      </RadioGroup>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </TabsContent>
-          </Tabs>
+                              {pointingType === "bulk" && (
+                                <div className="ml-8 space-y-2">
+                                  <p className="font-aptos text-[15px] font-regular leading-4.5">
+                                    {t("selectLULCClass")}
+                                  </p>
+                                  <Select
+                                    value={selectedClass}
+                                    onValueChange={setSelectedClass}
+                                  >
+                                    <SelectTrigger className="w-full">
+                                      <SelectValue
+                                        placeholder={t(
+                                          "selectLULCClassPlaceholder",
+                                        )}
+                                      />
+                                    </SelectTrigger>
+                                    <SelectContent position="item-aligned">
+                                      {classArray.map((item) => (
+                                        <SelectItem
+                                          key={`key-${item.class_id}`}
+                                          value={String(item.class_id)}
+                                          // disabled={item.disabled}
+                                        >
+                                          {item.class_name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              )}
+                            </div>
+                          </Label>
+                          <Button
+                            disabled={isNextDisabled}
+                            variant={"primary"}
+                            className="text-[16px]"
+                            onClick={() => {
+                              onClickStartPointing();
+                            }}
+                          >
+                            {t("startPointing")}
+                          </Button>
+                        </RadioGroup>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
     </>
@@ -704,8 +714,13 @@ export const DataTrainingComponent = () => {
 };
 
 export const DataTrainingFooter = () => {
-  const { setStepKey, setProgressPanelIndex, isUploadingTrainingFile } =
-    useContext(MapGenerationContext);
+  const {
+    setStepKey,
+    setProgressPanelIndex,
+    isUploadingTrainingFile,
+    LUCfile,
+    classArray,
+  } = useContext(MapGenerationContext);
 
   const { sessionId } = useContext(GlobalContext);
 
@@ -713,7 +728,10 @@ export const DataTrainingFooter = () => {
 
   const t = useTranslations("InteractivePanel");
 
-  const isNextDisabled = isUploadingTrainingFile;
+  const selectedCustom = LUCfile !== null;
+
+  const isNextDisabled =
+    isUploadingTrainingFile || (selectedCustom && classArray.length === 0);
 
   const onClickNext = () => {
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);

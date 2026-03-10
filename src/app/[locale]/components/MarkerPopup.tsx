@@ -46,7 +46,7 @@ export const MarkerPopup = ({
   const el = markerArray.find((item) => item.id === markerId);
 
   useEffect(() => {
-    console.log("markerrid", markerId);
+    // console.log("markerrid", markerId);
     if (!markerId) return;
 
     setIsEditing(false);

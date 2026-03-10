@@ -676,11 +676,10 @@ export const AreaScopingComponent = () => {
             />
             <div className="space-y-2">
               <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-                Draw Polygon
+                {t("drawPolygon")}
               </p>
               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
-                Select any location to start draw <br /> polygon. Double click
-                to finish it
+                {t("drawPolygonSubtitle")}
               </p>
             </div>
           </div>
@@ -701,7 +700,7 @@ export const AreaScopingComponent = () => {
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          Your selected area has total area approximately:
+                          {t("selectedAreaHasTotalArea")}
                         </p>
                         <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
                           {numberThousandSeparator(
@@ -807,6 +806,8 @@ export const AreaScopingComponent = () => {
 };
 
 export const AreaScopingFooter = () => {
+  const t = useTranslations("InteractivePanel");
+
   const {
     areaScopingType,
     areaScopingPolygonArea,
@@ -1041,7 +1042,7 @@ export const AreaScopingFooter = () => {
           onReselect();
         }}
       >
-        Reselect
+        {t("reselect")}
       </Button>
       <Button
         disabled={isConfirmDisabled}
@@ -1051,7 +1052,7 @@ export const AreaScopingFooter = () => {
           onClickConfirm();
         }}
       >
-        Confirm
+        {t("confirm")}
       </Button>
     </div>
   );

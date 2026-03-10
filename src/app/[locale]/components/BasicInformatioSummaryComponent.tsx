@@ -32,6 +32,7 @@ import { MapContext } from "@/contexts/mapContext";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
+import { GlobalContext } from "@/contexts/globalContext";
 
 export const BasicInformationSummaryComponent = () => {
   const { resetMosaicLayer } = useContext(MapContext);
@@ -58,7 +59,7 @@ export const BasicInformationSummaryComponent = () => {
     setPolygonData,
   } = useContext(MapGenerationContext);
 
-  const { vectorSource } = useContext(MapContext);
+  const { vectorSource, isPreviewingMosaic } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
 
@@ -142,7 +143,7 @@ export const BasicInformationSummaryComponent = () => {
             />
           </div>
         </div>
-        <MosaicSummary />
+        {isPreviewingMosaic && <MosaicSummary />}
       </div>
       {/* <Accordion
         value={basicInformationOpenAccordion}
@@ -170,14 +171,13 @@ export const BasicInformationSummaryComponent = () => {
 
 export const BasicInformationSummaryFooter = () => {
   const {
-    temporalCoverage,
-    temporalCoverageUnit,
     setStepKey,
-    // isPreviewingMosaic,
-    // setIsPreviewingMosaic,
     isBasicInformationChangeInput,
     setIsBasicInformationChangeInput,
     setProgressPanelIndex,
+    polygonData,
+    temporalCoverage,
+    temporalCoverageUnit,
   } = useContext(MapGenerationContext);
 
   const {
@@ -185,7 +185,10 @@ export const BasicInformationSummaryFooter = () => {
     // setIsPreviewingMosaic,
     removeMosaicLayer,
     isMosaicLoading,
+    getMosaicMap,
   } = useContext(MapContext);
+
+  const { sessionId } = useContext(GlobalContext);
 
   const t = useTranslations("InteractivePanel");
 
@@ -207,6 +210,22 @@ export const BasicInformationSummaryFooter = () => {
     setIsBasicInformationChangeInput(true);
   };
 
+  const onNextClick = () => {
+    if (isPreviewingMosaic) {
+      setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
+      setProgressPanelIndex(1);
+
+      return;
+    }
+
+    getMosaicMap({
+      sessionId,
+      polygonData,
+      temporalCoverage,
+      temporalCoverageUnit,
+    });
+  };
+
   return (
     <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
       <Button
@@ -224,14 +243,23 @@ export const BasicInformationSummaryFooter = () => {
       </Button>
       <Button
         onClick={() => {
-          setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-          setProgressPanelIndex(1);
+          onNextClick();
         }}
         disabled={isNextDisabled}
         variant="primary"
         className=""
       >
-        {t("next")}
+        {isPreviewingMosaic && t("next")}
+        {!isPreviewingMosaic && (
+          <>
+            {isMosaicLoading && (
+              <div className="w-full h-10 flex flex-row justify-center items-center">
+                <span className="loader sm"></span>
+              </div>
+            )}
+            {!isMosaicLoading && t("previewMosaicMap")}
+          </>
+        )}
       </Button>
     </div>
   );
