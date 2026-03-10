@@ -88,6 +88,13 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                 {t("featureID")}
               </TableHead>
             )}
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
+              {t("lulcClass")}
+            </TableHead>
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
+              {t("numberOfPoints")}
+            </TableHead>
+
             {!summary && (
               <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center flex flex-row justify-start">
                 <Button
@@ -116,12 +123,6 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                 </Button>
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-              {t("lulcClass")}
-            </TableHead>
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
-              {t("numberOfPoints")}
-            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody className="text-black font-aptos text-xs font-regular leading-4.5 bg-white">
@@ -129,10 +130,10 @@ export const LUCClassTable = ({ summary = false }: Props) => {
             <>
               {summaryData?.data.training_data_summary.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell className="font-aptos! text-center">
+                  <TableCell className="font-aptos! text-center border-r">
                     {item.class_id}
                   </TableCell>
-                  <TableCell className="font-aptos! text-center">
+                  <TableCell className="font-aptos! text-center border-r">
                     {item.class_name}
                   </TableCell>
                   <TableCell className="font-aptos! text-center max-w-25">
@@ -146,6 +147,13 @@ export const LUCClassTable = ({ summary = false }: Props) => {
             <>
               {classArrayCount.map((item, index) => (
                 <TableRow key={index}>
+                  <TableCell className="font-aptos! text-center border-r">
+                    {item.class_name}
+                  </TableCell>
+                  <TableCell className="font-aptos! text-center border-r max-w-25">
+                    {item.count}
+                  </TableCell>
+
                   <TableCell className="font-aptos! ">
                     <Button
                       variant={"ghost"}
@@ -175,12 +183,6 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                         item.class_name,
                       ) && <EyeIcon className="" />}
                     </Button>
-                  </TableCell>
-                  <TableCell className="font-aptos! text-center">
-                    {item.class_name}
-                  </TableCell>
-                  <TableCell className="font-aptos! text-center max-w-25">
-                    {item.count}
                   </TableCell>
                 </TableRow>
               ))}

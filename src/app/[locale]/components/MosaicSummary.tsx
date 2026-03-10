@@ -90,12 +90,12 @@ export const MosaicSummary = () => {
   // };
 
   useEffect(() => {
-    getMosaicMap({
-      sessionId,
-      polygonData,
-      temporalCoverage,
-      temporalCoverageUnit,
-    });
+    // getMosaicMap({
+    //   sessionId,
+    //   polygonData,
+    //   temporalCoverage,
+    //   temporalCoverageUnit,
+    // });
   }, []);
 
   return (
@@ -110,7 +110,7 @@ export const MosaicSummary = () => {
               Mosaic Summary
             </p>
             <div className="flex flex-row gap-x-3 items-center pb-1">
-              {isMosaicLoading && (
+              {/* {isMosaicLoading && (
                 // <div className="w-full h-10 flex flex-row justify-center">
                 <span className="loader sm "></span>
                 // </div>
@@ -129,7 +129,7 @@ export const MosaicSummary = () => {
                 // }}
                 disabled={true}
                 id="preview-mosaic-map"
-              />
+              /> */}
             </div>
           </div>
           <div className="mt-2">

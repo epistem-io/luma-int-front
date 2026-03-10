@@ -7,7 +7,7 @@ import { useContext } from "react";
 export const ZoomButton = () => {
   const { mapInstance } = useContext(MapContext);
   return (
-    <div className="absolute right-4 top-24 border border-neutrals-300 bg-neutral-100 flex flex-col">
+    <div className="border border-neutrals-300 rounded-md bg-neutral-100 flex flex-col z-11 overflow-hidden">
       <div
         onClick={() => {
           const view = mapInstance?.getView();

@@ -1,3 +1,4 @@
+import { BasemapButton } from "./components/BasemapButton";
 import { FloatingPanel } from "./components/FloatingPanel";
 import { LegendPanel } from "./components/LegendPanel";
 import { LegendPanelNew } from "./components/LegendPanelNew";
@@ -15,9 +16,12 @@ export default function Home() {
         <NewFloatingPanel />
       </div>
       <Map1 />
+      <div className="flex flex-col gap-y-4 absolute right-10 top-8 ">
+        <ZoomButton />
+        <BasemapButton />
+      </div>
       {/* <LegendPanel /> */}
       <LegendPanelNew />
-      {/* <ZoomButton /> */}
     </div>
   );
 }

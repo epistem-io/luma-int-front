@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 import TileLayer from "ol/layer/Tile";
-import { GET_MOSAIC_URL, POINTING_TYPE } from "@/constants";
+import { BASEMAP_TYPE, GET_MOSAIC_URL, POINTING_TYPE } from "@/constants";
 import { toast } from "sonner";
 import { XYZ } from "ol/source";
 import {
@@ -77,6 +77,14 @@ interface LegendItem {
   items: (SingleColor | Gradient)[];
   // constrainToPolygon: boolean;
 }
+
+const INCLUDED_MOSAIC = [
+  "Composite - True Color (RGB)",
+  "Composite - False Color Infrared (NIR/Red/Green)",
+  "Composite - Land/Water (NIR/SWIR1/RED)",
+];
+
+const DEFAULT_ON_MOSAIC = "Composite - True Color (RGB)";
 
 export interface LayerLegend {
   layer: TileLayer;
@@ -146,6 +154,10 @@ interface MapContextType {
   renderArrayToMarkerVector: (arr: Marker[]) => void;
   mosaicStatistic: MosaicStatistics | null;
   setMosaicStatistic: Dispatch<SetStateAction<MosaicStatistics | null>>;
+  selectedBasemap: string;
+  setSelectedBasemap: Dispatch<SetStateAction<string>>;
+  isLegendVisible: string[];
+  setIsLegendVisible: Dispatch<SetStateAction<string[]>>;
 }
 
 const DEFAULT_VALUE: MapContextType = {
@@ -198,6 +210,10 @@ const DEFAULT_VALUE: MapContextType = {
   renderArrayToMarkerVector: () => {},
   mosaicStatistic: null,
   setMosaicStatistic: () => {},
+  selectedBasemap: BASEMAP_TYPE.GREY,
+  setSelectedBasemap: () => {},
+  isLegendVisible: [],
+  setIsLegendVisible: () => {},
 };
 
 const MapContext = createContext(DEFAULT_VALUE);
@@ -254,7 +270,17 @@ const MapContextContainer = (props: PropsWithChildren) => {
   const [finalLayerVisible, setFinalLayerVisible] = useState<boolean>(
     DEFAULT_VALUE.finalLayerVisible,
   );
+
+  const [selectedBasemap, setSelectedBasemap] = useState(
+    DEFAULT_VALUE.selectedBasemap,
+  );
+
+  const [isLegendVisible, setIsLegendVisible] = useState(
+    DEFAULT_VALUE.isLegendVisible,
+  );
+
   // NON VALUE
+
   const [cursorVectorLayer, setCursorVectorLayer] =
     useState<VectorLayer | null>(null);
   const [mapHoverOverMarker, setMapHoverOverMarker] = useState<boolean>(false);
@@ -263,6 +289,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
   );
   const [mapPointerListener, setMapPointerListener] =
     useState<EventsKey | null>(null);
+
   // const [mapClickListener, setMapClickListener] = useState<EventsKey[]>([]);
   // const [mapPointerListener, setMapPointerListener] = useState<EventsKey[]>([]);
 
@@ -318,8 +345,14 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
         // console.log("jsonn", json);
 
-        addMosaicLayer(json.results.layers);
-        setMosaicData(json.results.layers);
+        const tempLayers = json.results.layers.filter((item) => {
+          return INCLUDED_MOSAIC.includes(item.name);
+        });
+
+        addMosaicLayer(tempLayers);
+        setMosaicData(tempLayers);
+        // addMosaicLayer(json.results.layers);
+        // setMosaicData(json.results.layers);
 
         const temp: MosaicStatistics = {
           statistics: json.results.statistics,
@@ -328,6 +361,8 @@ const MapContextContainer = (props: PropsWithChildren) => {
         };
 
         setMosaicStatistic(temp);
+
+        setIsLegendVisible(["legend-accordion"]);
       })
       .catch((e) => {
         toast.error(`Error on upload training data: ${e}`, {
@@ -348,11 +383,15 @@ const MapContextContainer = (props: PropsWithChildren) => {
     if (arr.length === 0) return;
 
     const temp: TileLayer[] = [];
+    const tempVisArr: boolean[] = [];
 
     arr.forEach((item) => {
       // filter only Composite - True Color (RGB)
 
       // if (item.name !== "Composite - True Color (RGB)") return;
+
+      console.log("add mosaic", item);
+      if (!INCLUDED_MOSAIC.includes(item.name)) return;
 
       const xyzLayer = new TileLayer({
         source: new XYZ({
@@ -362,18 +401,21 @@ const MapContextContainer = (props: PropsWithChildren) => {
         }),
         className: `mosaic`,
         zIndex: 10,
-        opacity: 0,
+        opacity: item.name === DEFAULT_ON_MOSAIC ? 1 : 0,
       });
 
       // console.log("xlayer", xyzLayer);
       temp.push(xyzLayer);
+      tempVisArr.push(item.name === DEFAULT_ON_MOSAIC);
+
       mapInstance?.addLayer(xyzLayer);
     });
 
     vectorLayer?.setStyle(stylesTransparentFill(3));
     setIsPreviewingMosaic(true);
     setMosaicLayerArray(temp);
-    setMosaicLayerVisibilityArray(temp.map(() => false));
+    setMosaicLayerVisibilityArray(tempVisArr);
+    // setMosaicLayerVisibilityArray(temp.map(() => false));
 
     return;
   };
@@ -893,6 +935,10 @@ const MapContextContainer = (props: PropsWithChildren) => {
     setFinalLayer,
     finalLayerVisible,
     setFinalLayerVisible,
+    selectedBasemap,
+    setSelectedBasemap,
+    isLegendVisible,
+    setIsLegendVisible,
   };
 
   return (

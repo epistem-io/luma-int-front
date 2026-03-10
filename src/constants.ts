@@ -23,6 +23,12 @@ export enum BASIC_INFORMATION_ACCORDION_TYPE {
   COMPOSITE = "composite",
 }
 
+export enum BASEMAP_TYPE {
+  GREY = "grey",
+  OSM = "osm",
+  SATELLITE = "satellite",
+}
+
 export const AREA_SCOPING_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 export const AREA_SCOPING_POLYGON_AREA_LIMIT = 100000;
 
