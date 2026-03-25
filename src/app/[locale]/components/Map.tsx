@@ -42,7 +42,7 @@ const Map1 = () => {
   // on component mount create the map and set the map refrences to the state
   useEffect(() => {
     const source = new VectorSource({ wrapX: false });
-    const vectorLayer = new VectorLayer({ source });
+    const vectorLayer = new VectorLayer({ source, zIndex: 20 });
 
     const baseMapCarto = new TileLayer({
       source: new ImageTile({

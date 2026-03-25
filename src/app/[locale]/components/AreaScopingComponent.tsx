@@ -169,6 +169,7 @@ export const AreaScopingComponent = () => {
     setDrawInteraction(updatedDraw);
 
     const temp1 = updatedDraw.on("drawstart", () => {
+      console.log("vsource clear onn drawstart");
       vectorLayer.getSource()?.clear();
       // Backspace to undo drawn polygon
       document.addEventListener("keydown", (e) => {
@@ -181,9 +182,8 @@ export const AreaScopingComponent = () => {
     const temp2 = updatedDraw.on("drawend", (e) => {
       const feature: Feature<Polygon> = e.feature as Feature<Polygon>;
       feature.setStyle(stylesTransparentFill(3));
-      // feature.setStyle(styles(3));
-      const polygon = feature.getGeometry() as Polygon;
 
+      const polygon = feature.getGeometry() as Polygon;
       setPolygon(polygon);
 
       const extent = polygon.getExtent();
@@ -210,10 +210,13 @@ export const AreaScopingComponent = () => {
 
       mapInstance.removeInteraction(updatedDraw);
 
+      setDrawInteraction(null);
+
       setDrawStartNumber(null);
       setDrawEndNumber(null);
     });
 
+    console.log("setdrawstarts");
     setDrawStartNumber(temp1);
     setDrawEndNumber(temp2);
 
@@ -849,6 +852,7 @@ export const AreaScopingFooter = () => {
     setPolygonData(null);
 
     if (vectorLayer && mapInstance) {
+      console.log("vsource clear onreselect");
       vectorSource?.clear();
     }
   };
@@ -897,7 +901,7 @@ export const AreaScopingFooter = () => {
         if (json.geometry.type === "MultiPolygon") {
           const coordinates = json.geometry.coordinates as Coordinate[][][];
 
-          vectorSource?.clear();
+          // vectorSource?.clear();
 
           const tempPolygon = new MultiPolygon(coordinates).transform(
             "EPSG:4326",
@@ -943,7 +947,7 @@ export const AreaScopingFooter = () => {
 
         const coordinates = json.geometry.coordinates as Coordinate[][];
 
-        vectorSource?.clear();
+        // vectorSource?.clear();
 
         const tempPolygon = new Polygon(coordinates).transform(
           "EPSG:4326",

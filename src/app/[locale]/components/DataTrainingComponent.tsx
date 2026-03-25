@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
-import { cn, shortenKiloByte } from "@/lib/utils";
+import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import { fromLonLat } from "ol/proj";
 
 import {
@@ -36,6 +36,8 @@ import {
 } from "@/constants";
 import {
   AlertCircleIcon,
+  ChevronDown,
+  ChevronLeft,
   FileTextIcon,
   Trash2Icon,
   UploadIcon,
@@ -43,6 +45,16 @@ import {
 import { toast } from "sonner";
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionFullTrigger,
+  AccordionItem,
+} from "@/components/ui/accordion";
+import Feature from "ol/Feature";
+import { Point } from "ol/geom";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
 
 export const DataTrainingComponent = () => {
   const { sessionId } = useContext(GlobalContext);
@@ -61,23 +73,21 @@ export const DataTrainingComponent = () => {
     setIsUploadingTrainingFile,
     defaultArray,
     LUCfile,
+    trainingFile,
+    trainingFilename,
+    trainingFilesize,
+    trainingFileError,
+    uploadedFilesArray,
+    setTrainingFile,
+    setTrainingFilename,
+    setTrainingFilesize,
+    setTrainingFileError,
+    setUploadedFilesArray,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
-
-  const [trainingFile, setTrainingFile] = useState<File | null>(null);
-  const [trainingFilename, setTrainingFilename] = useState<string>("");
-  const [trainingFilesize, setTrainingFilesize] = useState<number>(0);
-
-  const [trainingFileError, setTrainingFileError] = useState<string>("");
-
-  // const [isUploadingTrainingFile, setIsUploadingTrainingFile] = useState(false);
-
-  const [uploadedFilesArray, setUploadedFilesArray] = useState<
-    FileTrainingObject[]
-  >([]);
 
   // useEffect(() => {
   //   console.log("upll", uploadedFilesArray);
@@ -147,12 +157,38 @@ export const DataTrainingComponent = () => {
             // WIP NAME WITH POINT
             name: item.class_name,
             class_id: item.class_id,
+            class_color: item.class_color,
           })),
         ];
 
-        setMarkerArray(tempMarkerArray);
+        const tempMarkerWithFeature = tempMarkerArray.map((item) => ({
+          ...item,
+          map_feature: new Feature({
+            geometry: new Point(item.coordinates),
+            id: item.id,
+            property: {
+              class_name: item.name,
+            },
+          }),
+        }));
 
-        renderArrayToMarkerVector(tempMarkerArray);
+        tempMarkerWithFeature.forEach((item) => {
+          item.map_feature.setStyle(
+            new Style({
+              image: new Icon({
+                anchor: [0.5, 1], // Anchor the bottom center of the icon
+                src: svgWithColor(item.class_color),
+                // src: "/images/marker.webp", // Use your own icon URL
+                size: [92, 117],
+                height: 30,
+              }),
+            }),
+          );
+        });
+
+        setMarkerArray(tempMarkerWithFeature);
+
+        renderArrayToMarkerVector(tempMarkerWithFeature);
 
         setTrainingFile(null);
         setTrainingFilename("");
@@ -201,13 +237,33 @@ export const DataTrainingComponent = () => {
 
   return (
     <>
-      <div className="">
-        <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
-          {selectedDefault && <LUCClassTable summary={false} />}
-          {selectedCustom && (
+      <div className="space-y-4">
+        <Accordion type="single" collapsible>
+          <AccordionItem
+            value={"lulc-table"}
+            className="rounded-xl border border-neutral-400  bg-white pb-3 last:border-b"
+          >
+            <AccordionFullTrigger
+              icon={
+                <ChevronDown className="h-5 w-5 shrink-0 text-primary-pink transition-transform duration-200" />
+              }
+              className="hover:no-underline p-3 pb-0"
+            >
+              <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
+                {t("recordedLULC")}
+              </p>
+            </AccordionFullTrigger>
+            <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+              <LUCClassTable summary={false} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        {/* {selectedDefault && <LUCClassTable summary={false} />} */}
+        {selectedCustom && (
+          <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs defaultValue="upload" className="gap-y-3 mb-0">
-              <div className="px-1.5">
-                <TabsList className="w-full">
+              <div className="px-0 py-0">
+                <TabsList className="w-full px-1.5">
                   <TabsTrigger value="upload">
                     {t("uploadDataTraining")}
                   </TabsTrigger>
@@ -394,6 +450,13 @@ export const DataTrainingComponent = () => {
                                       setTrainingFilename("");
                                       setTrainingFilesize(0);
                                       setTrainingFileError("");
+
+                                      const doc = document.getElementById(
+                                        "data-training-file-upload",
+                                      ) as HTMLInputElement;
+                                      if (!doc) return;
+
+                                      doc.value = "";
                                     }}
                                   >
                                     <Trash2Icon className="text-secondary-purple-dark size-5" />
@@ -428,6 +491,13 @@ export const DataTrainingComponent = () => {
                                     setTrainingFilename("");
                                     setTrainingFilesize(0);
                                     setTrainingFileError("");
+
+                                    const doc = document.getElementById(
+                                      "data-training-file-upload",
+                                    ) as HTMLInputElement;
+                                    if (!doc) return;
+
+                                    doc.value = "";
                                   }}
                                 >
                                   <Trash2Icon className="text-danger-700 size-5" />
@@ -490,6 +560,13 @@ export const DataTrainingComponent = () => {
                                       setTrainingFile(null);
                                       setTrainingFilename("");
                                       setTrainingFilesize(0);
+
+                                      const doc = document.getElementById(
+                                        "data-training-file-upload",
+                                      ) as HTMLInputElement;
+                                      if (!doc) return;
+
+                                      doc.value = "";
                                     }}
                                   >
                                     <Trash2Icon className="text-danger-700 size-5" />
@@ -531,12 +608,12 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("onScreenSamplingDescription")}
                   </p>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
                       {t("recordedLULC")}
                     </p>
                     <LUCClassTable summary={false} />
-                  </div>
+                  </div> */}
                   <Tabs defaultValue="pinpoint" className="gap-y-3 mb-0">
                     <div className="px-0">
                       <TabsList className="w-full bg-transparent rounded-none border-0 p-0 gap-0">
@@ -706,8 +783,8 @@ export const DataTrainingComponent = () => {
                 </div>
               </TabsContent>
             </Tabs>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </>
   );
@@ -733,25 +810,44 @@ export const DataTrainingFooter = () => {
   const isNextDisabled =
     isUploadingTrainingFile || (selectedCustom && classArray.length === 0);
 
+  const isBackDisabled = isUploadingTrainingFile;
+
   const onClickNext = () => {
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
     markerVectorLayer?.setOpacity(0);
     setProgressPanelIndex(3);
   };
 
+  const onClickBack = () => {
+    setProgressPanelIndex(1);
+    setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
+  };
+
   return (
-    <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
-      <div></div>
+    <div className="p-3 pt-4 gap-x-4 flex flex-row">
       <Button
+        disabled={isBackDisabled}
         onClick={() => {
-          onClickNext();
+          onClickBack();
         }}
-        disabled={isNextDisabled}
-        variant="primary"
-        className=""
+        variant={"outline"}
+        size={"icon"}
       >
-        {t("next")}
+        <ChevronLeft className="text-primary-pink size-4" />
       </Button>
+      <div className="grid grid-cols-2 gap-x-4 w-full">
+        <div></div>
+        <Button
+          onClick={() => {
+            onClickNext();
+          }}
+          disabled={isNextDisabled}
+          variant="primary"
+          className=""
+        >
+          {t("next")}
+        </Button>
+      </div>
     </div>
   );
 };

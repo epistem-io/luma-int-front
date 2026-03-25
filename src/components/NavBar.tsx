@@ -52,7 +52,7 @@ export function NavBar({ className }: NavBarProps) {
                 />
               </div>
               <h1 className="text-xl font-medium text-black font-inter">
-                Epistem-X
+                Luma
               </h1>
             </div>
           </Link>

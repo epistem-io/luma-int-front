@@ -17,6 +17,7 @@ import Feature from "ol/Feature";
 import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
+import { svgWithColor } from "@/lib/utils";
 
 interface Props {
   summary?: boolean;
@@ -43,11 +44,15 @@ export const LUCClassTable = ({ summary = false }: Props) => {
         geometry: new Point(item.coordinates),
         id: item.id,
       });
+
+      const svg = svgWithColor(item.class_color);
+
       markerFeature.setStyle(
         new Style({
           image: new Icon({
             anchor: [0.5, 1], // Anchor the bottom center of the icon
-            src: "/images/marker.webp", // Use your own icon URL
+            src: svg,
+            // src: "/images/marker.webp", // Use your own icon URL
             size: [92, 117],
             height: 30,
           }),
@@ -88,7 +93,7 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                 {t("featureID")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-full">
               {t("lulcClass")}
             </TableHead>
             <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">

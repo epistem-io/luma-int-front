@@ -66,7 +66,29 @@ interface PolygonData extends ErrorableResponse {
 
 interface LUCUpdateRes extends ErrorableResponse {
   message: string;
-  data: {};
+  classes: {
+    class_color: string;
+    class_id: number;
+    class_name: string;
+    id: null;
+  }[];
+  training_data: {
+    class_color: string;
+    class_id: number;
+    class_name: string;
+    geom: {
+      coordinates: [number, number];
+      type: string;
+    };
+  }[];
+  training_data_summary: {
+    class_color: string;
+    class_id: number;
+    class_name: string;
+    total_items: number;
+  }[];
+  // data: {
+  // };
 }
 
 interface LUCUploadRes extends ErrorableResponse {
@@ -157,13 +179,6 @@ interface LUCClass {
   class_color: string;
   class_id: number;
   class_name: string;
-}
-
-interface Marker {
-  coordinates: [number, number];
-  id: string;
-  name: string;
-  class_id: number;
 }
 
 interface FileObject {
