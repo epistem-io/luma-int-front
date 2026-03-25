@@ -251,6 +251,14 @@
   line-height: 24px; /* 150% */
 }
 
+.text-m-bold {
+  font-family: var(--font-aptos);
+  font-size: 15px;
+  /* font-style: normal; */
+  font-weight: 700;
+  line-height: 22px;
+}
+
 .text-m-semibold {
   font-family: var(--font-aptos);
   font-size: 15px;

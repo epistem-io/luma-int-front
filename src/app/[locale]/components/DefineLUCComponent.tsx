@@ -8,10 +8,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
-import { cn, shortenKiloByte } from "@/lib/utils";
+import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
   AlertCircleIcon,
   ChevronDown,
+  ChevronLeft,
   FileTextIcon,
   Trash2Icon,
   UploadIcon,
@@ -39,6 +40,12 @@ import {
 import { Label } from "@/components/ui/label";
 import { GlobalContext } from "@/contexts/globalContext";
 import { toast } from "sonner";
+import { Marker } from "@/types/marker";
+import Feature from "ol/Feature";
+import { Point } from "ol/geom";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
+import { MapContext } from "@/contexts/mapContext";
 
 // const TreeBorderContainer = ({ children }: { children: React.ReactNode }) => {
 //   return (
@@ -70,11 +77,12 @@ export const DefineLUCComponent = () => {
     setLUCFile,
     setLUCFilename,
     setLUCFilesize,
+    haveDownloadedFile,
+    setHaveDownloadedFile,
   } = useContext(MapGenerationContext);
 
   const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
   const [fileEnter, setFileEnter] = useState(false);
-  const [haveDownloadedFile, setHaveDownloadedFile] = useState(false);
 
   const onClickDownloadFile = () => {
     const link = document.createElement("a");
@@ -238,9 +246,14 @@ export const DefineLUCComponent = () => {
           </p>
         </div>
         {/* <div className="space-y-3"> */}
-        <Tabs defaultValue="custom" className="gap-y-6 mb-0">
+        <Tabs
+          defaultValue={
+            selectedCustom ? "custom" : selectedDefault ? "default" : "custom"
+          }
+          className="gap-y-6 mb-0"
+        >
           <div className="px-0 py-0">
-            <TabsList className="w-full py-0 px-1.5">
+            <TabsList className="w-full">
               <TabsTrigger disabled={selectedDefault} value="custom">
                 {t("classifyOwnTemplate")}
               </TabsTrigger>
@@ -433,7 +446,7 @@ export const DefineLUCComponent = () => {
                   )}
                 </>
               )}
-              {!haveDownloadedFile && (
+              {!haveDownloadedFile && !LUCfile && (
                 <>
                   <Button
                     variant={"secondary"}
@@ -782,13 +795,7 @@ export const DefineLUCComponent = () => {
 
 export const DefineLUCFooter = () => {
   const {
-    temporalCoverage,
-    temporalCoverageUnit,
     setStepKey,
-    // isPreviewingMosaic,
-    // setIsPreviewingMosaic,
-    isBasicInformationChangeInput,
-    setIsBasicInformationChangeInput,
     setProgressPanelIndex,
     defaultArray,
     LUCfile,
@@ -796,7 +803,13 @@ export const DefineLUCFooter = () => {
     isLUCLoading,
     setIsLUCLoading,
     setClassArray,
+    setLUCFile,
+    setLUCFilename,
+    setLUCFilesize,
+    setDefaultArray,
   } = useContext(MapGenerationContext);
+
+  const { setMarkerArray, renderArrayToMarkerVector } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
 
@@ -809,6 +822,8 @@ export const DefineLUCFooter = () => {
     (!selectedCustom && !selectedDefault) ||
     isLUCLoading ||
     (selectedCustom && LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT);
+
+  const isBackDisabled = isLUCLoading;
 
   const onClickNext = async () => {
     setIsLUCLoading(true);
@@ -892,6 +907,44 @@ export const DefineLUCFooter = () => {
         }));
 
         setClassArray(arr);
+
+        const markerArr: Marker[] = json.training_data.map((item) => {
+          const uuid = crypto.randomUUID();
+          return {
+            class_color: item.class_color,
+            class_id: item.class_id,
+            coordinates: item.geom.coordinates,
+            name: item.class_name,
+            id: uuid,
+            map_feature: new Feature({
+              geometry: new Point(item.geom.coordinates),
+              id: uuid,
+              property: {
+                class_name: item.class_name,
+              },
+            }),
+          };
+        });
+
+        markerArr.forEach((item) => {
+          if (!item.map_feature) return;
+          item.map_feature.setStyle(
+            new Style({
+              image: new Icon({
+                anchor: [0.5, 1], // Anchor the bottom center of the icon
+                src: svgWithColor(item.class_color),
+                // src: "/images/marker.webp", // Use your own icon URL
+                size: [92, 117],
+                height: 30,
+              }),
+            }),
+          );
+        });
+
+        setMarkerArray(markerArr);
+
+        renderArrayToMarkerVector(markerArr);
+
         setProgressPanelIndex(2);
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
         // CONTINUE
@@ -910,28 +963,61 @@ export const DefineLUCFooter = () => {
     return;
   };
 
+  const clearFile = () => {
+    setLUCFile(null);
+    setLUCFilename("");
+    setLUCFilesize(0);
+
+    const doc = document.getElementById(
+      "luc-template-file-upload",
+    ) as HTMLInputElement;
+    if (!doc) return;
+
+    doc.value = "";
+  };
+
+  const onClickBack = () => {
+    setDefaultArray([]);
+    clearFile();
+
+    setProgressPanelIndex(0);
+    setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY);
+  };
+
   return (
-    <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
-      <div></div>
-      {isLUCLoading && (
-        <div className="w-full h-10 flex flex-row justify-center items-center">
-          <span className="loader md"></span>
-        </div>
-      )}
-      {!isLUCLoading && (
-        <Button
-          onClick={() => {
-            // setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-            // setProgressPanelIndex(2);
-            onClickNext();
-          }}
-          disabled={isNextDisabled}
-          variant="primary"
-          className=""
-        >
-          {t("next")}
-        </Button>
-      )}
+    <div className="p-3 pt-4 gap-x-4 flex flex-row">
+      <Button
+        disabled={isBackDisabled}
+        onClick={() => {
+          onClickBack();
+        }}
+        variant={"outline"}
+        size={"icon"}
+      >
+        <ChevronLeft className="text-primary-pink size-4" />
+      </Button>
+      <div className="grid grid-cols-2 gap-x-4 w-full">
+        <div></div>
+        {isLUCLoading && (
+          <div className="w-full h-10 flex flex-row justify-center items-center">
+            <span className="loader md"></span>
+          </div>
+        )}
+        {!isLUCLoading && (
+          <Button
+            onClick={() => {
+              // setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
+              // setProgressPanelIndex(2);
+              onClickNext();
+            }}
+            disabled={isNextDisabled}
+            variant="primary"
+            className=""
+          >
+            {t("next")}
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

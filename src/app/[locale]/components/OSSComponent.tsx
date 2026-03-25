@@ -8,7 +8,8 @@ import { PANEL_COMPONENT_KEY, POINTING_TYPE } from "@/constants";
 import { useTranslations } from "next-intl";
 
 export const OSSComponent = () => {
-  const { pointingType, selectedClass } = useContext(MapGenerationContext);
+  const { pointingType, selectedClass, classArray } =
+    useContext(MapGenerationContext);
 
   const { markerCursor, removeMarkerCursor, setPointingType } =
     useContext(MapContext);
@@ -21,7 +22,7 @@ export const OSSComponent = () => {
     // setHasCalledMarkerCursor(true);
     // console.log("markerCursor", pointingType);
     // setPointingType(pointingType);
-    markerCursor(pointingType, selectedClass);
+    markerCursor(pointingType, classArray, selectedClass);
 
     return () => {
       // console.log("cleanup marker cursor");

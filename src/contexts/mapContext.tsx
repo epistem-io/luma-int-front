@@ -22,6 +22,7 @@ import {
   getTemporalRangeDateStart,
   styles,
   stylesTransparentFill,
+  svgWithColor,
 } from "@/lib/utils";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
@@ -32,6 +33,7 @@ import Overlay from "ol/Overlay";
 import { EventsKey } from "ol/events";
 import { unByKey } from "ol/Observable";
 import { set } from "zod";
+import { Marker } from "@/types/marker";
 
 // interface LayerItem {
 //   citation: string;
@@ -140,7 +142,11 @@ interface MapContextType {
   setMarkerLayerVisibilityArray: Dispatch<SetStateAction<string[]>>;
   vectorVisible: boolean;
   setVectorVisible: Dispatch<SetStateAction<boolean>>;
-  markerCursor: (pointingType: POINTING_TYPE, selectedClass?: string) => void;
+  markerCursor: (
+    pointingType: POINTING_TYPE,
+    classArray: LUCClass[],
+    selectedClass?: string,
+  ) => void;
   removeMarkerCursor: () => void;
   overlay: Overlay | null;
   setOverlay: Dispatch<SetStateAction<Overlay | null>>;
@@ -451,6 +457,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
   const markerCursor = (
     pointingTypes: POINTING_TYPE,
+    classArray: LUCClass[],
     selectedClass?: string,
   ) => {
     if (!mapInstance) return;
@@ -644,6 +651,13 @@ const MapContextContainer = (props: PropsWithChildren) => {
           coordinates: [newCoordinates[0], newCoordinates[1]],
           id: uuid,
           name: `Point ${markerArrRef.current.length + 1}`,
+          class_color:
+            pointingTypes === POINTING_TYPE.SINGLE
+              ? ""
+              : classArray.find(
+                  (item) => item.class_id === Number(selectedClass),
+                )?.class_color || "",
+          map_feature: markerFeature,
         },
       ]);
 
@@ -841,20 +855,25 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
     markerVectorSource.clear();
 
+    console.log("arr", arr);
+
     arr.forEach((item) => {
-      const markerFeature = new Feature({
-        geometry: new Point(item.coordinates),
-        id: item.id,
-        property: {
-          class_name: item.name,
-        },
-      });
+      const markerFeature =
+        item.map_feature ||
+        new Feature({
+          geometry: new Point(item.coordinates),
+          id: item.id,
+          property: {
+            class_name: item.name,
+          },
+        });
 
       markerFeature.setStyle(
         new Style({
           image: new Icon({
             anchor: [0.5, 1], // Anchor the bottom center of the icon
-            src: "/images/marker.webp", // Use your own icon URL
+            src: svgWithColor(item.class_color),
+            // src: "/images/marker.webp", // Use your own icon URL
             size: [92, 117],
             height: 30,
           }),

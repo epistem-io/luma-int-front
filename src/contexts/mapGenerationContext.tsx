@@ -98,12 +98,24 @@ interface ContextType {
   LUCfilename: string;
   LUCfilesize: number;
   isLUCLoading: boolean;
+  haveDownloadedFile: boolean;
   setDefaultArray: Dispatch<SetStateAction<number[]>>;
   setLUCFile: Dispatch<SetStateAction<File | null>>;
   setLUCFilename: Dispatch<SetStateAction<string>>;
   setLUCFilesize: Dispatch<SetStateAction<number>>;
   setIsLUCLoading: Dispatch<SetStateAction<boolean>>;
+  setHaveDownloadedFile: Dispatch<SetStateAction<boolean>>;
   //
+  trainingFile: File | null;
+  trainingFilename: string;
+  trainingFilesize: number;
+  trainingFileError: string;
+  uploadedFilesArray: FileTrainingObject[];
+  setTrainingFile: Dispatch<SetStateAction<File | null>>;
+  setTrainingFilename: Dispatch<SetStateAction<string>>;
+  setTrainingFilesize: Dispatch<SetStateAction<number>>;
+  setTrainingFileError: Dispatch<SetStateAction<string>>;
+  setUploadedFilesArray: Dispatch<SetStateAction<FileTrainingObject[]>>;
   classArray: LUCClass[];
   setClassArray: Dispatch<SetStateAction<LUCClass[]>>;
   pointingType: POINTING_TYPE;
@@ -184,12 +196,24 @@ const DEFAULT_VALUE: ContextType = {
   LUCfilename: "",
   LUCfilesize: 0,
   isLUCLoading: false,
+  haveDownloadedFile: false,
   setDefaultArray: () => {},
   setLUCFile: () => {},
   setLUCFilename: () => {},
   setLUCFilesize: () => {},
   setIsLUCLoading: () => {},
+  setHaveDownloadedFile: () => {},
   //
+  trainingFile: null,
+  trainingFilename: "",
+  trainingFilesize: 0,
+  trainingFileError: "",
+  uploadedFilesArray: [],
+  setTrainingFile: () => {},
+  setTrainingFilename: () => {},
+  setTrainingFilesize: () => {},
+  setTrainingFileError: () => {},
+  setUploadedFilesArray: () => {},
   classArray: TEMP_ARR,
   setClassArray: () => {},
   pointingType: POINTING_TYPE.EMPTY,
@@ -276,12 +300,36 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
 
   const [isLUCLoading, setIsLUCLoading] = useState(DEFAULT_VALUE.isLUCLoading);
 
+  const [haveDownloadedFile, setHaveDownloadedFile] = useState(
+    DEFAULT_VALUE.haveDownloadedFile,
+  );
+
   const [classArray, setClassArray] = useState(DEFAULT_VALUE.classArray);
 
   const [pointingType, setPointingType] = useState(DEFAULT_VALUE.pointingType);
   const [selectedClass, setSelectedClass] = useState(
     DEFAULT_VALUE.selectedClass,
   );
+  //
+
+  const [trainingFile, setTrainingFile] = useState<File | null>(
+    DEFAULT_VALUE.trainingFile,
+  );
+  const [trainingFilename, setTrainingFilename] = useState<string>(
+    DEFAULT_VALUE.trainingFilename,
+  );
+  const [trainingFilesize, setTrainingFilesize] = useState<number>(
+    DEFAULT_VALUE.trainingFilesize,
+  );
+
+  const [trainingFileError, setTrainingFileError] = useState<string>(
+    DEFAULT_VALUE.trainingFileError,
+  );
+
+  const [uploadedFilesArray, setUploadedFilesArray] = useState<
+    FileTrainingObject[]
+  >(DEFAULT_VALUE.uploadedFilesArray);
+
   //
 
   const [isUploadingTrainingFile, setIsUploadingTrainingFile] = useState(
@@ -361,6 +409,18 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setLUCFilename,
     setLUCFilesize,
     setIsLUCLoading,
+    haveDownloadedFile,
+    setHaveDownloadedFile,
+    trainingFile,
+    trainingFilename,
+    trainingFilesize,
+    trainingFileError,
+    uploadedFilesArray,
+    setTrainingFile,
+    setTrainingFilename,
+    setTrainingFilesize,
+    setTrainingFileError,
+    setUploadedFilesArray,
     classArray,
     setClassArray,
     pointingType,

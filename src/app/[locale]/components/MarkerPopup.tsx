@@ -19,6 +19,10 @@ import Overlay from "ol/Overlay";
 import Feature from "ol/Feature";
 import VectorLayer from "ol/layer/Vector";
 import Point from "ol/geom/Point";
+import { Marker } from "@/types/marker";
+import { svgWithColor } from "@/lib/utils";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
 
 export const MarkerPopup = ({
   markerId,
@@ -82,6 +86,20 @@ export const MarkerPopup = ({
         id: item.id,
       });
 
+      const svg = svgWithColor(item.class_color);
+
+      markerFeature.setStyle(
+        new Style({
+          image: new Icon({
+            anchor: [0.5, 1], // Anchor the bottom center of the icon
+            src: svg,
+            // src: "/images/marker.webp", // Use your own icon URL
+            size: [92, 117],
+            height: 30,
+          }),
+        }),
+      );
+
       markerVectorSource?.addFeature(markerFeature);
     });
 
@@ -107,6 +125,21 @@ export const MarkerPopup = ({
 
     const temp = { ...markerArray[index] };
     temp.class_id = Number(value);
+    temp.class_color =
+      classArray.find((item) => item.class_id === Number(value))?.class_color ||
+      "#000000";
+
+    temp.map_feature?.setStyle(
+      new Style({
+        image: new Icon({
+          anchor: [0.5, 1], // Anchor the bottom center of the icon
+          src: svgWithColor(temp.class_color),
+          // src: "/images/marker.webp", // Use your own icon URL
+          size: [92, 117],
+          height: 30,
+        }),
+      }),
+    );
 
     const newMarkerArray = [...markerArray];
     newMarkerArray[index] = temp;
