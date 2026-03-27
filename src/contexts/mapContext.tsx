@@ -145,6 +145,7 @@ interface MapContextType {
   markerCursor: (
     pointingType: POINTING_TYPE,
     classArray: LUCClass[],
+    editOnly: boolean,
     selectedClass?: string,
   ) => void;
   removeMarkerCursor: () => void;
@@ -458,6 +459,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
   const markerCursor = (
     pointingTypes: POINTING_TYPE,
     classArray: LUCClass[],
+    editOnly: boolean = false,
     selectedClass?: string,
   ) => {
     if (!mapInstance) return;
@@ -539,10 +541,15 @@ const MapContextContainer = (props: PropsWithChildren) => {
     }
 
     mapInstance.addLayer(vl);
-    setCursorVectorLayer(vl);
+
+    if (!editOnly) {
+      setCursorVectorLayer(vl);
+    }
 
     const pointerKey = mapInstance.on("pointermove", async function (evt) {
       // Get the current map coordinates from the event
+      if (editOnly) return;
+
       const newCoordinates = evt.coordinate;
 
       // console.log("newCoordinates", newCoordinates);
@@ -628,6 +635,8 @@ const MapContextContainer = (props: PropsWithChildren) => {
         return;
       }
 
+      if (editOnly) return;
+
       if (markerArrRef.current.some((item) => item.class_id === -1)) {
         return;
       }
@@ -642,6 +651,28 @@ const MapContextContainer = (props: PropsWithChildren) => {
       });
 
       if (!markerVectorSource) return;
+
+      const selectedClassColor =
+        classArray.find((item) => item.class_id === Number(selectedClass))
+          ?.class_color || "#000000";
+
+      console.log(
+        "selected color",
+        classArray.find((item) => item.class_id === Number(selectedClass))
+          ?.class_color,
+      );
+
+      markerFeature.setStyle(
+        new Style({
+          image: new Icon({
+            anchor: [0.5, 1], // Anchor the bottom center of the icon
+            src: svgWithColor(selectedClassColor),
+            // src: "/images/marker.webp", // Use your own icon URL
+            size: [92, 117],
+            height: 30,
+          }),
+        }),
+      );
 
       setMarkerArray([
         ...markerArrRef.current,

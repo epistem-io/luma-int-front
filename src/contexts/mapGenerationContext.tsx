@@ -124,6 +124,8 @@ interface ContextType {
   setSelectedClass: Dispatch<SetStateAction<string>>;
   isUploadingTrainingFile: boolean;
   setIsUploadingTrainingFile: Dispatch<SetStateAction<boolean>>;
+  isUpdatingTrainingData: boolean;
+  setIsUpdatingTrainingData: Dispatch<SetStateAction<boolean>>;
   isSummaryDialogOpen: boolean;
   setIsSummaryDialogOpen: Dispatch<SetStateAction<boolean>>;
   // mapGenerationResult: GenerateMapRes | null;
@@ -222,6 +224,8 @@ const DEFAULT_VALUE: ContextType = {
   setSelectedClass: () => {},
   isUploadingTrainingFile: false,
   setIsUploadingTrainingFile: () => {},
+  isUpdatingTrainingData: false,
+  setIsUpdatingTrainingData: () => {},
   isSummaryDialogOpen: false,
   setIsSummaryDialogOpen: () => {},
   // mapGenerationResult: null,
@@ -336,6 +340,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.isUploadingTrainingFile,
   );
 
+  const [isUpdatingTrainingData, setIsUpdatingTrainingData] = useState(
+    DEFAULT_VALUE.isUpdatingTrainingData,
+  );
+
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(
     DEFAULT_VALUE.isSummaryDialogOpen,
   );
@@ -429,6 +437,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSelectedClass,
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
+    isUpdatingTrainingData,
+    setIsUpdatingTrainingData,
     isSummaryDialogOpen,
     setIsSummaryDialogOpen,
     // mapGenerationResult,

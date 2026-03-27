@@ -46,6 +46,7 @@ import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { MapContext } from "@/contexts/mapContext";
+import { fromLonLat } from "ol/proj";
 
 // const TreeBorderContainer = ({ children }: { children: React.ReactNode }) => {
 //   return (
@@ -886,7 +887,11 @@ export const DefineLUCFooter = () => {
       },
       body: JSON.stringify({
         session_id: sessionId,
-        classes,
+        classes: classes.map((item) => ({
+          id: item?.id,
+          class: item?.name,
+          color: item?.color,
+        })),
       }),
     })
       .then(async (response) => {
@@ -910,14 +915,18 @@ export const DefineLUCFooter = () => {
 
         const markerArr: Marker[] = json.training_data.map((item) => {
           const uuid = crypto.randomUUID();
+          const coord = [
+            fromLonLat(item.geom.coordinates)[0],
+            fromLonLat(item.geom.coordinates)[1],
+          ] as [number, number];
           return {
             class_color: item.class_color,
             class_id: item.class_id,
-            coordinates: item.geom.coordinates,
+            coordinates: coord,
             name: item.class_name,
             id: uuid,
             map_feature: new Feature({
-              geometry: new Point(item.geom.coordinates),
+              geometry: new Point(coord),
               id: uuid,
               property: {
                 class_name: item.class_name,

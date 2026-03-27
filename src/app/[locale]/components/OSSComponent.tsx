@@ -22,7 +22,7 @@ export const OSSComponent = () => {
     // setHasCalledMarkerCursor(true);
     // console.log("markerCursor", pointingType);
     // setPointingType(pointingType);
-    markerCursor(pointingType, classArray, selectedClass);
+    markerCursor(pointingType, classArray, false, selectedClass);
 
     return () => {
       // console.log("cleanup marker cursor");
