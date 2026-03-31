@@ -10,31 +10,32 @@ import {
   Dispatch,
   PropsWithChildren,
   SetStateAction,
+  useEffect,
   useState,
 } from "react";
 
-const TEMP_ARR: LUCClass[] = [
-  {
-    class_color: "#5a9a67",
-    class_id: 1,
-    class_name: "Karet",
-  },
-  {
-    class_color: "#bbbb5a",
-    class_id: 2,
-    class_name: "Kelapa Sawit",
-  },
-  {
-    class_color: "#111eda",
-    class_id: 3,
-    class_name: "Tubuh Air",
-  },
-  {
-    class_color: "#da0407",
-    class_id: 4,
-    class_name: "Permukiman",
-  },
-];
+// const TEMP_ARR: LUCClass[] = [
+//   {
+//     class_color: "#5a9a67",
+//     class_id: 1,
+//     class_name: "Karet",
+//   },
+//   {
+//     class_color: "#bbbb5a",
+//     class_id: 2,
+//     class_name: "Kelapa Sawit",
+//   },
+//   {
+//     class_color: "#111eda",
+//     class_id: 3,
+//     class_name: "Tubuh Air",
+//   },
+//   {
+//     class_color: "#da0407",
+//     class_id: 4,
+//     class_name: "Permukiman",
+//   },
+// ];
 
 // const TEMP_ARR: LUCClass[] = [
 //   {
@@ -216,7 +217,8 @@ const DEFAULT_VALUE: ContextType = {
   setTrainingFilesize: () => {},
   setTrainingFileError: () => {},
   setUploadedFilesArray: () => {},
-  classArray: TEMP_ARR,
+  // classArray: TEMP_ARR,
+  classArray: [],
   setClassArray: () => {},
   pointingType: POINTING_TYPE.EMPTY,
   setPointingType: () => {},
@@ -458,6 +460,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     summaryData,
     setSummaryData,
   };
+
+  useEffect(() => {
+    console.log("class array", classArray);
+  }, [classArray]);
 
   return (
     <MapGenerationContext.Provider value={providedValue}>

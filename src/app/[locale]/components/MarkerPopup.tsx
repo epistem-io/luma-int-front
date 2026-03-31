@@ -32,6 +32,7 @@ export const MarkerPopup = ({
   markerVectorLayer,
   setMarkerId,
   overlay,
+  classArray,
 }: {
   markerId: string;
   markerArray: Marker[];
@@ -40,8 +41,9 @@ export const MarkerPopup = ({
   markerVectorLayer: VectorLayer | null;
   setMarkerId: (markerId: string) => void;
   overlay: null | Overlay;
+  classArray: LUCClass[];
 }) => {
-  const { classArray } = useContext(MapGenerationContext);
+  // const { classArray } = useContext(MapGenerationContext);
   const { mapInstance } = useContext(MapContext);
 
   const [isEditing, setIsEditing] = useState(false);

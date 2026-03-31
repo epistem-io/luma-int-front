@@ -68,6 +68,7 @@ export const DataTrainingComponent = () => {
     removeMarkerCursor,
     markerCursor,
     markerVectorLayer,
+    markerVectorSource,
   } = useContext(MapContext);
 
   const {
@@ -260,6 +261,10 @@ export const DataTrainingComponent = () => {
     }
   }, []);
 
+  useEffect(() => {
+    console.log("marker arrya", markerArray);
+  }, [markerArray]);
+
   return (
     <>
       <div className="space-y-4">
@@ -405,9 +410,9 @@ export const DataTrainingComponent = () => {
                       return (
                         <div
                           key={`uploaded-file-${item.filename}-${index}`}
-                          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second"
+                          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
                         >
-                          <div className="flex flex-row gap-x-4 items-center">
+                          <div className="flex flex-row gap-x-4 items-center col-span-10">
                             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                             </div>
@@ -421,17 +426,28 @@ export const DataTrainingComponent = () => {
                             </div>
                           </div>
 
-                          <div className="">
-                            {/* {!isUploadingTrainingFile && (
-                          )} */}
+                          <div className="col-span-2 flex flex-row justify-end">
                             <Button
                               disabled={isUploadingTrainingFile}
                               variant={"ghost"}
                               className="hover:brightness-95 cursor-pointer size-7 rounded-full"
                               onClick={() => {
-                                // setTrainingFile(null);
-                                // setTrainingFilename("");
-                                // setTrainingFilesize(0);
+                                setTrainingFile(null);
+                                setTrainingFilename("");
+                                setTrainingFilesize(0);
+                                setTrainingFileError("");
+
+                                setUploadedFilesArray([]);
+
+                                setMarkerArray([]);
+                                markerVectorSource?.clear();
+
+                                const doc = document.getElementById(
+                                  "data-training-file-upload",
+                                ) as HTMLInputElement;
+                                if (!doc) return;
+
+                                doc.value = "";
                               }}
                             >
                               <Trash2Icon className="text-secondary-purple-dark size-5" />
@@ -444,7 +460,7 @@ export const DataTrainingComponent = () => {
                       <>
                         {trainingFilesize <= DATA_TRAINING_FILE_SIZE_LIMIT &&
                           !trainingFileError && (
-                            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
+                            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
                               <div className="flex flex-row gap-x-4 items-center">
                                 <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                                   <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
@@ -459,7 +475,7 @@ export const DataTrainingComponent = () => {
                                 </div>
                               </div>
 
-                              <div className="">
+                              <div className="col-span-2 flex flex-row justify-end">
                                 {isUploadingTrainingFile && (
                                   <div className="">
                                     <div className="loader"></div>
@@ -492,8 +508,8 @@ export const DataTrainingComponent = () => {
                           )}
                         {trainingFileError && (
                           <>
-                            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                              <div className="flex flex-row gap-x-4 items-center">
+                            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
+                              <div className="flex flex-row gap-x-4 items-center col-span-10">
                                 <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                   <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                                 </div>
@@ -506,7 +522,7 @@ export const DataTrainingComponent = () => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="">
+                              <div className="col-span-2 flex flex-row justify-end">
                                 <Button
                                   disabled={isUploadingTrainingFile}
                                   variant={"ghost"}
@@ -562,8 +578,8 @@ export const DataTrainingComponent = () => {
                         {trainingFilesize > DATA_TRAINING_FILE_SIZE_LIMIT &&
                           !trainingFileError && (
                             <>
-                              <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                                <div className="flex flex-row gap-x-4 items-center">
+                              <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
+                                <div className="flex flex-row gap-x-4 items-center col-span-10">
                                   <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                     <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                                   </div>
@@ -576,7 +592,7 @@ export const DataTrainingComponent = () => {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="">
+                                <div className="col-span-2 flex flex-row justify-end">
                                   <Button
                                     disabled={isUploadingTrainingFile}
                                     variant={"ghost"}
@@ -890,6 +906,7 @@ export const DataTrainingFooter = () => {
 
   const onClickBack = () => {
     setProgressPanelIndex(1);
+    markerVectorLayer?.setOpacity(0);
     setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
   };
 
