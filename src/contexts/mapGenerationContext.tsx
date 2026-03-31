@@ -10,31 +10,32 @@ import {
   Dispatch,
   PropsWithChildren,
   SetStateAction,
+  useEffect,
   useState,
 } from "react";
 
-const TEMP_ARR: LUCClass[] = [
-  {
-    class_color: "#5a9a67",
-    class_id: 1,
-    class_name: "Karet",
-  },
-  {
-    class_color: "#bbbb5a",
-    class_id: 2,
-    class_name: "Kelapa Sawit",
-  },
-  {
-    class_color: "#111eda",
-    class_id: 3,
-    class_name: "Tubuh Air",
-  },
-  {
-    class_color: "#da0407",
-    class_id: 4,
-    class_name: "Permukiman",
-  },
-];
+// const TEMP_ARR: LUCClass[] = [
+//   {
+//     class_color: "#5a9a67",
+//     class_id: 1,
+//     class_name: "Karet",
+//   },
+//   {
+//     class_color: "#bbbb5a",
+//     class_id: 2,
+//     class_name: "Kelapa Sawit",
+//   },
+//   {
+//     class_color: "#111eda",
+//     class_id: 3,
+//     class_name: "Tubuh Air",
+//   },
+//   {
+//     class_color: "#da0407",
+//     class_id: 4,
+//     class_name: "Permukiman",
+//   },
+// ];
 
 // const TEMP_ARR: LUCClass[] = [
 //   {
@@ -124,6 +125,8 @@ interface ContextType {
   setSelectedClass: Dispatch<SetStateAction<string>>;
   isUploadingTrainingFile: boolean;
   setIsUploadingTrainingFile: Dispatch<SetStateAction<boolean>>;
+  isUpdatingTrainingData: boolean;
+  setIsUpdatingTrainingData: Dispatch<SetStateAction<boolean>>;
   isSummaryDialogOpen: boolean;
   setIsSummaryDialogOpen: Dispatch<SetStateAction<boolean>>;
   // mapGenerationResult: GenerateMapRes | null;
@@ -214,7 +217,8 @@ const DEFAULT_VALUE: ContextType = {
   setTrainingFilesize: () => {},
   setTrainingFileError: () => {},
   setUploadedFilesArray: () => {},
-  classArray: TEMP_ARR,
+  // classArray: TEMP_ARR,
+  classArray: [],
   setClassArray: () => {},
   pointingType: POINTING_TYPE.EMPTY,
   setPointingType: () => {},
@@ -222,6 +226,8 @@ const DEFAULT_VALUE: ContextType = {
   setSelectedClass: () => {},
   isUploadingTrainingFile: false,
   setIsUploadingTrainingFile: () => {},
+  isUpdatingTrainingData: false,
+  setIsUpdatingTrainingData: () => {},
   isSummaryDialogOpen: false,
   setIsSummaryDialogOpen: () => {},
   // mapGenerationResult: null,
@@ -336,6 +342,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.isUploadingTrainingFile,
   );
 
+  const [isUpdatingTrainingData, setIsUpdatingTrainingData] = useState(
+    DEFAULT_VALUE.isUpdatingTrainingData,
+  );
+
   const [isSummaryDialogOpen, setIsSummaryDialogOpen] = useState(
     DEFAULT_VALUE.isSummaryDialogOpen,
   );
@@ -429,6 +439,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSelectedClass,
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
+    isUpdatingTrainingData,
+    setIsUpdatingTrainingData,
     isSummaryDialogOpen,
     setIsSummaryDialogOpen,
     // mapGenerationResult,
@@ -448,6 +460,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     summaryData,
     setSummaryData,
   };
+
+  useEffect(() => {
+    console.log("class array", classArray);
+  }, [classArray]);
 
   return (
     <MapGenerationContext.Provider value={providedValue}>

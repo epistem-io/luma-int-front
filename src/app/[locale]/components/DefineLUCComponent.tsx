@@ -46,6 +46,7 @@ import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { MapContext } from "@/contexts/mapContext";
+import { fromLonLat } from "ol/proj";
 
 // const TreeBorderContainer = ({ children }: { children: React.ReactNode }) => {
 //   return (
@@ -272,8 +273,8 @@ export const DefineLUCComponent = () => {
                   {LUCfile && (
                     <>
                       {LUCfilesize <= LUC_TEMPLATE_FILE_SIZE_LIMIT && (
-                        <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                          <div className="flex flex-row gap-x-4 items-center">
+                        <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
+                          <div className="col-span-10 flex flex-row gap-x-4 items-center">
                             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                             </div>
@@ -287,7 +288,7 @@ export const DefineLUCComponent = () => {
                             </div>
                           </div>
 
-                          <div className="">
+                          <div className="col-span-2 flex flex-row justify-end">
                             <Button
                               variant={"ghost"}
                               className="hover:brightness-95 cursor-pointer size-7 rounded-full"
@@ -302,8 +303,8 @@ export const DefineLUCComponent = () => {
                       )}
                       {LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT && (
                         <>
-                          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                            <div className="flex flex-row gap-x-4 items-center">
+                          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
+                            <div className="col-span-10 flex flex-row gap-x-4 items-center">
                               <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                 <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                               </div>
@@ -316,7 +317,7 @@ export const DefineLUCComponent = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="">
+                            <div className="col-span-2 flex flex-row justify-end">
                               <Button
                                 variant={"ghost"}
                                 className="hover:brightness-95 cursor-pointer size-7 rounded-full"
@@ -886,7 +887,11 @@ export const DefineLUCFooter = () => {
       },
       body: JSON.stringify({
         session_id: sessionId,
-        classes,
+        classes: classes.map((item) => ({
+          id: item?.id,
+          class: item?.name,
+          color: item?.color,
+        })),
       }),
     })
       .then(async (response) => {
@@ -910,14 +915,18 @@ export const DefineLUCFooter = () => {
 
         const markerArr: Marker[] = json.training_data.map((item) => {
           const uuid = crypto.randomUUID();
+          const coord = [
+            fromLonLat(item.geom.coordinates)[0],
+            fromLonLat(item.geom.coordinates)[1],
+          ] as [number, number];
           return {
             class_color: item.class_color,
             class_id: item.class_id,
-            coordinates: item.geom.coordinates,
+            coordinates: coord,
             name: item.class_name,
             id: uuid,
             map_feature: new Feature({
-              geometry: new Point(item.geom.coordinates),
+              geometry: new Point(coord),
               id: uuid,
               property: {
                 class_name: item.class_name,

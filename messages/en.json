@@ -271,6 +271,13 @@
     "uploadSHPFile": "Upload SHP File",
     "dropHere": "Drop here",
     "uploadSHPSubtitle": "Define your area of interest for analysis",
-    "year": "Year"
+    "year": "Year",
+    "legendLULCsubtitle": "Anda belum mililih kelas LULC, silahkan pilih kelas yang sesuai pada step berikutnya",
+    "cloudCoverInComposite": "Tutupan awan di Composite",
+    "cloudCoverInCompositeDescription": "Tutupan awan adalah bla bla bla dan ditampilkan dalam persentase lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem",
+    "cloudCoverTrueColor": "True Color Composite (RGB)",
+    "cloudCoverFalseColor": "False Color Infrared Composite (NIR/Red/Green)",
+    "cloudCoverLandWater": "Land/Water Composite (NIR/SWIR1/Red)",
+    "baseMap": "Base Map"
   }
 }

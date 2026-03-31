@@ -16,6 +16,7 @@ import Overlay from "ol/Overlay";
 import { MarkerPopup } from "./MarkerPopup";
 import LayerGroup from "ol/layer/Group";
 import { BASEMAP_TYPE } from "@/constants";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 
 const Map1 = () => {
   const {
@@ -33,6 +34,8 @@ const Map1 = () => {
     overlay: overlayContext,
     markerVectorLayer,
   } = useContext(MapContext);
+
+  const { classArray } = useContext(MapGenerationContext);
 
   const [root, setRoot] = useState<Root | null>(null);
 
@@ -154,6 +157,7 @@ const Map1 = () => {
         overlay={overlayContext}
         setMarkerId={setMarkerId}
         markerVectorLayer={markerVectorLayer}
+        classArray={classArray ?? []}
       />,
     );
     setRoot(root);
@@ -193,6 +197,7 @@ const Map1 = () => {
         overlay={overlayContext}
         setMarkerId={setMarkerId}
         markerVectorLayer={markerVectorLayer}
+        classArray={classArray ?? []}
       />,
     );
   }, [markerId, markerArray]);

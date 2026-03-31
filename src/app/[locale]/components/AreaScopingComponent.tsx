@@ -345,8 +345,8 @@ export const AreaScopingComponent = () => {
             <>
               {areaScopingPolygonUrl && areaScopingPolygonError && (
                 <>
-                  <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                    <div className="flex flex-row gap-x-4 items-center">
+                  <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
+                    <div className="flex flex-row gap-x-4 items-center col-span-10">
                       <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                         <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                       </div>
@@ -359,7 +359,7 @@ export const AreaScopingComponent = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="">
+                    <div className="col-span-2 justify-end">
                       <Button
                         variant={"ghost"}
                         className="hover:brightness-95 cursor-pointer size-7 rounded-full"
@@ -371,8 +371,8 @@ export const AreaScopingComponent = () => {
                       </Button>
                     </div>
                   </div>
-                  <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                    <div className="flex flex-row gap-x-4 items-center">
+                  <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
+                    <div className="flex flex-row gap-x-4 items-center col-span-12">
                       <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
                         <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
                       </div>
@@ -391,7 +391,7 @@ export const AreaScopingComponent = () => {
                 areaScopingPolygonFileSize <= AREA_SCOPING_FILE_SIZE_LIMIT &&
                 !areaScopingPolygonError && (
                   <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
                       <div className="flex flex-row gap-x-4 items-center">
                         <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                           <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
@@ -435,7 +435,7 @@ export const AreaScopingComponent = () => {
                 polygonData &&
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
                   <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                           Your selected area has total area approximately:
@@ -448,8 +448,8 @@ export const AreaScopingComponent = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center">
+                    <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
+                      <div className="flex flex-row gap-x-4 items-center col-span-10">
                         <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
                           <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
                         </div>
@@ -462,7 +462,7 @@ export const AreaScopingComponent = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="">
+                      <div className="col-span-2 flex flex-row justify-end">
                         <Button
                           variant={"ghost"}
                           className="hover:brightness-95 cursor-pointer size-7 rounded-full"
@@ -477,8 +477,8 @@ export const AreaScopingComponent = () => {
               {areaScopingPolygonUrl &&
                 areaScopingPolygonFileSize > AREA_SCOPING_FILE_SIZE_LIMIT && (
                   <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                      <div className="flex flex-row gap-x-4 items-center">
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
+                      <div className="flex flex-row gap-x-4 items-center col-span-10">
                         <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                           <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                         </div>
@@ -491,7 +491,7 @@ export const AreaScopingComponent = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="">
+                      <div className="flex flex-row justify-end">
                         <Button
                           variant={"ghost"}
                           className="hover:brightness-95 cursor-pointer size-7 rounded-full"
@@ -503,8 +503,8 @@ export const AreaScopingComponent = () => {
                         </Button>
                       </div>
                     </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center">
+                    <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
+                      <div className="flex flex-row gap-x-4 items-center col-span-10">
                         <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
                           <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
                         </div>
@@ -517,7 +517,7 @@ export const AreaScopingComponent = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="">
+                      <div className="flex flex-row justify-end">
                         <Button
                           variant={"ghost"}
                           className="hover:brightness-95 cursor-pointer size-7 rounded-full"
