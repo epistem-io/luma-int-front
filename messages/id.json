@@ -275,6 +275,8 @@
     "cloudCoverTrueColor": "True Color Composite (RGB)",
     "cloudCoverFalseColor": "False Color Infrared Composite (NIR/Red/Green)",
     "cloudCoverLandWater": "Land/Water Composite (NIR/SWIR1/Red)",
-    "baseMap": "Base Map"
+    "baseMap": "Base Map",
+    "retry": "Retry",
+    "somethingWrongHappened": "Something wrong happened. Please try again."
   }
 }
