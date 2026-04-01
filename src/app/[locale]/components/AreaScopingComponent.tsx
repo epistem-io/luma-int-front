@@ -603,7 +603,7 @@ export const AreaScopingComponent = () => {
                         <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                            Drop here
+                            {t("dropHere")}
                           </p>
                         </div>
                       </>
