@@ -359,7 +359,7 @@ export const AreaScopingComponent = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="col-span-2 justify-end">
+                    <div className="col-span-2 flex flex-row justify-end">
                       <Button
                         variant={"ghost"}
                         className="hover:brightness-95 cursor-pointer size-7 rounded-full"

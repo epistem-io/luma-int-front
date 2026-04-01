@@ -53,6 +53,8 @@ export const YourMapComponent = () => {
   const [progress, setProgress] = useState(0);
   const [totalProgress, setTotalProgress] = useState(0);
 
+  const [isError, setIsError] = useState(false);
+
   const getMapGenerationResult = () => {
     setIsLoading(true);
     setTotalProgress(0);
@@ -166,6 +168,7 @@ export const YourMapComponent = () => {
         }
       })
       .catch((e) => {
+        setIsError(true);
         toast.error(`Error generating map: ${e}`, {
           duration: Infinity,
           dismissible: true,
@@ -211,13 +214,34 @@ export const YourMapComponent = () => {
         )}
         {!isLoading && (
           <>
-            <ModelAccuracyAssessment />
-            <LULCCompositionSummary />
-            {generateMapSampleQuality &&
-              generateMapSampleQuality.lowest_separability.result_dict.length >
-                0 && <TrainingDataQuality />}
-            {/* <PredictorImportances /> */}
-            <ThematicAccuracyAssessment />
+            {isError && (
+              <>
+                <p className=" text-center">
+                  Something wrong happened. Please try again.
+                </p>
+                <Button
+                  disabled={isLoading}
+                  variant="primary"
+                  className=""
+                  onClick={() => {
+                    getMapGenerationResult();
+                  }}
+                >
+                  Retry
+                </Button>
+              </>
+            )}
+            {!isError && (
+              <>
+                <ModelAccuracyAssessment />
+                <LULCCompositionSummary />
+                {generateMapSampleQuality &&
+                  generateMapSampleQuality.lowest_separability.result_dict
+                    .length > 0 && <TrainingDataQuality />}
+                {/* <PredictorImportances /> */}
+                <ThematicAccuracyAssessment />
+              </>
+            )}
           </>
         )}
       </div>
