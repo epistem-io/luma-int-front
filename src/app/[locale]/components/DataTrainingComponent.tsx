@@ -18,7 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
-import { fromLonLat } from "ol/proj";
+import { fromLonLat, toLonLat } from "ol/proj";
 
 import {
   Select,
@@ -461,7 +461,7 @@ export const DataTrainingComponent = () => {
                         {trainingFilesize <= DATA_TRAINING_FILE_SIZE_LIMIT &&
                           !trainingFileError && (
                             <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
-                              <div className="flex flex-row gap-x-4 items-center">
+                              <div className="col-span-10 flex flex-row gap-x-4 items-center">
                                 <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                                   <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                                 </div>
@@ -477,8 +477,8 @@ export const DataTrainingComponent = () => {
 
                               <div className="col-span-2 flex flex-row justify-end">
                                 {isUploadingTrainingFile && (
-                                  <div className="">
-                                    <div className="loader"></div>
+                                  <div className="w-full h-10 flex flex-row justify-center">
+                                    <span className="loader sm"></span>
                                   </div>
                                 )}
                                 {!isUploadingTrainingFile && (
@@ -559,19 +559,6 @@ export const DataTrainingComponent = () => {
                                   </p>
                                 </div>
                               </div>
-                              {/* <div className="">
-                              <Button
-                                variant={"ghost"}
-                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                onClick={() => {
-                                  setLUCFile(null);
-                                  setLUCFilename("");
-                                  setLUCFilesize(0);
-                                }}
-                              >
-                                <Trash2Icon className="text-white size-5" />
-                              </Button>
-                            </div> */}
                             </div>
                           </>
                         )}
@@ -870,7 +857,8 @@ export const DataTrainingFooter = () => {
           class_id: item?.class_id,
           geometry: {
             type: "Point",
-            coordinates: [item?.coordinates[0], item?.coordinates[1]],
+            // coordinates: [item?.coordinates[0], item?.coordinates[1]],
+            coordinates: toLonLat(item?.coordinates),
           },
         })),
       }),
