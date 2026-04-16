@@ -92,6 +92,7 @@ export const DataTrainingComponent = () => {
     setTrainingFilesize,
     setTrainingFileError,
     setUploadedFilesArray,
+    setIsTrainingDataChanged,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -104,10 +105,12 @@ export const DataTrainingComponent = () => {
 
   const onClickStartPointing = () => {
     removeMarkerCursor();
+    setIsTrainingDataChanged(true);
     setStepKey(PANEL_COMPONENT_KEY.OSS);
   };
 
   const submitFile = (fileObj: FileObject) => {
+    setIsTrainingDataChanged(true);
     setTrainingFileError("");
 
     if (!fileObj) return;
@@ -261,9 +264,9 @@ export const DataTrainingComponent = () => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log("marker arrya", markerArray);
-  }, [markerArray]);
+  // useEffect(() => {
+  //   console.log("marker arrya", markerArray);
+  // }, [markerArray]);
 
   return (
     <>
@@ -827,6 +830,8 @@ export const DataTrainingFooter = () => {
     setIsUpdatingTrainingData,
     LUCfile,
     classArray,
+    isTrainingDataChanged,
+    setIsTrainingDataChanged,
   } = useContext(MapGenerationContext);
 
   const { sessionId } = useContext(GlobalContext);
@@ -867,6 +872,7 @@ export const DataTrainingFooter = () => {
         setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
         markerVectorLayer?.setOpacity(0);
         setProgressPanelIndex(3);
+        setIsTrainingDataChanged(false);
       })
       .catch((e) => {
         toast.error(`Error on submitting request: ${e}`, {
@@ -881,6 +887,15 @@ export const DataTrainingFooter = () => {
   };
 
   const onClickNext = () => {
+    // console.log("istraining chaned", isTrainingDataChanged);
+    // return;
+    if (!isTrainingDataChanged) {
+      setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
+      markerVectorLayer?.setOpacity(0);
+      setProgressPanelIndex(3);
+      return;
+    }
+
     if (selectedCustom) {
       updateLULC();
       return;
@@ -889,6 +904,7 @@ export const DataTrainingFooter = () => {
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
     markerVectorLayer?.setOpacity(0);
     setProgressPanelIndex(3);
+    setIsTrainingDataChanged(false);
     return;
   };
 

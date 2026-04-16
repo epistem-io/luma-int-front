@@ -155,9 +155,10 @@ export const MarkerPopup = ({
 
   return (
     <>
-      <div className="z-20 w-[150px] rounded-2xl p-3 border-2 border-primary-red-pink-normal bg-white">
+      {/* <div className="z-20 w-[150px] rounded-2xl p-2.5 border-2 border-primary-red-pink-normal bg-white"> */}
+      <div className="z-20 rounded-2xl p-2.5 border-2 border-primary-red-pink-normal bg-white">
         <div className="flex flex-col gap-y-3">
-          <div className="flex flex-row justify-between">
+          <div className="flex flex-row justify-between gap-x-2">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px]">
               {el?.name}
             </p>

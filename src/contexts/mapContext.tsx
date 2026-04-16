@@ -301,6 +301,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
   // const [mapPointerListener, setMapPointerListener] = useState<EventsKey[]>([]);
 
   const markerArrRef = useRef(markerArray);
+  const markerIdRef = useRef(markerId);
   const clickListenerRef = useRef(mapClickListener);
   const pointerListenerRef = useRef(mapPointerListener);
   const cursorVectorRef = useRef(cursorVectorLayer);
@@ -635,6 +636,14 @@ const MapContextContainer = (props: PropsWithChildren) => {
         return;
       }
 
+      console.log("featt, markerid", featt?.length, markerIdRef.current);
+
+      if (editOnly && markerIdRef.current) {
+        setMarkerId("");
+        overlay?.setPosition(undefined);
+        return;
+      }
+
       if (editOnly) return;
 
       if (markerArrRef.current.some((item) => item.class_id === -1)) {
@@ -934,6 +943,10 @@ const MapContextContainer = (props: PropsWithChildren) => {
   useEffect(() => {
     cursorVectorRef.current = cursorVectorLayer;
   }, [cursorVectorLayer]);
+
+  useEffect(() => {
+    markerIdRef.current = markerId;
+  }, [markerId]);
 
   const providedValue = {
     mapInstance,

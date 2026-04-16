@@ -207,7 +207,10 @@ const Map1 = () => {
       {/* <div className=""> */}
       <div
         ref={map1Container}
-        className="absolute inset-0 m-4 mt-0 rounded-2xl overflow-hidden z-10"
+        className="absolute inset-0 m-4 mt-0 rounded-2xl overflow-hidden z-10 border-[1.5px] border-[#E7E6E6]"
+        style={{
+          boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.08)",
+        }}
       ></div>
       <div
         ref={overlayRef}

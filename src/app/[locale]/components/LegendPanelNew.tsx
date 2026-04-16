@@ -323,7 +323,7 @@ export const LegendPanelNew = () => {
                             </p>
                           </AccordionTrigger>
 
-                          <div className="absolute top-1/2 -translate-y-1/2 left-20">
+                          <div className="absolute top-1/2 -translate-y-1/2 left-16.5">
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button
