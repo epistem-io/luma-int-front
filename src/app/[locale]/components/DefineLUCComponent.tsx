@@ -80,6 +80,7 @@ export const DefineLUCComponent = () => {
     setLUCFilesize,
     haveDownloadedFile,
     setHaveDownloadedFile,
+    setIsDefineLULCChanged,
   } = useContext(MapGenerationContext);
 
   const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
@@ -100,6 +101,8 @@ export const DefineLUCComponent = () => {
   };
 
   const onToggleSwitch = (num: number, checked: boolean) => {
+    setIsDefineLULCChanged(true);
+
     if (!checked) {
       setDefaultArray(defaultArray.filter((item) => item !== num));
       return;
@@ -113,6 +116,7 @@ export const DefineLUCComponent = () => {
   };
 
   const clearFile = () => {
+    setIsDefineLULCChanged(true);
     setLUCFile(null);
     setLUCFilename("");
     setLUCFilesize(0);
@@ -126,6 +130,7 @@ export const DefineLUCComponent = () => {
   };
 
   const onResetInput = () => {
+    setIsDefineLULCChanged(true);
     setDefaultArray([]);
     setHaveDownloadedFile(false);
 
@@ -136,6 +141,7 @@ export const DefineLUCComponent = () => {
     e: ChangeEvent<HTMLInputElement>,
     // cb: () => void,
   ) => {
+    setIsDefineLULCChanged(true);
     const target = e.target;
     const files = target?.files;
 
@@ -393,6 +399,7 @@ export const DefineLUCComponent = () => {
                                 // setAreaScopingPolygonFileName(file.name);
                                 // console.log("fileee", file);
 
+                                setIsDefineLULCChanged(true);
                                 setLUCFile(file);
                                 setLUCFilename(file.name);
                                 setLUCFilesize(file.size);
@@ -808,6 +815,8 @@ export const DefineLUCFooter = () => {
     setLUCFilename,
     setLUCFilesize,
     setDefaultArray,
+    setIsDefineLULCChanged,
+    isDefineLULCChanged,
   } = useContext(MapGenerationContext);
 
   const { setMarkerArray, renderArrayToMarkerVector } = useContext(MapContext);
@@ -827,6 +836,13 @@ export const DefineLUCFooter = () => {
   const isBackDisabled = isLUCLoading;
 
   const onClickNext = async () => {
+    if (!isDefineLULCChanged) {
+      setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
+      // WIP NEED CONFIRM
+      setProgressPanelIndex(2);
+      return;
+    }
+
     setIsLUCLoading(true);
 
     if (selectedCustom) {
@@ -954,6 +970,7 @@ export const DefineLUCFooter = () => {
 
         renderArrayToMarkerVector(markerArr);
 
+        setIsDefineLULCChanged(false);
         setProgressPanelIndex(2);
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
         // CONTINUE
@@ -986,8 +1003,8 @@ export const DefineLUCFooter = () => {
   };
 
   const onClickBack = () => {
-    setDefaultArray([]);
-    clearFile();
+    // setDefaultArray([]);
+    // clearFile();
 
     setProgressPanelIndex(0);
     setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY);

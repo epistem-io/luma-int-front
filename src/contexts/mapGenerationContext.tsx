@@ -155,6 +155,12 @@ interface ContextType {
   >;
   summaryData: InputSummaryRes | null;
   setSummaryData: Dispatch<SetStateAction<InputSummaryRes | null>>;
+  isDefineLULCChanged: boolean;
+  setIsDefineLULCChanged: Dispatch<SetStateAction<boolean>>;
+  isTrainingDataChanged: boolean;
+  setIsTrainingDataChanged: Dispatch<SetStateAction<boolean>>;
+  isLULCParamsChanged: boolean;
+  setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
 }
 
 const DEFAULT_VALUE: ContextType = {
@@ -246,6 +252,12 @@ const DEFAULT_VALUE: ContextType = {
   setGenerateMapDownloadURL: () => {},
   summaryData: null,
   setSummaryData: () => {},
+  isDefineLULCChanged: true,
+  setIsDefineLULCChanged: () => {},
+  isTrainingDataChanged: true,
+  setIsTrainingDataChanged: () => {},
+  isLULCParamsChanged: true,
+  setIsLULCParamsChanged: () => {},
 };
 
 const MapGenerationContext = createContext(DEFAULT_VALUE);
@@ -378,6 +390,20 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
 
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
 
+  // FLOW
+
+  const [isDefineLULCChanged, setIsDefineLULCChanged] = useState(
+    DEFAULT_VALUE.isDefineLULCChanged,
+  );
+
+  const [isTrainingDataChanged, setIsTrainingDataChanged] = useState(
+    DEFAULT_VALUE.isTrainingDataChanged,
+  );
+
+  const [isLULCParamsChanged, setIsLULCParamsChanged] = useState(
+    DEFAULT_VALUE.isLULCParamsChanged,
+  );
+
   const providedValue = {
     progressPanelIndex,
     setProgressPanelIndex,
@@ -459,11 +485,17 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapDownloadURL,
     summaryData,
     setSummaryData,
+    isDefineLULCChanged,
+    setIsDefineLULCChanged,
+    isTrainingDataChanged,
+    setIsTrainingDataChanged,
+    isLULCParamsChanged,
+    setIsLULCParamsChanged,
   };
 
-  useEffect(() => {
-    console.log("class array", classArray);
-  }, [classArray]);
+  // useEffect(() => {
+  //   console.log("class array", classArray);
+  // }, [classArray]);
 
   return (
     <MapGenerationContext.Provider value={providedValue}>
