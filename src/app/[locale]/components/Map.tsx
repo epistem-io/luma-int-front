@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import "ol/ol.css";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -11,7 +11,7 @@ import VectorLayer from "ol/layer/Vector";
 import { ImageTile, OSM, XYZ } from "ol/source";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
-import { createRoot, Root } from "react-dom/client";
+import { createPortal } from "react-dom";
 import Overlay from "ol/Overlay";
 import { MarkerPopup } from "./MarkerPopup";
 import LayerGroup from "ol/layer/Group";
@@ -37,9 +37,7 @@ const Map1 = () => {
 
   const { classArray } = useContext(MapGenerationContext);
 
-  const [root, setRoot] = useState<Root | null>(null);
-
-  const overlayRef = useRef(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
 
   const map1Container = useRef<HTMLDivElement | null>(null);
   // on component mount create the map and set the map refrences to the state
@@ -146,22 +144,6 @@ const Map1 = () => {
 
     if (!overlayRef.current) return;
 
-    const root = createRoot(overlayRef.current);
-
-    root.render(
-      <MarkerPopup
-        markerId={String(markerId)}
-        markerArray={markerArray}
-        setMarkerArray={setMarkerArray}
-        markerVectorSource={markerVectorSource}
-        overlay={overlayContext}
-        setMarkerId={setMarkerId}
-        markerVectorLayer={markerVectorLayer}
-        classArray={classArray ?? []}
-      />,
-    );
-    setRoot(root);
-
     const overlay = new Overlay({
       element: overlayRef.current, // Use the ref's DOM element
       position: fromLonLat([0, 0]), // Set the geographic position
@@ -174,44 +156,38 @@ const Map1 = () => {
     map1.addOverlay(overlay);
 
     return () => {
-      map1.setTarget(undefined);
+      if (map1) {
+        map1.setTarget(undefined);
+      }
+
       setMapInstance(null);
       setVectorLayer(null);
       setVectorSource(null);
-      root.unmount();
     };
   }, []);
-
-  // useEffect(() => {
-  //   console.log("markervector changed");
-  // }, [markerVectorSource]);
-
-  useEffect(() => {
-    if (!root) return;
-    root.render(
-      <MarkerPopup
-        markerId={String(markerId)}
-        markerArray={markerArray}
-        setMarkerArray={setMarkerArray}
-        markerVectorSource={markerVectorSource}
-        overlay={overlayContext}
-        setMarkerId={setMarkerId}
-        markerVectorLayer={markerVectorLayer}
-        classArray={classArray ?? []}
-      />,
-    );
-  }, [markerId, markerArray]);
 
   return (
     <>
       {/* <div className=""> */}
       <div
-        ref={map1Container}
-        className="absolute inset-0 m-4 mt-0 rounded-2xl overflow-hidden z-10 border-[1.5px] border-[#E7E6E6]"
-        style={{
-          boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.08)",
-        }}
-      ></div>
+        className="inset-0 bg-white"
+        // style={{
+        //   height: "",
+        // }}
+      >
+        <div
+          ref={map1Container}
+          className="absolute inset-0 m-4 mt-0 rounded-2xl overflow-hidden z-10 border-[1.5px] border-[#E7E6E6]"
+          style={{
+            boxShadow: "inset 0px 0px 12px 0px rgba(0,0,0,0.12)",
+          }}
+        ></div>
+
+        <div
+          className="pointer-events-none absolute inset-0 z-20 rounded-2xl m-4 mt-0"
+          style={{ boxShadow: "inset 0 0 12px rgba(0,0,0,0.12)" }}
+        />
+      </div>
       <div
         ref={overlayRef}
         id="marker-popup"
@@ -219,6 +195,20 @@ const Map1 = () => {
         // className="absolute z-20 w-[150px] rounded-2xl p-3 border-2 border-primary-red-pink-normal bg-white"
         // style={{ display: "none" }}
       ></div>
+      {overlayRef.current &&
+        createPortal(
+          <MarkerPopup
+            markerId={String(markerId)}
+            markerArray={markerArray}
+            setMarkerArray={setMarkerArray}
+            markerVectorSource={markerVectorSource}
+            overlay={overlayContext}
+            setMarkerId={setMarkerId}
+            markerVectorLayer={markerVectorLayer}
+            classArray={classArray ?? []}
+          />,
+          overlayRef.current,
+        )}
       {/* </div> */}
     </>
   );
