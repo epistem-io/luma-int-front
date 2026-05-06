@@ -39,12 +39,12 @@ export const AreaScopingSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("areaOfInterest")}
+              {t("areaScoping.areaOfInterest")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-0 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
-                  {t("selectedAreaHasTotalArea")}
+                  {t("areaScoping.selectedAreaHasTotalArea")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {areaSizeString}
@@ -81,10 +81,10 @@ export const AreaScopingSummary = ({
               setIsConfirmModalVisible(false);
               onClickEdit();
             }}
-            title={t("changeInput")}
-            subtitle={t("confirmSubtitle")}
-            confirmButtonCaption={t("changeInput")}
-            cancelButtonCaption={t("cancelChangeInput")}
+            title={t("common.changeInput")}
+            subtitle={t("common.confirmSubtitle")}
+            confirmButtonCaption={t("common.changeInput")}
+            cancelButtonCaption={t("common.cancelChangeInput")}
           />
         </>
       )}

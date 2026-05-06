@@ -150,10 +150,10 @@ export const LegendPanelNew = () => {
                   <div className="space-y-0 max-h-[360px] overflow-y-scroll">
                     <div className="">
                       <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {tInteractive("layerAndComposites")}
+                        {tInteractive("layerAndComposites.layerAndComposites")}
                       </p>
                       <p className="font-aptos text-neutral-700-baru text-md font-regular leading-6">
-                        {tInteractive("layerAndCompositesSubtitle")}
+                        {tInteractive("layerAndComposites.layerAndCompositesSubtitle")}
                       </p>
                     </div>
                     <div className="space-y-6 mt-6">
@@ -286,7 +286,7 @@ export const LegendPanelNew = () => {
                           <AccordionItem value="aoi" className="border-b-0">
                             <AccordionTrigger className="py-0">
                               <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                {tInteractive("areaOfInterest")}
+                                {tInteractive("areaScoping.areaOfInterest")}
                               </p>
                             </AccordionTrigger>
                             <AccordionContent>
@@ -332,7 +332,7 @@ export const LegendPanelNew = () => {
                             <div className="relative">
                               <AccordionTrigger className="py-0 relative">
                                 <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                  {tInteractive("composite")}
+                                  {tInteractive("layerAndComposites.composite")}
                                 </p>
                               </AccordionTrigger>
 
@@ -411,7 +411,7 @@ export const LegendPanelNew = () => {
                         <AccordionItem value="lulc" className="border-b-0">
                           <AccordionTrigger className="py-0">
                             <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                              {tInteractive("lulcClass")}
+                              {tInteractive("dataTraining.lulcClass")}
                             </p>
                           </AccordionTrigger>
                           <AccordionContent>
@@ -458,14 +458,14 @@ export const LegendPanelNew = () => {
                           >
                             <AccordionTrigger className="py-0">
                               <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                {tInteractive("cloudCoverage")}
+                                {tInteractive("satelliteComposite.cloudCoverage")}
                               </p>
                             </AccordionTrigger>
                             <AccordionContent>
                               <div className="mt-4">
                                 <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-third">
                                   {tInteractive(
-                                    "cloudCoverageLegendDescription",
+                                    "satelliteComposite.cloudCoverageLegendDescription",
                                   )}
                                 </p>
                               </div>
@@ -488,7 +488,7 @@ export const LegendPanelNew = () => {
                     )}
                   >
                     <p className="font-aptos text-xl font-extrabold leading-6 text-text-icons-on-color">
-                      {tInteractive("layerAndComposites")}
+                      {tInteractive("layerAndComposites.layerAndComposites")}
                     </p>
                     {/* <p className="bold-body-400">{tInteractive("legend")}</p> */}
                   </AccordionFullTrigger>

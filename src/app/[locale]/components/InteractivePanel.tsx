@@ -87,13 +87,13 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.BASIC_INFORMATION]: {
       component: <BasicInformationComponent />,
       footer: <BasicInformationFooter />,
-      title: t("basicInformationTitle"),
-      subtitle: t("basicInformationCaption"),
+      title: t("basicInformation.basicInformationTitle"),
+      subtitle: t("basicInformation.basicInformationCaption"),
     },
     [PANEL_COMPONENT_KEY.AREA_SCOPING]: {
       component: <AreaScopingComponent />,
       footer: <AreaScopingFooter />,
-      title: t("areaScoping"),
+      title: t("areaScoping.areaScoping"),
       onClickBackCallback: () => {
         setAreaScopingPolygonArea(0);
         setAreaScopingPolygonFileName("");
@@ -108,26 +108,26 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY]: {
       component: <BasicInformationSummaryComponent />,
       footer: <BasicInformationSummaryFooter />,
-      title: t("basicInformationTitle"),
-      subtitle: t("basicInformationCaption"),
+      title: t("basicInformation.basicInformationTitle"),
+      subtitle: t("basicInformation.basicInformationCaption"),
     },
     [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
       component: <DefineLUCComponent />,
       footer: <DefineLUCFooter />,
-      title: t("defineLUCTitle"),
-      subtitle: t("defineLUCDescription"),
+      title: t("defineLUC.defineLUCTitle"),
+      subtitle: t("defineLUC.defineLUCDescription"),
     },
     [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
       component: <DataTrainingComponent />,
       footer: <DataTrainingFooter />,
-      title: t("dataTrainingTitle"),
-      subtitle: t("dataTrainingDescription"),
+      title: t("dataTraining.dataTrainingTitle"),
+      subtitle: t("dataTraining.dataTrainingDescription"),
     },
     [PANEL_COMPONENT_KEY.OSS]: {
       component: <OSSComponent />,
       footer: <OSSFooter />,
-      title: t("onScreenSamplingPanel"),
-      subtitle: t("onScreenSamplingPanelDescription"),
+      title: t("dataTraining.onScreenSamplingPanel"),
+      subtitle: t("dataTraining.onScreenSamplingPanelDescription"),
       onClickBackCallback: () => {
         // removeMarkerCursor()
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
@@ -136,14 +136,14 @@ export const InteractivePanel = () => {
     [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
       component: <LULCParamsComponent />,
       footer: <LULCParamsFooter />,
-      title: t("selectLULCListParams"),
-      subtitle: t("selectLULCListParamsDescription"),
+      title: t("lulcParams.selectLULCListParams"),
+      subtitle: t("lulcParams.selectLULCListParamsDescription"),
     },
     [PANEL_COMPONENT_KEY.YOUR_MAP]: {
       component: <YourMapComponent />,
       footer: <YourMapFooter />,
-      title: t("yourMapPanelTitle"),
-      subtitle: t("yourMapPanelDescription"),
+      title: t("yourMap.yourMapPanelTitle"),
+      subtitle: t("yourMap.yourMapPanelDescription"),
     },
   };
 

@@ -11,11 +11,11 @@ export const CloudCoverPopup = () => {
         <div className="flex flex-row items-center gap-x-2">
           <HelpCircle className="size-6 text-primary-pink" />
           <p className="text-m-bold text-text-icons-base-main">
-            {t("cloudCoverInComposite")}
+            {t("satelliteComposite.cloudCoverInComposite")}
           </p>
         </div>
         <p className="text-xs-regular text-text-icons-base-third">
-          {t("cloudCoverInCompositeDescription")}
+          {t("satelliteComposite.cloudCoverInCompositeDescription")}
         </p>
       </div>
       <div className="grid grid-cols-3 gap-x-4">
@@ -30,7 +30,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("cloudCoverTrueColor")}
+            {t("satelliteComposite.cloudCoverTrueColor")}
           </p>
         </div>
         <div className="space-y-2">
@@ -44,7 +44,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("cloudCoverFalseColor")}
+            {t("satelliteComposite.cloudCoverFalseColor")}
           </p>
         </div>
         <div className="space-y-2">
@@ -58,7 +58,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("cloudCoverLandWater")}
+            {t("satelliteComposite.cloudCoverLandWater")}
           </p>
         </div>
       </div>

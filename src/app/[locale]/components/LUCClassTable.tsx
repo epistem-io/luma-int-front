@@ -90,14 +90,14 @@ export const LUCClassTable = ({ summary = false }: Props) => {
           <TableRow>
             {summary && (
               <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                {t("featureID")}
+                {t("finalSummary.featureID")}
               </TableHead>
             )}
             <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-full">
-              {t("lulcClass")}
+              {t("dataTraining.lulcClass")}
             </TableHead>
             <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
-              {t("numberOfPoints")}
+              {t("dataTraining.numberOfPoints")}
             </TableHead>
 
             {!summary && (

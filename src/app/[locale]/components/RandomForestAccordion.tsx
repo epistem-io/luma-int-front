@@ -58,7 +58,7 @@ export const RandomForestAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {tInteractive("RFVariable")}
+          {tInteractive("lulcParams.RFVariable")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">

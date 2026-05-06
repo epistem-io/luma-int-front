@@ -39,31 +39,31 @@ export const DATA_TRAINING_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 export const TEMPORAL_COVERAGE_ARRAY = [
   {
     value: "1",
-    labelFunction: (i18n: TFunction) => i18n("byYear"),
+    labelFunction: (i18n: TFunction) => i18n("timePeriod.byYear"),
     label: "By Year",
     // default: true,
   },
   {
     value: "2",
-    labelFunction: (i18n: TFunction) => i18n("bySemester"),
+    labelFunction: (i18n: TFunction) => i18n("timePeriod.bySemester"),
     label: "By Semester (coming soon)",
     disabled: true,
   },
   {
     value: "3",
-    labelFunction: (i18n: TFunction) => i18n("byQuarter"),
+    labelFunction: (i18n: TFunction) => i18n("timePeriod.byQuarter"),
     label: "By Quarter (coming soon)",
     disabled: true,
   },
   {
     value: "4",
-    labelFunction: (i18n: TFunction) => i18n("byMonth"),
+    labelFunction: (i18n: TFunction) => i18n("timePeriod.byMonth"),
     label: "By Month (coming soon)",
     disabled: true,
   },
   {
     value: "5",
-    labelFunction: (i18n: TFunction) => i18n("customDate"),
+    labelFunction: (i18n: TFunction) => i18n("timePeriod.customDate"),
     label: "Custom Date (coming soon)",
     disabled: true,
   },

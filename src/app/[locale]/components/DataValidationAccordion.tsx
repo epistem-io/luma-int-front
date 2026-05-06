@@ -56,7 +56,7 @@ export const DataValidationAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("dataValidation")}
+          {t("lulcParams.dataValidation")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -73,8 +73,8 @@ export const DataValidationAccordion = () => {
             <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
               {/* Drag & drop your file here to upload. <br />
               Accepted format .zip */}
-              {t("dragAndDrop")} <br />
-              {t("acceptedFormat", {
+              {t("common.dragAndDrop")} <br />
+              {t("common.acceptedFormat", {
                 extensions: ".zip",
               })}
             </p>
@@ -98,7 +98,7 @@ export const DataValidationAccordion = () => {
                   true && "text-text-icons-base-third",
                 )}
               >
-                {t("browseFile")}
+                {t("common.browseFile")}
               </p>
             </div>
           </Label>

@@ -322,11 +322,11 @@ export const AreaScopingComponent = () => {
             />
             <div className="space-y-2">
               <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-                {t("uploadSHPFile")}
+                {t("areaScoping.uploadSHPFile")}
               </p>
               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
                 {/* Here to generate the current <br /> condition data. */}
-                {t.rich("uploadSHPSubtitleBR", {
+                {t.rich("areaScoping.uploadSHPSubtitleBR", {
                   br: () => <br></br>,
                 })}
               </p>
@@ -455,10 +455,12 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("fileTooBigError")}
+                            {t("common.areaTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("fileTooBigError", { limit: "100,000 Ha" })}
+                            {t("common.areaTooBigErrorDesc", {
+                              limit: "100,000 Ha",
+                            })}
                           </p>
                         </div>
                       </div>
@@ -510,10 +512,10 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("fileTooBigError")}
+                            {t("common.fileTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("fileTooBigError", { limit: "500MB" })}
+                            {t("common.fileTooBigError", { limit: "500MB" })}
                           </p>
                         </div>
                       </div>
@@ -578,8 +580,8 @@ export const AreaScopingComponent = () => {
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
                             {/* Accepted format .zip (.shp, .shx, .dbf, .prj), .kml,
                             .kmz */}
-                            {t("dragAndDrop")} <br />
-                            {t("acceptedFormat", {
+                            {t("common.dragAndDrop")} <br />
+                            {t("common.acceptedFormat", {
                               extensions:
                                 ".zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
                             })}
@@ -591,7 +593,7 @@ export const AreaScopingComponent = () => {
                         >
                           <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
                             <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                              {t("browseFile")}
+                              {t("common.browseFile")}
                             </p>
                           </div>
                         </Label>
@@ -603,7 +605,7 @@ export const AreaScopingComponent = () => {
                         <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                            {t("dropHere")}
+                            {t("common.dropHere")}
                           </p>
                         </div>
                       </>
@@ -679,10 +681,10 @@ export const AreaScopingComponent = () => {
             />
             <div className="space-y-2">
               <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-                {t("drawPolygon")}
+                {t("areaScoping.drawPolygon")}
               </p>
               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
-                {t("drawPolygonSubtitle")}
+                {t("areaScoping.drawPolygonSubtitle")}
               </p>
             </div>
           </div>
@@ -703,7 +705,7 @@ export const AreaScopingComponent = () => {
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("selectedAreaHasTotalArea")}
+                          {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
                         <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
                           {numberThousandSeparator(
@@ -739,10 +741,12 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("fileTooBigError")}
+                            {t("common.fileTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("fileTooBigError", { limit: "100,000 Ha" })}
+                            {t("common.fileTooBigError", {
+                              limit: "100,000 Ha",
+                            })}
                           </p>
                         </div>
                       </div>
@@ -761,7 +765,7 @@ export const AreaScopingComponent = () => {
               <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
                 <ComingSoon />
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                  {t("spatialResolution")}:
+                  {t("areaScoping.spatialResolution")}:
                 </p>
                 <div className="">
                   <RadioGroup
@@ -1046,7 +1050,7 @@ export const AreaScopingFooter = () => {
           onReselect();
         }}
       >
-        {t("reselect")}
+        {t("common.reselect")}
       </Button>
       <Button
         disabled={isConfirmDisabled}
@@ -1056,7 +1060,7 @@ export const AreaScopingFooter = () => {
           onClickConfirm();
         }}
       >
-        {t("confirm")}
+        {t("common.confirm")}
       </Button>
     </div>
   );

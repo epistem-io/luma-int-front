@@ -332,7 +332,7 @@ const LULCCompositionSummary = () => {
       <Card>
         <div className="space-y-5">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("lulcCompositionSummary")}
+            {t("yourMap.lulcCompositionSummary")}
           </p>
           <div className="flex flex-row w-full rounded-md overflow-hidden h-14">
             {generateMapLULC?.lulc_composition.map((item, index) => (
@@ -431,10 +431,10 @@ const TrainingDataQuality = () => {
         <div className="space-y-4">
           <div className="space-y-1">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("trainingDataQuality")}
+              {t("yourMap.trainingDataQuality")}
             </p>
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {t("trainingDataQualityDescription")}
+              {t("yourMap.trainingDataQualityDescription")}
             </p>
           </div>
 
@@ -442,12 +442,12 @@ const TrainingDataQuality = () => {
             <div className="flex flex-row gap-x-2">
               <AlertCircleIcon className="size-6 text-danger-700" />
               <p className="font-aptos text-md font-bold leading-6 text-danger-700">
-                {t("lowSeparabilityDetected")}
+                {t("yourMap.lowSeparabilityDetected")}
               </p>
             </div>
 
             <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
-              <p className="font-bold">{t("lowSeparabilityCaption1")}</p>
+              <p className="font-bold">{t("yourMap.lowSeparabilityCaption1")}</p>
               <div className="">
                 {generateMapSampleQuality?.lowest_separability?.result_dict.map(
                   (item, index) => {
@@ -460,7 +460,7 @@ const TrainingDataQuality = () => {
                         {/* WIP */}
                         {/* <p className="">Class [X] and Class [Y]</p> */}
                         <p className="">
-                          {t("lowSeparabilityCaption2", {
+                          {t("yourMap.lowSeparabilityCaption2", {
                             X: item.Class1_Name,
                             Y: item.Class2_Name,
                           })}
@@ -470,7 +470,7 @@ const TrainingDataQuality = () => {
                   },
                 )}
               </div>
-              <p className="">{t("lowSeparabilityCaption3")}</p>
+              <p className="">{t("yourMap.lowSeparabilityCaption3")}</p>
             </div>
           </div>
         </div>
@@ -488,10 +488,10 @@ const PredictorImportances = () => {
         <div className="space-y-5">
           <div className="space-y-1">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("predictorImportances")}
+              {t("yourMap.predictorImportances")}
             </p>
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {t("predictorImportancesDescription")}
+              {t("yourMap.predictorImportancesDescription")}
             </p>
           </div>
 
@@ -556,7 +556,7 @@ const PredictorImportances = () => {
             >
               <div className="">
                 <p className="text-primary-pink font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-                  {t("showDetail")}
+                  {t("yourMap.showDetail")}
                 </p>
               </div>
             </Button>
@@ -576,10 +576,10 @@ const ModelAccuracyAssessment = () => {
         <div className="space-y-4">
           <div className="space-y-1">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("modelAccuracyAssessment")}
+              {t("yourMap.modelAccuracyAssessment")}
             </p>
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {t("modelAccuracyAssessmentDescription")}
+              {t("yourMap.modelAccuracyAssessmentDescription")}
             </p>
           </div>
 
@@ -587,7 +587,7 @@ const ModelAccuracyAssessment = () => {
             <div className="flex flex-row gap-x-2">
               {/* <AlertCircleIcon className="size-6 text-danger-700" /> */}
               <p className="font-aptos text-md font-bold leading-6 text-success-700">
-                {t("modelAccuracyAssessmentPercentage", {
+                {t("yourMap.modelAccuracyAssessmentPercentage", {
                   percentage:
                     generateMapModelQuality?.model_quality.overall_accuracy.toFixed(
                       0,
@@ -601,7 +601,7 @@ const ModelAccuracyAssessment = () => {
               <div className="flex flex-row justify-evenly">
                 <div className="flex flex-col items-center">
                   <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
-                    {t("overallAccuracy")}
+                    {t("yourMap.overallAccuracy")}
                   </p>
                   <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.overall_accuracy.toFixed(
@@ -612,7 +612,7 @@ const ModelAccuracyAssessment = () => {
                 </div>
                 <div className="flex flex-col items-center">
                   <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
-                    {t("kappaCoefficient")}
+                    {t("yourMap.kappaCoefficient")}
                   </p>
                   <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.kappa.toFixed(2)}
@@ -620,7 +620,7 @@ const ModelAccuracyAssessment = () => {
                 </div>
                 <div className="flex flex-col items-center">
                   <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
-                    {t("averageF1Score")}
+                    {t("yourMap.averageF1Score")}
                   </p>
                   <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.average_f1_score.toFixed(
@@ -630,7 +630,7 @@ const ModelAccuracyAssessment = () => {
                 </div>
                 <div className="flex flex-col items-center">
                   <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
-                    {t("gMeanScore")}
+                    {t("yourMap.gMeanScore")}
                   </p>
                   <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.gmean_score.toFixed(
@@ -652,7 +652,7 @@ const ModelAccuracyAssessment = () => {
             >
               <div className="">
                 <p className="text-primary-pink font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-                  {t("showAllPredictor")}
+                  {t("yourMap.showAllPredictor")}
                 </p>
               </div>
             </Button>
@@ -670,19 +670,19 @@ const ThematicAccuracyAssessment = () => {
       <Card>
         <div className="space-y-5">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("thematicAccuracyAssessment")}
+            {t("yourMap.thematicAccuracyAssessment")}
           </p>
           <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-            {t("thematicAccuracyAssessmentDescription")}
+            {t("yourMap.thematicAccuracyAssessmentDescription")}
           </p>
           <div className="p-3 rounded-md bg-text-icons-base-main">
             <div className="space-y-1">
               <p className="font-aptos text-md font-bold leading-6 text-text-icons-on-color">
-                {t("ronaAdTitle")}
+                {t("yourMap.ronaAdTitle")}
               </p>
 
               <p className="font-aptos text-sm font-regular leading-5 text-text-icons-on-color">
-                {t.rich("ronaAdDescription", {
+                {t.rich("yourMap.ronaAdDescription", {
                   b: (t) => <b>{t}</b>,
                 })}
               </p>
@@ -698,16 +698,16 @@ const ThematicAccuracyAssessment = () => {
             </div>
             <div className="space-y-3">
               <p className="font-pjs text-sm font-medium text-text-icons-on-color">
-                {t("rona")}
+                {t("yourMap.rona")}
               </p>
               <p className="font-pjs text-xl font-bold text-text-icons-on-color">
-                {t("ronaTagline")}
+                {t("yourMap.ronaTagline")}
               </p>
               <Button
                 className="w-full rounded-md hover:bg-primary-pink hover:cursor-default"
                 variant={"primary"}
               >
-                <p className="font-aptos text-[13px]">{t("ronaComingSoon")}</p>
+                <p className="font-aptos text-[13px]">{t("yourMap.ronaComingSoon")}</p>
               </Button>
             </div>
           </div>

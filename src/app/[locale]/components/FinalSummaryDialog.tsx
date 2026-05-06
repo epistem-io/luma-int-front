@@ -135,10 +135,10 @@ export const FinalSummaryDialog = () => {
       >
         <DialogHeader className="flex flex-col gap-x-3 items-center">
           <DialogTitle className="text-center text-primary-pink font-aptos text-[32px] font-bold tracking-[-0.32px] pr-8">
-            {t("finalSummaryTitle")}
+            {t("finalSummary.finalSummaryTitle")}
           </DialogTitle>
           <DialogDescription className="text-center font-aptos text-md font-regular text-text-icons-base-main pr-8">
-            {t("finalSummarySubtitle")}
+            {t("finalSummary.finalSummarySubtitle")}
           </DialogDescription>
           <div className="py-10 space-y-7.5 w-full max-h-[calc(100vh-250px)] overflow-y-scroll pr-4 mr-4">
             {isLoading && (
@@ -150,17 +150,17 @@ export const FinalSummaryDialog = () => {
               <>
                 <div className="space-y-2">
                   <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
-                    {t("summaryOfBasicInformation")}
+                    {t("basicInformation.summaryOfBasicInformation")}
                   </p>
                   <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
                     <div className="">
                       <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {t("areaOfInterest")}
+                        {t("areaScoping.areaOfInterest")}
                       </p>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                         <div className="col-span-2">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("location")} :
+                            {t("finalSummary.location")} :
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {/* WIP NO LOCATION */}
@@ -169,7 +169,7 @@ export const FinalSummaryDialog = () => {
                         </div>
                         <div className="col-span-2">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("selectedAreaHasTotalArea")}
+                            {t("areaScoping.selectedAreaHasTotalArea")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {summaryData?.data.aoi.area_size} m<sup>2</sup>
@@ -179,12 +179,12 @@ export const FinalSummaryDialog = () => {
                     </div>
                     <div className="">
                       <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {t("timePeriod")}
+                        {t("timePeriod.timePeriod")}
                       </p>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                         <div className="col-span-1">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("temporalResolution")}
+                            {t("timePeriod.temporalResolution")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {/* WIP NO RESOLUTION */}
@@ -196,7 +196,7 @@ export const FinalSummaryDialog = () => {
                         </div>
                         <div className="col-span-1">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("specificPeriod")}
+                            {t("timePeriod.specificPeriod")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {/* WIP NO PERIOD */}
@@ -206,7 +206,7 @@ export const FinalSummaryDialog = () => {
                         </div>
                         <div className="col-span-2">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("satelliteInputDateRange")}
+                            {t("timePeriod.satelliteInputDateRange")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {/* WIP NO RANGE */}
@@ -221,12 +221,12 @@ export const FinalSummaryDialog = () => {
                     </div>
                     <div className="">
                       <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {t("satelliteComposite")}
+                        {t("satelliteComposite.satelliteComposite")}
                       </p>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                         <div className="col-span-1">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("satellite")}
+                            {t("satelliteComposite.satellite")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {summaryData?.data.luma_params.landsat_version}
@@ -234,7 +234,7 @@ export const FinalSummaryDialog = () => {
                         </div>
                         <div className="col-span-1">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
-                            {t("cloudCoverage")}
+                            {t("satelliteComposite.cloudCoverage")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {summaryData?.data.luma_params.cloud_cover}%
@@ -246,18 +246,18 @@ export const FinalSummaryDialog = () => {
                 </div>
                 <div className="space-y-2">
                   <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main text-center">
-                    {t("summaryOfLULCSampling")}
+                    {t("finalSummary.summaryOfLULCSampling")}
                   </p>
                   <div className="p-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-3 bg-purple-second">
                     <div className="">
                       <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {t("totalClass")}
+                        {t("finalSummary.totalClass")}
                       </p>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                         <div className="col-span-2">
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {summaryData?.data.training_data_summary.length}{" "}
-                            {t("class")}
+                            {t("finalSummary.class")}
                           </p>
                         </div>
                         <div className="col-span-2">
@@ -298,7 +298,7 @@ export const FinalSummaryDialog = () => {
                       <div className="flex flex-row gap-x-3.5 items-start">
                         <div className="">
                           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                            {t("timePeriod")}
+                            {t("timePeriod.timePeriod")}
                           </p>
                           <div className="grid grid-cols-2 gap-y-1 gap-x-3">
                             <div className="col-span-2">
@@ -307,7 +307,7 @@ export const FinalSummaryDialog = () => {
                                   (acc, cur) => acc + cur.total_items,
                                   0,
                                 )}{" "}
-                                {t("points")}
+                                {t("finalSummary.points")}
                               </p>
                             </div>
                           </div>
@@ -331,7 +331,7 @@ export const FinalSummaryDialog = () => {
             disabled={isLoading}
             variant={"primary"}
           >
-            {t("generateMap")}
+            {t("finalSummary.generateMap")}
           </Button>
         </div>
       </DialogContent>

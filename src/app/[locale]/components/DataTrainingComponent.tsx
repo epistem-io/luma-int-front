@@ -283,7 +283,7 @@ export const DataTrainingComponent = () => {
               className="hover:no-underline p-3 pb-0"
             >
               <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-                {t("recordedLULC")}
+                {t("dataTraining.recordedLULC")}
               </p>
             </AccordionFullTrigger>
             <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -298,15 +298,15 @@ export const DataTrainingComponent = () => {
               <div className="px-0 py-0">
                 <TabsList className="w-full px-1.5">
                   <TabsTrigger value="upload">
-                    {t("uploadDataTraining")}
+                    {t("dataTraining.uploadDataTraining")}
                   </TabsTrigger>
-                  <TabsTrigger value="oss">{t("onScreenSampling")}</TabsTrigger>
+                  <TabsTrigger value="oss">{t("dataTraining.onScreenSampling")}</TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="upload">
                 <div className="space-y-6">
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                    {t("uploadDataTrainingDescription")}
+                    {t("dataTraining.uploadDataTrainingDescription")}
                   </p>
                   <div className="space-y-6">
                     {uploadedFilesArray.length === 0 && (
@@ -368,8 +368,8 @@ export const DataTrainingComponent = () => {
                               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
                                 {/* Drag & drop your file here to upload. <br />
                             Accepted format .zip */}
-                                {t("dragAndDrop")} <br />
-                                {t("acceptedFormat", {
+                                {t("common.dragAndDrop")} <br />
+                                {t("common.acceptedFormat", {
                                   extensions: ".zip",
                                 })}
                               </p>
@@ -390,7 +390,7 @@ export const DataTrainingComponent = () => {
                                 )}
                               >
                                 <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                                  {t("browseFile")}
+                                  {t("common.browseFile")}
                                 </p>
                               </div>
                             </Label>
@@ -402,7 +402,7 @@ export const DataTrainingComponent = () => {
                             <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                               <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                               <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                                {t("dropHere")}
+                                {t("common.dropHere")}
                               </p>
                             </div>
                           </>
@@ -555,7 +555,7 @@ export const DataTrainingComponent = () => {
                                 </div>
                                 <div className="">
                                   <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                    {t("fileError")}
+                                    {t("common.fileError")}
                                   </p>
                                   <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                                     {trainingFileError}
@@ -611,10 +611,10 @@ export const DataTrainingComponent = () => {
                                   </div>
                                   <div className="">
                                     <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                      {t("fileTooBigError")}
+                                      {t("common.fileTooBigError")}
                                     </p>
                                     <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                      {t("fileTooBigError", { limit: "500MB" })}
+                                      {t("common.fileTooBigError", { limit: "500MB" })}
                                     </p>
                                   </div>
                                 </div>
@@ -637,11 +637,11 @@ export const DataTrainingComponent = () => {
               <TabsContent value="oss">
                 <div className="space-y-6">
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-                    {t("onScreenSamplingDescription")}
+                    {t("dataTraining.onScreenSamplingDescription")}
                   </p>
                   {/* <div className="space-y-2">
                     <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                      {t("recordedLULC")}
+                      {t("dataTraining.recordedLULC")}
                     </p>
                     <LUCClassTable summary={false} />
                   </div> */}
@@ -652,14 +652,14 @@ export const DataTrainingComponent = () => {
                           value="pinpoint"
                           className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink rounded-none"
                         >
-                          {t("pinPoint")}
+                          {t("dataTraining.pinPoint")}
                         </TabsTrigger>
                         <TabsTrigger
                           disabled
                           value="draw"
                           className="font-aptos data-[state=active]:text-text-icons-base-main text-[15px] text-text-icons-base-third font-semibold leading-4.5 data-[state=active]:bg-transparent border-0 border-b-4 data-[state=active]:border-b-primary-pink border-b-text-icons-disabled rounded-none"
                         >
-                          {t("drawPolygon")}
+                          {t("areaScoping.drawPolygon")}
                         </TabsTrigger>
                       </TabsList>
                     </div>
@@ -667,10 +667,10 @@ export const DataTrainingComponent = () => {
                       <div className="mt-4 space-y-5.5">
                         <div className="">
                           <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                            {t("pinYourPoint")}
+                            {t("dataTraining.pinYourPoint")}
                           </p>
                           <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
-                            {t("pinYourPointDescription")}
+                            {t("dataTraining.pinYourPointDescription")}
                           </p>
                         </div>
                         <RadioGroup
@@ -715,10 +715,10 @@ export const DataTrainingComponent = () => {
                               </div>
                               <div className="">
                                 <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                  {t("singlePoint")}
+                                  {t("dataTraining.singlePoint")}
                                 </p>
                                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                  {t("singlePointDescription")}
+                                  {t("dataTraining.singlePointDescription")}
                                 </p>
                               </div>
                             </div>
@@ -758,17 +758,17 @@ export const DataTrainingComponent = () => {
                                 </div>
                                 <div className="">
                                   <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                    {t("bulkPoint")}
+                                    {t("dataTraining.bulkPoint")}
                                   </p>
                                   <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
-                                    {t("bulkPointDescription")}
+                                    {t("dataTraining.bulkPointDescription")}
                                   </p>
                                 </div>
                               </div>
                               {pointingType === "bulk" && (
                                 <div className="ml-8 space-y-2">
                                   <p className="font-aptos text-[15px] font-regular leading-4.5">
-                                    {t("selectLULCClass")}
+                                    {t("dataTraining.selectLULCClass")}
                                   </p>
                                   <Select
                                     value={selectedClass}
@@ -777,7 +777,7 @@ export const DataTrainingComponent = () => {
                                     <SelectTrigger className="w-full">
                                       <SelectValue
                                         placeholder={t(
-                                          "selectLULCClassPlaceholder",
+                                          "dataTraining.selectLULCClassPlaceholder",
                                         )}
                                       />
                                     </SelectTrigger>
@@ -805,7 +805,7 @@ export const DataTrainingComponent = () => {
                               onClickStartPointing();
                             }}
                           >
-                            {t("startPointing")}
+                            {t("dataTraining.startPointing")}
                           </Button>
                         </RadioGroup>
                       </div>
@@ -936,7 +936,7 @@ export const DataTrainingFooter = () => {
           variant="primary"
           className=""
         >
-          {!isUpdatingTrainingData && t("next")}
+          {!isUpdatingTrainingData && t("common.next")}
           {isUpdatingTrainingData && (
             <div className="w-full h-10 flex flex-row justify-center items-center">
               <span className="loader sm"></span>

@@ -69,7 +69,7 @@ export const BasicInformationFooter = () => {
         variant="primary"
         className="w-39.25"
       >
-        {t("next")}
+        {t("common.next")}
       </Button>
     </div>
   );

@@ -103,7 +103,7 @@ export const MosaicSummary = () => {
       <div className="space-y-3">
         <div className="">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("mosaicMap")}
+            {t("satelliteComposite.mosaicMap")}
           </p>
           <div className="flex flex-row items-center justify-between">
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
@@ -118,7 +118,7 @@ export const MosaicSummary = () => {
               {!isMosaicLoading && (
                 <Label htmlFor="preview-mosaic-map">
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                    {t("previewMosaicMap")}
+                    {t("satelliteComposite.previewMosaicMap")}
                   </p>
                 </Label>
               )}
@@ -138,18 +138,18 @@ export const MosaicSummary = () => {
                 <TableHeader className="bg-purple-second">
                   <TableRow>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("featureID")} */}#
+                      {/* {t("finalSummary.featureID")} */}#
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("featureID")} */}
+                      {/* {t("finalSummary.featureID")} */}
                       Scene ID
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("lulcClass")} */}
+                      {/* {t("dataTraining.lulcClass")} */}
                       Tanggal Perekaman
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
-                      {/* {t("numberOfPoints")} */}
+                      {/* {t("dataTraining.numberOfPoints")} */}
                       Tutupan Awan (%)
                     </TableHead>
                   </TableRow>
