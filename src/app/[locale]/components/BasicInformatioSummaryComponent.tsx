@@ -70,7 +70,7 @@ export const BasicInformationSummaryComponent = () => {
       <div className="space-y-6">
         <div className="space-y-3">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("summaryOfBasicInformation")}
+            {t("basicInformation.summaryOfBasicInformation")}
           </p>
           <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second space-y-4">
             <AreaScopingSummary
@@ -239,7 +239,7 @@ export const BasicInformationSummaryFooter = () => {
       >
         {/* {isPreviewingMosaic || isBasicInformationChangeInput */}
         {/* {isBasicInformationChangeInput ? "Cancel" : "Change Input"} */}
-        {t("changeInput")}
+        {t("common.changeInput")}
       </Button>
       <Button
         onClick={() => {
@@ -249,7 +249,7 @@ export const BasicInformationSummaryFooter = () => {
         variant="primary"
         className=""
       >
-        {isPreviewingMosaic && t("next")}
+        {isPreviewingMosaic && t("common.next")}
         {!isPreviewingMosaic && (
           <>
             {isMosaicLoading && (
@@ -257,7 +257,7 @@ export const BasicInformationSummaryFooter = () => {
                 <span className="loader sm"></span>
               </div>
             )}
-            {!isMosaicLoading && t("previewMosaicMap")}
+            {!isMosaicLoading && t("satelliteComposite.previewMosaicMap")}
           </>
         )}
       </Button>

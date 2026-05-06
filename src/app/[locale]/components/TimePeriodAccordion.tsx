@@ -141,7 +141,7 @@ export const TimePeriodAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("timePeriod")}
+          {t("timePeriod.timePeriod")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 px-3 pb-0 space-y-4">
@@ -149,10 +149,10 @@ export const TimePeriodAccordion = () => {
           <>
             <div className="space-y-3">
               <p className="font-noto-sans text-lg font-medium leading-6 tracking-[-0.18px] text-text-icons-base-main">
-                {t("temporalCoverage")}
+                {t("timePeriod.temporalCoverage")}
               </p>
               <p className="font-aptos text-md font-regular leading-5 text-text-icons-base-main">
-                {t("temporalCoverageLabel")}
+                {t("timePeriod.temporalCoverageLabel")}
               </p>
             </div>
             <form onSubmit={scopingForm.handleSubmit(onSubmitScoping)}>
@@ -175,7 +175,7 @@ export const TimePeriodAccordion = () => {
                           className="w-full"
                         >
                           <SelectValue
-                            placeholder={t("temporalCoveragePlaceholder")}
+                            placeholder={t("timePeriod.temporalCoveragePlaceholder")}
                           />
                         </SelectTrigger>
                         <SelectContent position="item-aligned">
@@ -210,7 +210,7 @@ export const TimePeriodAccordion = () => {
                         >
                           <Label className="m-0">
                             <p className="font-aptos text-[15px] font-regular leading-4.5 text-text-icons-base-main ">
-                              {t("year")}
+                              {t("timePeriod.year")}
                             </p>
                           </Label>
                           <Select
@@ -223,7 +223,7 @@ export const TimePeriodAccordion = () => {
                               className="w-full"
                             >
                               <SelectValue
-                                placeholder={t("byYearPlaceholder")}
+                                placeholder={t("timePeriod.byYearPlaceholder")}
                               />
                             </SelectTrigger>
                             <SelectContent position="item-aligned">
@@ -244,7 +244,7 @@ export const TimePeriodAccordion = () => {
                 </>
               )}
               <Button variant={"primary"} className="mt-4">
-                {t("setTimePeriod")}
+                {t("timePeriod.setTimePeriod")}
               </Button>
             </form>
           </>

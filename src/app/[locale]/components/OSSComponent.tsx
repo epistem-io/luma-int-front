@@ -81,7 +81,7 @@ export const OSSFooter = () => {
         variant="primary"
         className=""
       >
-        {t("endPointing")}
+        {t("dataTraining.endPointing")}
       </Button>
     </div>
   );

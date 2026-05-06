@@ -57,11 +57,8 @@ export function NavBar({ className }: NavBarProps) {
             </div>
           </Link>
 
-          {/* Navigation and Language Picker */}
           <div className="flex items-center space-x-10">
-            {/* Navigation Menu */}
-            <nav className="flex items-center space-x-8">
-              {/* Data and Methods Dropdown */}
+            {/* <nav className="flex items-center space-x-8">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center space-x-1 font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground hover:cursor-pointer">
                   <span>Data and Methods</span>
@@ -80,7 +77,6 @@ export function NavBar({ className }: NavBarProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* Other Menu Items */}
               <Link
                 href="/launch-tool"
                 className="font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground"
@@ -93,7 +89,7 @@ export function NavBar({ className }: NavBarProps) {
               >
                 Map Utilization
               </Link>
-            </nav>
+            </nav> */}
 
             <LanguageToggle />
             {/* Language Picker */}

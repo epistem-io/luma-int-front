@@ -38,7 +38,7 @@ export const ProgressPanel = () => {
             />
             <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px]">
               {/* Generate LULC Map */}
-              {t("generateLULCMap")}
+              {t("finalSummary.generateLULCMap")}
             </p>
           </Button>
           <Button className="py-1 px-1 aspect-square flex flex-row gap-2 items-center bg-[#313131] hover:cursor-pointer">

@@ -36,12 +36,12 @@ export const TimePeriodSummary = ({
         <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second">
           <div className="space-y-3">
             <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-              {t("yourSelectedTimePeriod")}
+              {t("timePeriod.yourSelectedTimePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("temporalResolution")}
+                  {t("timePeriod.temporalResolution")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {temporalResolutionLabel}
@@ -49,7 +49,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("specificPeriod")}
+                  {t("timePeriod.specificPeriod")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {specificPeriod}
@@ -57,7 +57,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("satelliteInputDateRange")}
+                  {t("timePeriod.satelliteInputDateRange")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {dateRange}
@@ -71,12 +71,12 @@ export const TimePeriodSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("timePeriod")}
+              {t("timePeriod.timePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("temporalResolution")}
+                  {t("timePeriod.temporalResolution")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {temporalResolutionLabel}
@@ -84,7 +84,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("specificPeriod")}
+                  {t("timePeriod.specificPeriod")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {specificPeriod}
@@ -92,7 +92,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("satelliteInputDateRange")}
+                  {t("timePeriod.satelliteInputDateRange")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {dateRange}
@@ -129,10 +129,10 @@ export const TimePeriodSummary = ({
               setIsConfirmModalVisible(false);
               onClickEdit();
             }}
-            title={t("changeInput")}
-            subtitle={t("confirmSubtitle")}
-            confirmButtonCaption={t("changeInput")}
-            cancelButtonCaption={t("cancelChangeInput")}
+            title={t("common.changeInput")}
+            subtitle={t("common.confirmSubtitle")}
+            confirmButtonCaption={t("common.changeInput")}
+            cancelButtonCaption={t("common.cancelChangeInput")}
           />
         </>
       )}

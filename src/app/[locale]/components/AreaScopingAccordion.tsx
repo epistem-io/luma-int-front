@@ -54,7 +54,7 @@ export const AreaScopingAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("areaScoping")}
+          {t("areaScoping.areaScoping")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -79,10 +79,10 @@ export const AreaScopingAccordion = () => {
                   <ChevronRight className="size-5 text-neutral-700-baru" />
                 </div>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                  {t("uploadSHP")}
+                  {t("areaScoping.uploadSHP")}
                 </p>
                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutral-700-baru">
-                  {t("uploadSHPSubtitle")}
+                  {t("areaScoping.uploadSHPSubtitle")}
                 </p>
               </div>
               <div
@@ -103,17 +103,17 @@ export const AreaScopingAccordion = () => {
                   <ChevronRight className="size-5 text-neutral-700-baru" />
                 </div>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                  {t("drawPolygon")}
+                  {t("areaScoping.drawPolygon")}
                 </p>
                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutral-700-baru">
-                  {t("drawPolygonSubtitle")}
+                  {t("areaScoping.drawPolygonSubtitle")}
                 </p>
               </div>
             </div>
             <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
               <ComingSoon />
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                {t("spatialResolution")}:
+                {t("areaScoping.spatialResolution")}:
               </p>
               <div className="">
                 <RadioGroup
@@ -159,7 +159,7 @@ export const AreaScopingAccordion = () => {
             <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
               <div className="space-y-3 col-span-2 text-center w-full">
                 <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                  {t("selectedAreaHasTotalArea")}
+                  {t("areaScoping.selectedAreaHasTotalArea")}
                 </p>
                 <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
                   {numberThousandSeparator(areaScopingPolygonArea.toFixed(0))}{" "}

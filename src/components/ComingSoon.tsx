@@ -7,7 +7,7 @@ export const ComingSoon = () => {
     <div className="rounded-sm py-1 px-2 flex flex-row items-center bg-text-icons-disabled gap-x-2">
       <CircleAlert size={17} className="text-text-icons-base-second" />
       <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-second">
-        {t("featureComingSoon")}
+        {t("common.featureComingSoon")}
       </p>
     </div>
   );

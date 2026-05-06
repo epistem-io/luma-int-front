@@ -33,7 +33,7 @@ export const SateliteCompositeAccordion = () => {
         className="hover:no-underline p-3 pb-0"
       >
         <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("satelliteComposite")}
+          {t("satelliteComposite.satelliteComposite")}
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
@@ -42,12 +42,12 @@ export const SateliteCompositeAccordion = () => {
           <Field className="space-y-2">
             <Label className="m-0">
               <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-third ">
-                {t("satellite")}
+                {t("satelliteComposite.satellite")}
               </p>
             </Label>
             <Select disabled>
               <SelectTrigger className="w-full bg-white">
-                <SelectValue placeholder={t("selectSatellitePlaceholder")} />
+                <SelectValue placeholder={t("satelliteComposite.selectSatellitePlaceholder")} />
               </SelectTrigger>
               <SelectContent position="item-aligned"></SelectContent>
             </Select>
@@ -55,7 +55,7 @@ export const SateliteCompositeAccordion = () => {
           <Field className="space-y-2.5">
             <Label className="m-0">
               <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-third ">
-                {t("cloudCoverage")}
+                {t("satelliteComposite.cloudCoverage")}
               </p>
             </Label>
             <Slider className="mt-1" trackBgColor="bg-neutral-300" disabled />
@@ -102,7 +102,7 @@ export const SateliteCompositeAccordion = () => {
             variant={"primary"}
             className="mt-2 bg-neutral-300 text-neutral-500"
           >
-            {t("setSatelliteComposite")}
+            {t("satelliteComposite.setSatelliteComposite")}
           </Button>
         </div>
       </AccordionContent>

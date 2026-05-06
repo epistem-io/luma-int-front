@@ -31,12 +31,12 @@ export const SatelliteCompositeSummary = ({
     <>
       <div className="space-y-2 relative">
         <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-          {t("satelliteComposite")}
+          {t("satelliteComposite.satelliteComposite")}
         </p>
         <div className="gap-y-5 grid grid-cols-2">
           <div className="space-y-1 col-span-1">
             <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-              {t("satellite")}
+              {t("satelliteComposite.satellite")}
             </p>
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
               {sateliteString}
@@ -44,7 +44,7 @@ export const SatelliteCompositeSummary = ({
           </div>
           <div className="space-y-1 col-span-1">
             <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-              {t("cloudCoverage")}
+              {t("satelliteComposite.cloudCoverage")}
             </p>
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
               {cloudCoverageString}
