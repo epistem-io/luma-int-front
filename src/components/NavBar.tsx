@@ -1,16 +1,8 @@
-import * as React from "react";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/navigation";
 import LanguageToggle from "./LanguageToggle";
-import { ChevronDown } from "lucide-react";
 
 interface NavBarProps {
   className?: string;
@@ -51,9 +43,14 @@ export function NavBar({ className }: NavBarProps) {
                   priority
                 />
               </div>
-              <h1 className="text-xl font-medium text-black font-inter">
-                Luma
-              </h1>
+              <div className="space-y-0">
+                <h1 className="text-4xl leading-8 tracking-[1.44px] font-medium text-[#0F0A83] font-degular-display-demo">
+                  Luma
+                </h1>
+                <h2 className="text-[14px] leading-3.5 tracking-[0.28px] font-medium text-[#0F0A83] font-degular-display-demo">
+                  Land Use Mapping for All
+                </h2>
+              </div>
             </div>
           </Link>
 
