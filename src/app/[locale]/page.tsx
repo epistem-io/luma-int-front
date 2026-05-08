@@ -7,6 +7,8 @@ import { NewFloatingPanel } from "./components/NewFloatingPanel";
 import { ProgressPanel } from "./components/ProgressPanel";
 import { ZoomButton } from "./components/ZoomButton";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-[calc(100vh-66px)] relative bg-neutral-100">

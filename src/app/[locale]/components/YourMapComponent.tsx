@@ -365,8 +365,10 @@ const LULCCompositionSummary = () => {
                       {item.class_name}
                     </p>
                     <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {numberThousandSeparator(item.area_m2.toFixed(0))} m
-                      <sup>2</sup>
+                      {numberThousandSeparator(
+                        (item.area_m2 / 10000).toFixed(0),
+                      )}{" "}
+                      ha
                     </p>
                   </div>
 
@@ -376,7 +378,7 @@ const LULCCompositionSummary = () => {
                       color: item.class_color,
                     }}
                   >
-                    {item.proportion.toFixed(1)}%
+                    {item.proportion.toFixed(0)}%
                   </p>
                 </div>
               ))}
@@ -399,8 +401,10 @@ const LULCCompositionSummary = () => {
                       {item.class_name}
                     </p>
                     <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {numberThousandSeparator(item.area_m2.toFixed(0))} m
-                      <sup>2</sup>
+                      {numberThousandSeparator(
+                        (item.area_m2 / 10000).toFixed(0),
+                      )}{" "}
+                      ha
                     </p>
                   </div>
 
@@ -410,7 +414,7 @@ const LULCCompositionSummary = () => {
                       color: item.class_color,
                     }}
                   >
-                    {item.proportion.toFixed(1)}%
+                    {item.proportion.toFixed(0)}%
                   </p>
                 </div>
               ))}
@@ -447,7 +451,9 @@ const TrainingDataQuality = () => {
             </div>
 
             <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
-              <p className="font-bold">{t("yourMap.lowSeparabilityCaption1")}</p>
+              <p className="font-bold">
+                {t("yourMap.lowSeparabilityCaption1")}
+              </p>
               <div className="">
                 {generateMapSampleQuality?.lowest_separability?.result_dict.map(
                   (item, index) => {
@@ -588,7 +594,7 @@ const ModelAccuracyAssessment = () => {
               {/* <AlertCircleIcon className="size-6 text-danger-700" /> */}
               <p className="font-aptos text-md font-bold leading-6 text-success-700">
                 {t("yourMap.modelAccuracyAssessmentPercentage", {
-                  percentage:
+                  X:
                     generateMapModelQuality?.model_quality.overall_accuracy.toFixed(
                       0,
                     ) || "-",
@@ -707,7 +713,9 @@ const ThematicAccuracyAssessment = () => {
                 className="w-full rounded-md hover:bg-primary-pink hover:cursor-default"
                 variant={"primary"}
               >
-                <p className="font-aptos text-[13px]">{t("yourMap.ronaComingSoon")}</p>
+                <p className="font-aptos text-[13px]">
+                  {t("yourMap.ronaComingSoon")}
+                </p>
               </Button>
             </div>
           </div>
