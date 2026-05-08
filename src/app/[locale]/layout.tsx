@@ -76,6 +76,17 @@ const lato = localFont({
   variable: "--font-lato",
 });
 
+const degularDisplayDemo = localFont({
+  src: [
+    {
+      path: "../../../public/fonts/DegularDisplayDemo-Medium.otf",
+      weight: "500",
+      style: "normal",
+    },
+  ],
+  variable: "--font-degular-display-demo",
+});
+
 const aptos = localFont({
   src: [
     {
@@ -214,7 +225,7 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} ${roboto.variable} ${pjs.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} ${roboto.variable} ${pjs.variable} ${degularDisplayDemo.variable} antialiased`}
       >
         <NextIntlClientProvider>
           <GlobalContextContainer>
