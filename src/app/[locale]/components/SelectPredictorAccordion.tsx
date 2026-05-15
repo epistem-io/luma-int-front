@@ -60,7 +60,14 @@ export const SelectPredictorAccordion = () => {
           {tInteractive("lulcParams.selectPredictor")}
         </p>
       </AccordionFullTrigger>
-      <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+      <AccordionContent className="mt-2 space-y-5 px-3 pb-0">
+        <div className="">
+          <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
+            {tInteractive.rich("lulcParams.selectPredictorDesc", {
+              br: () => <br></br>,
+            })}
+          </p>
+        </div>
         <div className="rounded-md p-2 space-y-5 bg-background-disableds">
           <ComingSoon />
           <div className="space-y-5">

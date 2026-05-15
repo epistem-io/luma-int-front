@@ -107,7 +107,7 @@ export const MosaicSummary = () => {
           </p>
           <div className="flex flex-row items-center justify-between">
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-              Mosaic Summary
+              {t("basicInformation.mosaicSummary")}
             </p>
             <div className="flex flex-row gap-x-3 items-center pb-1">
               {/* {isMosaicLoading && (
@@ -138,19 +138,20 @@ export const MosaicSummary = () => {
                 <TableHeader className="bg-purple-second">
                   <TableRow>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("finalSummary.featureID")} */}#
+                      {/* {t("finalSummary.featureID")} */}
+                      {t("basicInformation.numberColumn")}
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
                       {/* {t("finalSummary.featureID")} */}
-                      Scene ID
+                      {t("basicInformation.sceneIDcolumn")}
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
                       {/* {t("dataTraining.lulcClass")} */}
-                      Tanggal Perekaman
+                      {t("basicInformation.tanggalPerekamanColumn")}
                     </TableHead>
                     <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
                       {/* {t("dataTraining.numberOfPoints")} */}
-                      Tutupan Awan (%)
+                      {t("basicInformation.tutupanAwanColumn")}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -178,12 +179,12 @@ export const MosaicSummary = () => {
         </div>
         <div className="">
           <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-            Statistik Tutupan Awan
+            {t("basicInformation.statistikTutupanAwan")}
           </p>
           <div className="flex flex-row justify-between items-center">
             <div className="">
               <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                Minimum
+                {t("basicInformation.minimum")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                 {mosaicStatistic?.statistics?.min}%
@@ -191,7 +192,7 @@ export const MosaicSummary = () => {
             </div>
             <div className="">
               <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                Rata-rata
+                {t("basicInformation.rataRata")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                 {mosaicStatistic?.statistics?.mean}%
@@ -199,7 +200,7 @@ export const MosaicSummary = () => {
             </div>
             <div className="">
               <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                Maksimum
+                {t("basicInformation.maksimum")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                 {mosaicStatistic?.statistics?.max}%
@@ -233,7 +234,7 @@ export const MosaicSummary = () => {
             >
               <div className="">
                 <p className="text-neutral-700-baru font-aptos text-md font-regular leading-6 underline">
-                  Download Mosaic Map
+                  {t("basicInformation.downloadMosaicMap")}
                 </p>
               </div>
             </Button>

@@ -61,30 +61,37 @@ export const RandomForestAccordion = () => {
           {tInteractive("lulcParams.RFVariable")}
         </p>
       </AccordionFullTrigger>
-      <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+      <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+        <div className="">
+          <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
+            {tInteractive.rich("lulcParams.RFVariableDesc", {
+              br: () => <br></br>,
+            })}
+          </p>
+        </div>
         <div className="rounded-md p-2 space-y-5 bg-background-disableds cursor-not-allowed">
           <ComingSoon />
           <div className="grid grid-cols-2 space-x-5">
             <div className="space-y-2">
               <Label>
                 <p className="text-text-icons-base-third font-aptos text-sm font-regular heading-5">
-                  {t("Section4.nOfTree")}
+                  {tInteractive("lulcParams.nOfTree")}
                 </p>
               </Label>
               <Input className="" disabled />
               <p className="font-aptos text-xs font-regular heading4 text-neutrals-600">
-                {t("Section4.fillWNum", { min: 10, max: 500 })}
+                {tInteractive("lulcParams.fillWNum", { min: 10, max: 500 })}
               </p>
             </div>
             <div className="space-y-2">
               <Label>
                 <p className="text-text-icons-base-third font-aptos text-sm font-regular heading-5">
-                  {t("Section4.minLeafPop")}
+                  {tInteractive("lulcParams.minLeafPop")}
                 </p>
               </Label>
               <Input className="" disabled />
               <p className="font-aptos text-xs font-regular heading4 text-neutrals-600">
-                {t("Section4.fillWNum", { min: 1, max: 50 })}
+                {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
               </p>
             </div>
           </div>

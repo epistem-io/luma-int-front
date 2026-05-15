@@ -300,7 +300,9 @@ export const DataTrainingComponent = () => {
                   <TabsTrigger value="upload">
                     {t("dataTraining.uploadDataTraining")}
                   </TabsTrigger>
-                  <TabsTrigger value="oss">{t("dataTraining.onScreenSampling")}</TabsTrigger>
+                  <TabsTrigger value="oss">
+                    {t("dataTraining.onScreenSampling")}
+                  </TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="upload">
@@ -370,7 +372,7 @@ export const DataTrainingComponent = () => {
                             Accepted format .zip */}
                                 {t("common.dragAndDrop")} <br />
                                 {t("common.acceptedFormat", {
-                                  extensions: ".zip",
+                                  X: ".zip",
                                 })}
                               </p>
                             </div>
@@ -611,10 +613,14 @@ export const DataTrainingComponent = () => {
                                   </div>
                                   <div className="">
                                     <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                      {t("common.fileTooBigError")}
+                                      {t("common.fileTooBigError", {
+                                        X: "500",
+                                      })}
                                     </p>
                                     <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                      {t("common.fileTooBigError", { limit: "500MB" })}
+                                      {t("common.fileTooBigErrorDesc", {
+                                        limit: "500MB",
+                                      })}
                                     </p>
                                   </div>
                                 </div>
@@ -666,9 +672,9 @@ export const DataTrainingComponent = () => {
                     <TabsContent value="pinpoint">
                       <div className="mt-4 space-y-5.5">
                         <div className="">
-                          <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
+                          {/* <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
                             {t("dataTraining.pinYourPoint")}
-                          </p>
+                          </p> */}
                           <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
                             {t("dataTraining.pinYourPointDescription")}
                           </p>

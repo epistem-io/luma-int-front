@@ -214,7 +214,9 @@ export const DefineLUCComponent = () => {
                   <div>
                     <p className="text-m-medium italic">
                       {t("defineLUC.tryAICaption")}{" "}
-                      <b className="font-extrabold">{t("defineLUC.tryAICaptionCont")}</b>
+                      <b className="font-extrabold">
+                        {t("defineLUC.tryAICaptionCont")}
+                      </b>
                     </p>
                   </div>
                   <div>
@@ -234,7 +236,9 @@ export const DefineLUCComponent = () => {
                       disabled
                       // className="rounded-none bg-primary-pink py-1.5 px-2"
                     >
-                      <p className="">{t("defineLUC.tryAICaptionSubmitButtonLabel")}</p>
+                      <p className="">
+                        {t("defineLUC.tryAICaptionSubmitButtonLabel")}
+                      </p>
                     </Button>
                   </div>
                 </div>
@@ -342,10 +346,14 @@ export const DefineLUCComponent = () => {
                               </div>
                               <div className="">
                                 <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                  {t("common.fileTooBigError")}
+                                  {t("common.fileTooBigError", {
+                                    X: "500",
+                                  })}
                                 </p>
                                 <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                  {t("common.fileTooBigError", { limit: "500MB" })}
+                                  {t("common.fileTooBigErrorDesc", {
+                                    limit: "500MB",
+                                  })}
                                 </p>
                               </div>
                             </div>
@@ -423,7 +431,7 @@ export const DefineLUCComponent = () => {
                               Accepted format .csv, .xls, .xlsx */}
                               {t("common.dragAndDrop")} <br />
                               {t("common.acceptedFormat", {
-                                extensions: ".csv, .xls, .xlsx",
+                                X: ".csv, .xls, .xlsx",
                               })}
                             </p>
                           </div>

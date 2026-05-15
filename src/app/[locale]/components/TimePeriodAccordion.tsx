@@ -148,9 +148,9 @@ export const TimePeriodAccordion = () => {
         {isEditingTemporalCoverage && (
           <>
             <div className="space-y-3">
-              <p className="font-noto-sans text-lg font-medium leading-6 tracking-[-0.18px] text-text-icons-base-main">
+              {/* <p className="font-noto-sans text-lg font-medium leading-6 tracking-[-0.18px] text-text-icons-base-main">
                 {t("timePeriod.temporalCoverage")}
-              </p>
+              </p> */}
               <p className="font-aptos text-md font-regular leading-5 text-text-icons-base-main">
                 {t("timePeriod.temporalCoverageLabel")}
               </p>

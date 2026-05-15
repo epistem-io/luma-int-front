@@ -512,10 +512,12 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.fileTooBigError")}
+                            {t("common.fileTooBigError", { X: "500" })}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.fileTooBigError", { limit: "500MB" })}
+                            {t("common.fileTooBigErrorDesc", {
+                              limit: "500MB",
+                            })}
                           </p>
                         </div>
                       </div>
@@ -582,8 +584,7 @@ export const AreaScopingComponent = () => {
                             .kmz */}
                             {t("common.dragAndDrop")} <br />
                             {t("common.acceptedFormat", {
-                              extensions:
-                                ".zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
+                              X: ".zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
                             })}
                           </p>
                         </div>
@@ -627,9 +628,15 @@ export const AreaScopingComponent = () => {
 
           <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
             <ComingSoon />
-            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-              Spatial Resolution:
-            </p>
+
+            <div className="">
+              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
+                {t("areaScoping.spatialResolution")}:
+              </p>
+              <p className="text-l-regular text-text-icons-base-third">
+                {t("areaScoping.spatialResolutionSubtitle")}
+              </p>
+            </div>
             <div className="">
               <RadioGroup
                 disabled
@@ -640,13 +647,13 @@ export const AreaScopingComponent = () => {
                   <div className="flex flex-row items-center gap-x-2">
                     <RadioGroupItem value="1" />
                     <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                      30 x 30 m²
+                      {t("areaScoping.30x30m2")}
                     </Label>
                   </div>
                   <div className="flex flex-row items-center gap-x-2">
                     <RadioGroupItem value="3" />
                     <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                      100 x 100 m²
+                      {t("areaScoping.100x100m2")}
                     </Label>
                   </div>
                 </div>
@@ -654,13 +661,13 @@ export const AreaScopingComponent = () => {
                   <div className="flex flex-row items-center gap-x-2">
                     <RadioGroupItem value="2" />
                     <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                      500 x 500 m²
+                      {t("areaScoping.500x500m2")}
                     </Label>
                   </div>
                   <div className="flex flex-row items-center gap-x-2">
                     <RadioGroupItem value="4" />
                     <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                      1x1 km²
+                      {t("areaScoping.1x1km2")}
                     </Label>
                   </div>
                 </div>
@@ -741,11 +748,11 @@ export const AreaScopingComponent = () => {
                         </div>
                         <div className="">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.fileTooBigError")}
+                            {t("common.areaTooBigError")}
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.fileTooBigError", {
-                              limit: "100,000 Ha",
+                            {t("common.areaTooBigErrorDesc", {
+                              limit: "100,000",
                             })}
                           </p>
                         </div>
@@ -764,9 +771,15 @@ export const AreaScopingComponent = () => {
 
               <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
                 <ComingSoon />
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                  {t("areaScoping.spatialResolution")}:
-                </p>
+
+                <div className="">
+                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
+                    {t("areaScoping.spatialResolution")}:
+                  </p>
+                  <p className="text-l-regular text-text-icons-base-third">
+                    {t("areaScoping.spatialResolutionSubtitle")}
+                  </p>
+                </div>
                 <div className="">
                   <RadioGroup
                     disabled

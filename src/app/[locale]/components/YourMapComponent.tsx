@@ -250,17 +250,18 @@ export const YourMapComponent = () => {
 };
 
 export const YourMapFooter = () => {
+  const { generateMapDownloadURL, setIsYourMapDialogVisible } =
+    useContext(MapGenerationContext);
+
   return (
     <>
       <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
         <div></div>
         <Button
           onClick={() => {
-            // setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-            // setProgressPanelIndex(2);
-            // onClickNext();
+            setIsYourMapDialogVisible(true);
           }}
-          disabled={true}
+          disabled={!generateMapDownloadURL?.download_url}
           variant="primary"
           className=""
         >
@@ -552,7 +553,7 @@ const PredictorImportances = () => {
             </div> */}
           </div>
 
-          <div className="w-full flex flex-row justify-end">
+          {/* <div className="w-full flex flex-row justify-end">
             <Button
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
@@ -566,7 +567,7 @@ const PredictorImportances = () => {
                 </p>
               </div>
             </Button>
-          </div>
+          </div> */}
         </div>
       </Card>
     </>
@@ -585,7 +586,8 @@ const ModelAccuracyAssessment = () => {
               {t("yourMap.modelAccuracyAssessment")}
             </p>
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {t("yourMap.modelAccuracyAssessmentDescription")}
+              {/* WIP */}
+              {/* {t("yourMap.modelAccuracyAssessmentDescription")} */}
             </p>
           </div>
 
@@ -712,6 +714,7 @@ const ThematicAccuracyAssessment = () => {
               <Button
                 className="w-full rounded-md hover:bg-primary-pink hover:cursor-default"
                 variant={"primary"}
+                disabled
               >
                 <p className="font-aptos text-[13px]">
                   {t("yourMap.ronaComingSoon")}

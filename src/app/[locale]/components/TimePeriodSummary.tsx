@@ -71,12 +71,12 @@ export const TimePeriodSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("timePeriod.timePeriod")}
+              {t("basicInformation.yourSelectedTimePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.temporalResolution")}
+                  {t("basicInformation.temporalResolution")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {temporalResolutionLabel}
@@ -84,7 +84,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-1">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.specificPeriod")}
+                  {t("basicInformation.specificPeriod")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {specificPeriod}
@@ -92,7 +92,7 @@ export const TimePeriodSummary = ({
               </div>
               <div className="space-y-1 col-span-2">
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.satelliteInputDateRange")}
+                  {t("basicInformation.satelliteInputDateRange")}
                 </p>
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
                   {dateRange}
