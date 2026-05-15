@@ -103,7 +103,7 @@ export const MosaicSummary = () => {
       <div className="space-y-3">
         <div className="">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("satelliteComposite.mosaicMap")}
+            {t("basicInformation.compositeMapGenerated")}
           </p>
           <div className="flex flex-row items-center justify-between">
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">

@@ -650,6 +650,7 @@ const ModelAccuracyAssessment = () => {
             </div>
           </div>
 
+              {/*
           <div className="w-full flex flex-row justify-end">
             <Button
               variant={"ghost"}
@@ -664,7 +665,7 @@ const ModelAccuracyAssessment = () => {
                 </p>
               </div>
             </Button>
-          </div>
+          </div>*/}
         </div>
       </Card>
     </>

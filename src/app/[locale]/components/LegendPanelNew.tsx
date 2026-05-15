@@ -501,13 +501,15 @@ export const LegendPanelNew = () => {
                               <div className="mt-4">
                                 {/* WIP Copy */}
                                 <p className="text-s-medium text-text-icons-base-third">
-                                  Anda belum mililih kelas LULC, silahkan pilih
-                                  kelas yang sesuai pada step berikutnya
+                                  {tInteractive(
+                                  "layerAndComposites.legendLULCsubtitleBefore",
+                                )}
                                 </p>
                               </div>
                             )}
                           </AccordionContent>
                         </AccordionItem>
+                        {/*
                         {mosaicLayerArray.length > 0 && (
                           <AccordionItem
                             value="cloud_cover"
@@ -530,7 +532,7 @@ export const LegendPanelNew = () => {
                               </div>
                             </AccordionContent>
                           </AccordionItem>
-                        )}
+                        )}*/}
                       </Accordion>
                     </div>
                   </div>

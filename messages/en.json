@@ -122,8 +122,8 @@
     "basicInformation": {
       "basicInformationTitle": "Basic Information",
       "basicInformationCaption": "Provide the fundamental details needed to generate your Land Use and Land Cover (LULC) map",
-      "summaryOfBasicInformation": "Basic Information Summary",
-      "previewMosaicMap": "Your Input Summary",
+      "summaryOfBasicInformation": "Your Input Summary",
+      "previewMosaicMap": "View satellite imagery",
       "areaOfInterest": "Mapping area",
       "areaOfInterestSubtitle": "Approximate size of your mapping area",
       "yourSelectedTimePeriod": "Time period selected",
@@ -134,7 +134,7 @@
       "satellite": "Satellite imagery source",
       "cloudCoverage": "Maximum cloudy area",
       "changeInput": "Change input",
-      "compositeMapGenerated": "Generated Composite of Satellite Imagery Obtained",
+      "compositeMapGenerated": "Generated Composite of Imagery Obtained",
       "mosaicSummary": "Based on your input, the mapping process will use the composite of the obtained satellite imagery below. ",
       "numberColumn": "No.",
       "sceneIDcolumn": "Scene ID",
@@ -171,7 +171,7 @@
     },
     "timePeriod": {
       "timePeriod": "Time Period",
-      "temporalCoverageLabel": "Determine the time period of your land use and land cover mapping",
+      "temporalCoverageLabel": "Determine the time period of your land use and land cover mapping.",
       "temporalCoveragePlaceholder": "Select time interval",
       "year": "Year",
       "byYear": "By year",
@@ -204,7 +204,7 @@
       "cloudCoverLandWater": "Land/Water Composite (NIR/SWIR1/Red)"
     },
     "defineLUC": {
-      "defineLUCTitle": "land use and land cover Classification",
+      "defineLUCTitle": "Land Use & Land Cover Classification",
       "defineLUCDescription": "Determine the types of land use and land cover that are distinguished in your mapping area. Each type will be defined as a land use and land cover class.",
       "classifyOwnTemplate": "Own Classification",
       "classifyOwnTemplateDescription": "Download file and use it to list the land use and land cover classes you want to map. After filling the template, upload file to be used as your custom classification scheme.",
@@ -220,7 +220,7 @@
       "treeBasedSystem": "Tree based system",
       "agroforestry": "Agroforestry",
       "monoculturePlantation": "Monoculture plantation",
-      "treePlantation": "Tree plantation",
+      "treePlantation": "Timber plantation",
       "rubberPlantation": "Rubber monoculture",
       "oilPalmPlantation": "Oil palm monoculture",
       "otherPlantation": "Other monoculture",
@@ -246,8 +246,8 @@
       "tryAICaptionDefaultValue": "I need to map forested areas with minimal human activity, only small-scale traditional farming, and no large infrastructure nearby.",
       "tryAICaptionSubmitButtonLabel": "Generate",
       "tryAICaptionInstruction": "Maximum 500 characters",
-      "LUCHierarchy": "Land Use and Land Cover Classification Scheme",
-      "LUCHierarchyDescription": "Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem IpsumLorem Ipsum Lorem Ipsum Lorem Ipsum"
+      "LUCHierarchy": "Land Use & Land Cover Classification Scheme",
+      "LUCHierarchyDescription": "Set the land use and land cover classification scheme for your map. This scheme defines the classes that will be mapped in your area of interest."
     },
     "dataTraining": {
       "dataTrainingTitle": "Mapping Sample Data",
@@ -256,7 +256,7 @@
       "recordedLULCDescriptionDEFAULTCLASS": "Available sample data within your mapping area is summarized in the table below. Note that sample data from other locations throughout Indonesia are also used for mapping your area when classes from default classification scheme in Luma are used. Hence, Luma can still map your area despite potentially limited sample data availability.",
       "recordedLULCDescriptionOWNCLASS": "Recorded sample data that will be used to map your area of interest is summarized in the table below.",
       "lulcClass": "LULC class",
-      "numberOfPoints": "Number of sample",
+      "numberOfPoints": "Number of samples",
       "uploadDataTraining": "Upload Sample Data",
       "uploadDataTrainingDescription": "Upload your existing sample data in shapefile format",
       "dragAndDrop": "Drag and drop your sample data file here ",
@@ -276,7 +276,7 @@
       "startPointing": "Start sampling",
       "onScreenSamplingPanel": "On Screen Sampling",
       "onScreenSamplingPanelDescription": "Add points or draw polygons directly on the displayed map for all land use and land cover classes in your mapping area. We recommend adding at least 25 points per LULC class to improve mapping accuracy.",
-      "deletePoint": "Delete titik",
+      "deletePoint": "Delete point",
       "endPointing": "Done",
       "pinYourPoint": "Pin Your Point",
       "addFeature": "Add Feature"
@@ -295,12 +295,12 @@
       "acceptedFormat": "Accepted format: {X}",
       "browseFile": "Browse file",
       "dropHere": "Drop here",
-      "RFVariableDesc": "Random Forest is used to classify satellite images into LULC classes using training data. <br></br>It works by combining many decision trees, which each make a prediction for every pixel. The final result is based on the majority vote from all trees, making the classification more accurate and reliable.",
-      "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. <br></br>Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is."
+      "RFVariableDesc": "Random Forest is used to classify satellite images into LULC classes using training data. It works by combining many decision trees, which each make a prediction for every pixel. The final result is based on the majority vote from all trees, making the classification more accurate and reliable.",
+      "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is."
     },
     "finalSummary": {
       "finalSummaryTitle": "Ready to generate your map?",
-      "finalSummarySubtitle": "Your land use and land cover map will be created using the sample data, predictors, and settings from previous steps",
+      "finalSummarySubtitle": "Your land use and land cover map will be created using the sample data, predictors, and settings from previous steps.",
       "summaryOfLULCSampling": "Summary of LULC Class Composition",
       "totalClass": "Number of classes",
       "totalSamplePoints": "Total sample points",
@@ -309,7 +309,18 @@
       "featureID": "Class ID",
       "generateMap": "Generate map",
       "generateLULCMap": "Generate LULC Map",
-      "location": "Location"
+      "location": "Location",
+      "summaryOfBasicInformation": "Your Input Summary",
+      "previewMosaicMap": "View satellite imagery",
+      "areaOfInterest": "Mapping area",
+      "areaOfInterestSubtitle": "Approximate size of your mapping area",
+      "yourSelectedTimePeriod": "Time period selected",
+      "temporalResolution": "Time interval",
+      "specificPeriod": "Selected period",
+      "satelliteInputDateRange": "Satellite input date range",
+      "satelliteComposite": "Satellite Imagery",
+      "satellite": "Satellite imagery source",
+      "cloudCoverage": "Maximum cloudy area"
     },
     "yourMap": {
       "yourMapPanelTitle": "Your Map",
@@ -363,7 +374,8 @@
       "legendLULCsubtitle": "Anda belum mililih kelas LULC, silahkan pilih kelas yang sesuai pada step berikutnya",
       "compositeTip": "Use the toggles to adjust which layers appear on top.",
       "cloudCoverageDescription": "Tutupan awan  adalah bla bla bla dan ditampilkan dalam persentase lorem ipsum lorem ipsum lorem ipsumlorem ipsum lorem ipsum lorem ipsum",
-      "layerAndCompositesSubtitle": "Choose which satellite band combinations to visualise. Use the drag handles to adjust which layers appear on top."
+      "layerAndCompositesSubtitle": "Choose which satellite band combinations to visualise. Use the drag handles to adjust which layers appear on top.",
+      "legendLULCsubtitleBefore": "LULC classification scheme is not defined yet."
     }
   }
 }

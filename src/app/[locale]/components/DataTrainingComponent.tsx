@@ -271,26 +271,6 @@ export const DataTrainingComponent = () => {
   return (
     <>
       <div className="space-y-4">
-        <Accordion type="single" collapsible>
-          <AccordionItem
-            value={"lulc-table"}
-            className="rounded-xl border border-neutral-400  bg-white pb-3 last:border-b"
-          >
-            <AccordionFullTrigger
-              icon={
-                <ChevronDown className="h-5 w-5 shrink-0 text-primary-pink transition-transform duration-200" />
-              }
-              className="hover:no-underline p-3 pb-0"
-            >
-              <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-                {t("dataTraining.recordedLULC")}
-              </p>
-            </AccordionFullTrigger>
-            <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
-              <LUCClassTable summary={false} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
         {selectedCustom && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
@@ -370,8 +350,8 @@ export const DataTrainingComponent = () => {
                               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
                                 {/* Drag & drop your file here to upload. <br />
                             Accepted format .zip */}
-                                {t("common.dragAndDrop")} <br />
-                                {t("common.acceptedFormat", {
+                                {t("dataTraining.dragAndDrop")} <br />
+                                {t("dataTraining.acceptedFormat", {
                                   X: ".zip",
                                 })}
                               </p>
@@ -392,7 +372,7 @@ export const DataTrainingComponent = () => {
                                 )}
                               >
                                 <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                                  {t("common.browseFile")}
+                                  {t("dataTraining.browseFile")}
                                 </p>
                               </div>
                             </Label>
@@ -404,7 +384,7 @@ export const DataTrainingComponent = () => {
                             <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                               <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                               <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                                {t("common.dropHere")}
+                                {t("dataTraining.dropHere")}
                               </p>
                             </div>
                           </>
@@ -822,6 +802,26 @@ export const DataTrainingComponent = () => {
             </Tabs>
           </div>
         )}
+        <Accordion type="single" collapsible>
+          <AccordionItem
+            value={"lulc-table"}
+            className="rounded-xl border border-neutral-400  bg-white pb-3 last:border-b"
+          >
+            <AccordionFullTrigger
+              icon={
+                <ChevronDown className="h-5 w-5 shrink-0 text-primary-pink transition-transform duration-200" />
+              }
+              className="hover:no-underline p-3 pb-0"
+            >
+              <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
+                {t("dataTraining.recordedLULC")}
+              </p>
+            </AccordionFullTrigger>
+            <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+              <LUCClassTable summary={false} />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </div>
     </>
   );

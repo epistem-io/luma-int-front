@@ -326,7 +326,7 @@ export const AreaScopingComponent = () => {
               </p>
               <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
                 {/* Here to generate the current <br /> condition data. */}
-                {t.rich("areaScoping.uploadSHPSubtitleBR", {
+                {t.rich("areaScoping.uploadSHPFileDescription", {
                   br: () => <br></br>,
                 })}
               </p>
@@ -417,7 +417,7 @@ export const AreaScopingComponent = () => {
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          Your selected area has total area approximately:
+                          {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
                         <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
                           {numberThousandSeparator(
@@ -438,7 +438,7 @@ export const AreaScopingComponent = () => {
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          Your selected area has total area approximately:
+                          {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
                         <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
                           {numberThousandSeparator(
@@ -582,8 +582,8 @@ export const AreaScopingComponent = () => {
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
                             {/* Accepted format .zip (.shp, .shx, .dbf, .prj), .kml,
                             .kmz */}
-                            {t("common.dragAndDrop")} <br />
-                            {t("common.acceptedFormat", {
+                            {t("areaScoping.dragAndDrop")} <br />
+                            {t("areaScoping.acceptedFormat", {
                               X: ".zip (.shp, .shx, .dbf, .prj), .kml, .kmz",
                             })}
                           </p>
@@ -594,7 +594,7 @@ export const AreaScopingComponent = () => {
                         >
                           <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
                             <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                              {t("common.browseFile")}
+                              {t("areaScoping.browseFile")}
                             </p>
                           </div>
                         </Label>
@@ -606,7 +606,7 @@ export const AreaScopingComponent = () => {
                         <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
                           <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                            {t("common.dropHere")}
+                            {t("areaScoping.dropHere")}
                           </p>
                         </div>
                       </>
@@ -731,7 +731,7 @@ export const AreaScopingComponent = () => {
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
                       <div className="space-y-3 col-span-2 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          Your selected area has total area approximately:
+                          {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
                         <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
                           {numberThousandSeparator(

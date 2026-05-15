@@ -80,8 +80,8 @@ export const DataValidationAccordion = () => {
             <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
               {/* Drag & drop your file here to upload. <br />
               Accepted format .zip */}
-              {t("common.dragAndDrop")} <br />
-              {t("common.acceptedFormat", {
+              {t("lulcParams.dragAndDrop")} <br />
+              {t("lulcParams.acceptedFormat", {
                 X: ".zip",
               })}
             </p>
@@ -105,7 +105,7 @@ export const DataValidationAccordion = () => {
                   true && "text-text-icons-base-third",
                 )}
               >
-                {t("common.browseFile")}
+                {t("lulcParams.browseFile")}
               </p>
             </div>
           </Label>

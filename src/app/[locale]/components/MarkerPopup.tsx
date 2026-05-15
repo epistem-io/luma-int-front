@@ -23,6 +23,7 @@ import { Marker } from "@/types/marker";
 import { svgWithColor } from "@/lib/utils";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
+import { useTranslations } from "next-intl";
 
 export const MarkerPopup = ({
   markerId,
@@ -48,6 +49,8 @@ export const MarkerPopup = ({
 
   const [isEditing, setIsEditing] = useState(false);
   const [selectedClass, setSelectedClass] = useState("");
+
+  const t = useTranslations("InteractivePanel");
 
   const el = markerArray.find((item) => item.id === markerId);
 
@@ -195,7 +198,9 @@ export const MarkerPopup = ({
             </p>
             <Select value={selectedClass} onValueChange={onSelectChange}>
               <SelectTrigger disabled={!isEditing} className="w-full">
-                <SelectValue placeholder="Select Temporal Coverage" />
+                <SelectValue placeholder={t(
+                                          "dataTraining.selectLULCClassPlaceholder",
+                                        )} />
               </SelectTrigger>
               <SelectContent position="item-aligned">
                 {classArray.map((item) => (

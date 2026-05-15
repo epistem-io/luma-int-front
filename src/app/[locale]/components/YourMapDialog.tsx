@@ -134,9 +134,8 @@ export const YourMapDialog = () => {
           </Button>
           <Button
             type="button"
-            onClick={handlePlaceholderClick}
-            variant="secondary"
-            className="text-l-bold h-10 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-primary-red-pink-normal"
+            disabled
+            className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
           >
             {t("improveAccuracy")}
           </Button>

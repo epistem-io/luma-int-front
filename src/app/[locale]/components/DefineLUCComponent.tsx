@@ -169,6 +169,7 @@ export const DefineLUCComponent = () => {
 
   return (
     <div className="space-y-4">
+          {/*
       <Collapsible open={aiAccordionOpen} onOpenChange={setAIAccordionOpen}>
         <div
           className="bg-aneh p-px rounded-[13px]"
@@ -247,6 +248,7 @@ export const DefineLUCComponent = () => {
           </div>
         </div>
       </Collapsible>
+          */}
       <div className="rounded-[12px] bg-white p-3 border border-neutral-400 space-y-6">
         <div className="space-y-3">
           <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
@@ -429,8 +431,8 @@ export const DefineLUCComponent = () => {
                             <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
                               {/* Drag & drop your file here to upload. <br />
                               Accepted format .csv, .xls, .xlsx */}
-                              {t("common.dragAndDrop")} <br />
-                              {t("common.acceptedFormat", {
+                              {t("defineLUC.dragAndDrop")} <br />
+                              {t("defineLUC.acceptedFormat", {
                                 X: ".csv, .xls, .xlsx",
                               })}
                             </p>
@@ -441,7 +443,7 @@ export const DefineLUCComponent = () => {
                           >
                             <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
                               <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                                {t("common.browseFile")}
+                                {t("defineLUC.browseFile")}
                               </p>
                             </div>
                           </Label>
@@ -508,17 +510,6 @@ export const DefineLUCComponent = () => {
                             <AccordionTrigger className="p-2"></AccordionTrigger>
                           </div>
                           <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                            <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(7, checked);
-                                }}
-                                checked={defaultArray.includes(7)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.agroforestry")}
-                              </p>
-                            </div>
                             {/* <div className="flex flex-row items-center space-x-2.5">
                               <Switch
                                 onCheckedChange={(checked) => {
@@ -530,67 +521,6 @@ export const DefineLUCComponent = () => {
                                 {t("defineLUC.monoculturePlantation")}
                               </p>
                             </div> */}
-
-                            <Accordion type="multiple">
-                              <AccordionItem value="tree-based-system-acc">
-                                <div className="flex flex-row items-center justify-between">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    {/* <Switch /> */}
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.monoculturePlantation")}
-                                      {/* {t("TBS")} */}
-                                    </p>
-                                  </div>
-                                  <AccordionTrigger className="p-2"></AccordionTrigger>
-                                </div>
-                                <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(8, checked);
-                                      }}
-                                      checked={defaultArray.includes(8)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.treePlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(9, checked);
-                                      }}
-                                      checked={defaultArray.includes(9)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.rubberPlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(10, checked);
-                                      }}
-                                      checked={defaultArray.includes(10)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.oilPalmPlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(11, checked);
-                                      }}
-                                      checked={defaultArray.includes(11)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.otherPlantation")}
-                                    </p>
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
 
                             <Accordion type="multiple">
                               <AccordionItem value="tree-based-system-acc">
@@ -674,6 +604,79 @@ export const DefineLUCComponent = () => {
                                 </AccordionContent>
                               </AccordionItem>
                             </Accordion>
+
+                            <Accordion type="multiple">
+                              <AccordionItem value="tree-based-system-acc">
+                                <div className="flex flex-row items-center justify-between">
+                                  <div className="flex flex-row items-center space-x-2.5">
+                                    {/* <Switch /> */}
+                                    <p className="text-l-medium text-muted-foreground">
+                                      {t("defineLUC.monoculturePlantation")}
+                                      {/* {t("TBS")} */}
+                                    </p>
+                                  </div>
+                                  <AccordionTrigger className="p-2"></AccordionTrigger>
+                                </div>
+                                <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                                  <div className="flex flex-row items-center space-x-2.5">
+                                    <Switch
+                                      onCheckedChange={(checked) => {
+                                        onToggleSwitch(8, checked);
+                                      }}
+                                      checked={defaultArray.includes(8)}
+                                    />
+                                    <p className="text-l-medium text-muted-foreground">
+                                      {t("defineLUC.treePlantation")}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-row items-center space-x-2.5">
+                                    <Switch
+                                      onCheckedChange={(checked) => {
+                                        onToggleSwitch(9, checked);
+                                      }}
+                                      checked={defaultArray.includes(9)}
+                                    />
+                                    <p className="text-l-medium text-muted-foreground">
+                                      {t("defineLUC.rubberPlantation")}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-row items-center space-x-2.5">
+                                    <Switch
+                                      onCheckedChange={(checked) => {
+                                        onToggleSwitch(10, checked);
+                                      }}
+                                      checked={defaultArray.includes(10)}
+                                    />
+                                    <p className="text-l-medium text-muted-foreground">
+                                      {t("defineLUC.oilPalmPlantation")}
+                                    </p>
+                                  </div>
+                                  <div className="flex flex-row items-center space-x-2.5">
+                                    <Switch
+                                      onCheckedChange={(checked) => {
+                                        onToggleSwitch(11, checked);
+                                      }}
+                                      checked={defaultArray.includes(11)}
+                                    />
+                                    <p className="text-l-medium text-muted-foreground">
+                                      {t("defineLUC.otherPlantation")}
+                                    </p>
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            </Accordion>
+
+                            <div className="flex flex-row items-center space-x-2.5">
+                              <Switch
+                                onCheckedChange={(checked) => {
+                                  onToggleSwitch(7, checked);
+                                }}
+                                checked={defaultArray.includes(7)}
+                              />
+                              <p className="text-l-medium text-muted-foreground">
+                                {t("defineLUC.agroforestry")}
+                              </p>
+                            </div>
                           </AccordionContent>
                         </AccordionItem>
                       </Accordion>

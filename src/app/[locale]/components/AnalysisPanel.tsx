@@ -1255,6 +1255,7 @@ export function AnalysisPanel({
                         )}
                       />
                     </CollapsibleTrigger>
+                    
                     <CollapsibleContent>
                       <div className="pt-4 space-y-2">
                         <p className="text-m-medium italic">

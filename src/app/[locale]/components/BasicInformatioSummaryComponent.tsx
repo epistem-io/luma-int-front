@@ -261,7 +261,7 @@ export const BasicInformationSummaryFooter = () => {
                 <span className="loader sm"></span>
               </div>
             )}
-            {!isMosaicLoading && t("satelliteComposite.previewMosaicMap")}
+            {!isMosaicLoading && t("basicInformation.previewMosaicMap")}
           </>
         )}
       </Button>

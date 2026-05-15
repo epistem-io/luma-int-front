@@ -106,7 +106,7 @@ export const AreaScopingAccordion = () => {
                   {t("areaScoping.drawPolygon")}
                 </p>
                 <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutral-700-baru">
-                  {t("areaScoping.drawPolygonSubtitle")}
+                  {t("areaScoping.drawPolygonDescription")}
                 </p>
               </div>
             </div>
@@ -114,7 +114,7 @@ export const AreaScopingAccordion = () => {
               <ComingSoon />
               <div className="">
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                  {t("areaScoping.spatialResolution")}:
+                  {t("areaScoping.spatialResolution")}
                 </p>
                 <p className="text-l-regular text-text-icons-base-third">
                   {t("areaScoping.spatialResolutionSubtitle")}
