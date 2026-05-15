@@ -143,7 +143,9 @@ export const BasicInformationSummaryComponent = () => {
             />
           </div>
         </div>
-        {isPreviewingMosaic && <MosaicSummary />}
+        {isPreviewingMosaic && !isBasicInformationChangeInput && (
+          <MosaicSummary />
+        )}
       </div>
       {/* <Accordion
         value={basicInformationOpenAccordion}
@@ -239,7 +241,9 @@ export const BasicInformationSummaryFooter = () => {
       >
         {/* {isPreviewingMosaic || isBasicInformationChangeInput */}
         {/* {isBasicInformationChangeInput ? "Cancel" : "Change Input"} */}
-        {t("common.changeInput")}
+        {isBasicInformationChangeInput
+          ? t("common.changeInputCancelFooter")
+          : t("common.changeInput")}
       </Button>
       <Button
         onClick={() => {

@@ -59,7 +59,14 @@ export const DataValidationAccordion = () => {
           {t("lulcParams.dataValidation")}
         </p>
       </AccordionFullTrigger>
-      <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+      <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+        <div className="">
+          <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
+            {t.rich("lulcParams.dataValidationDesc", {
+              br: () => <br></br>,
+            })}
+          </p>
+        </div>
         <ComingSoon />
         <div
           className={cn(
@@ -75,7 +82,7 @@ export const DataValidationAccordion = () => {
               Accepted format .zip */}
               {t("common.dragAndDrop")} <br />
               {t("common.acceptedFormat", {
-                extensions: ".zip",
+                X: ".zip",
               })}
             </p>
           </div>

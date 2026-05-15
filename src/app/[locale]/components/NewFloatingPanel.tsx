@@ -4,6 +4,7 @@ import { StepBar } from "./StepBar";
 import { ProgressPanel } from "./ProgressPanel";
 import { InteractivePanel } from "./InteractivePanel";
 import { FinalSummaryDialog } from "./FinalSummaryDialog";
+import { YourMapDialog } from "./YourMapDialog";
 
 export const NewFloatingPanel = () => {
   return (
@@ -12,6 +13,7 @@ export const NewFloatingPanel = () => {
       <InteractivePanel />
 
       <FinalSummaryDialog />
+      <YourMapDialog />
     </div>
   );
 };

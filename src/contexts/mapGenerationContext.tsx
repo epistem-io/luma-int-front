@@ -161,6 +161,8 @@ interface ContextType {
   setIsTrainingDataChanged: Dispatch<SetStateAction<boolean>>;
   isLULCParamsChanged: boolean;
   setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
+  isYourMapDialogVisible: boolean;
+  setIsYourMapDialogVisible: Dispatch<SetStateAction<boolean>>;
 }
 
 const DEFAULT_VALUE: ContextType = {
@@ -258,6 +260,8 @@ const DEFAULT_VALUE: ContextType = {
   setIsTrainingDataChanged: () => {},
   isLULCParamsChanged: true,
   setIsLULCParamsChanged: () => {},
+  isYourMapDialogVisible: false,
+  setIsYourMapDialogVisible: () => {},
 };
 
 const MapGenerationContext = createContext(DEFAULT_VALUE);
@@ -390,6 +394,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
 
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
 
+  const [isYourMapDialogVisible, setIsYourMapDialogVisible] = useState(
+    DEFAULT_VALUE.isYourMapDialogVisible,
+  );
+
   // FLOW
 
   const [isDefineLULCChanged, setIsDefineLULCChanged] = useState(
@@ -491,6 +499,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsTrainingDataChanged,
     isLULCParamsChanged,
     setIsLULCParamsChanged,
+    isYourMapDialogVisible,
+    setIsYourMapDialogVisible,
   };
 
   // useEffect(() => {
