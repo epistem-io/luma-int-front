@@ -253,6 +253,8 @@ export const YourMapFooter = () => {
   const { generateMapDownloadURL, setIsYourMapDialogVisible } =
     useContext(MapGenerationContext);
 
+  const t = useTranslations("InteractivePanel");
+
   return (
     <>
       <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
@@ -265,7 +267,7 @@ export const YourMapFooter = () => {
           variant="primary"
           className=""
         >
-          Next
+          {t("common.next")}
         </Button>
       </div>
     </>
@@ -650,7 +652,7 @@ const ModelAccuracyAssessment = () => {
             </div>
           </div>
 
-              {/*
+          {/*
           <div className="w-full flex flex-row justify-end">
             <Button
               variant={"ghost"}

@@ -111,7 +111,7 @@ export const YourMapDialog = () => {
             onClick={handleDownload}
             disabled={!generateMapDownloadURL?.download_url || isDownloading}
             variant="primary"
-            className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)]"
+            className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
           >
             <Download className="size-4" />
             {t("downloadMap")}

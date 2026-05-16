@@ -288,7 +288,9 @@ export const LegendPanelNew = () => {
                           <AccordionItem value="aoi" className="border-b-0">
                             <AccordionTrigger className="py-0">
                               <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                {tInteractive("areaScoping.areaOfInterest")}
+                                {tInteractive(
+                                  "layerAndComposites.areaOfInterest",
+                                )}
                               </p>
                             </AccordionTrigger>
                             <AccordionContent>
@@ -502,8 +504,8 @@ export const LegendPanelNew = () => {
                                 {/* WIP Copy */}
                                 <p className="text-s-medium text-text-icons-base-third">
                                   {tInteractive(
-                                  "layerAndComposites.legendLULCsubtitleBefore",
-                                )}
+                                    "layerAndComposites.legendLULCsubtitleBefore",
+                                  )}
                                 </p>
                               </div>
                             )}
