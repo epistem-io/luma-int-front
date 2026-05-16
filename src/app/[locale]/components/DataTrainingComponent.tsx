@@ -3,7 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -98,6 +104,19 @@ export const DataTrainingComponent = () => {
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
+  const [activeTab, setActiveTab] = useState("upload");
+  const startPointingButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (activeTab !== "oss") return;
+
+    requestAnimationFrame(() => {
+      startPointingButtonRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  }, [activeTab]);
 
   // useEffect(() => {
   //   console.log("upll", uploadedFilesArray);
@@ -271,7 +290,11 @@ export const DataTrainingComponent = () => {
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
         {selectedCustom && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
-            <Tabs defaultValue="upload" className="gap-y-3 mb-0">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="gap-y-3 mb-0"
+            >
               <div className="px-0 py-0">
                 <TabsList className="w-full px-1.5">
                   <TabsTrigger value="upload">
@@ -781,6 +804,7 @@ export const DataTrainingComponent = () => {
                             </div>
                           </Label>
                           <Button
+                            ref={startPointingButtonRef}
                             disabled={isNextDisabled}
                             variant={"primary"}
                             className="text-[16px]"
