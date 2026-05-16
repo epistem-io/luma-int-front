@@ -338,6 +338,7 @@ const LULCCompositionSummary = () => {
             {t("yourMap.lulcCompositionSummary")}
           </p>
           <div className="flex flex-row w-full rounded-md overflow-hidden h-14">
+            {generateMapLULC?.lulc_composition.length === 0 && "-"}
             {generateMapLULC?.lulc_composition.map((item, index) => (
               <div
                 key={`comop-${index}`}
@@ -431,7 +432,12 @@ const LULCCompositionSummary = () => {
 
 const TrainingDataQuality = () => {
   const t = useTranslations("InteractivePanel");
-  const { generateMapSampleQuality } = useContext(MapGenerationContext);
+  const { generateMapSampleQuality, defaultArray, LUCfile } =
+    useContext(MapGenerationContext);
+
+  const selectedDefault = defaultArray.length > 0;
+  const selectedCustom = LUCfile !== null;
+
   return (
     <>
       <Card>
@@ -441,53 +447,60 @@ const TrainingDataQuality = () => {
               {t("yourMap.trainingDataQuality")}
             </p>
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {t("yourMap.trainingDataQualityDescription")}
+              {selectedCustom
+                ? t("yourMap.trainingDataQualityDescriptionOWN")
+                : selectedDefault
+                  ? t("yourMap.trainingDataQualityDescriptionDEFAULT")
+                  : "error"}
             </p>
           </div>
 
-          <div className="p-2 rounded-[12px] bg-danger-50 space-y-2 ">
-            <div className="flex flex-row gap-x-2">
-              <AlertCircleIcon className="size-6 text-danger-700" />
-              <p className="font-aptos text-md font-bold leading-6 text-danger-700">
-                {t("yourMap.lowSeparabilityDetected")}
-              </p>
-            </div>
-
-            <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
-              <p className="font-bold">
-                {t("yourMap.lowSeparabilityCaption1")}
-              </p>
-              <div className="">
-                {generateMapSampleQuality?.lowest_separability?.result_dict.map(
-                  (item, index) => {
-                    return (
-                      <div
-                        className="flex flex-row gap-x-2 items-start"
-                        key={`separability-${index}`}
-                      >
-                        <div className="size-1 aspect-square mt-2 rounded-full bg-danger-800" />
-                        {/* WIP */}
-                        {/* <p className="">Class [X] and Class [Y]</p> */}
-                        <p className="">
-                          {t("yourMap.lowSeparabilityCaption2", {
-                            X: item.Class1_Name,
-                            Y: item.Class2_Name,
-                          })}
-                        </p>
-                      </div>
-                    );
-                  },
-                )}
+          {selectedCustom && (
+            <div className="p-2 rounded-[12px] bg-danger-50 space-y-2 ">
+              <div className="flex flex-row gap-x-2">
+                <AlertCircleIcon className="size-6 text-danger-700" />
+                <p className="font-aptos text-md font-bold leading-6 text-danger-700">
+                  {t("yourMap.lowSeparabilityDetected")}
+                </p>
               </div>
-              <p className="">{t("yourMap.lowSeparabilityCaption3")}</p>
+
+              <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
+                <p className="font-bold">
+                  {t("yourMap.lowSeparabilityCaption1")}
+                </p>
+                <div className="">
+                  {generateMapSampleQuality?.lowest_separability?.result_dict.map(
+                    (item, index) => {
+                      return (
+                        <div
+                          className="flex flex-row gap-x-2 items-start"
+                          key={`separability-${index}`}
+                        >
+                          <div className="size-1 aspect-square mt-2 rounded-full bg-danger-800" />
+                          {/* WIP */}
+                          {/* <p className="">Class [X] and Class [Y]</p> */}
+                          <p className="">
+                            {t("yourMap.lowSeparabilityCaption2", {
+                              X: item.Class1_Name,
+                              Y: item.Class2_Name,
+                            })}
+                          </p>
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+                <p className="">{t("yourMap.lowSeparabilityCaption3")}</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Card>
     </>
   );
 };
 
+// WIP to be deleted
 const PredictorImportances = () => {
   const t = useTranslations("InteractivePanel");
   const { generateMapFeatureImportance } = useContext(MapGenerationContext);
@@ -578,7 +591,12 @@ const PredictorImportances = () => {
 
 const ModelAccuracyAssessment = () => {
   const t = useTranslations("InteractivePanel");
-  const { generateMapModelQuality } = useContext(MapGenerationContext);
+  const { generateMapModelQuality, defaultArray, LUCfile } =
+    useContext(MapGenerationContext);
+
+  const selectedDefault = defaultArray.length > 0;
+  const selectedCustom = LUCfile !== null;
+
   return (
     <>
       <Card>
@@ -590,6 +608,11 @@ const ModelAccuracyAssessment = () => {
             <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
               {/* WIP */}
               {/* {t("yourMap.modelAccuracyAssessmentDescription")} */}
+              {selectedCustom
+                ? t("yourMap.modelAccuracyAssessmentDescriptionOWNCLASS")
+                : selectedDefault
+                  ? t("yourMap.modelAccuracyAssessmentDescriptionDEFAULTCLASS")
+                  : "error"}
             </p>
           </div>
 
@@ -680,12 +703,14 @@ const ThematicAccuracyAssessment = () => {
     <>
       <Card>
         <div className="space-y-5">
-          <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("yourMap.thematicAccuracyAssessment")}
-          </p>
-          <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-            {t("yourMap.thematicAccuracyAssessmentDescription")}
-          </p>
+          <div className="">
+            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+              {t("yourMap.thematicAccuracyAssessment")}
+            </p>
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-700 mt-2">
+              {t("yourMap.thematicAccuracyAssessmentDescription")}
+            </p>
+          </div>
           <div className="p-3 rounded-md bg-text-icons-base-main">
             <div className="space-y-1">
               <p className="font-aptos text-md font-bold leading-6 text-text-icons-on-color">

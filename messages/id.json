@@ -247,7 +247,8 @@
     },
     "dataTraining": {
       "dataTrainingTitle": "Data Sampel Pemetaan",
-      "dataTrainingDescription": "Data sampel adalah sejumlah kecil lokasi di mana keberadaan kelas penggunaan dan tutupan lahan Anda dapat dipastikan. Data sampel memberi tahu proses pemetaan bagaimana kelas-kelas tersebut bisa dibedakan untuk keseluruhan wilayah pemetaan Anda. Siapkan data sampel untuk klasifikasi penggunaan dan tutupan lahan di wilayah pemetaan Anda. Anda dapat mengunggah sampel yang sudah ada atau membuatnya secara langsung di Luma melalui fitur pengambilan sampel di layar.",
+      "dataTrainingDescriptionOWNCLASS": "Data sampel adalah sejumlah kecil lokasi di mana keberadaan kelas penggunaan dan tutupan lahan Anda dapat dipastikan. Data sampel memberi tahu proses pemetaan bagaimana kelas-kelas tersebut bisa dibedakan untuk keseluruhan wilayah pemetaan Anda. Siapkan data sampel untuk klasifikasi penggunaan dan tutupan lahan di wilayah pemetaan Anda. Anda dapat mengunggah sampel yang sudah ada atau membuatnya secara langsung di Luma melalui fitur pengambilan sampel di layar.",
+      "dataTrainingDescriptionDEFAULTCLASS": "Data sampel adalah sejumlah kecil lokasi di mana keberadaan kelas penggunaan dan tutupan lahan Anda dapat dipastikan. Data sampel memberi tahu proses pemetaan bagaimana kelas-kelas tersebut bisa dibedakan untuk keseluruhan wilayah pemetaan Anda.",
       "recordedLULC": "Rangkuman Data Sampel",
       "recordedLULCDescriptionDEFAULTCLASS": "Ketersediaan data sampel pada wilayah pemetaan Anda dirangkum di tabel di bawah. Apabila Anda menggunakan opsi kelas dari skema klasifikasi bawaan yang telah tersedia di Luma, pemetaan akan menggunakan data sampel yang telah tersedia untuk seluruh wilayah Indonesia. Oleh karena itu, Luma tetap dapat menghasilkan peta penggunaan dan tutupan lahan walaupun ketersediaan data sampel di wilayah pemetaan Anda bisa jadi terbatas.",
       "recordedLULCDescriptionOWNCLASS": "Tabel di bawah merangkum data sampel yang sudah terekam sistem dan akan digunakan untuk pemetaan Anda.",
@@ -324,6 +325,8 @@
       "lulcCompositionSummary": "Komposisi Kelas Penggunaan dan Tutupan Lahan",
       "trainingDataQuality": "Kualitas Data Sampel",
       "trainingDataQualityDescription": "Analisis ini menunjukkan seberapa jelas perbedaan antar kelas penggunaan dan tutupan lahan pada data sampel berdasarkan karakteristik data spektral penginderaan jauh.",
+      "trainingDataQualityDescriptionOWN": "Analisis ini menunjukkan seberapa jelas perbedaan antar kelas penggunaan dan tutupan lahan pada data sampel berdasarkan karakteristik data spektral penginderaan jauh.",
+      "trainingDataQualityDescriptionDEFAULT": "Analisis ini tidak dilakukan untuk peta Anda. Karena Anda menggunakan opsi kelas dari skema klasifikasi bawaan yang telah tersedia di Luma, pemetaan dilakukan dengan data sampel yang telah tersedia untuk seluruh wilayah Indonesia. Oleh karena itu, Luma tetap dapat menghasilkan peta penggunaan dan tutupan lahan walaupun ketersediaan data sampel di wilayah pemetaan Anda bisa jadi terbatas.",
       "lowSeparabilityDetected": "Terdeteksi tingkat keterpisahan kelas yang rendah",
       "lowSeparabilityCaption1": "Beberapa pasangan kelas memiliki kemiripan spektral di bawah ambang batas:",
       "lowSeparabilityCaption2": "Kelas {X} dan Kelas {Y}",

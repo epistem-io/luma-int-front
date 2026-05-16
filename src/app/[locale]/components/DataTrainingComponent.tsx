@@ -817,7 +817,14 @@ export const DataTrainingComponent = () => {
                 {t("dataTraining.recordedLULC")}
               </p>
             </AccordionFullTrigger>
-            <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+            <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+              <p className="text-text-icons-base-second font-aptos text-[13px] font-regular leading-4.5">
+                {selectedCustom
+                  ? t("dataTraining.recordedLULCDescriptionOWNCLASS")
+                  : selectedDefault
+                    ? t("dataTraining.recordedLULCDescriptionDEFAULTCLASS")
+                    : "error"}
+              </p>
               <LUCClassTable summary={false} />
             </AccordionContent>
           </AccordionItem>

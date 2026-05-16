@@ -61,7 +61,73 @@ interface PanelComponent {
   onClickBackCallback?: () => void;
 }
 
-const DEFAULT = "area_scoping";
+// const PANEL_COMPONENT_ARRAY: Record<PANEL_COMPONENT_KEY, PanelComponent> = {
+//   [PANEL_COMPONENT_KEY.NULL]: {
+//     component: <div>Error</div>,
+//     title: "Error",
+//   },
+//   [PANEL_COMPONENT_KEY.BASIC_INFORMATION]: {
+//     component: <BasicInformationComponent />,
+//     footer: <BasicInformationFooter />,
+//     title: t("basicInformation.basicInformationTitle"),
+//     subtitle: t("basicInformation.basicInformationCaption"),
+//   },
+//   [PANEL_COMPONENT_KEY.AREA_SCOPING]: {
+//     component: <AreaScopingComponent />,
+//     footer: <AreaScopingFooter />,
+//     title: t("areaScoping.areaScoping"),
+//     onClickBackCallback: () => {
+//       setAreaScopingPolygonArea(0);
+//       setAreaScopingPolygonFileName("");
+//       setAreaScopingPolygonFileSize(0);
+//       setAreaScopingPolygonUrl(null);
+//       vectorSource?.clear();
+//       setPolygonData(null);
+
+//       setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
+//     },
+//   },
+//   [PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY]: {
+//     component: <BasicInformationSummaryComponent />,
+//     footer: <BasicInformationSummaryFooter />,
+//     title: t("basicInformation.basicInformationTitle"),
+//     subtitle: t("basicInformation.basicInformationCaption"),
+//   },
+//   [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
+//     component: <DefineLUCComponent />,
+//     footer: <DefineLUCFooter />,
+//     title: t("defineLUC.defineLUCTitle"),
+//     subtitle: t("defineLUC.defineLUCDescription"),
+//   },
+//   [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
+//     component: <DataTrainingComponent />,
+//     footer: <DataTrainingFooter />,
+//     title: t("dataTraining.dataTrainingTitle"),
+//     subtitle: t("dataTraining.dataTrainingDescription"),
+//   },
+//   [PANEL_COMPONENT_KEY.OSS]: {
+//     component: <OSSComponent />,
+//     footer: <OSSFooter />,
+//     title: t("dataTraining.onScreenSamplingPanel"),
+//     subtitle: t("dataTraining.onScreenSamplingPanelDescription"),
+//     onClickBackCallback: () => {
+//       // removeMarkerCursor()
+//       setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
+//     },
+//   },
+//   [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
+//     component: <LULCParamsComponent />,
+//     footer: <LULCParamsFooter />,
+//     title: t("lulcParams.selectLULCListParams"),
+//     subtitle: t("lulcParams.selectLULCListParamsDescription"),
+//   },
+//   [PANEL_COMPONENT_KEY.YOUR_MAP]: {
+//     component: <YourMapComponent />,
+//     footer: <YourMapFooter />,
+//     title: t("yourMap.yourMapPanelTitle"),
+//     subtitle: t("yourMap.yourMapPanelDescription"),
+//   },
+// };
 
 export const InteractivePanel = () => {
   const {
@@ -73,79 +139,91 @@ export const InteractivePanel = () => {
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
     setPolygonData,
+    defaultArray,
+    LUCfile,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
 
   const { vectorSource, removeMarkerCursor } = useContext(MapContext);
 
-  const PANEL_COMPONENT_ARRAY: Record<PANEL_COMPONENT_KEY, PanelComponent> = {
-    [PANEL_COMPONENT_KEY.NULL]: {
-      component: <div>Error</div>,
-      title: "Error",
-    },
-    [PANEL_COMPONENT_KEY.BASIC_INFORMATION]: {
-      component: <BasicInformationComponent />,
-      footer: <BasicInformationFooter />,
-      title: t("basicInformation.basicInformationTitle"),
-      subtitle: t("basicInformation.basicInformationCaption"),
-    },
-    [PANEL_COMPONENT_KEY.AREA_SCOPING]: {
-      component: <AreaScopingComponent />,
-      footer: <AreaScopingFooter />,
-      title: t("areaScoping.areaScoping"),
-      onClickBackCallback: () => {
-        setAreaScopingPolygonArea(0);
-        setAreaScopingPolygonFileName("");
-        setAreaScopingPolygonFileSize(0);
-        setAreaScopingPolygonUrl(null);
-        vectorSource?.clear();
-        setPolygonData(null);
+  const PANEL_COMPONENT_ARRAY: Record<PANEL_COMPONENT_KEY, PanelComponent> =
+    useMemo(() => {
+      const selectedDefault = defaultArray.length > 0;
+      const selectedCustom = LUCfile !== null;
 
-        setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
-      },
-    },
-    [PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY]: {
-      component: <BasicInformationSummaryComponent />,
-      footer: <BasicInformationSummaryFooter />,
-      title: t("basicInformation.basicInformationTitle"),
-      subtitle: t("basicInformation.basicInformationCaption"),
-    },
-    [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
-      component: <DefineLUCComponent />,
-      footer: <DefineLUCFooter />,
-      title: t("defineLUC.defineLUCTitle"),
-      subtitle: t("defineLUC.defineLUCDescription"),
-    },
-    [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
-      component: <DataTrainingComponent />,
-      footer: <DataTrainingFooter />,
-      title: t("dataTraining.dataTrainingTitle"),
-      subtitle: t("dataTraining.dataTrainingDescription"),
-    },
-    [PANEL_COMPONENT_KEY.OSS]: {
-      component: <OSSComponent />,
-      footer: <OSSFooter />,
-      title: t("dataTraining.onScreenSamplingPanel"),
-      subtitle: t("dataTraining.onScreenSamplingPanelDescription"),
-      onClickBackCallback: () => {
-        // removeMarkerCursor()
-        setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
-      },
-    },
-    [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
-      component: <LULCParamsComponent />,
-      footer: <LULCParamsFooter />,
-      title: t("lulcParams.selectLULCListParams"),
-      subtitle: t("lulcParams.selectLULCListParamsDescription"),
-    },
-    [PANEL_COMPONENT_KEY.YOUR_MAP]: {
-      component: <YourMapComponent />,
-      footer: <YourMapFooter />,
-      title: t("yourMap.yourMapPanelTitle"),
-      subtitle: t("yourMap.yourMapPanelDescription"),
-    },
-  };
+      return {
+        [PANEL_COMPONENT_KEY.NULL]: {
+          component: <div>Error</div>,
+          title: "Error",
+        },
+        [PANEL_COMPONENT_KEY.BASIC_INFORMATION]: {
+          component: <BasicInformationComponent />,
+          footer: <BasicInformationFooter />,
+          title: t("basicInformation.basicInformationTitle"),
+          subtitle: t("basicInformation.basicInformationCaption"),
+        },
+        [PANEL_COMPONENT_KEY.AREA_SCOPING]: {
+          component: <AreaScopingComponent />,
+          footer: <AreaScopingFooter />,
+          title: t("areaScoping.areaScoping"),
+          onClickBackCallback: () => {
+            setAreaScopingPolygonArea(0);
+            setAreaScopingPolygonFileName("");
+            setAreaScopingPolygonFileSize(0);
+            setAreaScopingPolygonUrl(null);
+            vectorSource?.clear();
+            setPolygonData(null);
+
+            setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
+          },
+        },
+        [PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY]: {
+          component: <BasicInformationSummaryComponent />,
+          footer: <BasicInformationSummaryFooter />,
+          title: t("basicInformation.basicInformationTitle"),
+          subtitle: t("basicInformation.basicInformationCaption"),
+        },
+        [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
+          component: <DefineLUCComponent />,
+          footer: <DefineLUCFooter />,
+          title: t("defineLUC.defineLUCTitle"),
+          subtitle: t("defineLUC.defineLUCDescription"),
+        },
+        [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
+          component: <DataTrainingComponent />,
+          footer: <DataTrainingFooter />,
+          title: t("dataTraining.dataTrainingTitle"),
+          subtitle: selectedCustom
+            ? t("dataTraining.dataTrainingDescriptionOWNCLASS")
+            : selectedDefault
+              ? t("dataTraining.dataTrainingDescriptionDEFAULTCLASS")
+              : "Error",
+        },
+        [PANEL_COMPONENT_KEY.OSS]: {
+          component: <OSSComponent />,
+          footer: <OSSFooter />,
+          title: t("dataTraining.onScreenSamplingPanel"),
+          subtitle: t("dataTraining.onScreenSamplingPanelDescription"),
+          onClickBackCallback: () => {
+            // removeMarkerCursor()
+            setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
+          },
+        },
+        [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
+          component: <LULCParamsComponent />,
+          footer: <LULCParamsFooter />,
+          title: t("lulcParams.selectLULCListParams"),
+          subtitle: t("lulcParams.selectLULCListParamsDescription"),
+        },
+        [PANEL_COMPONENT_KEY.YOUR_MAP]: {
+          component: <YourMapComponent />,
+          footer: <YourMapFooter />,
+          title: t("yourMap.yourMapPanelTitle"),
+          subtitle: t("yourMap.yourMapPanelDescription"),
+        },
+      };
+    }, [defaultArray, LUCfile]);
 
   const [isOpen, setIsOpen] = useState(true);
   // const [subtitleHeight, setSubtitleHeight] = useState(0);

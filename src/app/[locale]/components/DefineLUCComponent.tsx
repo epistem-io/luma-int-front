@@ -83,7 +83,7 @@ export const DefineLUCComponent = () => {
     setIsDefineLULCChanged,
   } = useContext(MapGenerationContext);
 
-  const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
+  // const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
   const [fileEnter, setFileEnter] = useState(false);
 
   const onClickDownloadFile = () => {
@@ -169,7 +169,7 @@ export const DefineLUCComponent = () => {
 
   return (
     <div className="space-y-4">
-          {/*
+      {/*
       <Collapsible open={aiAccordionOpen} onOpenChange={setAIAccordionOpen}>
         <div
           className="bg-aneh p-px rounded-[13px]"

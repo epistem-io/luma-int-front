@@ -114,7 +114,8 @@ export const DEFAULT_LUC = [
   { id: 17, name: "Waterbody", color: "#0000FF" },
 ];
 
-export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
+export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";
+// export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
 
 export enum POINTING_TYPE {
   EMPTY = "",

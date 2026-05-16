@@ -251,7 +251,8 @@
     },
     "dataTraining": {
       "dataTrainingTitle": "Mapping Sample Data",
-      "dataTrainingDescription": "Sample data is a small number of locations where presence of the land use and land cover classes that you specify can be determined. Sample data informs the mapping process on how your classes can be distinguished in all locations throughout your mapping area. Prepare the sample data for land use and land cover classification in your mapping area. You can upload existing data or create samples directly in Luma through on-screen sampling.",
+      "dataTrainingDescriptionOWNCLASS": "Sample data is a small number of locations where presence of the land use and land cover classes that you specify can be determined. Sample data informs the mapping process on how your classes can be distinguished in all locations throughout your mapping area. Prepare the sample data for land use and land cover classification in your mapping area. You can upload existing data or create samples directly in Luma through on-screen sampling.",
+      "dataTrainingDescriptionDEFAULTCLASS": "Sample data is a small number of locations where presence of the land use and land cover classes that you specify can be determined. Sample data informs the mapping process on how your classes can be distinguished in all locations throughout your mapping area.",
       "recordedLULC": "Sample Data Summary",
       "recordedLULCDescriptionDEFAULTCLASS": "Available sample data within your mapping area is summarized in the table below. Note that sample data from other locations throughout Indonesia are also used for mapping your area when classes from default classification scheme in Luma are used. Hence, Luma can still map your area despite potentially limited sample data availability.",
       "recordedLULCDescriptionOWNCLASS": "Recorded sample data that will be used to map your area of interest is summarized in the table below.",
@@ -328,6 +329,8 @@
       "lulcCompositionSummary": "LULC Class Composition",
       "trainingDataQuality": "Sample Data Quality",
       "trainingDataQualityDescription": "This analysis shows how clearly the land use and land cover classes among the sample data are separated based on their remote sensing spectral characteristics.",
+      "trainingDataQualityDescriptionOWN": "This analysis shows how clearly the land use and land cover classes among the sample data are separated based on their remote sensing spectral characteristics.",
+      "trainingDataQualityDescriptionDEFAULT": "This analysis is not conducted for your map. Note that sample data from other locations throughout Indonesia are also used for mapping your area when classes from default classification scheme in Luma are used. Hence, Luma can still map your area despite potentially limited sample data availability.",
       "lowSeparabilityDetected": "Low class separability detected",
       "lowSeparabilityCaption1": "Some class pairs have similar spectral signatures below the threshold:",
       "lowSeparabilityCaption2": "Class {X} and Class {Y}",
