@@ -95,6 +95,8 @@ interface ContextType {
   setAreaScopingPolygonError: Dispatch<SetStateAction<string>>;
   // LUC
   defaultArray: number[];
+  selectedDefault: boolean;
+  selectedCustom: boolean;
   LUCfile: File | null;
   LUCfilename: string;
   LUCfilesize: number;
@@ -203,6 +205,8 @@ const DEFAULT_VALUE: ContextType = {
   setPolygonData: () => {},
   // LUC
   defaultArray: [],
+  selectedDefault: false,
+  selectedCustom: false,
   LUCfile: null,
   LUCfilename: "",
   LUCfilesize: 0,
@@ -311,8 +315,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [defaultArray, setDefaultArray] = useState<number[]>(
     DEFAULT_VALUE.defaultArray,
   );
+  const selectedDefault = defaultArray.length > 0;
 
   const [LUCfile, setLUCFile] = useState<File | null>(DEFAULT_VALUE.LUCfile);
+  const selectedCustom = !selectedDefault;
   const [LUCfilename, setLUCFilename] = useState<string>(
     DEFAULT_VALUE.LUCfilename,
   );
@@ -444,6 +450,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     areaScopingPolygonError,
     setAreaScopingPolygonError,
     defaultArray,
+    selectedDefault,
+    selectedCustom,
     LUCfile,
     LUCfilename,
     LUCfilesize,

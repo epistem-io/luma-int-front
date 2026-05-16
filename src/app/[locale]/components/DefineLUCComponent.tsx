@@ -71,6 +71,8 @@ export const DefineLUCComponent = () => {
 
   const {
     defaultArray,
+    selectedDefault,
+    selectedCustom,
     LUCfile,
     LUCfilename,
     LUCfilesize,
@@ -163,9 +165,6 @@ export const DefineLUCComponent = () => {
   };
 
   const submitFile = () => {};
-
-  const selectedDefault = defaultArray.length > 0;
-  const selectedCustom = LUCfile !== null;
 
   return (
     <div className="space-y-4">
@@ -817,6 +816,8 @@ export const DefineLUCFooter = () => {
     setStepKey,
     setProgressPanelIndex,
     defaultArray,
+    selectedDefault,
+    selectedCustom,
     LUCfile,
     LUCfilesize,
     isLUCLoading,
@@ -835,9 +836,6 @@ export const DefineLUCFooter = () => {
   const t = useTranslations("InteractivePanel");
 
   const { sessionId } = useContext(GlobalContext);
-
-  const selectedDefault = defaultArray.length > 0;
-  const selectedCustom = LUCfile !== null;
 
   const isNextDisabled =
     (!selectedCustom && !selectedDefault) ||

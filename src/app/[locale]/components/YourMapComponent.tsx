@@ -432,11 +432,8 @@ const LULCCompositionSummary = () => {
 
 const TrainingDataQuality = () => {
   const t = useTranslations("InteractivePanel");
-  const { generateMapSampleQuality, defaultArray, LUCfile } =
+  const { generateMapSampleQuality, selectedDefault, selectedCustom } =
     useContext(MapGenerationContext);
-
-  const selectedDefault = defaultArray.length > 0;
-  const selectedCustom = LUCfile !== null;
 
   return (
     <>
@@ -591,11 +588,8 @@ const PredictorImportances = () => {
 
 const ModelAccuracyAssessment = () => {
   const t = useTranslations("InteractivePanel");
-  const { generateMapModelQuality, defaultArray, LUCfile } =
+  const { generateMapModelQuality, selectedDefault, selectedCustom } =
     useContext(MapGenerationContext);
-
-  const selectedDefault = defaultArray.length > 0;
-  const selectedCustom = LUCfile !== null;
 
   return (
     <>

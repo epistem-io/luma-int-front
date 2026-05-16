@@ -80,8 +80,8 @@ export const DataTrainingComponent = () => {
     setStepKey,
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
-    defaultArray,
-    LUCfile,
+    selectedDefault,
+    selectedCustom,
     trainingFile,
     trainingFilename,
     trainingFilesize,
@@ -244,9 +244,6 @@ export const DataTrainingComponent = () => {
     !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
 
   const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
-
-  const selectedDefault = defaultArray.length > 0;
-  const selectedCustom = LUCfile !== null;
 
   useEffect(() => {
     markerVectorLayer?.setOpacity(1);
@@ -841,7 +838,7 @@ export const DataTrainingFooter = () => {
     isUploadingTrainingFile,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
-    LUCfile,
+    selectedCustom,
     classArray,
     isTrainingDataChanged,
     setIsTrainingDataChanged,
@@ -852,8 +849,6 @@ export const DataTrainingFooter = () => {
   const { markerVectorLayer, markerArray } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
-
-  const selectedCustom = LUCfile !== null;
 
   const isNextDisabled =
     isUploadingTrainingFile ||

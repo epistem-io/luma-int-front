@@ -139,8 +139,8 @@ export const InteractivePanel = () => {
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
     setPolygonData,
-    defaultArray,
-    LUCfile,
+    selectedDefault,
+    selectedCustom,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -149,9 +149,6 @@ export const InteractivePanel = () => {
 
   const PANEL_COMPONENT_ARRAY: Record<PANEL_COMPONENT_KEY, PanelComponent> =
     useMemo(() => {
-      const selectedDefault = defaultArray.length > 0;
-      const selectedCustom = LUCfile !== null;
-
       return {
         [PANEL_COMPONENT_KEY.NULL]: {
           component: <div>Error</div>,
@@ -223,7 +220,7 @@ export const InteractivePanel = () => {
           subtitle: t("yourMap.yourMapPanelDescription"),
         },
       };
-    }, [defaultArray, LUCfile]);
+    }, [selectedCustom, selectedDefault]);
 
   const [isOpen, setIsOpen] = useState(true);
   // const [subtitleHeight, setSubtitleHeight] = useState(0);
