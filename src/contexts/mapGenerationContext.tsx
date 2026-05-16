@@ -165,6 +165,7 @@ interface ContextType {
   setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
   isYourMapDialogVisible: boolean;
   setIsYourMapDialogVisible: Dispatch<SetStateAction<boolean>>;
+  resetMapGenerationState: () => void;
 }
 
 const DEFAULT_VALUE: ContextType = {
@@ -266,6 +267,7 @@ const DEFAULT_VALUE: ContextType = {
   setIsLULCParamsChanged: () => {},
   isYourMapDialogVisible: false,
   setIsYourMapDialogVisible: () => {},
+  resetMapGenerationState: () => {},
 };
 
 const MapGenerationContext = createContext(DEFAULT_VALUE);
@@ -318,7 +320,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const selectedDefault = defaultArray.length > 0;
 
   const [LUCfile, setLUCFile] = useState<File | null>(DEFAULT_VALUE.LUCfile);
-  const selectedCustom = !selectedDefault;
+  const selectedCustom = !selectedDefault && LUCfile !== null;
   const [LUCfilename, setLUCFilename] = useState<string>(
     DEFAULT_VALUE.LUCfilename,
   );
@@ -418,6 +420,70 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.isLULCParamsChanged,
   );
 
+  const resetMapGenerationState = () => {
+    setProgressPanelIndex(DEFAULT_VALUE.progressPanelIndex);
+    setStepKey(DEFAULT_VALUE.stepKey);
+    setBasicInformationOpenAccordion(
+      DEFAULT_VALUE.basicInformationOpenAccordion,
+    );
+    setAreaScopingType(DEFAULT_VALUE.areaScopingType);
+    setAreaScopingPolygonUrl(DEFAULT_VALUE.areaScopingPolygonUrl);
+    setAreaScopingPolygonFileName(DEFAULT_VALUE.areaScopingPolygonFileName);
+    setAreaScopingPolygonArea(DEFAULT_VALUE.areaScopingPolygonArea);
+    setAreaScopingPolygonFileSize(DEFAULT_VALUE.areaScopingPolygonFileSize);
+    setisEditingTemporalCoverage(DEFAULT_VALUE.isEditingTemporalCoverage);
+    setTemporalCoverage(DEFAULT_VALUE.temporalCoverage);
+    setTemporalCoverageUnit(DEFAULT_VALUE.temporalCoverageUnit);
+    setIsAreaScopingLoading(DEFAULT_VALUE.isAreaScopingLoading);
+    setIsBasicInformationChangeInput(
+      DEFAULT_VALUE.isBasicInformationChangeInput,
+    );
+    setPolygonData(DEFAULT_VALUE.polygonData);
+    setAreaScopingPolygonError(DEFAULT_VALUE.areaScopingPolygonError);
+    setDefaultArray(DEFAULT_VALUE.defaultArray);
+    setLUCFile(DEFAULT_VALUE.LUCfile);
+    setLUCFilename(DEFAULT_VALUE.LUCfilename);
+    setLUCFilesize(DEFAULT_VALUE.LUCfilesize);
+    setIsLUCLoading(DEFAULT_VALUE.isLUCLoading);
+    setHaveDownloadedFile(DEFAULT_VALUE.haveDownloadedFile);
+    setTrainingFile(DEFAULT_VALUE.trainingFile);
+    setTrainingFilename(DEFAULT_VALUE.trainingFilename);
+    setTrainingFilesize(DEFAULT_VALUE.trainingFilesize);
+    setTrainingFileError(DEFAULT_VALUE.trainingFileError);
+    setUploadedFilesArray(DEFAULT_VALUE.uploadedFilesArray);
+    setClassArray(DEFAULT_VALUE.classArray);
+    setPointingType(DEFAULT_VALUE.pointingType);
+    setSelectedClass(DEFAULT_VALUE.selectedClass);
+    setIsUploadingTrainingFile(DEFAULT_VALUE.isUploadingTrainingFile);
+    setIsUpdatingTrainingData(DEFAULT_VALUE.isUpdatingTrainingData);
+    setIsSummaryDialogOpen(DEFAULT_VALUE.isSummaryDialogOpen);
+    setGenerateMapDataVisualization(DEFAULT_VALUE.generateMapDataVisualization);
+    setGenerateMapLULC(DEFAULT_VALUE.generateMapLULC);
+    setGenerateMapSampleQuality(DEFAULT_VALUE.generateMapSampleQuality);
+    setGenerateMapFeatureImportance(DEFAULT_VALUE.generateMapFeatureImportance);
+    setGenerateMapModelQuality(DEFAULT_VALUE.generateMapModelQuality);
+    setGenerateMapDownloadURL(DEFAULT_VALUE.generateMapDownloadURL);
+    setSummaryData(DEFAULT_VALUE.summaryData);
+    setIsDefineLULCChanged(DEFAULT_VALUE.isDefineLULCChanged);
+    setIsTrainingDataChanged(DEFAULT_VALUE.isTrainingDataChanged);
+    setIsLULCParamsChanged(DEFAULT_VALUE.isLULCParamsChanged);
+    setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
+
+    if (typeof document === "undefined") return;
+
+    [
+      "area-scoping-file-upload",
+      "luc-template-file-upload",
+      "data-training-file-upload",
+    ].forEach((id) => {
+      const input = document.getElementById(id) as HTMLInputElement | null;
+
+      if (input) {
+        input.value = "";
+      }
+    });
+  };
+
   const providedValue = {
     progressPanelIndex,
     setProgressPanelIndex,
@@ -509,6 +575,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsLULCParamsChanged,
     isYourMapDialogVisible,
     setIsYourMapDialogVisible,
+    resetMapGenerationState,
   };
 
   // useEffect(() => {

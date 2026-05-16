@@ -353,7 +353,7 @@
       "shareMap": "Bagikan peta",
       "saveToMyAccount": "Simpan ke akun saya",
       "improveAccuracy": "Tingkatkan akurasi",
-      "closePopup": "Apakah Anda yakin? Klik Iya untuk membuat peta baru (semua masukan/hasil Anda akan dihapus). Klik Kembali untuk kembali ke laman Peta Anda.",
+      "closePopup": "Apakah Anda sudah selesai? Klik Konfirmasi untuk membuat peta baru dan menghapus semua masukan Anda. Klik Batal untuk menutup jendela ini.",
       "predictorImportances": "Pentingnya Prediktor",
       "predictorImportancesDescription": "3 Prediktor Teratas Tutupan Lahan/Kelas Penggunaan Lahan yang Diurutkan Berdasarkan Kepentingan Relatif dalam Peta yang Dihasilkan",
       "showAllPredictor": "Tampilkan Semua Prediktor"

@@ -165,6 +165,7 @@ interface MapContextType {
   setSelectedBasemap: Dispatch<SetStateAction<string>>;
   isLegendVisible: string[];
   setIsLegendVisible: Dispatch<SetStateAction<string[]>>;
+  resetMapState: () => void;
 }
 
 const DEFAULT_VALUE: MapContextType = {
@@ -221,6 +222,7 @@ const DEFAULT_VALUE: MapContextType = {
   setSelectedBasemap: () => {},
   isLegendVisible: [],
   setIsLegendVisible: () => {},
+  resetMapState: () => {},
 };
 
 const MapContext = createContext(DEFAULT_VALUE);
@@ -448,6 +450,45 @@ const MapContextContainer = (props: PropsWithChildren) => {
     setMosaicLayerVisibilityArray([]);
     setMosaicData([]);
     setMosaicStatistic(null);
+  };
+
+  const resetMapState = () => {
+    removeMarkerCursor();
+    resetMosaicLayer();
+
+    overlay?.setPosition(undefined);
+    markerVectorSource?.clear();
+    vectorSource?.clear();
+
+    if (finalLayer) {
+      mapInstance?.removeLayer(finalLayer);
+    }
+
+    mapInstance?.getAllLayers().forEach((layer) => {
+      const className = layer.getClassName?.() || "";
+
+      if (className.includes("final")) {
+        mapInstance.removeLayer(layer);
+      }
+    });
+
+    if (mapInstance) {
+      mapInstance.getTargetElement().style.cursor = "";
+    }
+
+    vectorLayer?.setStyle(styles(3));
+    markerVectorLayer?.setOpacity(1);
+
+    setPolygon(null);
+    setMarkerArray([]);
+    setMarkerId("");
+    setPointingType(DEFAULT_VALUE.pointingType);
+    setFinalLayer(null);
+    setFinalLayerVisible(DEFAULT_VALUE.finalLayerVisible);
+    setMosaicLayerVisibilityArray(DEFAULT_VALUE.mosaicLayerVisibilityArray);
+    setMarkerLayerVisibilityArray(DEFAULT_VALUE.markerLayerVisibilityArray);
+    setVectorVisible(DEFAULT_VALUE.vectorVisible);
+    setIsLegendVisible(DEFAULT_VALUE.isLegendVisible);
   };
 
   const insertMarkerArr = (marker: Marker) => {
@@ -1002,6 +1043,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
     setSelectedBasemap,
     isLegendVisible,
     setIsLegendVisible,
+    resetMapState,
   };
 
   return (

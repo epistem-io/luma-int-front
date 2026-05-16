@@ -2,25 +2,29 @@
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { Download, Save, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 export const YourMapDialog = () => {
   const {
     generateMapDownloadURL,
     isYourMapDialogVisible,
     setIsYourMapDialogVisible,
+    resetMapGenerationState,
   } = useContext(MapGenerationContext);
+  const { resetMapState } = useContext(MapContext);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
 
   const t = useTranslations("InteractivePanel.yourMap");
   const commonT = useTranslations("InteractivePanel.common");
@@ -75,78 +79,109 @@ export const YourMapDialog = () => {
     }
   };
 
+  const handleCloseRequest = () => {
+    setIsCloseConfirmVisible(true);
+  };
+
+  const handleCloseAllModals = () => {
+    setIsCloseConfirmVisible(false);
+    setIsYourMapDialogVisible(false);
+  };
+
+  const handleResetAndClose = () => {
+    handleCloseAllModals();
+    resetMapState();
+    resetMapGenerationState();
+  };
+
   return (
-    <Dialog
-      open={isYourMapDialogVisible}
-      onOpenChange={(open) => {
-        setIsYourMapDialogVisible(open);
-      }}
-    >
-      <DialogContent
-        id="yourMapDialog"
-        showCloseButton={false}
-        className="w-full max-w-[950px] rounded-2xl border-none px-8 py-6 shadow-[0px_4px_5.5px_rgba(0,0,0,0.08)] gap-6"
-        onInteractOutside={(e) => {
-          e.preventDefault();
-        }}
-        onPointerDownOutside={(e) => {
-          e.preventDefault();
+    <>
+      <Dialog
+        open={isYourMapDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleCloseRequest();
+            return;
+          }
+
+          setIsYourMapDialogVisible(open);
         }}
       >
-        <DialogHeader className="items-center gap-3 text-center">
-          <DialogClose asChild>
+        <DialogContent
+          id="yourMapDialog"
+          showCloseButton={false}
+          className="w-full max-w-[950px] rounded-2xl border-none px-8 py-6 shadow-[0px_4px_5.5px_rgba(0,0,0,0.08)] gap-6"
+          onInteractOutside={(e) => {
+            e.preventDefault();
+          }}
+          onPointerDownOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
+          <DialogHeader className="items-center gap-3 text-center">
             <button
               type="button"
               aria-label="Close dialog"
+              onClick={handleCloseRequest}
               className="absolute right-8 top-8 cursor-pointer text-text-icons-base-main transition-opacity hover:opacity-75"
             >
               <X className="size-8 stroke-[2.25]" />
             </button>
-          </DialogClose>
-          <DialogTitle className="max-w-[412px] font-aptos text-[32px] font-bold leading-none tracking-[-0.32px] text-primary-pink text-center">
-            {t("followUpDialogTitle")}
-          </DialogTitle>
-          <DialogDescription className="max-w-[784px] font-aptos text-base font-normal leading-normal text-text-icons-base-main text-center">
-            {t.rich("followUpDialogDescription", {
-              br: () => <></>,
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="mx-auto mt-0 flex w-full max-w-[490px] flex-col gap-3">
-          <Button
-            onClick={handleDownload}
-            disabled={!generateMapDownloadURL?.download_url || isDownloading}
-            variant="primary"
-            className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
-          >
-            <Download className="size-4" />
-            {t("downloadMap")}
-          </Button>
-          <Button
-            type="button"
-            disabled
-            className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
-          >
-            <Share2 className="size-4" />
-            {t("shareMap")}
-          </Button>
-          <Button
-            type="button"
-            disabled
-            className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
-          >
-            <Save className="size-4" />
-            {t("saveToMyAccount")}
-          </Button>
-          <Button
-            type="button"
-            disabled
-            className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
-          >
-            {t("improveAccuracy")}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <DialogTitle className="max-w-[412px] font-aptos text-[32px] font-bold leading-none tracking-[-0.32px] text-primary-pink text-center">
+              {t("followUpDialogTitle")}
+            </DialogTitle>
+            <DialogDescription className="max-w-[784px] font-aptos text-base font-normal leading-normal text-text-icons-base-main text-center">
+              {t.rich("followUpDialogDescription", {
+                br: () => <></>,
+              })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mx-auto mt-0 flex w-full max-w-[490px] flex-col gap-3">
+            <Button
+              onClick={handleDownload}
+              disabled={!generateMapDownloadURL?.download_url || isDownloading}
+              variant="primary"
+              className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
+            >
+              <Download className="size-4" />
+              {t("downloadMap")}
+            </Button>
+            <Button
+              type="button"
+              disabled
+              className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
+            >
+              <Share2 className="size-4" />
+              {t("shareMap")}
+            </Button>
+            <Button
+              type="button"
+              disabled
+              className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
+            >
+              <Save className="size-4" />
+              {t("saveToMyAccount")}
+            </Button>
+            <Button
+              type="button"
+              disabled
+              className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
+            >
+              {t("improveAccuracy")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        isVisible={isCloseConfirmVisible}
+        onCancel={handleCloseAllModals}
+        onConfirm={handleResetAndClose}
+        title={commonT("confirm")}
+        subtitle={t("closePopup")}
+        confirmButtonCaption={commonT("confirm")}
+        cancelButtonCaption={commonT("cancel")}
+      />
+    </>
   );
 };
