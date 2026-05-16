@@ -357,6 +357,7 @@
       "shareMap": "Share map",
       "saveToMyAccount": "Save to my account",
       "improveAccuracy": "Improve accuracy",
+      "closePopup": "Are you done? Click Yes to create a new map (all your input will be deleted). Click Back to go back to Your Map.",
       "predictorImportances": "Predictor Importances",
       "predictorImportancesDescription": "Top 3 Predictor Land Cover/Use Class Ranked by Relative Importance in the Map Generated",
       "showAllPredictor": "Show All Predictor"

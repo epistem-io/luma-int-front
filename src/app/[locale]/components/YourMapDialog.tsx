@@ -86,6 +86,12 @@ export const YourMapDialog = () => {
         id="yourMapDialog"
         showCloseButton={false}
         className="w-full max-w-[950px] rounded-2xl border-none px-8 py-6 shadow-[0px_4px_5.5px_rgba(0,0,0,0.08)] gap-6"
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+        onPointerDownOutside={(e) => {
+          e.preventDefault();
+        }}
       >
         <DialogHeader className="items-center gap-3 text-center">
           <DialogClose asChild>
