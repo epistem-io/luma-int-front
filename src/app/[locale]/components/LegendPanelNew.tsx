@@ -20,6 +20,7 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import {
   ChevronDown,
+  CircleAlert,
   Eye,
   EyeOff,
   GripVertical,
@@ -297,25 +298,17 @@ export const LegendPanelNew = () => {
                               <div className="mt-4">
                                 <div className="space-y-6">
                                   <div className="flex flex-row gap-x-1.5 items-start">
-                                    {/* <GripVertical className="size-4 min-h-4 min-w-4 aspect-square text-text-icons-base-main" /> */}
                                     <Switch
                                       onCheckedChange={(checked) => {
                                         if (checked) {
                                           vectorLayer.setOpacity(1);
                                           setVectorVisible(true);
 
-                                          // const temp = [...mosaicLayerVisibilityArray];
-                                          // temp[index] = true;
-                                          // setMosaicLayerVisibilityArray(temp);
                                           return;
                                         }
 
                                         vectorLayer.setOpacity(0);
                                         setVectorVisible(false);
-
-                                        // const temp = [...mosaicLayerVisibilityArray];
-                                        // temp[index] = false;
-                                        // setMosaicLayerVisibilityArray(temp);
                                       }}
                                       checked={vectorVisible}
                                     />
@@ -334,32 +327,48 @@ export const LegendPanelNew = () => {
                             className="border-b-0"
                           >
                             <div className="relative">
-                              <AccordionTrigger className="py-0 relative">
-                                <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                  {tInteractive("layerAndComposites.composite")}
-                                </p>
-                              </AccordionTrigger>
+                              <AccordionTrigger className="py-0 flex flex-row items-center">
+                                <div className="flex flex-row items-center gap-x-1">
+                                  <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
+                                    {tInteractive(
+                                      "layerAndComposites.composite",
+                                    )}
+                                  </p>
 
-                              {/* <div className="absolute top-1/2 -translate-y-1/2 left-16.5">
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size={"icon"}
-                                      className="rounded-full cursor-pointer"
-                                    >
-                                      <HelpCircle className="size-5 min-h-5 min-w-5 aspect-square text-primary-pink" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent
-                                    side="bottom"
-                                    align="end"
-                                    className="w-120 p-0"
+                                  <div
+                                    className="shrink-0"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onPointerDown={(e) => e.stopPropagation()}
                                   >
-                                    <CloudCoverPopup />
-                                  </PopoverContent>
-                                </Popover>
-                              </div> */}
+                                    <div
+                                      // key={`mosaic-layer-${index}`}
+                                      className="flex flex-row gap-x-1.5 items-start"
+                                    >
+                                      <Popover>
+                                        <PopoverTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size={"icon"}
+                                            className="rounded-full cursor-pointer"
+                                          >
+                                            <CircleAlert className="size-5 min-h-5 min-w-5 aspect-square text-primary-pink" />
+                                          </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent
+                                          side="bottom"
+                                          align="end"
+                                          className="w-120 p-0"
+                                        >
+                                          <CloudCoverPopup />
+                                        </PopoverContent>
+                                      </Popover>
+                                      {/* <p className="font-aptos text-sm text-text-icons-base-main font-regular leading-5 text-wrap">
+                                          {mosaicDat.name}
+                                        </p> */}
+                                    </div>
+                                  </div>
+                                </div>
+                              </AccordionTrigger>
                             </div>
                             <AccordionContent>
                               <p className="text-l-regular text-neutral-700-baru mt-2">
@@ -432,46 +441,53 @@ export const LegendPanelNew = () => {
                           </AccordionItem>
                         )}
                         <AccordionItem value="lulc" className="border-b-0">
-                          <div className="relative">
+                          <div className="">
                             <AccordionTrigger className="py-0">
-                              <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                {tInteractive("dataTraining.lulcClass")}
-                              </p>
-                            </AccordionTrigger>
+                              <div className="flex flex-row items-center gap-x-2">
+                                <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
+                                  {tInteractive("dataTraining.lulcClass")}
+                                </p>
 
-                            <div className="absolute top-1/2 -translate-y-1/2 left-20.5">
-                              <div
-                                // key={`mosaic-layer-${index}`}
-                                className="flex flex-row gap-x-1.5 items-start"
-                              >
-                                {/* <GripVertical className="size-4 min-h-4 min-w-4 aspect-square text-text-icons-base-main" /> */}
-                                <Switch
-                                  disabled={!finalLayer}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      finalLayer?.setOpacity(1);
-                                      setFinalLayerVisible(true);
+                                <div
+                                  className="shrink-0"
+                                  onClick={(e) => e.stopPropagation()}
+                                  onPointerDown={(e) => e.stopPropagation()}
+                                >
+                                  <div
+                                    // key={`mosaic-layer-${index}`}
+                                    className="flex flex-row gap-x-1.5 items-start"
+                                  >
+                                    <Switch
+                                      disabled={!finalLayer}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          finalLayer?.setOpacity(1);
+                                          setFinalLayerVisible(true);
 
-                                      // const temp = [...mosaicLayerVisibilityArray];
-                                      // temp[index] = true;
-                                      // setMosaicLayerVisibilityArray(temp);
-                                      return;
-                                    }
+                                          // const temp = [...mosaicLayerVisibilityArray];
+                                          // temp[index] = true;
+                                          // setMosaicLayerVisibilityArray(temp);
+                                          return;
+                                        }
 
-                                    finalLayer?.setOpacity(0);
-                                    setFinalLayerVisible(false);
+                                        finalLayer?.setOpacity(0);
+                                        setFinalLayerVisible(false);
 
-                                    // const temp = [...mosaicLayerVisibilityArray];
-                                    // temp[index] = false;
-                                    // setMosaicLayerVisibilityArray(temp);
-                                  }}
-                                  checked={!!finalLayer && finalLayerVisible}
-                                />
-                                {/* <p className="font-aptos text-sm text-text-icons-base-main font-regular leading-5 text-wrap">
+                                        // const temp = [...mosaicLayerVisibilityArray];
+                                        // temp[index] = false;
+                                        // setMosaicLayerVisibilityArray(temp);
+                                      }}
+                                      checked={
+                                        !!finalLayer && finalLayerVisible
+                                      }
+                                    />
+                                    {/* <p className="font-aptos text-sm text-text-icons-base-main font-regular leading-5 text-wrap">
                                           {mosaicDat.name}
                                         </p> */}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            </AccordionTrigger>
                           </div>
                           <AccordionContent>
                             {generateMapLULC &&

@@ -1,4 +1,4 @@
-import { HelpCircle } from "lucide-react";
+import { CircleAlert, HelpCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
@@ -9,13 +9,15 @@ export const CloudCoverPopup = () => {
     <div className="space-y-3 p-4">
       <div className="space-y-1">
         <div className="flex flex-row items-center gap-x-2">
-          <HelpCircle className="size-6 text-primary-pink" />
+          <CircleAlert className="size-6 text-primary-pink" />
           <p className="text-m-bold text-text-icons-base-main">
-            {t("satelliteComposite.cloudCoverInComposite")}
+            {t("layerAndComposites.cloudCoverInComposite")}
           </p>
         </div>
         <p className="text-xs-regular text-text-icons-base-third">
-          {t("satelliteComposite.cloudCoverInCompositeDescription")}
+          {t.rich("layerAndComposites.cloudCoverInCompositeDescription", {
+            br: () => <br></br>,
+          })}
         </p>
       </div>
       <div className="grid grid-cols-3 gap-x-4">
@@ -30,7 +32,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("satelliteComposite.cloudCoverTrueColor")}
+            {t("layerAndComposites.cloudCoverTrueColor")}
           </p>
         </div>
         <div className="space-y-2">
@@ -44,7 +46,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("satelliteComposite.cloudCoverFalseColor")}
+            {t("layerAndComposites.cloudCoverFalseColor")}
           </p>
         </div>
         <div className="space-y-2">
@@ -58,7 +60,7 @@ export const CloudCoverPopup = () => {
             />
           </div>
           <p className="text-xs-regular text-neutral-700-baru">
-            {t("satelliteComposite.cloudCoverLandWater")}
+            {t("layerAndComposites.cloudCoverLandWater")}
           </p>
         </div>
       </div>
