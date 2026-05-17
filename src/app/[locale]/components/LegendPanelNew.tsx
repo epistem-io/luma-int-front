@@ -147,7 +147,12 @@ export const LegendPanelNew = () => {
               type="multiple"
             >
               <AccordionItem className="" value="legend-accordion">
-                <AccordionContent className="p-3 bg-white rounded-md rounded-br-none">
+                <AccordionContent
+                  className="p-3 bg-white rounded-md rounded-br-none border-[1.5px] border-[#C2C0C0]"
+                  style={{
+                    boxShadow: "0 2px 12px 0 rgba(87, 86, 86, 0.12)",
+                  }}
+                >
                   <div className="space-y-0 max-h-[360px] overflow-y-scroll">
                     <div className="">
                       <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-text-icons-base-main">
@@ -346,13 +351,13 @@ export const LegendPanelNew = () => {
                                     >
                                       <Popover>
                                         <PopoverTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size={"icon"}
-                                            className="rounded-full cursor-pointer"
+                                          <div
+                                            // variant="ghost"
+                                            // size={"icon"}
+                                            className="rounded-full cursor-pointer hover:brightness-90 transition-all duration-200"
                                           >
                                             <CircleAlert className="size-5 min-h-5 min-w-5 aspect-square text-primary-pink" />
-                                          </Button>
+                                          </div>
                                         </PopoverTrigger>
                                         <PopoverContent
                                           side="bottom"
