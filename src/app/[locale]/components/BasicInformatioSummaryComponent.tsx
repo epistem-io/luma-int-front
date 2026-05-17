@@ -26,7 +26,13 @@ import { AreaScopingSummary } from "./AreaScopingSummary";
 import { TimePeriodSummary } from "./TimePeriodSummary";
 import { SatelliteCompositeSummary } from "./SatelliteCompositeSummary";
 import { Switch } from "@/components/ui/switch";
-import { cn, getTemporalRangeText, numberThousandSeparator } from "@/lib/utils";
+import {
+  cn,
+  getTemporalRangeDateEnd,
+  getTemporalRangeDateStart,
+  getTemporalRangeText,
+  numberThousandSeparator,
+} from "@/lib/utils";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
@@ -145,9 +151,11 @@ export const BasicInformationSummaryFooter = () => {
     isBasicInformationChangeInput,
     setIsBasicInformationChangeInput,
     setProgressPanelIndex,
-    polygonData,
     temporalCoverage,
     temporalCoverageUnit,
+    spatialResolution,
+    satelliteSource,
+    maximumCloudCover,
   } = useContext(MapGenerationContext);
 
   const {
@@ -190,9 +198,17 @@ export const BasicInformationSummaryFooter = () => {
 
     getMosaicMap({
       sessionId,
-      polygonData,
-      temporalCoverage,
-      temporalCoverageUnit,
+      startDate: getTemporalRangeDateStart(
+        temporalCoverage,
+        temporalCoverageUnit,
+      ),
+      endDate: getTemporalRangeDateEnd(
+        temporalCoverage,
+        temporalCoverageUnit,
+      ),
+      landsatVersion: satelliteSource,
+      cloudCover: maximumCloudCover,
+      spatialResolution: Number(spatialResolution),
     });
   };
 

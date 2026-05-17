@@ -17,13 +17,7 @@ import TileLayer from "ol/layer/Tile";
 import { BASEMAP_TYPE, GET_MOSAIC_URL, POINTING_TYPE } from "@/constants";
 import { toast } from "sonner";
 import { XYZ } from "ol/source";
-import {
-  getTemporalRangeDateEnd,
-  getTemporalRangeDateStart,
-  styles,
-  stylesTransparentFill,
-  svgWithColor,
-} from "@/lib/utils";
+import { styles, stylesTransparentFill, svgWithColor } from "@/lib/utils";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import Style from "ol/style/Style";
@@ -126,9 +120,11 @@ export interface MapContextType {
   resetMosaicLayer: () => void;
   getMosaicMap: (params: {
     sessionId: string;
-    polygonData: PolygonData | null;
-    temporalCoverage: string;
-    temporalCoverageUnit: string;
+    startDate: string;
+    endDate: string;
+    landsatVersion: string;
+    cloudCover: number;
+    spatialResolution: string;
   }) => void;
   mosaicLayerArray: TileLayer[];
   setMosaicLayerArray: Dispatch<SetStateAction<TileLayer[]>>;
@@ -310,36 +306,40 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
   const getMosaicMap = async ({
     sessionId,
-    polygonData,
-    temporalCoverage,
-    temporalCoverageUnit,
+    startDate,
+    endDate,
+    landsatVersion,
+    cloudCover,
+    spatialResolution,
   }: {
     sessionId: string;
-    polygonData: PolygonData | null;
-    temporalCoverage: string;
-    temporalCoverageUnit: string;
+    startDate: string;
+    endDate: string;
+    landsatVersion: string;
+    cloudCover: number;
+    spatialResolution: string;
   }) => {
     setIsMosaicLoading(true);
 
     if (
       !sessionId ||
-      !polygonData ||
-      !temporalCoverage ||
-      !temporalCoverageUnit
+      !startDate ||
+      !endDate ||
+      !landsatVersion ||
+      Number.isNaN(cloudCover) ||
+      Number.isNaN(spatialResolution)
     ) {
+      setIsMosaicLoading(false);
       return;
     }
 
     const body = {
       session_id: sessionId,
-      start_date: getTemporalRangeDateStart(
-        temporalCoverage,
-        temporalCoverageUnit,
-      ),
-      end_date: getTemporalRangeDateEnd(temporalCoverage, temporalCoverageUnit),
-      landsat_version: "",
-      cloud_cover: 0,
-      spatial_resolution: Number(),
+      start_date: startDate,
+      end_date: endDate,
+      landsat_version: landsatVersion,
+      cloud_cover: String(cloudCover),
+      spatial_resolution: String(spatialResolution),
     };
 
     fetch(`${GET_MOSAIC_URL}?${new URLSearchParams(body)}`, {
