@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Slider } from "@/components/ui/slider";
-import { Switch } from "@/components/ui/switch";
+import { NonButtonSwitch, Switch } from "@/components/ui/switch";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
@@ -462,7 +462,7 @@ export const LegendPanelNew = () => {
                                     // key={`mosaic-layer-${index}`}
                                     className="flex flex-row gap-x-1.5 items-start"
                                   >
-                                    <Switch
+                                    <NonButtonSwitch
                                       disabled={!finalLayer}
                                       onCheckedChange={(checked) => {
                                         if (checked) {
