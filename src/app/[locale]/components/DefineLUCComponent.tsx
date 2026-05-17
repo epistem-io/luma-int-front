@@ -855,6 +855,16 @@ export const DefineLUCFooter = () => {
     setIsLUCLoading(true);
 
     if (selectedCustom) {
+      if (!LUCfile) {
+        toast.error("No LUC file selected.", {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+        setIsLUCLoading(false);
+        return;
+      }
+
       const body = new FormData();
 
       body.append("file", LUCfile);
