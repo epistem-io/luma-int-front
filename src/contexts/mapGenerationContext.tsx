@@ -78,6 +78,8 @@ export interface MapGenerationContextType {
   setAreaScopingPolygonArea: Dispatch<SetStateAction<number>>;
   areaScopingPolygonFileSize: number;
   setAreaScopingPolygonFileSize: Dispatch<SetStateAction<number>>;
+  spatialResolution: string;
+  setSpatialResolution: Dispatch<SetStateAction<string>>;
   isEditingTemporalCoverage: boolean;
   setisEditingTemporalCoverage: Dispatch<SetStateAction<boolean>>;
   temporalCoverage: string;
@@ -195,6 +197,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setAreaScopingPolygonArea: () => {},
   areaScopingPolygonFileSize: 0,
   setAreaScopingPolygonFileSize: () => {},
+  spatialResolution: "",
+  setSpatialResolution: () => {},
   isEditingTemporalCoverage: true,
   setisEditingTemporalCoverage: () => {},
   temporalCoverage: "",
@@ -305,6 +309,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   );
   const [areaScopingPolygonFileSize, setAreaScopingPolygonFileSize] = useState(
     DEFAULT_VALUE.areaScopingPolygonFileSize,
+  );
+  const [spatialResolution, setSpatialResolution] = useState(
+    DEFAULT_VALUE.spatialResolution,
   );
   const [isEditingTemporalCoverage, setisEditingTemporalCoverage] = useState(
     DEFAULT_VALUE.isEditingTemporalCoverage,
@@ -451,12 +458,11 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setAreaScopingPolygonFileName(DEFAULT_VALUE.areaScopingPolygonFileName);
     setAreaScopingPolygonArea(DEFAULT_VALUE.areaScopingPolygonArea);
     setAreaScopingPolygonFileSize(DEFAULT_VALUE.areaScopingPolygonFileSize);
+    setSpatialResolution(DEFAULT_VALUE.spatialResolution);
     setisEditingTemporalCoverage(DEFAULT_VALUE.isEditingTemporalCoverage);
     setTemporalCoverage(DEFAULT_VALUE.temporalCoverage);
     setTemporalCoverageUnit(DEFAULT_VALUE.temporalCoverageUnit);
-    setIsEditingSatelliteComposite(
-      DEFAULT_VALUE.isEditingSatelliteComposite,
-    );
+    setIsEditingSatelliteComposite(DEFAULT_VALUE.isEditingSatelliteComposite);
     setSatelliteSource(DEFAULT_VALUE.satelliteSource);
     setMaximumCloudCover(DEFAULT_VALUE.maximumCloudCover);
     setIsAreaScopingLoading(DEFAULT_VALUE.isAreaScopingLoading);
@@ -526,6 +532,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setAreaScopingPolygonArea,
     areaScopingPolygonFileSize,
     setAreaScopingPolygonFileSize,
+    spatialResolution,
+    setSpatialResolution,
     isEditingTemporalCoverage,
     setisEditingTemporalCoverage,
     temporalCoverage,

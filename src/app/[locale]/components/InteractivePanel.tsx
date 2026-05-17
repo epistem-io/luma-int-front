@@ -139,6 +139,7 @@ export const InteractivePanel = () => {
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
     setPolygonData,
+    setSpatialResolution,
     selectedDefault,
     selectedCustom,
   } = useContext(MapGenerationContext);
@@ -171,6 +172,7 @@ export const InteractivePanel = () => {
             setAreaScopingPolygonUrl(null);
             vectorSource?.clear();
             setPolygonData(null);
+            setSpatialResolution("");
 
             setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
           },

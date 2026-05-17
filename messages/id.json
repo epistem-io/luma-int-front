@@ -184,6 +184,7 @@
     },
     "satelliteComposite": {
       "satelliteComposite": "Citra Satelit",
+      "satelliteCompositeDescription": "Sistem akan memilih sumber citra satelit yang paling mutakhir untuk tahun pemetaan Anda sedangkan batas maksimum area berawan ditetapkan pada nilai 30%. Sesuaikan pengaturan ini hanya jika Anda memerlukan proses pemetaan yang lebih spesifik dengan skema klasifikasi sendiri.",
       "satellite": "Sumber citra satelit",
       "satelliteSubtitle": "Pilih sumber citra yang ingin Anda gunakan. Sumber data yang tersedia bergantung pada jangka waktu yang Anda pilih. Satelit yang lebih baru, seperti Landsat 9, biasanya menghasilkan citra yang lebih rinci.",
       "selectSatellitePlaceholder": "Pilih sumber citra",

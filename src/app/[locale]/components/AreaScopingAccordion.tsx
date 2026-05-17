@@ -46,9 +46,18 @@ export const AreaScopingAccordion = () => {
     setAreaScopingType,
     polygonData,
     areaScopingPolygonArea,
+    spatialResolution,
   } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
+  const spatialResolutionLabelMap: Record<string, string> = {
+    "30": t("areaScoping.30x30m2"),
+    "100": t("areaScoping.100x100m2"),
+    "500": t("areaScoping.500x500m2"),
+    "1000": t("areaScoping.1x1km2"),
+  };
+  const spatialResolutionLabel =
+    spatialResolutionLabelMap[spatialResolution] ?? t("areaScoping.30x30m2");
 
   return (
     <AccordionItem
@@ -118,54 +127,6 @@ export const AreaScopingAccordion = () => {
                 </p>
               </div>
             </div>
-            <SpatialResolutionSelect />
-            {/* <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
-              <ComingSoon />
-              <div className="">
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
-                  {t("areaScoping.spatialResolution")}
-                </p>
-                <p className="text-l-regular text-text-icons-base-third">
-                  {t("areaScoping.spatialResolutionSubtitle")}
-                </p>
-              </div>
-              <div className="">
-                <RadioGroup
-                  disabled
-                  className="flex flex-row gap-x-12"
-                  // className="grid grid-cols-2 gap-x-12 gap-y-2"
-                >
-                  <div className="flex flex-col gap-y-2">
-                    <div className="flex flex-row items-center gap-x-2">
-                      <RadioGroupItem value="1" />
-                      <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                        {t("areaScoping.30x30m2")}
-                      </Label>
-                    </div>
-                    <div className="flex flex-row items-center gap-x-2">
-                      <RadioGroupItem value="3" />
-                      <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                        {t("areaScoping.100x100m2")}
-                      </Label>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-y-2">
-                    <div className="flex flex-row items-center gap-x-2">
-                      <RadioGroupItem value="2" />
-                      <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                        {t("areaScoping.500x500m2")}
-                      </Label>
-                    </div>
-                    <div className="flex flex-row items-center gap-x-2">
-                      <RadioGroupItem value="4" />
-                      <Label className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third">
-                        {t("areaScoping.1x1km2")}
-                      </Label>
-                    </div>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div> */}
           </>
         )}
         {polygonData &&
@@ -184,7 +145,7 @@ export const AreaScopingAccordion = () => {
                     {/* WIP DICT */}
                     with spatial resolution :{" "}
                     <span className="font-noto-sans font-bold text-lg leading-6 text-secondary-purple-dark">
-                      30 x 30 m2
+                      {spatialResolutionLabel}
                     </span>
                   </p>
                 </div>

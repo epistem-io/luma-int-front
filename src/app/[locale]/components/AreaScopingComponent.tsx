@@ -46,6 +46,7 @@ import Stroke from "ol/style/Stroke";
 import Style, { GeometryFunction } from "ol/style/Style";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { SpatialResolutionSelect } from "./SpatialResolutionSelect";
 
 // const styles = (strokeWidth: number) => [
 //   new Style({
@@ -626,7 +627,9 @@ export const AreaScopingComponent = () => {
             </>
           )}
 
-          <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
+          <SpatialResolutionSelect />
+          {/* WIP To be deleted */}
+          {/* <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
             <ComingSoon />
 
             <div className="">
@@ -673,7 +676,7 @@ export const AreaScopingComponent = () => {
                 </div>
               </RadioGroup>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
       {areaScopingType === AREA_SCOPING_TYPE.DRAW && (
@@ -769,7 +772,8 @@ export const AreaScopingComponent = () => {
                   </>
                 )}
 
-              <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
+              {/* wip to be deleted */}
+              {/* <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
                 <ComingSoon />
 
                 <div className="">
@@ -816,9 +820,10 @@ export const AreaScopingComponent = () => {
                     </div>
                   </RadioGroup>
                 </div>
-              </div>
+              </div> */}
             </>
           )}
+          <SpatialResolutionSelect />
         </div>
       )}
     </>
@@ -845,6 +850,7 @@ export const AreaScopingFooter = () => {
     setIsAreaScopingLoading,
     setAreaScopingPolygonError,
     setStepKey,
+    spatialResolution,
   } = useContext(MapGenerationContext);
 
   const { sessionId, setSessionId } = useContext(GlobalContext);
@@ -884,6 +890,7 @@ export const AreaScopingFooter = () => {
   const isConfirmDisabled =
     isAreaScopingLoading ||
     !!areaScopingPolygonError ||
+    spatialResolution === "" ||
     (polygonData && areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT) ||
     (areaScopingType === AREA_SCOPING_TYPE.DRAW && !polygonData) ||
     (areaScopingType === AREA_SCOPING_TYPE.UPLOAD &&

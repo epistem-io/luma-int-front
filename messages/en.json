@@ -188,6 +188,7 @@
     },
     "satelliteComposite": {
       "satelliteComposite": "Satellite Imagery",
+      "satelliteCompositeDescription": "Sistem akan memilih sumber citra satelit yang paling mutakhir untuk tahun pemetaan Anda sedangkan batas maksimum area berawan ditetapkan pada nilai 30%. Sesuaikan pengaturan ini hanya jika Anda memerlukan proses pemetaan yang lebih spesifik dengan skema klasifikasi sendiri.",
       "satellite": "Satellite imagery source",
       "satelliteSubtitle": "Choose the satellite imagery source you want to use. Available data sources depend on the time period you select. Newer satellites, such as Landsat 9, usually give more detailed images.",
       "selectSatellitePlaceholder": "Select imagery source",

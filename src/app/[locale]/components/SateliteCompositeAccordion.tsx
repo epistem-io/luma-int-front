@@ -77,7 +77,10 @@ export const SateliteCompositeAccordion = () => {
           {t("satelliteComposite.satelliteComposite")}
         </p>
       </AccordionFullTrigger>
-      <AccordionContent className="mt-5 space-y-6 px-3 pb-0">
+      <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+        <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+          {t("satelliteComposite.satelliteCompositeDescription")}
+        </p>
         <div className="p-0 rounded-sm bg-white mt-3 space-y-6">
           <Field className="space-y-2">
             <Label className="m-0">

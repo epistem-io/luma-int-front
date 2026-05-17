@@ -337,6 +337,9 @@ const MapContextContainer = (props: PropsWithChildren) => {
         temporalCoverageUnit,
       ),
       end_date: getTemporalRangeDateEnd(temporalCoverage, temporalCoverageUnit),
+      landsat_version: "",
+      cloud_cover: 0,
+      spatial_resolution: Number(),
     };
 
     fetch(`${GET_MOSAIC_URL}?${new URLSearchParams(body)}`, {

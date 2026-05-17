@@ -1,10 +1,36 @@
-import { ComingSoon } from "@/components/ComingSoon";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useTranslations } from "next-intl";
+import { useContext } from "react";
+
+const SPATIAL_RESOLUTION_OPTIONS = [
+  {
+    id: "spatial-resolution-item-1",
+    value: "30",
+    labelKey: "areaScoping.30x30m2",
+  },
+  {
+    id: "spatial-resolution-item-3",
+    value: "100",
+    labelKey: "areaScoping.100x100m2",
+  },
+  {
+    id: "spatial-resolution-item-2",
+    value: "500",
+    labelKey: "areaScoping.500x500m2",
+  },
+  {
+    id: "spatial-resolution-item-4",
+    value: "1000",
+    labelKey: "areaScoping.1x1km2",
+  },
+] as const;
 
 export const SpatialResolutionSelect = () => {
   const t = useTranslations("InteractivePanel");
+  const { spatialResolution, setSpatialResolution } =
+    useContext(MapGenerationContext);
   const isDisabled = false;
   return (
     <div className="p-0 rounded-xl space-y-2 bg-white">
@@ -17,67 +43,28 @@ export const SpatialResolutionSelect = () => {
         </p>
       </div>
       <div className="">
-        <RadioGroup disabled={isDisabled} className="flex flex-row gap-x-12">
-          <div className="flex flex-col gap-y-2">
-            <div className="flex flex-row items-center gap-x-2">
+        <RadioGroup
+          disabled={isDisabled}
+          className="grid grid-cols-2 gap-x-12 gap-y-2"
+          value={spatialResolution}
+          onValueChange={setSpatialResolution}
+        >
+          {SPATIAL_RESOLUTION_OPTIONS.flat().map((option) => (
+            <div key={option.id} className="flex flex-row items-center gap-x-2">
               <RadioGroupItem
-                id="spatial-resolution-item-1"
-                value="1"
-                className="data-[state=checked]:border-primary-pink data-[state=checked]:text-primary-pink"
+                id={option.id}
+                value={option.value}
+                className="border-text-icons-base-second data-[state=checked]:border-primary-pink data-[state=checked]:text-primary-pink"
                 indicatorClassName="fill-primary-pink"
               />
               <Label
-                htmlFor="spatial-resolution-item-1"
+                htmlFor={option.id}
                 className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third"
               >
-                {t("areaScoping.30x30m2")}
+                {t(option.labelKey)}
               </Label>
             </div>
-            <div className="flex flex-row items-center gap-x-2">
-              <RadioGroupItem
-                id="spatial-resolution-item-3"
-                value="3"
-                className="data-[state=checked]:border-primary-pink data-[state=checked]:text-primary-pink"
-                indicatorClassName="fill-primary-pink"
-              />
-              <Label
-                htmlFor="spatial-resolution-item-3"
-                className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third"
-              >
-                {t("areaScoping.100x100m2")}
-              </Label>
-            </div>
-          </div>
-          <div className="flex flex-col gap-y-2">
-            <div className="flex flex-row items-center gap-x-2">
-              <RadioGroupItem
-                id="spatial-resolution-item-2"
-                value="2"
-                className="data-[state=checked]:border-primary-pink data-[state=checked]:text-primary-pink"
-                indicatorClassName="fill-primary-pink"
-              />
-              <Label
-                htmlFor="spatial-resolution-item-2"
-                className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third"
-              >
-                {t("areaScoping.500x500m2")}
-              </Label>
-            </div>
-            <div className="flex flex-row items-center gap-x-2">
-              <RadioGroupItem
-                id="spatial-resolution-item-4"
-                value="4"
-                className="data-[state=checked]:border-primary-pink data-[state=checked]:text-primary-pink"
-                indicatorClassName="fill-primary-pink"
-              />
-              <Label
-                htmlFor="spatial-resolution-item-4"
-                className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third"
-              >
-                {t("areaScoping.1x1km2")}
-              </Label>
-            </div>
-          </div>
+          ))}
         </RadioGroup>
       </div>
     </div>
