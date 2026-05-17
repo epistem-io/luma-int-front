@@ -236,7 +236,7 @@ export const BasicInformationSummaryFooter = () => {
         }}
         // disabled={isNextDisabled}
         disabled={isCancelDisabled}
-        variant="primary"
+        variant="secondary"
         className={cn()}
       >
         {/* {isPreviewingMosaic || isBasicInformationChangeInput */}

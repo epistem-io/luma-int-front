@@ -356,7 +356,7 @@ input[type="date"].datepicker::-webkit-calendar-picker-indicator {
   width: 48px;
   height: 48px;
   border: 5px solid #eee;
-  border-bottom-color: #ff3d00;
+  border-bottom-color: #cc4778;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -367,14 +367,14 @@ input[type="date"].datepicker::-webkit-calendar-picker-indicator {
   width: 32px;
   height: 32px;
   border: 4px solid #eee;
-  border-bottom-color: #ff3d00;
+  border-bottom-color: #cc4778;
 }
 
 .loader.sm {
   width: 16px;
   height: 16px;
   border: 3px solid #eee;
-  border-bottom-color: #ff3d00;
+  border-bottom-color: #cc4778;
 }
 
 .progress-border {

@@ -1057,7 +1057,7 @@ export const AreaScopingFooter = () => {
     <div className="grid grid-cols-2 gap-x-4 p-3 pt-2">
       <Button
         disabled={isReselectDisabled}
-        variant="primary"
+        variant="secondary"
         className=""
         onClick={() => {
           onReselect();
