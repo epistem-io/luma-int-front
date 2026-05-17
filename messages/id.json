@@ -331,7 +331,7 @@
       "lowSeparabilityCaption1": "Beberapa pasangan kelas memiliki kemiripan spektral di bawah ambang batas:",
       "lowSeparabilityCaption2": "Kelas {X} dan Kelas {Y}",
       "lowSeparabilityCaption3": "Kemiripan ini berpotensi menurunkan akurasi klasifikasi.",
-      "modelAccuracyAssessment": "Pengujian Akurasi Model",
+      "modelAccuracyAssessment": "Pengujian Akurasi Pemetaan",
       "modelAccuracyAssessmentDescriptionDEFAULTCLASS": "Nilai-nilai di bawah ini menunjukkan seberapa akurat pemetaan membedakan kelas penggunaan dan tutupan lahan Anda. Nilai-nilai tersebut didapatkan dari peta penggunaan dan tutupan lahan nasional yang sudah dihasilkan sebelumnya. Peta Anda dibuat dengan memotong dan melakukan klasifikasi ulang peta penggunaan dan tutupan lahan nasional tersebut sesuai wilayah pemetaan dan skema klasifikasi yang telah Anda pilih.",
       "modelAccuracyAssessmentDescriptionOWNCLASS": "Nilai-nilai di bawah ini menunjukkan seberapa akurat pemetaan membedakan kelas penggunaan dan tutupan lahan Anda.",
       "modelAccuracyAssessmentPercentage": "Rata-rata, pemetaan dapat memberikan hasil yang sesuai data sampel pada {X}% percobaan.",

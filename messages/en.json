@@ -335,7 +335,7 @@
       "lowSeparabilityCaption1": "Some class pairs have similar spectral signatures below the threshold:",
       "lowSeparabilityCaption2": "Class {X} and Class {Y}",
       "lowSeparabilityCaption3": "This similarity may reduce classification accuracy.",
-      "modelAccuracyAssessment": "Model Accuracy Assesment",
+      "modelAccuracyAssessment": "Mapping Accuracy Assesment",
       "modelAccuracyAssessmentDescriptionDEFAULTCLASS": "The scores below show how accurately the mapping process distinguished your LULC classes. The scores are obtained from a pre-generated national LULC map of Indonesia. Your map is produced by clipping the national LULC map into your area of interest and reclassifying the default LULC classes to fit your selection of LULC classes.",
       "modelAccuracyAssessmentDescriptionOWNCLASS": "The scores below show how accurately the mapping process distinguished your LULC classes.",
       "modelAccuracyAssessmentPercentage": "On average, the mapping replicates sample data results {X}% of the time.",
