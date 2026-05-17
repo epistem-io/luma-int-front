@@ -19,14 +19,48 @@ import {
   BASIC_INFORMATION_ACCORDION_TYPE,
   SATELLITE_OPTIONS_ARRAY,
 } from "@/constants";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useContext, useEffect, useState } from "react";
 
 export const SateliteCompositeAccordion = () => {
+  const {
+    isEditingSatelliteComposite,
+    setIsEditingSatelliteComposite,
+    satelliteSource,
+    setSatelliteSource,
+    maximumCloudCover,
+    setMaximumCloudCover,
+  } = useContext(MapGenerationContext);
+
   const t = useTranslations("InteractivePanel");
 
-  const isFormDisabled = false;
-  const isSubmitDisabled = true;
+  const isFormDisabled = !isEditingSatelliteComposite;
+  const [selectedSatellite, setSelectedSatellite] = useState(satelliteSource);
+  const [cloudCoverage, setCloudCoverage] = useState(maximumCloudCover);
+  const [isSliding, setIsSliding] = useState(false);
+  const isSubmitDisabled = !selectedSatellite || isFormDisabled;
+
+  const sliderPosition = `${cloudCoverage}%`;
+  const isAtMin = cloudCoverage <= 0;
+  const isAtMax = cloudCoverage >= 100;
+  const tooltipPositionClassName = isAtMin
+    ? "translate-x-0"
+    : isAtMax
+      ? "-translate-x-full"
+      : "-translate-x-1/2";
+
+  const onSaveSatelliteComposite = () => {
+    setSatelliteSource(selectedSatellite);
+    setMaximumCloudCover(cloudCoverage);
+    setIsEditingSatelliteComposite(false);
+  };
+
+  useEffect(() => {
+    setSelectedSatellite(satelliteSource);
+    setCloudCoverage(maximumCloudCover);
+  }, [satelliteSource, maximumCloudCover, isEditingSatelliteComposite]);
 
   return (
     <AccordionItem
@@ -51,7 +85,11 @@ export const SateliteCompositeAccordion = () => {
                 {t("satelliteComposite.satellite")}
               </p>
             </Label>
-            <Select disabled={isFormDisabled}>
+            <Select
+              disabled={isFormDisabled}
+              value={selectedSatellite}
+              onValueChange={setSelectedSatellite}
+            >
               <SelectTrigger className="w-full bg-white">
                 <SelectValue
                   placeholder={t(
@@ -78,57 +116,97 @@ export const SateliteCompositeAccordion = () => {
                 {t("satelliteComposite.cloudCoverage")}
               </p>
             </Label>
-            <Slider
-              step={10}
-              defaultValue={[30]}
-              min={0}
-              max={100}
-              className="mt-1"
-              trackBgColor="bg-neutral-300"
-              disabled={isFormDisabled}
-            />
+            <div className="relative mt-1 px-0">
+              {isSliding && (
+                <div
+                  className={`pointer-events-none absolute -top-9 z-10 rounded-md bg-primary px-2 py-1 font-aptos text-xs font-bold leading-4 text-white shadow-sm ${tooltipPositionClassName}`}
+                  style={{ left: sliderPosition }}
+                >
+                  {cloudCoverage}%
+                </div>
+              )}
+              <Slider
+                step={10}
+                value={[cloudCoverage]}
+                min={0}
+                max={100}
+                trackBgColor="bg-neutral-300"
+                disabled={isFormDisabled}
+                onValueChange={(value) => {
+                  setCloudCoverage(value[0] ?? 0);
+                  setIsSliding(true);
+                }}
+                onValueCommit={() => setIsSliding(false)}
+                onPointerDown={() => setIsSliding(true)}
+                onPointerUp={() => setIsSliding(false)}
+                onPointerLeave={() => setIsSliding(false)}
+              />
+            </div>
+            {/* <div className="grid grid-cols-10"></div> */}
             <div className="flex flex-row justify-between">
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  0%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  0
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  5%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  10
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  10%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  20
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  15%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  30
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  20%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  40
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  25%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  50
                 </p>
               </div>
               <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-text-icons-base-main text-center">
-                  30%
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  60
+                </p>
+              </div>
+              <div className="">
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  70
+                </p>
+              </div>
+              <div className="">
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  80
+                </p>
+              </div>
+              <div className="">
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  90
+                </p>
+              </div>
+              <div className="">
+                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
+                  100
                 </p>
               </div>
             </div>
           </Field>
           <Button
+            type="button"
             disabled={isSubmitDisabled}
             variant={"primary"}
-            className="mt-2 bg-neutral-300 text-neutral-500"
+            className="mt-2"
+            onClick={onSaveSatelliteComposite}
           >
             {t("satelliteComposite.setSatelliteComposite")}
           </Button>

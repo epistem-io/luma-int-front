@@ -175,10 +175,19 @@ export const AreaScopingAccordion = () => {
                 <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                   {t("areaScoping.selectedAreaHasTotalArea")}
                 </p>
-                <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
-                  {numberThousandSeparator(areaScopingPolygonArea.toFixed(0))}{" "}
-                  Ha
-                </p>
+                <div className="">
+                  <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
+                    {numberThousandSeparator(areaScopingPolygonArea.toFixed(0))}{" "}
+                    Ha
+                  </p>
+                  <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main mt-1">
+                    {/* WIP DICT */}
+                    with spatial resolution :{" "}
+                    <span className="font-noto-sans font-bold text-lg leading-6 text-secondary-purple-dark">
+                      30 x 30 m2
+                    </span>
+                  </p>
+                </div>
               </div>
 
               <div className="flex flex-row justify-end">
@@ -197,7 +206,7 @@ export const AreaScopingAccordion = () => {
                   <div className="">
                     <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
                       {/* WIP dict */}
-                      Reselect Time Period
+                      Reselect Area
                     </p>
                   </div>
                 </Button>

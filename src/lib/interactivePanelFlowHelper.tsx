@@ -53,6 +53,9 @@ export const goToCompositeEditFlow = ({
   mapContext,
   mapGenerationContext,
 }: InteractivePanelFlowHelperParams) => {
+  mapGenerationContext.setSatelliteSource("");
+  mapGenerationContext.setMaximumCloudCover(30);
+  mapGenerationContext.setIsEditingSatelliteComposite(true);
   mapGenerationContext.setBasicInformationOpenAccordion(
     BASIC_INFORMATION_ACCORDION_TYPE.COMPOSITE,
   );

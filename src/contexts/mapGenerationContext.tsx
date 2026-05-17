@@ -84,6 +84,12 @@ export interface MapGenerationContextType {
   setTemporalCoverage: Dispatch<SetStateAction<string>>;
   temporalCoverageUnit: string;
   setTemporalCoverageUnit: Dispatch<SetStateAction<string>>;
+  isEditingSatelliteComposite: boolean;
+  setIsEditingSatelliteComposite: Dispatch<SetStateAction<boolean>>;
+  satelliteSource: string;
+  setSatelliteSource: Dispatch<SetStateAction<string>>;
+  maximumCloudCover: number;
+  setMaximumCloudCover: Dispatch<SetStateAction<number>>;
   isAreaScopingLoading: boolean;
   setIsAreaScopingLoading: Dispatch<SetStateAction<boolean>>;
   isBasicInformationChangeInput: boolean;
@@ -195,6 +201,12 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setTemporalCoverage: () => {},
   temporalCoverageUnit: "",
   setTemporalCoverageUnit: () => {},
+  isEditingSatelliteComposite: true,
+  setIsEditingSatelliteComposite: () => {},
+  satelliteSource: "",
+  setSatelliteSource: () => {},
+  maximumCloudCover: 30,
+  setMaximumCloudCover: () => {},
   isBasicInformationChangeInput: false,
   setIsBasicInformationChangeInput: () => {},
   isAreaScopingLoading: false,
@@ -302,6 +314,14 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   );
   const [temporalCoverageUnit, setTemporalCoverageUnit] = useState(
     DEFAULT_VALUE.temporalCoverageUnit,
+  );
+  const [isEditingSatelliteComposite, setIsEditingSatelliteComposite] =
+    useState(DEFAULT_VALUE.isEditingSatelliteComposite);
+  const [satelliteSource, setSatelliteSource] = useState(
+    DEFAULT_VALUE.satelliteSource,
+  );
+  const [maximumCloudCover, setMaximumCloudCover] = useState(
+    DEFAULT_VALUE.maximumCloudCover,
   );
   const [isBasicInformationChangeInput, setIsBasicInformationChangeInput] =
     useState(DEFAULT_VALUE.isBasicInformationChangeInput);
@@ -434,6 +454,11 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setisEditingTemporalCoverage(DEFAULT_VALUE.isEditingTemporalCoverage);
     setTemporalCoverage(DEFAULT_VALUE.temporalCoverage);
     setTemporalCoverageUnit(DEFAULT_VALUE.temporalCoverageUnit);
+    setIsEditingSatelliteComposite(
+      DEFAULT_VALUE.isEditingSatelliteComposite,
+    );
+    setSatelliteSource(DEFAULT_VALUE.satelliteSource);
+    setMaximumCloudCover(DEFAULT_VALUE.maximumCloudCover);
     setIsAreaScopingLoading(DEFAULT_VALUE.isAreaScopingLoading);
     setIsBasicInformationChangeInput(
       DEFAULT_VALUE.isBasicInformationChangeInput,
@@ -507,6 +532,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setTemporalCoverage,
     temporalCoverageUnit,
     setTemporalCoverageUnit,
+    isEditingSatelliteComposite,
+    setIsEditingSatelliteComposite,
+    satelliteSource,
+    setSatelliteSource,
+    maximumCloudCover,
+    setMaximumCloudCover,
     isBasicInformationChangeInput,
     setIsBasicInformationChangeInput,
     polygonData,

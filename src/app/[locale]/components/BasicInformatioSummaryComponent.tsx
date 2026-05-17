@@ -15,9 +15,13 @@ import { TimePeriodAccordion } from "./TimePeriodAccordion";
 import { AreaScopingAccordion } from "./AreaScopingAccordion";
 import { SateliteCompositeAccordion } from "./SateliteCompositeAccordion";
 import { Button } from "@/components/ui/button";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import { PANEL_COMPONENT_KEY, TEMPORAL_COVERAGE_ARRAY } from "@/constants";
+import {
+  PANEL_COMPONENT_KEY,
+  SATELLITE_OPTIONS_ARRAY,
+  TEMPORAL_COVERAGE_ARRAY,
+} from "@/constants";
 import { AreaScopingSummary } from "./AreaScopingSummary";
 import { TimePeriodSummary } from "./TimePeriodSummary";
 import { SatelliteCompositeSummary } from "./SatelliteCompositeSummary";
@@ -25,7 +29,6 @@ import { Switch } from "@/components/ui/switch";
 import { cn, getTemporalRangeText, numberThousandSeparator } from "@/lib/utils";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
-import { ConfirmDialog } from "./ConfirmDialog";
 import { useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
 import { GlobalContext } from "@/contexts/globalContext";
@@ -45,6 +48,8 @@ export const BasicInformationSummaryComponent = () => {
     temporalCoverage,
     temporalCoverageUnit,
     isBasicInformationChangeInput,
+    satelliteSource,
+    maximumCloudCover,
   } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
@@ -90,8 +95,14 @@ export const BasicInformationSummaryComponent = () => {
             <div className="h-0.5 w-full bg-secondary-purple-light-active" />
             <SatelliteCompositeSummary
               accordion={false}
-              cloudCoverageString="-"
-              sateliteString="-"
+              cloudCoverageString={`${maximumCloudCover}%`}
+              sateliteString={
+                satelliteSource
+                  ? (SATELLITE_OPTIONS_ARRAY.find(
+                      (item) => item.value === satelliteSource,
+                    )?.label ?? satelliteSource)
+                  : "-"
+              }
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
                 goToCompositeEditFlow({ mapContext, mapGenerationContext });

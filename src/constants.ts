@@ -116,39 +116,35 @@ export const DEFAULT_LUC = [
 
 export const SATELLITE_OPTIONS_ARRAY = [
   {
-    value: "Landsat 1",
+    value: "L1_RAW",
     label: "Landsat 1",
   },
   {
-    value: "Landsat 2",
+    value: "L2_RAW",
     label: "Landsat 2",
   },
   {
-    value: "Landsat 3",
+    value: "L3_RAW",
     label: "Landsat 3",
   },
   {
-    value: "Landsat 4",
+    value: "L4_SR",
     label: "Landsat 4",
   },
   {
-    value: "Landsat 5",
+    value: "L5_SR",
     label: "Landsat 5",
   },
   {
-    value: "Landsat 6",
-    label: "Landsat 6",
-  },
-  {
-    value: "Landsat 7",
+    value: "L7_SR",
     label: "Landsat 7",
   },
   {
-    value: "Landsat 8",
+    value: "L8_SR",
     label: "Landsat 8",
   },
   {
-    value: "Landsat 9",
+    value: "L9_SR",
     label: "Landsat 9",
   },
 ];

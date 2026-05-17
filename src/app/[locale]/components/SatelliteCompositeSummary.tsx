@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 interface Props {
   sateliteString: string;
@@ -26,6 +28,7 @@ export const SatelliteCompositeSummary = ({
   }
 
   const t = useTranslations("InteractivePanel");
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   return (
     <>
@@ -55,7 +58,9 @@ export const SatelliteCompositeSummary = ({
               variant={"ghost"}
               className="absolute top-0 right-0 p-1 rounded-full cursor-pointer"
               size={"icon"}
-              onClick={onClickEdit}
+              onClick={() => {
+                setIsConfirmModalVisible(true);
+              }}
             >
               <Image
                 src="/svgs/fa-edit.svg"
@@ -68,6 +73,22 @@ export const SatelliteCompositeSummary = ({
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        isVisible={isConfirmModalVisible}
+        onCancel={() => {
+          setIsConfirmModalVisible(false);
+        }}
+        onConfirm={() => {
+          if (!onClickEdit) return;
+          setIsConfirmModalVisible(false);
+          onClickEdit();
+        }}
+        title={t("common.changeInput")}
+        subtitle={t("common.confirmSubtitle")}
+        confirmButtonCaption={t("common.changeInput")}
+        cancelButtonCaption={t("common.cancelChangeInput")}
+      />
     </>
   );
 };
