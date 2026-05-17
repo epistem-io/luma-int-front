@@ -31,6 +31,7 @@ import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import * as z from "zod";
+import { SpatialResolutionSelect } from "./SpatialResolutionSelect";
 
 export const AreaScopingAccordion = () => {
   const {
@@ -110,7 +111,8 @@ export const AreaScopingAccordion = () => {
                 </p>
               </div>
             </div>
-            <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
+            <SpatialResolutionSelect />
+            {/* <div className="p-3 rounded-xl space-y-2 bg-text-icons-base-fourth">
               <ComingSoon />
               <div className="">
                 <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-third">
@@ -156,7 +158,7 @@ export const AreaScopingAccordion = () => {
                   </div>
                 </RadioGroup>
               </div>
-            </div>
+            </div> */}
           </>
         )}
         {polygonData &&

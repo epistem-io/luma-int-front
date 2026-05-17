@@ -35,7 +35,8 @@ import { TFunction } from "@/i18n/types";
 import { GlobalContext } from "@/contexts/globalContext";
 
 export const BasicInformationSummaryComponent = () => {
-  const { resetMosaicLayer } = useContext(MapContext);
+  const { resetMosaicLayer, vectorSource, isPreviewingMosaic } =
+    useContext(MapContext);
 
   const {
     basicInformationOpenAccordion,
@@ -58,8 +59,6 @@ export const BasicInformationSummaryComponent = () => {
     setAreaScopingPolygonError,
     setPolygonData,
   } = useContext(MapGenerationContext);
-
-  const { vectorSource, isPreviewingMosaic } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
 

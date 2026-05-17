@@ -36,7 +36,8 @@ export const TimePeriodSummary = ({
         <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second">
           <div className="space-y-3">
             <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-              {t("timePeriod.yourSelectedTimePeriod")}
+              {/* WIP */}
+              {t("timePeriod.yourSelectedTimePeriod")} huhi
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">
@@ -64,6 +65,23 @@ export const TimePeriodSummary = ({
                 </p>
               </div>
             </div>
+            <div className="flex flex-row justify-end">
+              <Button
+                variant={"ghost"}
+                className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
+                // disabled={isMosaicLoading}
+                onClick={async () => {
+                  // onResetInput();
+                }}
+              >
+                <div className="">
+                  <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
+                    {/* WIP dict */}
+                    Reselect Time Period
+                  </p>
+                </div>
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -71,7 +89,8 @@ export const TimePeriodSummary = ({
         <>
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("basicInformation.yourSelectedTimePeriod")}
+              {/* WIP */}
+              {t("basicInformation.yourSelectedTimePeriod")} hihu
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">

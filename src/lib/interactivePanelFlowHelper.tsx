@@ -1,0 +1,3 @@
+const resetAreaScopingData = () => {};
+
+const resetTimePeriodData = () => {};
