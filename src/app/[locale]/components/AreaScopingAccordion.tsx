@@ -1,3 +1,5 @@
+"use client";
+
 import { ComingSoon } from "@/components/ComingSoon";
 import {
   AccordionContent,
@@ -32,14 +34,19 @@ import { Controller, useForm } from "react-hook-form";
 
 import * as z from "zod";
 import { SpatialResolutionSelect } from "./SpatialResolutionSelect";
+import { resetAreaScopingData } from "@/lib/interactivePanelFlowHelper";
+import { MapContext } from "@/contexts/mapContext";
 
 export const AreaScopingAccordion = () => {
+  const mapContext = useContext(MapContext);
+  const mapGenerationContext = useContext(MapGenerationContext);
+
   const {
     setStepKey,
     setAreaScopingType,
     polygonData,
     areaScopingPolygonArea,
-  } = useContext(MapGenerationContext);
+  } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
 
@@ -163,7 +170,7 @@ export const AreaScopingAccordion = () => {
         )}
         {polygonData &&
           areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
-            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active flex flex-row justify-between gap-x-4 items-center bg-purple-second">
+            <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second">
               <div className="space-y-3 col-span-2 text-center w-full">
                 <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                   {t("areaScoping.selectedAreaHasTotalArea")}
@@ -172,6 +179,28 @@ export const AreaScopingAccordion = () => {
                   {numberThousandSeparator(areaScopingPolygonArea.toFixed(0))}{" "}
                   Ha
                 </p>
+              </div>
+
+              <div className="flex flex-row justify-end">
+                <Button
+                  variant={"ghost"}
+                  className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
+                  // disabled={isMosaicLoading}
+                  onClick={async () => {
+                    // onResetInput();
+                    resetAreaScopingData({
+                      mapContext,
+                      mapGenerationContext,
+                    });
+                  }}
+                >
+                  <div className="">
+                    <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
+                      {/* WIP dict */}
+                      Reselect Time Period
+                    </p>
+                  </div>
+                </Button>
               </div>
             </div>
           )}

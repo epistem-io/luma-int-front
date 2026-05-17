@@ -3,8 +3,11 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { ConfirmDialog } from "./ConfirmDialog";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useTranslations } from "next-intl";
+import { resetTimePeriodData } from "@/lib/interactivePanelFlowHelper";
+import { MapContext } from "@/contexts/mapContext";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 
 interface Props {
   temporalResolutionLabel: string;
@@ -23,6 +26,8 @@ export const TimePeriodSummary = ({
   isEditing = false,
   onClickEdit,
 }: Props) => {
+  const mapContext = useContext(MapContext);
+  const mapGenerationContext = useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
 
   const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
@@ -72,6 +77,10 @@ export const TimePeriodSummary = ({
                 // disabled={isMosaicLoading}
                 onClick={async () => {
                   // onResetInput();
+                  resetTimePeriodData({
+                    mapContext,
+                    mapGenerationContext,
+                  });
                 }}
               >
                 <div className="">

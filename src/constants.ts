@@ -114,6 +114,45 @@ export const DEFAULT_LUC = [
   { id: 17, name: "Waterbody", color: "#0000FF" },
 ];
 
+export const SATELLITE_OPTIONS_ARRAY = [
+  {
+    value: "Landsat 1",
+    label: "Landsat 1",
+  },
+  {
+    value: "Landsat 2",
+    label: "Landsat 2",
+  },
+  {
+    value: "Landsat 3",
+    label: "Landsat 3",
+  },
+  {
+    value: "Landsat 4",
+    label: "Landsat 4",
+  },
+  {
+    value: "Landsat 5",
+    label: "Landsat 5",
+  },
+  {
+    value: "Landsat 6",
+    label: "Landsat 6",
+  },
+  {
+    value: "Landsat 7",
+    label: "Landsat 7",
+  },
+  {
+    value: "Landsat 8",
+    label: "Landsat 8",
+  },
+  {
+    value: "Landsat 9",
+    label: "Landsat 9",
+  },
+];
+
 export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";
 // export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
 

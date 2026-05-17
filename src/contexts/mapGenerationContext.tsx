@@ -61,7 +61,7 @@ interface PolygonData {
   // session_id: string;
 }
 
-interface ContextType {
+export interface MapGenerationContextType {
   progressPanelIndex: number;
   setProgressPanelIndex: Dispatch<SetStateAction<number>>;
   stepKey: PANEL_COMPONENT_KEY;
@@ -168,7 +168,7 @@ interface ContextType {
   resetMapGenerationState: () => void;
 }
 
-const DEFAULT_VALUE: ContextType = {
+const DEFAULT_VALUE: MapGenerationContextType = {
   progressPanelIndex: 0,
   setProgressPanelIndex: () => {},
   stepKey: PANEL_COMPONENT_KEY.BASIC_INFORMATION,

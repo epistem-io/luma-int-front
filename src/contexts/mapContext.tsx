@@ -97,7 +97,7 @@ export interface LayerLegend {
   legend: LegendItem;
 }
 
-interface MapContextType {
+export interface MapContextType {
   mapInstance: Map | null;
   setMapInstance: Dispatch<SetStateAction<null | Map>>;
   polygon: MultiPolygon | Polygon | null;

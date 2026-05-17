@@ -127,6 +127,15 @@ export const TimePeriodAccordion = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!isEditingTemporalCoverage) return;
+
+    scopingForm.reset({
+      temporal_coverage: temporalCoverage,
+      scoping_unit: temporalCoverageUnit,
+    });
+  }, [isEditingTemporalCoverage]);
+
   const temporalCoverageVal = scopingForm.watch("temporal_coverage");
 
   return (

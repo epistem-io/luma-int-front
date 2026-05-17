@@ -17,11 +17,7 @@ import { SateliteCompositeAccordion } from "./SateliteCompositeAccordion";
 import { Button } from "@/components/ui/button";
 import { useContext, useState } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import {
-  BASIC_INFORMATION_ACCORDION_TYPE,
-  PANEL_COMPONENT_KEY,
-  TEMPORAL_COVERAGE_ARRAY,
-} from "@/constants";
+import { PANEL_COMPONENT_KEY, TEMPORAL_COVERAGE_ARRAY } from "@/constants";
 import { AreaScopingSummary } from "./AreaScopingSummary";
 import { TimePeriodSummary } from "./TimePeriodSummary";
 import { SatelliteCompositeSummary } from "./SatelliteCompositeSummary";
@@ -33,32 +29,23 @@ import { ConfirmDialog } from "./ConfirmDialog";
 import { useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
 import { GlobalContext } from "@/contexts/globalContext";
+import {
+  goToCompositeEditFlow,
+  resetAreaScopingData,
+  resetTimePeriodData,
+} from "@/lib/interactivePanelFlowHelper";
 
 export const BasicInformationSummaryComponent = () => {
-  const { resetMosaicLayer, vectorSource, isPreviewingMosaic } =
-    useContext(MapContext);
+  const mapContext = useContext(MapContext);
+  const { isPreviewingMosaic, resetMosaicLayer } = mapContext;
 
+  const mapGenerationContext = useContext(MapGenerationContext);
   const {
-    basicInformationOpenAccordion,
     areaScopingPolygonArea,
-    setBasicInformationOpenAccordion,
     temporalCoverage,
     temporalCoverageUnit,
-    // isPreviewingMosaic,
-    // setIsPreviewingMosaic,
     isBasicInformationChangeInput,
-    setIsBasicInformationChangeInput,
-    setStepKey,
-    setTemporalCoverage,
-    setTemporalCoverageUnit,
-    setisEditingTemporalCoverage,
-    setAreaScopingPolygonUrl,
-    setAreaScopingPolygonFileName,
-    setAreaScopingPolygonArea,
-    setAreaScopingPolygonFileSize,
-    setAreaScopingPolygonError,
-    setPolygonData,
-  } = useContext(MapGenerationContext);
+  } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
 
@@ -77,22 +64,7 @@ export const BasicInformationSummaryComponent = () => {
               accordion={false}
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
-                // DELETE AREA & POLYGON
-                setAreaScopingPolygonUrl(null);
-                setAreaScopingPolygonFileName("");
-                setAreaScopingPolygonArea(0);
-                setAreaScopingPolygonFileSize(0);
-                setAreaScopingPolygonError("");
-                setPolygonData(null);
-
-                vectorSource?.clear();
-
-                setBasicInformationOpenAccordion(
-                  BASIC_INFORMATION_ACCORDION_TYPE.SCOPING,
-                );
-                setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
-                setIsBasicInformationChangeInput(false);
-
+                resetAreaScopingData({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
               }}
             />
@@ -111,16 +83,7 @@ export const BasicInformationSummaryComponent = () => {
               )}
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
-                setTemporalCoverage("");
-                setTemporalCoverageUnit("");
-                setisEditingTemporalCoverage(true);
-
-                setBasicInformationOpenAccordion(
-                  BASIC_INFORMATION_ACCORDION_TYPE.PERIOD,
-                );
-                setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
-                setIsBasicInformationChangeInput(false);
-
+                resetTimePeriodData({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
               }}
             />
@@ -131,12 +94,7 @@ export const BasicInformationSummaryComponent = () => {
               sateliteString="-"
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
-                setBasicInformationOpenAccordion(
-                  BASIC_INFORMATION_ACCORDION_TYPE.COMPOSITE,
-                );
-                setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
-                setIsBasicInformationChangeInput(false);
-
+                goToCompositeEditFlow({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
               }}
             />
