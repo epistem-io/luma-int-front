@@ -6,27 +6,27 @@ export interface LULCPredictor {
 
 export const LULC_PREDICTORS: LULCPredictor[] = [
   {
-    value: "elevation",
+    value: "ELEVATION",
     label: "Elevation",
     description: "Shuttle Radar Topography Mission (SRTM) elevation",
   },
   {
-    value: "slope",
+    value: "SLOPE",
     label: "Slope",
     description: "Shuttle Radar Topography Mission (SRTM) slope",
   },
   {
-    value: "ndvi",
+    value: "NDVI",
     label: "NDVI",
     description: "Normalized Difference Vegetation Index",
   },
   {
-    value: "ndbi",
+    value: "NDBI",
     label: "NDBI",
     description: "Normalized Difference Built-Up Index",
   },
   {
-    value: "mndwi",
+    value: "MNDWI",
     label: "MNDWI",
     description: "Modified Normalized Difference Vegetation Index",
   },

@@ -14,7 +14,12 @@ import {
   useState,
 } from "react";
 import TileLayer from "ol/layer/Tile";
-import { BASEMAP_TYPE, GET_MOSAIC_URL, POINTING_TYPE } from "@/constants";
+import {
+  BASEMAP_TYPE,
+  GET_MOSAIC_URL,
+  MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE,
+  POINTING_TYPE,
+} from "@/constants";
 import { toast } from "sonner";
 import { XYZ } from "ol/source";
 import { styles, stylesTransparentFill, svgWithColor } from "@/lib/utils";
@@ -372,6 +377,10 @@ const MapContextContainer = (props: PropsWithChildren) => {
           summary: json.results.summary,
           download_url: json.results.download_url,
         };
+
+        if (temp.download_url === "") {
+          toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
+        }
 
         setMosaicStatistic(temp);
 

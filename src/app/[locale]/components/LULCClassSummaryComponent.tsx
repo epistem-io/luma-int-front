@@ -6,12 +6,14 @@ import {
   LULCSummaryEditSection,
   MapGenerationContext,
 } from "@/contexts/mapGenerationContext";
-import { PANEL_COMPONENT_KEY } from "@/constants";
-import { type ReactNode, useContext, useMemo } from "react";
+import { PANEL_COMPONENT_KEY, PREDICTOR_URL } from "@/constants";
+import { type ReactNode, useContext, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { LULC_PREDICTORS } from "./lulcPredictors";
 import { ConfirmDialog } from "./ConfirmDialog";
 import Image from "next/image";
+import { GlobalContext } from "@/contexts/globalContext";
+import { toast } from "sonner";
 
 interface SectionWrapperProps {
   title: string;
@@ -224,8 +226,13 @@ export const LULCClassSummaryFooter = () => {
     isLULCSummaryChangeInput,
     setIsLULCSummaryChangeInput,
     setSelectedLULCSummaryEditSection,
+    selectedPredictors,
+    numberOfTrees,
+    minLeafPopulation,
   } = useContext(MapGenerationContext);
+  const { sessionId } = useContext(GlobalContext);
   const t = useTranslations("InteractivePanel");
+  const [isLoading, setIsLoading] = useState(false);
 
   const onChangeInputClick = () => {
     if (isLULCSummaryChangeInput) {
@@ -237,6 +244,42 @@ export const LULCClassSummaryFooter = () => {
     setIsLULCSummaryChangeInput(true);
   };
 
+  const onClickNext = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(PREDICTOR_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+          min_leaf: Number(minLeafPopulation.trim()),
+          ntrees: Number(numberOfTrees.trim()),
+          predictors: selectedPredictors,
+        }),
+      });
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(JSON.stringify(json?.message || response.statusText));
+      }
+
+      setIsSummaryDialogOpen(true);
+    } catch (e) {
+      toast.error(`Error submitting predictors: ${e}`, {
+        duration: Infinity,
+        dismissible: true,
+        closeButton: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 gap-x-4 p-3 pt-4">
       <Button onClick={onChangeInputClick} variant="secondary">
@@ -245,13 +288,15 @@ export const LULCClassSummaryFooter = () => {
           : t("common.changeInput")}
       </Button>
       <Button
-        onClick={() => {
-          setIsSummaryDialogOpen(true);
-        }}
+        onClick={onClickNext}
         variant="primary"
-        disabled={isLULCSummaryChangeInput}
+        disabled={isLULCSummaryChangeInput || isLoading}
       >
-        {t("finalSummary.generateMap")}
+        {isLoading ? (
+          <span className="loader sm"></span>
+        ) : (
+          t("finalSummary.generateMap")
+        )}
       </Button>
     </div>
   );

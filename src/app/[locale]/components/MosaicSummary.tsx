@@ -98,6 +98,10 @@ export const MosaicSummary = () => {
     // });
   }, []);
 
+  const isDownloadMosaicDisabled =
+    isMosaicLoading ||
+    (!!mosaicStatistic && mosaicStatistic.download_url === "");
+
   return (
     <div className="space-y-0">
       <div className="space-y-3">
@@ -211,7 +215,7 @@ export const MosaicSummary = () => {
             <Button
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
-              disabled={isMosaicLoading}
+              disabled={isDownloadMosaicDisabled}
               onClick={async () => {
                 // onResetInput();
 

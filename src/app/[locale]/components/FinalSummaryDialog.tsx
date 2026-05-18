@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import { set } from "zod";
 import { useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
-import { getTemporalRangeText } from "@/lib/utils";
+import { getTemporalRangeText, numberThousandSeparator } from "@/lib/utils";
 import { MapContext } from "@/contexts/mapContext";
 
 export const FinalSummaryDialog = () => {
@@ -168,13 +168,19 @@ export const FinalSummaryDialog = () => {
                             Surabaya
                           </p>
                         </div>
-                        */ }
+                        */}
                         <div className="col-span-2">
                           <p className="font-aptos text-text-icons-base-second text-[15px] font-semibold heading-4.5">
                             {t("finalSummary.areaOfInterestSubtitle")}
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
-                            {summaryData?.data.aoi.area_size} m<sup>2</sup>
+                            {numberThousandSeparator(
+                              (
+                                (summaryData?.data.aoi.area_size || 0) / 10000
+                              ).toFixed(0),
+                            )}{" "}
+                            ha
+                            {/* {summaryData?.data.aoi.area_size} m<sup>2</sup> */}
                           </p>
                         </div>
                       </div>

@@ -80,6 +80,7 @@ export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lu
 
 export const TRAINING_DATA_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/upload`;
 export const TRAINING_DATA_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data`;
+export const PREDICTOR_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor`;
 
 export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/input-summary`;
 
@@ -152,6 +153,9 @@ export const SATELLITE_OPTIONS_ARRAY = [
 
 export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";
 // export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
+
+export const MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE =
+  "Failed to create Mosaic image download link due to Google Earth Engine limitation";
 
 export enum POINTING_TYPE {
   EMPTY = "",
