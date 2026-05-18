@@ -19,6 +19,18 @@ interface PolygonData {
   // session_id: string;
 }
 
+export type LULCSummaryEditSection =
+  | ""
+  | "predictor"
+  | "random-forest"
+  | "data-validation";
+
+export type LULCParamsAccordionSection =
+  | ""
+  | "predictor"
+  | "random-forest"
+  | "data-validation";
+
 export interface MapGenerationContextType {
   progressPanelIndex: number;
   setProgressPanelIndex: Dispatch<SetStateAction<number>>;
@@ -54,6 +66,16 @@ export interface MapGenerationContextType {
   setIsAreaScopingLoading: Dispatch<SetStateAction<boolean>>;
   isBasicInformationChangeInput: boolean;
   setIsBasicInformationChangeInput: Dispatch<SetStateAction<boolean>>;
+  isLULCSummaryChangeInput: boolean;
+  setIsLULCSummaryChangeInput: Dispatch<SetStateAction<boolean>>;
+  selectedLULCSummaryEditSection: LULCSummaryEditSection;
+  setSelectedLULCSummaryEditSection: Dispatch<
+    SetStateAction<LULCSummaryEditSection>
+  >;
+  lulcParamsOpenAccordion: LULCParamsAccordionSection;
+  setLULCParamsOpenAccordion: Dispatch<
+    SetStateAction<LULCParamsAccordionSection>
+  >;
   //
   polygonData: PolygonData | null;
   setPolygonData: Dispatch<SetStateAction<null | PolygonData>>;
@@ -181,6 +203,12 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setMaximumCloudCover: () => {},
   isBasicInformationChangeInput: false,
   setIsBasicInformationChangeInput: () => {},
+  isLULCSummaryChangeInput: false,
+  setIsLULCSummaryChangeInput: () => {},
+  selectedLULCSummaryEditSection: "",
+  setSelectedLULCSummaryEditSection: () => {},
+  lulcParamsOpenAccordion: "",
+  setLULCParamsOpenAccordion: () => {},
   isAreaScopingLoading: false,
   setIsAreaScopingLoading: () => {},
   areaScopingPolygonError: "",
@@ -310,6 +338,14 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   );
   const [isBasicInformationChangeInput, setIsBasicInformationChangeInput] =
     useState(DEFAULT_VALUE.isBasicInformationChangeInput);
+  const [isLULCSummaryChangeInput, setIsLULCSummaryChangeInput] = useState(
+    DEFAULT_VALUE.isLULCSummaryChangeInput,
+  );
+  const [selectedLULCSummaryEditSection, setSelectedLULCSummaryEditSection] =
+    useState(DEFAULT_VALUE.selectedLULCSummaryEditSection);
+  const [lulcParamsOpenAccordion, setLULCParamsOpenAccordion] = useState(
+    DEFAULT_VALUE.lulcParamsOpenAccordion,
+  );
   const [isAreaScopingLoading, setIsAreaScopingLoading] = useState(
     DEFAULT_VALUE.isAreaScopingLoading,
   );
@@ -467,6 +503,11 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsBasicInformationChangeInput(
       DEFAULT_VALUE.isBasicInformationChangeInput,
     );
+    setIsLULCSummaryChangeInput(DEFAULT_VALUE.isLULCSummaryChangeInput);
+    setSelectedLULCSummaryEditSection(
+      DEFAULT_VALUE.selectedLULCSummaryEditSection,
+    );
+    setLULCParamsOpenAccordion(DEFAULT_VALUE.lulcParamsOpenAccordion);
     setPolygonData(DEFAULT_VALUE.polygonData);
     setAreaScopingPolygonError(DEFAULT_VALUE.areaScopingPolygonError);
     setDefaultArray(DEFAULT_VALUE.defaultArray);
@@ -551,6 +592,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setMaximumCloudCover,
     isBasicInformationChangeInput,
     setIsBasicInformationChangeInput,
+    isLULCSummaryChangeInput,
+    setIsLULCSummaryChangeInput,
+    selectedLULCSummaryEditSection,
+    setSelectedLULCSummaryEditSection,
+    lulcParamsOpenAccordion,
+    setLULCParamsOpenAccordion,
     polygonData,
     setPolygonData,
     isAreaScopingLoading,

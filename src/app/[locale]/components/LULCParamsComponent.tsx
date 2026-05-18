@@ -10,11 +10,17 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export const LULCParamsComponent = () => {
+  const { lulcParamsOpenAccordion, setLULCParamsOpenAccordion } = useContext(
+    MapGenerationContext,
+  );
+
   return (
     <>
       <Accordion
-        // value={basicInformationOpenAccordion}
-        // onValueChange={setBasicInformationOpenAccordion}
+        value={lulcParamsOpenAccordion}
+        onValueChange={(value) => {
+          setLULCParamsOpenAccordion(value as typeof lulcParamsOpenAccordion);
+        }}
         type="single"
         collapsible
         className="space-y-4"
@@ -37,6 +43,7 @@ export const LULCParamsFooter = () => {
     minLeafPopulation,
     setMinLeafPopulation,
     setMinLeafPopulationError,
+    setLULCParamsOpenAccordion,
     setStepKey,
     setProgressPanelIndex,
   } = useContext(MapGenerationContext);
@@ -100,6 +107,7 @@ export const LULCParamsFooter = () => {
 
     setNumberOfTrees(trimmedNumberOfTrees);
     setMinLeafPopulation(trimmedMinLeafPopulation);
+    setLULCParamsOpenAccordion("");
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY);
     setProgressPanelIndex(3);
   };
