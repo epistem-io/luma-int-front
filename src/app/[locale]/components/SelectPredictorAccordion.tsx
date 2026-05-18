@@ -10,82 +10,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDown, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
-
-// ELEVATION
-// SLOPE
-// ASPECT
-// NDVI
-// EVI
-// SAVI
-// MSAVI
-// OSAVI
-// ARVI
-// GBNDVI
-// GNDVI
-// MNDWI
-// NDMI
-// AWEInsh
-// NDBI
-// DBSI
-// MBI
-
-const PREDICTORS = [
-  {
-    value: "elevation",
-    label: "Elevation",
-    description: "Shuttle Radar Topography Mission (SRTM) elevation",
-  },
-  {
-    value: "slope",
-    label: "Slope",
-    description: "Shuttle Radar Topography Mission (SRTM) slope",
-  },
-  {
-    value: "ndvi",
-    label: "NDVI",
-    description: "Normalized Difference Vegetation Index",
-  },
-  {
-    value: "ndwi",
-    label: "NDWI",
-    description: "Normalized Difference Water Index",
-  },
-  {
-    value: "bg",
-    label: "BG",
-    description: "Normalized Difference Blue Green",
-  },
-  {
-    value: "blue",
-    label: "Blue",
-    description: "Blue band",
-  },
-  {
-    value: "green",
-    label: "Green",
-    description: "Green band",
-  },
-  {
-    value: "red",
-    label: "Red",
-    description: "Red band",
-  },
-  {
-    value: "nir",
-    label: "NIR",
-    description: "Near Infrared Band",
-  },
-  {
-    value: "distance-to-road",
-    label: "Distance to Road",
-    description: "Measuring closest road available",
-  },
-  {
-    value: "distance-to-river",
-    label: "Distance to River",
-    description: "Measuring closest river available",
-  },
-] as const;
+import { LULC_PREDICTORS } from "./lulcPredictors";
 
 export const SelectPredictorAccordion = () => {
   const t = useTranslations("AnalysisPanel");
@@ -130,7 +55,7 @@ export const SelectPredictorAccordion = () => {
 
         <div className="space-y-5">
           <div className="space-y-2.5 rounded-xl border border-neutral-400 bg-white p-3">
-            {PREDICTORS.map((predictor) => {
+            {LULC_PREDICTORS.map((predictor) => {
               const checked = selectedPredictors.includes(predictor.value);
               const id = `predictor-${predictor.value}`;
 

@@ -49,6 +49,10 @@ import {
 } from "./DataTrainingComponent";
 import { OSSComponent, OSSFooter } from "./OSSComponent";
 import { LULCParamsComponent, LULCParamsFooter } from "./LULCParamsComponent";
+import {
+  LULCClassSummaryComponent,
+  LULCClassSummaryFooter,
+} from "./LULCClassSummaryComponent";
 import { YourMapComponent, YourMapFooter } from "./YourMapComponent";
 import { useTranslations } from "next-intl";
 import { useObservedHeight } from "@/lib/hooks";
@@ -212,6 +216,12 @@ export const InteractivePanel = () => {
         [PANEL_COMPONENT_KEY.LULC_PARAMS]: {
           component: <LULCParamsComponent />,
           footer: <LULCParamsFooter />,
+          title: t("lulcParams.selectLULCListParams"),
+          subtitle: t("lulcParams.selectLULCListParamsDescription"),
+        },
+        [PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY]: {
+          component: <LULCClassSummaryComponent />,
+          footer: <LULCClassSummaryFooter />,
           title: t("lulcParams.selectLULCListParams"),
           subtitle: t("lulcParams.selectLULCListParamsDescription"),
         },

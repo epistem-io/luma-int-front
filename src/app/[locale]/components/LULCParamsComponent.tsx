@@ -6,7 +6,6 @@ import { useContext } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { PANEL_COMPONENT_KEY } from "@/constants";
 import { Button } from "@/components/ui/button";
-import { FinalSummaryDialog } from "./FinalSummaryDialog";
 import { ChevronLeft } from "lucide-react";
 
 export const LULCParamsComponent = () => {
@@ -30,17 +29,17 @@ export const LULCParamsComponent = () => {
   );
 };
 export const LULCParamsFooter = () => {
-  const { setStepKey, setProgressPanelIndex, setIsSummaryDialogOpen } =
-    useContext(MapGenerationContext);
+  const { setStepKey, setProgressPanelIndex } = useContext(
+    MapGenerationContext,
+  );
 
   const isNextDisabled = false;
 
   const isBackDisabled = false;
 
   const onClickNext = () => {
-    // setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-    // setProgressPanelIndex(4);
-    setIsSummaryDialogOpen(true);
+    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY);
+    setProgressPanelIndex(3);
   };
 
   const onClickBack = () => {

@@ -9,6 +9,7 @@ export enum PANEL_COMPONENT_KEY {
   DATA_TRAINING = "data_training",
   OSS = "oss",
   LULC_PARAMS = "lulc_params",
+  LULC_PARAMS_SUMMARY = "lulc_params_summary",
   YOUR_MAP = "your_map",
 }
 
