@@ -5,10 +5,11 @@ import {
   AccordionItem,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import { ChevronDown, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useContext } from "react";
 
 // ELEVATION
 // SLOPE
@@ -89,7 +90,9 @@ const PREDICTORS = [
 export const SelectPredictorAccordion = () => {
   const t = useTranslations("AnalysisPanel");
   const tInteractive = useTranslations("InteractivePanel");
-  const [selectedPredictors, setSelectedPredictors] = useState<string[]>([]);
+  const { selectedPredictors, setSelectedPredictors } = useContext(
+    MapGenerationContext,
+  );
 
   const togglePredictor = (predictorId: string, checked: boolean) => {
     setSelectedPredictors((currentPredictors) => {

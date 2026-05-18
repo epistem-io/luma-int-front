@@ -10,50 +10,8 @@ import {
   Dispatch,
   PropsWithChildren,
   SetStateAction,
-  useEffect,
   useState,
 } from "react";
-
-// const TEMP_ARR: LUCClass[] = [
-//   {
-//     class_color: "#5a9a67",
-//     class_id: 1,
-//     class_name: "Karet",
-//   },
-//   {
-//     class_color: "#bbbb5a",
-//     class_id: 2,
-//     class_name: "Kelapa Sawit",
-//   },
-//   {
-//     class_color: "#111eda",
-//     class_id: 3,
-//     class_name: "Tubuh Air",
-//   },
-//   {
-//     class_color: "#da0407",
-//     class_id: 4,
-//     class_name: "Permukiman",
-//   },
-// ];
-
-// const TEMP_ARR: LUCClass[] = [
-//   {
-//     class_id: 1,
-//     class_name: "Hunian",
-//     class_color: "#FF0000",
-//   },
-//   {
-//     class_id: 2,
-//     class_name: "Hutan",
-//     class_color: "#00FF00",
-//   },
-//   {
-//     class_id: 3,
-//     class_name: "Badan Air",
-//     class_color: "#0000FF",
-//   },
-// ];
 
 interface PolygonData {
   area_size: number;
@@ -173,6 +131,12 @@ export interface MapGenerationContextType {
   setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
   isYourMapDialogVisible: boolean;
   setIsYourMapDialogVisible: Dispatch<SetStateAction<boolean>>;
+  selectedPredictors: string[];
+  setSelectedPredictors: Dispatch<SetStateAction<string[]>>;
+  numberOfTrees: number;
+  setNumberOfTrees: Dispatch<SetStateAction<number>>;
+  minLeafPopulation: number;
+  setMinLeafPopulation: Dispatch<SetStateAction<number>>;
   resetMapGenerationState: () => void;
 }
 
@@ -283,6 +247,12 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setIsLULCParamsChanged: () => {},
   isYourMapDialogVisible: false,
   setIsYourMapDialogVisible: () => {},
+  selectedPredictors: [],
+  setSelectedPredictors: () => {},
+  numberOfTrees: 0,
+  setNumberOfTrees: () => {},
+  minLeafPopulation: 0,
+  setMinLeafPopulation: () => {},
   resetMapGenerationState: () => {},
 };
 
@@ -447,6 +417,18 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.isLULCParamsChanged,
   );
 
+  const [selectedPredictors, setSelectedPredictors] = useState<string[]>(
+    DEFAULT_VALUE.selectedPredictors,
+  );
+
+  const [numberOfTrees, setNumberOfTrees] = useState<number>(
+    DEFAULT_VALUE.numberOfTrees,
+  );
+
+  const [minLeafPopulation, setMinLeafPopulation] = useState<number>(
+    DEFAULT_VALUE.minLeafPopulation,
+  );
+
   const resetMapGenerationState = () => {
     setProgressPanelIndex(DEFAULT_VALUE.progressPanelIndex);
     setStepKey(DEFAULT_VALUE.stepKey);
@@ -499,6 +481,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsTrainingDataChanged(DEFAULT_VALUE.isTrainingDataChanged);
     setIsLULCParamsChanged(DEFAULT_VALUE.isLULCParamsChanged);
     setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
+    setSelectedPredictors(DEFAULT_VALUE.selectedPredictors);
+    setNumberOfTrees(DEFAULT_VALUE.numberOfTrees);
+    setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
 
     if (typeof document === "undefined") return;
 
@@ -614,6 +599,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsLULCParamsChanged,
     isYourMapDialogVisible,
     setIsYourMapDialogVisible,
+    selectedPredictors,
+    setSelectedPredictors,
+    numberOfTrees,
+    setNumberOfTrees,
+    minLeafPopulation,
+    setMinLeafPopulation,
     resetMapGenerationState,
   };
 

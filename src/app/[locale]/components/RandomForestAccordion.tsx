@@ -4,45 +4,20 @@ import {
   AccordionFullTrigger,
   AccordionItem,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AREA_SCOPING_POLYGON_AREA_LIMIT,
-  AREA_SCOPING_TYPE,
-  BASIC_INFORMATION_ACCORDION_TYPE,
-  PANEL_COMPONENT_KEY,
-} from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import { numberThousandSeparator } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { useContext } from "react";
-import { Controller, useForm } from "react-hook-form";
-
-import * as z from "zod";
 
 export const RandomForestAccordion = () => {
   const {
-    setStepKey,
-    setAreaScopingType,
-    polygonData,
-    areaScopingPolygonArea,
+    numberOfTrees,
+    setNumberOfTrees,
+    minLeafPopulation,
+    setMinLeafPopulation,
   } = useContext(MapGenerationContext);
-
-  const t = useTranslations("AnalysisPanel");
 
   const tInteractive = useTranslations("InteractivePanel");
 
@@ -77,7 +52,16 @@ export const RandomForestAccordion = () => {
                   {tInteractive("lulcParams.nOfTree")}
                 </p>
               </Label>
-              <Input className="border-neutrals-400 bg-neutrals-100" />
+              <Input
+                type="number"
+                min={10}
+                max={500}
+                value={numberOfTrees}
+                onChange={(e) => {
+                  setNumberOfTrees(Number(e.target.value) || 10);
+                }}
+                className="border-neutrals-400 bg-neutrals-100"
+              />
               <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
                 {tInteractive("lulcParams.fillWNum", { min: 10, max: 500 })}
               </p>
@@ -88,7 +72,16 @@ export const RandomForestAccordion = () => {
                   {tInteractive("lulcParams.minLeafPop")}
                 </p>
               </Label>
-              <Input className="border-neutrals-400 bg-neutrals-100" />
+              <Input
+                type="number"
+                min={1}
+                max={50}
+                value={minLeafPopulation}
+                onChange={(e) => {
+                  setMinLeafPopulation(Number(e.target.value) || 1);
+                }}
+                className="border-neutrals-400 bg-neutrals-100"
+              />
               <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
                 {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
               </p>
