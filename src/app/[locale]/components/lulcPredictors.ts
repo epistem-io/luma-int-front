@@ -21,43 +21,53 @@ export const LULC_PREDICTORS: LULCPredictor[] = [
     description: "Normalized Difference Vegetation Index",
   },
   {
-    value: "ndwi",
-    label: "NDWI",
-    description: "Normalized Difference Water Index",
+    value: "ndbi",
+    label: "NDBI",
+    description: "Normalized Difference Built-Up Index",
   },
   {
-    value: "bg",
-    label: "BG",
-    description: "Normalized Difference Blue Green",
+    value: "mndwi",
+    label: "MNDWI",
+    description: "Modified Normalized Difference Vegetation Index",
   },
-  {
-    value: "blue",
-    label: "Blue",
-    description: "Blue band",
-  },
-  {
-    value: "green",
-    label: "Green",
-    description: "Green band",
-  },
-  {
-    value: "red",
-    label: "Red",
-    description: "Red band",
-  },
-  {
-    value: "nir",
-    label: "NIR",
-    description: "Near Infrared Band",
-  },
-  {
-    value: "distance-to-road",
-    label: "Distance to Road",
-    description: "Measuring closest road available",
-  },
-  {
-    value: "distance-to-river",
-    label: "Distance to River",
-    description: "Measuring closest river available",
-  },
+  // {
+  //   value: "ndwi",
+  //   label: "NDWI",
+  //   description: "Normalized Difference Water Index",
+  // },
+  // {
+  //   value: "bg",
+  //   label: "BG",
+  //   description: "Normalized Difference Blue Green",
+  // },
+  // {
+  //   value: "blue",
+  //   label: "Blue",
+  //   description: "Blue band",
+  // },
+  // {
+  //   value: "green",
+  //   label: "Green",
+  //   description: "Green band",
+  // },
+  // {
+  //   value: "red",
+  //   label: "Red",
+  //   description: "Red band",
+  // },
+  // {
+  //   value: "nir",
+  //   label: "NIR",
+  //   description: "Near Infrared Band",
+  // },
+  // {
+  //   value: "distance-to-road",
+  //   label: "Distance to Road",
+  //   description: "Measuring closest road available",
+  // },
+  // {
+  //   value: "distance-to-river",
+  //   label: "Distance to River",
+  //   description: "Measuring closest river available",
+  // },
 ];

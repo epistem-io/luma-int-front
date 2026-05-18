@@ -103,11 +103,9 @@ export const BasicInformationSummaryComponent = () => {
               accordion={false}
               cloudCoverageString={`${maximumCloudCover}%`}
               sateliteString={
-                satelliteSource
-                  ? (SATELLITE_OPTIONS_ARRAY.find(
-                      (item) => item.value === satelliteSource,
-                    )?.label ?? satelliteSource)
-                  : "-"
+                SATELLITE_OPTIONS_ARRAY.find(
+                  (item) => item.value === satelliteSource,
+                )?.label ?? satelliteSource
               }
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
