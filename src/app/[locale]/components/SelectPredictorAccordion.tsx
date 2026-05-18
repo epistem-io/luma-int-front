@@ -4,50 +4,90 @@ import {
   AccordionFullTrigger,
   AccordionItem,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field, FieldGroup } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  AREA_SCOPING_POLYGON_AREA_LIMIT,
-  AREA_SCOPING_TYPE,
-  BASIC_INFORMATION_ACCORDION_TYPE,
-  PANEL_COMPONENT_KEY,
-} from "@/constants";
-import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import { numberThousandSeparator } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronDown, ChevronRight, Upload } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ChevronDown, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
-import { useContext } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useState } from "react";
 
-import * as z from "zod";
+const PREDICTORS = [
+  {
+    id: "elevation",
+    label: "Elevation",
+    description: "Shuttle Radar Topography Mission (SRTM) elevation",
+  },
+  {
+    id: "slope",
+    label: "Slope",
+    description: "Shuttle Radar Topography Mission (SRTM) slope",
+  },
+  {
+    id: "ndvi",
+    label: "NDVI",
+    description: "Normalized Difference Vegetation Index",
+  },
+  {
+    id: "ndwi",
+    label: "NDWI",
+    description: "Normalized Difference Water Index",
+  },
+  {
+    id: "bg",
+    label: "BG",
+    description: "Normalized Difference Blue Green",
+  },
+  {
+    id: "blue",
+    label: "Blue",
+    description: "Blue band",
+  },
+  {
+    id: "green",
+    label: "Green",
+    description: "Green band",
+  },
+  {
+    id: "red",
+    label: "Red",
+    description: "Red band",
+  },
+  {
+    id: "nir",
+    label: "NIR",
+    description: "Near Infrared Band",
+  },
+  {
+    id: "distance-to-road",
+    label: "Distance to Road",
+    description: "Measuring closest road available",
+  },
+  {
+    id: "distance-to-river",
+    label: "Distance to River",
+    description: "Measuring closest river available",
+  },
+] as const;
 
 export const SelectPredictorAccordion = () => {
-  const {
-    setStepKey,
-    setAreaScopingType,
-    polygonData,
-    areaScopingPolygonArea,
-  } = useContext(MapGenerationContext);
-
   const t = useTranslations("AnalysisPanel");
-
   const tInteractive = useTranslations("InteractivePanel");
+  const [selectedPredictors, setSelectedPredictors] = useState<string[]>([]);
+
+  const togglePredictor = (predictorId: string, checked: boolean) => {
+    setSelectedPredictors((currentPredictors) => {
+      if (checked) {
+        return currentPredictors.includes(predictorId)
+          ? currentPredictors
+          : [...currentPredictors, predictorId];
+      }
+
+      return currentPredictors.filter((currentId) => currentId !== predictorId);
+    });
+  };
 
   return (
     <AccordionItem
-      value={"predictor"}
+      value="predictor"
       className="rounded-xl border border-neutral-400 bg-white pb-3"
     >
       <AccordionFullTrigger
@@ -61,179 +101,57 @@ export const SelectPredictorAccordion = () => {
         </p>
       </AccordionFullTrigger>
       <AccordionContent className="mt-2 space-y-5 px-3 pb-0">
-        <div className="">
-          <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
-            {tInteractive.rich("lulcParams.selectPredictorDesc", {
-              br: () => <br></br>,
+        <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
+          {tInteractive.rich("lulcParams.selectPredictorDesc", {
+            br: () => <br></br>,
+          })}
+        </p>
+
+        <div className="space-y-5">
+          <div className="space-y-2.5 rounded-xl border border-neutral-400 bg-white p-3">
+            {PREDICTORS.map((predictor) => {
+              const checked = selectedPredictors.includes(predictor.id);
+
+              return (
+                <label
+                  key={predictor.id}
+                  htmlFor={predictor.id}
+                  className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-neutral-100"
+                >
+                  <Checkbox
+                    id={predictor.id}
+                    checked={checked}
+                    onCheckedChange={(nextChecked) =>
+                      togglePredictor(predictor.id, nextChecked === true)
+                    }
+                    className={cn(
+                      "mt-0.5 border-neutral-500",
+                      checked &&
+                        "border-primary-pink data-[state=checked]:border-primary-pink data-[state=checked]:bg-primary-pink",
+                    )}
+                  />
+                  <div className="space-y-1">
+                    <p className="text-m-semibold text-text-icons-base-second">
+                      {predictor.label}
+                    </p>
+                    <p className="text-xs-regular text-text-icons-base-second">
+                      {predictor.description}
+                    </p>
+                  </div>
+                </label>
+              );
             })}
-          </p>
-        </div>
-        <div className="rounded-md p-2 space-y-5 bg-background-disableds">
+          </div>
+
           <ComingSoon />
-          <div className="space-y-5">
-            <div className="space-y-2.5">
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Elevation
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Shuttle Radar Topography Mission (SRTM) elevation
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Slope
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Shuttle Radar Topography Mission (SRTM) slope
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    NDVI
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Normalized Difference Vegetation Index
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    NDWI
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Normalized Difference Water Index
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    BG
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Normalized Difference Blue Green
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Blue
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Blue band
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Green
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Green band
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Red
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Red band
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    NIR
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Near Infrared Band
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Distance to Road
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Measuring closest road available
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-row space-x-3">
-                <Checkbox
-                  disabled
-                  className="mt-0.5 border-text-icons-base-third"
-                />
-                <div className="space-y-1">
-                  <p className="text-m-semibold text-text-icons-base-third">
-                    Distance to River
-                  </p>
-                  <p className="text-xs-regular text-text-icons-base-third">
-                    Measuring closest river available
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-background-disableds rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 space-y-4 cursor-not-allowed">
+
+          <div className="rounded-xl bg-white p-0">
+            <div className="space-y-4 rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 cursor-not-allowed">
               <p className="text-l-bold text-text-icons-base-third text-center">
-                {/* <p className="text-l-bold text-[#002F3D] text-center"> */}
                 {t("Section4.selectPredictorDesc")}
               </p>
-              <div className="p-2 rounded-full border-neutral-600 border mx-auto w-fit">
-                <Upload className="text-text-icons-base-third h-5 w-5" />
+              <div className="mx-auto w-fit rounded-full border border-neutral-600 p-2">
+                <Upload className="h-5 w-5 text-text-icons-base-third" />
               </div>
               <div className="text-center">
                 <p className="text-l-medium text-text-icons-base-third">

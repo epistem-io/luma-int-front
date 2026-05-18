@@ -202,13 +202,10 @@ export const BasicInformationSummaryFooter = () => {
         temporalCoverage,
         temporalCoverageUnit,
       ),
-      endDate: getTemporalRangeDateEnd(
-        temporalCoverage,
-        temporalCoverageUnit,
-      ),
+      endDate: getTemporalRangeDateEnd(temporalCoverage, temporalCoverageUnit),
       landsatVersion: satelliteSource,
       cloudCover: maximumCloudCover,
-      spatialResolution: Number(spatialResolution),
+      spatialResolution: spatialResolution,
     });
   };
 
