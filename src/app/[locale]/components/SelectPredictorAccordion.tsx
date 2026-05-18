@@ -10,59 +10,77 @@ import { ChevronDown, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+// ELEVATION
+// SLOPE
+// ASPECT
+// NDVI
+// EVI
+// SAVI
+// MSAVI
+// OSAVI
+// ARVI
+// GBNDVI
+// GNDVI
+// MNDWI
+// NDMI
+// AWEInsh
+// NDBI
+// DBSI
+// MBI
+
 const PREDICTORS = [
   {
-    id: "elevation",
+    value: "elevation",
     label: "Elevation",
     description: "Shuttle Radar Topography Mission (SRTM) elevation",
   },
   {
-    id: "slope",
+    value: "slope",
     label: "Slope",
     description: "Shuttle Radar Topography Mission (SRTM) slope",
   },
   {
-    id: "ndvi",
+    value: "ndvi",
     label: "NDVI",
     description: "Normalized Difference Vegetation Index",
   },
   {
-    id: "ndwi",
+    value: "ndwi",
     label: "NDWI",
     description: "Normalized Difference Water Index",
   },
   {
-    id: "bg",
+    value: "bg",
     label: "BG",
     description: "Normalized Difference Blue Green",
   },
   {
-    id: "blue",
+    value: "blue",
     label: "Blue",
     description: "Blue band",
   },
   {
-    id: "green",
+    value: "green",
     label: "Green",
     description: "Green band",
   },
   {
-    id: "red",
+    value: "red",
     label: "Red",
     description: "Red band",
   },
   {
-    id: "nir",
+    value: "nir",
     label: "NIR",
     description: "Near Infrared Band",
   },
   {
-    id: "distance-to-road",
+    value: "distance-to-road",
     label: "Distance to Road",
     description: "Measuring closest road available",
   },
   {
-    id: "distance-to-river",
+    value: "distance-to-river",
     label: "Distance to River",
     description: "Measuring closest river available",
   },
@@ -110,19 +128,20 @@ export const SelectPredictorAccordion = () => {
         <div className="space-y-5">
           <div className="space-y-2.5 rounded-xl border border-neutral-400 bg-white p-3">
             {PREDICTORS.map((predictor) => {
-              const checked = selectedPredictors.includes(predictor.id);
+              const checked = selectedPredictors.includes(predictor.value);
+              const id = `predictor-${predictor.value}`;
 
               return (
                 <label
-                  key={predictor.id}
-                  htmlFor={predictor.id}
+                  key={id}
+                  htmlFor={id}
                   className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-neutral-100"
                 >
                   <Checkbox
-                    id={predictor.id}
+                    id={id}
                     checked={checked}
                     onCheckedChange={(nextChecked) =>
-                      togglePredictor(predictor.id, nextChecked === true)
+                      togglePredictor(predictor.value, nextChecked === true)
                     }
                     className={cn(
                       "mt-0.5 border-neutral-500",
