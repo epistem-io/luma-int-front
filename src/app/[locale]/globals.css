@@ -61,7 +61,9 @@
   --color-neutral-700-baru: rgba(87, 86, 86, 1);
   --color-neutral-900: rgba(0, 0, 0, 1);
 
+  --color-neutrals-100: rgba(255, 255, 255, 1);
   --color-neutrals-300: rgba(231, 230, 230, 1);
+  --color-neutrals-400: rgba(201, 201, 201, 1);
   --color-neutrals-500: rgba(176, 176, 176, 1);
   --color-neutrals-600: rgba(104, 103, 103, 1);
   --color-neutrals-800: rgba(26, 25, 25, 1);

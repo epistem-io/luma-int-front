@@ -69,28 +69,27 @@ export const RandomForestAccordion = () => {
             })}
           </p>
         </div>
-        <div className="rounded-md p-2 space-y-5 bg-background-disableds cursor-not-allowed">
-          <ComingSoon />
+        <div className="rounded-md p-0 space-y-5 bg-white cursor-not-allowed">
           <div className="grid grid-cols-2 space-x-5">
             <div className="space-y-2">
               <Label>
-                <p className="text-text-icons-base-third font-aptos text-sm font-regular heading-5">
+                <p className="text-text-icons-base-second font-aptos text-sm font-regular heading-5">
                   {tInteractive("lulcParams.nOfTree")}
                 </p>
               </Label>
-              <Input className="" disabled />
-              <p className="font-aptos text-xs font-regular heading4 text-neutrals-600">
+              <Input className="border-neutrals-400 bg-neutrals-100" />
+              <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
                 {tInteractive("lulcParams.fillWNum", { min: 10, max: 500 })}
               </p>
             </div>
             <div className="space-y-2">
               <Label>
-                <p className="text-text-icons-base-third font-aptos text-sm font-regular heading-5">
+                <p className="text-text-icons-base-second font-aptos text-sm font-regular heading-5">
                   {tInteractive("lulcParams.minLeafPop")}
                 </p>
               </Label>
-              <Input className="" disabled />
-              <p className="font-aptos text-xs font-regular heading4 text-neutrals-600">
+              <Input className="border-neutrals-400 bg-neutrals-100" />
+              <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
                 {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
               </p>
             </div>
