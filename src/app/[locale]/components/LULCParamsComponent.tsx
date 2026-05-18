@@ -7,6 +7,7 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { PANEL_COMPONENT_KEY } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export const LULCParamsComponent = () => {
   return (
@@ -29,15 +30,76 @@ export const LULCParamsComponent = () => {
   );
 };
 export const LULCParamsFooter = () => {
-  const { setStepKey, setProgressPanelIndex } = useContext(
-    MapGenerationContext,
-  );
+  const {
+    numberOfTrees,
+    setNumberOfTrees,
+    setNumberOfTreesError,
+    minLeafPopulation,
+    setMinLeafPopulation,
+    setMinLeafPopulationError,
+    setStepKey,
+    setProgressPanelIndex,
+  } = useContext(MapGenerationContext);
+  const t = useTranslations("InteractivePanel");
 
   const isNextDisabled = false;
 
   const isBackDisabled = false;
 
+  const validateRandomForestField = (
+    value: string,
+    min: number,
+    max: number,
+    fieldLabel: string,
+  ) => {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      return t("lulcParams.rfFieldRequired", { field: fieldLabel });
+    }
+
+    if (!/^\d+$/.test(trimmedValue)) {
+      return t("lulcParams.rfFieldInteger", { field: fieldLabel });
+    }
+
+    const parsedValue = Number(trimmedValue);
+
+    if (parsedValue < min || parsedValue > max) {
+      return t("lulcParams.rfFieldRange", {
+        field: fieldLabel,
+        min,
+        max,
+      });
+    }
+
+    return "";
+  };
+
   const onClickNext = () => {
+    const trimmedNumberOfTrees = numberOfTrees.trim();
+    const trimmedMinLeafPopulation = minLeafPopulation.trim();
+    const numberOfTreesError = validateRandomForestField(
+      numberOfTrees,
+      10,
+      500,
+      t("lulcParams.nOfTree"),
+    );
+    const minLeafPopulationError = validateRandomForestField(
+      minLeafPopulation,
+      1,
+      50,
+      t("lulcParams.minLeafPop"),
+    );
+
+    setNumberOfTreesError(numberOfTreesError);
+    setMinLeafPopulationError(minLeafPopulationError);
+
+    if (numberOfTreesError || minLeafPopulationError) {
+      return;
+    }
+
+    setNumberOfTrees(trimmedNumberOfTrees);
+    setMinLeafPopulation(trimmedMinLeafPopulation);
     setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY);
     setProgressPanelIndex(3);
   };

@@ -7,6 +7,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
@@ -15,8 +16,10 @@ export const RandomForestAccordion = () => {
   const {
     numberOfTrees,
     setNumberOfTrees,
+    numberOfTreesError,
     minLeafPopulation,
     setMinLeafPopulation,
+    minLeafPopulationError,
   } = useContext(MapGenerationContext);
 
   const tInteractive = useTranslations("InteractivePanel");
@@ -53,18 +56,26 @@ export const RandomForestAccordion = () => {
                 </p>
               </Label>
               <Input
-                type="number"
-                min={10}
-                max={500}
+                type="text"
                 value={numberOfTrees}
                 onChange={(e) => {
-                  setNumberOfTrees(Number(e.target.value) || 10);
+                  setNumberOfTrees(e.target.value);
                 }}
-                className="border-neutrals-400 bg-neutrals-100"
+                aria-invalid={Boolean(numberOfTreesError)}
+                className={cn(
+                  "border-neutrals-400 bg-neutrals-100",
+                  numberOfTreesError && "border-destructive",
+                )}
               />
-              <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
-                {tInteractive("lulcParams.fillWNum", { min: 10, max: 500 })}
-              </p>
+              {numberOfTreesError ? (
+                <p className="font-aptos text-xs font-regular heading4 text-destructive">
+                  {numberOfTreesError}
+                </p>
+              ) : (
+                <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
+                  {tInteractive("lulcParams.fillWNum", { min: 10, max: 500 })}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label>
@@ -73,18 +84,26 @@ export const RandomForestAccordion = () => {
                 </p>
               </Label>
               <Input
-                type="number"
-                min={1}
-                max={50}
+                type="text"
                 value={minLeafPopulation}
                 onChange={(e) => {
-                  setMinLeafPopulation(Number(e.target.value) || 1);
+                  setMinLeafPopulation(e.target.value);
                 }}
-                className="border-neutrals-400 bg-neutrals-100"
+                aria-invalid={Boolean(minLeafPopulationError)}
+                className={cn(
+                  "border-neutrals-400 bg-neutrals-100",
+                  minLeafPopulationError && "border-destructive",
+                )}
               />
-              <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
-                {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
-              </p>
+              {minLeafPopulationError ? (
+                <p className="font-aptos text-xs font-regular heading4 text-destructive">
+                  {minLeafPopulationError}
+                </p>
+              ) : (
+                <p className="font-aptos text-xs font-regular heading4 text-text-icons-base-second">
+                  {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
+                </p>
+              )}
             </div>
           </div>
         </div>

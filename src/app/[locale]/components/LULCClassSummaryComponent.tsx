@@ -11,6 +11,8 @@ export const LULCClassSummaryComponent = () => {
   const { selectedPredictors, numberOfTrees, minLeafPopulation } =
     useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
+  const formattedNumberOfTrees = numberOfTrees.trim();
+  const formattedMinLeafPopulation = minLeafPopulation.trim();
 
   const selectedPredictorDetails = useMemo(() => {
     return LULC_PREDICTORS.filter((predictor) =>
@@ -63,7 +65,7 @@ export const LULCClassSummaryComponent = () => {
                 {t("lulcParams.nOfTree")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                {numberOfTrees}
+                {formattedNumberOfTrees}
               </p>
             </div>
             <div>
@@ -71,7 +73,7 @@ export const LULCClassSummaryComponent = () => {
                 {t("lulcParams.minLeafPop")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                {minLeafPopulation}
+                {formattedMinLeafPopulation}
               </p>
             </div>
           </div>

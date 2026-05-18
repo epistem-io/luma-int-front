@@ -133,10 +133,14 @@ export interface MapGenerationContextType {
   setIsYourMapDialogVisible: Dispatch<SetStateAction<boolean>>;
   selectedPredictors: string[];
   setSelectedPredictors: Dispatch<SetStateAction<string[]>>;
-  numberOfTrees: number;
-  setNumberOfTrees: Dispatch<SetStateAction<number>>;
-  minLeafPopulation: number;
-  setMinLeafPopulation: Dispatch<SetStateAction<number>>;
+  numberOfTrees: string;
+  setNumberOfTrees: Dispatch<SetStateAction<string>>;
+  numberOfTreesError: string;
+  setNumberOfTreesError: Dispatch<SetStateAction<string>>;
+  minLeafPopulation: string;
+  setMinLeafPopulation: Dispatch<SetStateAction<string>>;
+  minLeafPopulationError: string;
+  setMinLeafPopulationError: Dispatch<SetStateAction<string>>;
   resetMapGenerationState: () => void;
 }
 
@@ -249,10 +253,14 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setIsYourMapDialogVisible: () => {},
   selectedPredictors: [],
   setSelectedPredictors: () => {},
-  numberOfTrees: 0,
+  numberOfTrees: "",
   setNumberOfTrees: () => {},
-  minLeafPopulation: 0,
+  numberOfTreesError: "",
+  setNumberOfTreesError: () => {},
+  minLeafPopulation: "",
   setMinLeafPopulation: () => {},
+  minLeafPopulationError: "",
+  setMinLeafPopulationError: () => {},
   resetMapGenerationState: () => {},
 };
 
@@ -421,12 +429,20 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.selectedPredictors,
   );
 
-  const [numberOfTrees, setNumberOfTrees] = useState<number>(
+  const [numberOfTrees, setNumberOfTrees] = useState<string>(
     DEFAULT_VALUE.numberOfTrees,
   );
 
-  const [minLeafPopulation, setMinLeafPopulation] = useState<number>(
+  const [numberOfTreesError, setNumberOfTreesError] = useState<string>(
+    DEFAULT_VALUE.numberOfTreesError,
+  );
+
+  const [minLeafPopulation, setMinLeafPopulation] = useState<string>(
     DEFAULT_VALUE.minLeafPopulation,
+  );
+
+  const [minLeafPopulationError, setMinLeafPopulationError] = useState<string>(
+    DEFAULT_VALUE.minLeafPopulationError,
   );
 
   const resetMapGenerationState = () => {
@@ -483,7 +499,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
     setSelectedPredictors(DEFAULT_VALUE.selectedPredictors);
     setNumberOfTrees(DEFAULT_VALUE.numberOfTrees);
+    setNumberOfTreesError(DEFAULT_VALUE.numberOfTreesError);
     setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
+    setMinLeafPopulationError(DEFAULT_VALUE.minLeafPopulationError);
 
     if (typeof document === "undefined") return;
 
@@ -603,8 +621,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSelectedPredictors,
     numberOfTrees,
     setNumberOfTrees,
+    numberOfTreesError,
+    setNumberOfTreesError,
     minLeafPopulation,
     setMinLeafPopulation,
+    minLeafPopulationError,
+    setMinLeafPopulationError,
     resetMapGenerationState,
   };
 
