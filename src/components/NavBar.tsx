@@ -6,6 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
+import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import LanguageToggle from "./LanguageToggle";
 import { Button } from "./ui/button";
@@ -28,6 +29,7 @@ const dataMethodsItems: MenuItem[] = [
 
 export function NavBar({ className }: NavBarProps) {
   const t = useTranslations("LoginModal");
+  const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { setIsLoginModalOpen } = useContext(GlobalContext);
 
   return (
@@ -97,16 +99,32 @@ export function NavBar({ className }: NavBarProps) {
 
             <LanguageToggle />
             {/* Language Picker */}
-            <Button
-              type="button"
-              variant={"outline"}
-              className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
-              onClick={() => {
-                setIsLoginModalOpen(true);
-              }}
-            >
-              {t("title")}
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <span className="font-aptos text-sm leading-5 text-text-icons-base-main">
+                  {user?.name ?? user?.email}
+                </span>
+                <Button
+                  type="button"
+                  variant={"outline"}
+                  className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
+                  onClick={logout}
+                >
+                  Logout
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant={"outline"}
+                className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
+                onClick={() => {
+                  setIsLoginModalOpen(true);
+                }}
+              >
+                {t("title")}
+              </Button>
+            )}
             {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button
                 onClick={() => setCurrentLanguage("EN")}

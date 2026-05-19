@@ -5,6 +5,7 @@ import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { MapContextContainer } from "@/contexts/mapContext";
 import { GlobalContextContainer } from "@/contexts/globalContext";
+import { AuthContextContainer } from "@/contexts/authContext";
 
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
@@ -228,18 +229,20 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${lato.variable} ${notoSans.variable} ${aptos.variable} ${acumin.variable} ${roboto.variable} ${pjs.variable} ${degularDisplayDemo.variable} antialiased`}
       >
         <NextIntlClientProvider>
-          <GlobalContextContainer>
-            <MapContextContainer>
-              <MapGenerationContextContainer>
-                <div className="relative">
-                  <NavBar />
-                  {children}
-                  <Toaster />
-                  <Analytics />
-                </div>
-              </MapGenerationContextContainer>
-            </MapContextContainer>
-          </GlobalContextContainer>
+          <AuthContextContainer>
+            <GlobalContextContainer>
+              <MapContextContainer>
+                <MapGenerationContextContainer>
+                  <div className="relative">
+                    <NavBar />
+                    {children}
+                    <Toaster />
+                    <Analytics />
+                  </div>
+                </MapGenerationContextContainer>
+              </MapContextContainer>
+            </GlobalContextContainer>
+          </AuthContextContainer>
         </NextIntlClientProvider>
       </body>
     </html>

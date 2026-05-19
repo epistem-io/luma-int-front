@@ -5,6 +5,7 @@ import { FETCH_GENERATE_MAP } from "@/constants";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { numberThousandSeparator } from "@/lib/utils";
 import { AlertCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -169,6 +170,15 @@ export const YourMapComponent = () => {
       })
       .catch((e) => {
         setIsError(true);
+        if (e instanceof UnauthorizedError) {
+          toast.error("Please log in to generate your map.", {
+            duration: Infinity,
+            dismissible: true,
+            closeButton: true,
+          });
+          return;
+        }
+
         toast.error(`Error generating map: ${e}`, {
           duration: Infinity,
           dismissible: true,

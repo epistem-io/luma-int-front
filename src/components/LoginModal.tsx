@@ -99,6 +99,7 @@ export default function LoginModal({
             <div className="flex flex-col gap-4 px-6 pb-6">
               <FormField
                 control={form.control}
+                disabled={isSubmitting}
                 name="email"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
@@ -122,6 +123,7 @@ export default function LoginModal({
 
               <FormField
                 control={form.control}
+                disabled={isSubmitting}
                 name="password"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
