@@ -107,7 +107,11 @@
     "submit": "Login",
     "google": "Login with Google",
     "noAccount": "Don't have an account?",
-    "signUp": "Sign up"
+    "signUp": "Sign up",
+    "errors": {
+      "invalidEmail": "Please enter a valid email address.",
+      "passwordMin": "Password must be at least 8 characters."
+    }
   },
   "InteractivePanel": {
     "common": {

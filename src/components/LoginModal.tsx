@@ -2,6 +2,7 @@
 
 import { type FormEvent, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 export interface LoginModalProps {
   open: boolean;
@@ -45,17 +45,40 @@ export default function LoginModal({
   const t = useTranslations("LoginModal");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
+
+  const loginSchema = z.object({
+    email: z.email({ message: t("errors.invalidEmail") }),
+    password: z.string().min(8, { message: t("errors.passwordMin") }),
+  });
 
   useEffect(() => {
     if (!open) {
       setEmail("");
       setPassword("");
+      setErrors({});
     }
   }, [open]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const result = loginSchema.safeParse({ email, password });
+
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      });
+      return;
+    }
+
+    setErrors({});
     await onSubmit?.({ email, password });
   };
 
@@ -88,10 +111,19 @@ export default function LoginModal({
                 value={email}
                 onChange={(event) => {
                   setEmail(event.target.value);
+                  if (errors.email) {
+                    setErrors((current) => ({ ...current, email: undefined }));
+                  }
                 }}
                 placeholder={t("emailPlaceholder")}
                 className={fieldClassName}
+                aria-invalid={Boolean(errors.email)}
               />
+              {errors.email ? (
+                <p className="font-aptos text-sm leading-5 text-destructive">
+                  {errors.email}
+                </p>
+              ) : null}
             </div>
 
             <div className="flex flex-col gap-2">
@@ -118,10 +150,22 @@ export default function LoginModal({
                 value={password}
                 onChange={(event) => {
                   setPassword(event.target.value);
+                  if (errors.password) {
+                    setErrors((current) => ({
+                      ...current,
+                      password: undefined,
+                    }));
+                  }
                 }}
                 placeholder={t("passwordPlaceholder")}
                 className={fieldClassName}
+                aria-invalid={Boolean(errors.password)}
               />
+              {errors.password ? (
+                <p className="font-aptos text-sm leading-5 text-destructive">
+                  {errors.password}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -130,7 +174,7 @@ export default function LoginModal({
               type="submit"
               variant="primary"
               disabled={isSubmitting}
-              className="text-m-semibold h-10 rounded-[12px]"
+              className="text-m-semibold h-10 rounded-[12px] text-white"
             >
               {t("submit")}
             </Button>

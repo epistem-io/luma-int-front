@@ -103,7 +103,11 @@
     "submit": "Masuk",
     "google": "Masuk dengan Google",
     "noAccount": "Belum punya akun?",
-    "signUp": "Daftar"
+    "signUp": "Daftar",
+    "errors": {
+      "invalidEmail": "Masukkan alamat email yang valid.",
+      "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter."
+    }
   },
   "InteractivePanel": {
     "common": {
