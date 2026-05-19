@@ -85,8 +85,7 @@ export const TimePeriodSummary = ({
               >
                 <div className="">
                   <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
-                    {/* WIP dict */}
-                    Reselect Time Period
+                    {t("common.changeInput")}
                   </p>
                 </div>
               </Button>
@@ -99,7 +98,7 @@ export const TimePeriodSummary = ({
           <div className="space-y-2 relative">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
               {/* WIP */}
-              {t("basicInformation.yourSelectedTimePeriod")} hihu
+              {t("basicInformation.yourSelectedTimePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">

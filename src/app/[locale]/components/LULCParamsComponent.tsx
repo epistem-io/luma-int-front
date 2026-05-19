@@ -10,9 +10,8 @@ import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export const LULCParamsComponent = () => {
-  const { lulcParamsOpenAccordion, setLULCParamsOpenAccordion } = useContext(
-    MapGenerationContext,
-  );
+  const { lulcParamsOpenAccordion, setLULCParamsOpenAccordion } =
+    useContext(MapGenerationContext);
 
   return (
     <>
@@ -148,7 +147,7 @@ export const LULCParamsFooter = () => {
           variant="primary"
           className=""
         >
-          Next
+          {t("common.next")}
         </Button>
       </div>
     </div>

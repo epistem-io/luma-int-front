@@ -292,11 +292,7 @@ export const LULCClassSummaryFooter = () => {
         variant="primary"
         disabled={isLULCSummaryChangeInput || isLoading}
       >
-        {isLoading ? (
-          <span className="loader sm"></span>
-        ) : (
-          t("finalSummary.generateMap")
-        )}
+        {isLoading ? <span className="loader sm"></span> : t("common.next")}
       </Button>
     </div>
   );

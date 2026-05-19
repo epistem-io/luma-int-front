@@ -166,8 +166,7 @@ export const AreaScopingAccordion = () => {
                 >
                   <div className="">
                     <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
-                      {/* WIP dict */}
-                      Reselect Area
+                      {t("common.changeInput")}
                     </p>
                   </div>
                 </Button>

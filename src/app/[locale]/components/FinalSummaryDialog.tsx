@@ -175,9 +175,7 @@ export const FinalSummaryDialog = () => {
                           </p>
                           <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
                             {numberThousandSeparator(
-                              (
-                                (summaryData?.data.aoi.area_size || 0) / 10000
-                              ).toFixed(0),
+                              (summaryData?.data.aoi.area_size || 0).toFixed(0),
                             )}{" "}
                             ha
                             {/* {summaryData?.data.aoi.area_size} m<sup>2</sup> */}

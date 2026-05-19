@@ -74,6 +74,7 @@ export const DefineLUCComponent = () => {
     selectedDefault,
     selectedCustom,
     LUCfile,
+    spatialResolution,
     LUCfilename,
     LUCfilesize,
     setDefaultArray,
@@ -269,7 +270,10 @@ export const DefineLUCComponent = () => {
               <TabsTrigger disabled={selectedDefault} value="custom">
                 {t("defineLUC.classifyOwnTemplate")}
               </TabsTrigger>
-              <TabsTrigger disabled={selectedCustom} value="default">
+              <TabsTrigger
+                disabled={selectedCustom || spatialResolution !== "100"}
+                value="default"
+              >
                 {t("defineLUC.useDefaultScheme")}
               </TabsTrigger>
             </TabsList>

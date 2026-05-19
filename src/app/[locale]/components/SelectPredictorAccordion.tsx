@@ -15,9 +15,8 @@ import { LULC_PREDICTORS } from "./lulcPredictors";
 export const SelectPredictorAccordion = () => {
   const t = useTranslations("AnalysisPanel");
   const tInteractive = useTranslations("InteractivePanel");
-  const { selectedPredictors, setSelectedPredictors } = useContext(
-    MapGenerationContext,
-  );
+  const { selectedPredictors, setSelectedPredictors, selectedDefault } =
+    useContext(MapGenerationContext);
 
   const togglePredictor = (predictorId: string, checked: boolean) => {
     setSelectedPredictors((currentPredictors) => {
@@ -71,6 +70,7 @@ export const SelectPredictorAccordion = () => {
                     onCheckedChange={(nextChecked) =>
                       togglePredictor(predictor.value, nextChecked === true)
                     }
+                    disabled={selectedDefault}
                     className={cn(
                       "mt-0.5 border-neutral-500",
                       checked &&
