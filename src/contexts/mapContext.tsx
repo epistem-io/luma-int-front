@@ -948,8 +948,6 @@ const MapContextContainer = (props: PropsWithChildren) => {
 
     markerVectorSource.clear();
 
-    console.log("arr", arr);
-
     arr.forEach((item) => {
       const markerFeature =
         item.map_feature ||

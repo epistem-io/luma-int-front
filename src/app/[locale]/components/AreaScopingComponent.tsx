@@ -351,7 +351,7 @@ export const AreaScopingComponent = () => {
                       <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                         <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                       </div>
-                      <div className="">
+                      <div className="min-w-0">
                         <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
                           {areaScopingPolygonFileName}
                         </p>
@@ -393,11 +393,11 @@ export const AreaScopingComponent = () => {
                 !areaScopingPolygonError && (
                   <>
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
-                      <div className="flex flex-row gap-x-4 items-center">
+                      <div className="col-span-12 flex flex-row gap-x-4 items-center">
                         <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                           <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                         </div>
-                        <div className="">
+                        <div className="min-w-0">
                           <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
                             {areaScopingPolygonFileName}
                           </p>
@@ -485,7 +485,7 @@ export const AreaScopingComponent = () => {
                         <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                           <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                         </div>
-                        <div className="">
+                        <div className="min-w-0">
                           <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
                             {areaScopingPolygonFileName}
                           </p>

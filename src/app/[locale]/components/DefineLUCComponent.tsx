@@ -289,12 +289,12 @@ export const DefineLUCComponent = () => {
                     <>
                       {LUCfilesize <= LUC_TEMPLATE_FILE_SIZE_LIMIT && (
                         <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
-                          <div className="col-span-10 flex flex-row gap-x-4 items-center">
+                          <div className="col-span-10 flex flex-row items-center gap-x-4">
                             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                             </div>
-                            <div className="">
-                              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
+                            <div className="min-w-0">
+                              <p className="overflow-hidden text-ellipsis whitespace-nowrap font-aptos text-lg font-bold leading-7 text-secondary-purple-dark">
                                 {LUCfilename}
                               </p>
                               <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
@@ -319,12 +319,12 @@ export const DefineLUCComponent = () => {
                       {LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT && (
                         <>
                           <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
-                            <div className="col-span-10 flex flex-row gap-x-4 items-center">
+                            <div className="col-span-10 flex flex-row items-center gap-x-4">
                               <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                 <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                               </div>
-                              <div className="">
-                                <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
+                              <div className="min-w-0">
+                                <p className="overflow-hidden text-ellipsis whitespace-nowrap font-aptos text-lg font-bold leading-7 text-danger-600">
                                   {LUCfilename}
                                 </p>
                                 <p className="font-aptos text-sm font-regular leading-5 text-danger-600">

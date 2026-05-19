@@ -204,13 +204,13 @@ export const YourMapComponent = () => {
   return (
     <>
       <div className="space-y-4">
-        <Button
+        {/* <Button
           onClick={() => {
             reset();
           }}
         >
           reset
-        </Button>
+        </Button> */}
         {isMapGenerationLoading && (
           <div className="space-y-2">
             <div className="w-full h-20 flex flex-row justify-center">

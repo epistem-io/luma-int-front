@@ -214,7 +214,7 @@ export const BasicInformationSummaryFooter = () => {
           onCancelClick();
         }}
         // disabled={isNextDisabled}
-        disabled={isCancelDisabled}
+        disabled={isCancelDisabled || isMosaicLoading}
         variant="secondary"
         className={cn()}
       >
@@ -228,7 +228,7 @@ export const BasicInformationSummaryFooter = () => {
         onClick={() => {
           onNextClick();
         }}
-        disabled={isNextDisabled}
+        disabled={isNextDisabled || isMosaicLoading}
         variant="primary"
         className=""
       >

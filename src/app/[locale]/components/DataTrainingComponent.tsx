@@ -6,13 +6,7 @@ import {
   MapGenerationContext,
   type DataTrainingActiveTab,
 } from "@/contexts/mapGenerationContext";
-import {
-  ChangeEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -427,7 +421,7 @@ export const DataTrainingComponent = () => {
                             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                             </div>
-                            <div className="">
+                            <div className="min-w-0">
                               <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
                                 {item.filename}
                               </p>
@@ -476,7 +470,7 @@ export const DataTrainingComponent = () => {
                                 <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
                                   <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
                                 </div>
-                                <div className="">
+                                <div className="min-w-0">
                                   <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
                                     {trainingFilename}
                                   </p>
@@ -524,7 +518,7 @@ export const DataTrainingComponent = () => {
                                 <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                   <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                                 </div>
-                                <div className="">
+                                <div className="min-w-0">
                                   <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
                                     {trainingFilename}
                                   </p>
@@ -581,7 +575,7 @@ export const DataTrainingComponent = () => {
                                   <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
                                     <FileTextIcon className="text-danger-700 size-12 aspect-square" />
                                   </div>
-                                  <div className="">
+                                  <div className="min-w-0">
                                     <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
                                       {trainingFilename}
                                     </p>
