@@ -86,6 +86,8 @@ export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lu
 
 export const FETCH_GENERATE_MAP = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-map`;
 
+export const SIGNUP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/account/signup`;
+
 export const THOUSAND_SEPARATOR = ".";
 
 export const DEFAULT_LUC = [

@@ -129,6 +129,11 @@
       "acceptTerms": "Harap setujui Ketentuan Layanan dan Kebijakan Privasi."
     }
   },
+  "RegisterSuccessModal": {
+    "title": "Pendaftaran berhasil!",
+    "description": "Silakan periksa email Anda untuk memverifikasi akun",
+    "confirm": "Oke"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Berikutnya",

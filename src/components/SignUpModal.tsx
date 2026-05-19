@@ -93,11 +93,29 @@ export default function SignUpModal({
     await onSubmit?.(values);
   });
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (isSubmitting && !nextOpen) {
+      return;
+    }
+
+    onOpenChange(nextOpen);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={false}
         className="w-full max-w-[400px] gap-0 overflow-hidden rounded-2xl border-neutral-400 bg-background-base-main p-0 shadow-lg"
+        onPointerDownOutside={(event) => {
+          if (isSubmitting) {
+            event.preventDefault();
+          }
+        }}
+        onEscapeKeyDown={(event) => {
+          if (isSubmitting) {
+            event.preventDefault();
+          }
+        }}
       >
         <DialogHeader className="gap-1.5 p-6 text-left">
           <DialogTitle className="lp-hea">{t("title")}</DialogTitle>
@@ -124,6 +142,7 @@ export default function SignUpModal({
                         type="email"
                         autoComplete="email"
                         placeholder={t("emailPlaceholder")}
+                        disabled={isSubmitting}
                         className={fieldClassName}
                       />
                     </FormControl>
@@ -147,6 +166,7 @@ export default function SignUpModal({
                         type="text"
                         autoComplete="name"
                         placeholder={t("namePlaceholder")}
+                        disabled={isSubmitting}
                         className={fieldClassName}
                       />
                     </FormControl>
@@ -170,6 +190,7 @@ export default function SignUpModal({
                         type="text"
                         autoComplete="organization"
                         placeholder={t("organizationPlaceholder")}
+                        disabled={isSubmitting}
                         className={fieldClassName}
                       />
                     </FormControl>
@@ -190,6 +211,7 @@ export default function SignUpModal({
                         onCheckedChange={(checked) => {
                           field.onChange(checked === true);
                         }}
+                        disabled={isSubmitting}
                         className="mt-0.5 size-[22px] rounded-[8px] border-primary-pink data-[state=checked]:border-primary-pink data-[state=checked]:bg-primary-pink"
                         aria-invalid={fieldState.invalid}
                       />
@@ -235,7 +257,8 @@ export default function SignUpModal({
               <button
                 type="button"
                 onClick={onSignIn}
-                className="font-bold text-primary-pink transition-opacity hover:cursor-pointer hover:opacity-75"
+                disabled={isSubmitting}
+                className="font-bold text-primary-pink transition-opacity hover:cursor-pointer hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {t("signIn")}
               </button>

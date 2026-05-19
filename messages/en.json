@@ -133,6 +133,11 @@
       "acceptTerms": "Please accept the Terms of Service and Privacy Policy."
     }
   },
+  "RegisterSuccessModal": {
+    "title": "Registration successful!",
+    "description": "Please check your email to verify your account",
+    "confirm": "Okay"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Next",
