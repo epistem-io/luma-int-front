@@ -3,16 +3,16 @@
 import { useContext } from "react";
 import { toast } from "sonner";
 
-import LoginModal from "@/components/LoginModal";
+import SignUpModal from "@/components/SignUpModal";
 import { GlobalContext } from "@/contexts/globalContext";
 import { useTranslations } from "next-intl";
 
-export const LoginPanel = () => {
+export const SignUpPanel = () => {
   const commonT = useTranslations("InteractivePanel.common");
   const {
-    isLoginModalOpen,
-    setIsLoginModalOpen,
+    isSignUpModalOpen,
     setIsSignUpModalOpen,
+    setIsLoginModalOpen,
   } = useContext(GlobalContext);
 
   const handlePlaceholderAction = () => {
@@ -20,19 +20,15 @@ export const LoginPanel = () => {
   };
 
   return (
-    <LoginModal
-      open={isLoginModalOpen}
-      onOpenChange={setIsLoginModalOpen}
+    <SignUpModal
+      open={isSignUpModalOpen}
+      onOpenChange={setIsSignUpModalOpen}
       onSubmit={async () => {
         handlePlaceholderAction();
       }}
-      onGoogleLogin={async () => {
-        handlePlaceholderAction();
-      }}
-      onForgotPassword={handlePlaceholderAction}
-      onSignUp={() => {
-        setIsLoginModalOpen(false);
-        setIsSignUpModalOpen(true);
+      onSignIn={() => {
+        setIsSignUpModalOpen(false);
+        setIsLoginModalOpen(true);
       }}
     />
   );

@@ -109,6 +109,26 @@
       "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter."
     }
   },
+  "SignUpModal": {
+    "title": "Daftar",
+    "description": "Ubah detail akun Anda di sini. Klik simpan saat Anda selesai.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Luma@gmail.com",
+    "nameLabel": "Nama",
+    "namePlaceholder": "Nama",
+    "organizationLabel": "Nama organisasi",
+    "organizationPlaceholder": "Nama organisasi",
+    "termsLabel": "Dengan mendaftar, saya menerima <terms>Ketentuan Layanan</terms> dan mengakui <privacy>Kebijakan Privasi</privacy> EPISTEM",
+    "submit": "Daftar",
+    "hasAccount": "Sudah punya akun?",
+    "signIn": "Masuk",
+    "errors": {
+      "invalidEmail": "Masukkan alamat email yang valid.",
+      "nameRequired": "Masukkan nama Anda.",
+      "organizationRequired": "Masukkan nama organisasi Anda.",
+      "acceptTerms": "Harap setujui Ketentuan Layanan dan Kebijakan Privasi."
+    }
+  },
   "InteractivePanel": {
     "common": {
       "next": "Berikutnya",

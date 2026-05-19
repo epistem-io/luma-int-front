@@ -36,6 +36,8 @@ interface ContextType {
   setSessionId: Dispatch<SetStateAction<string>>;
   isLoginModalOpen: boolean;
   setIsLoginModalOpen: Dispatch<SetStateAction<boolean>>;
+  isSignUpModalOpen: boolean;
+  setIsSignUpModalOpen: Dispatch<SetStateAction<boolean>>;
   polygonData: PolygonData | null;
   setPolygonData: Dispatch<SetStateAction<null | PolygonData>>;
   analysisConfig: AnalysisConfig | null;
@@ -54,6 +56,8 @@ const DEFAULT_VALUE: ContextType = {
   sessionId: "",
   isLoginModalOpen: false,
   setIsLoginModalOpen: () => {},
+  isSignUpModalOpen: false,
+  setIsSignUpModalOpen: () => {},
   // WIP
   // sessionId: "46c352ed-3b08-4862-96e6-2d03121a1f99",
   setSessionId: () => {},
@@ -65,6 +69,9 @@ const GlobalContextContainer = (props: PropsWithChildren) => {
   const [sessionId, setSessionId] = useState<string>(DEFAULT_VALUE.sessionId);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(
     DEFAULT_VALUE.isLoginModalOpen,
+  );
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState<boolean>(
+    DEFAULT_VALUE.isSignUpModalOpen,
   );
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
   const [analysisConfig, setAnalysisConfig] = useState<null | AnalysisConfig>(
@@ -83,6 +90,8 @@ const GlobalContextContainer = (props: PropsWithChildren) => {
     setAnalysisResult,
     isLoginModalOpen,
     setIsLoginModalOpen,
+    isSignUpModalOpen,
+    setIsSignUpModalOpen,
     sessionId,
     setSessionId,
   };

@@ -113,6 +113,26 @@
       "passwordMin": "Password must be at least 8 characters."
     }
   },
+  "SignUpModal": {
+    "title": "Sign Up",
+    "description": "Make changes to your account here. Click save when you're done.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Luma@gmail.com",
+    "nameLabel": "Name",
+    "namePlaceholder": "Name",
+    "organizationLabel": "Organization Name",
+    "organizationPlaceholder": "Organization Name",
+    "termsLabel": "By signing up, I accept the EPISTEM <terms>Terms of Service</terms> and acknowledge the <privacy>Privacy Policy</privacy>",
+    "submit": "Sign up",
+    "hasAccount": "Already have an account?",
+    "signIn": "Sign in",
+    "errors": {
+      "invalidEmail": "Please enter a valid email address.",
+      "nameRequired": "Please enter your name.",
+      "organizationRequired": "Please enter your organization name.",
+      "acceptTerms": "Please accept the Terms of Service and Privacy Policy."
+    }
+  },
   "InteractivePanel": {
     "common": {
       "next": "Next",

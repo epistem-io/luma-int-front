@@ -6,6 +6,7 @@ import { LoginPanel } from "./components/LoginPanel";
 import Map1 from "./components/Map";
 import { NewFloatingPanel } from "./components/NewFloatingPanel";
 import { ProgressPanel } from "./components/ProgressPanel";
+import { SignUpPanel } from "./components/SignUpPanel";
 import { ZoomButton } from "./components/ZoomButton";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default function Home() {
       {/* <LegendPanel /> */}
       <LegendPanelNew />
       <LoginPanel />
+      <SignUpPanel />
     </div>
   );
 }
