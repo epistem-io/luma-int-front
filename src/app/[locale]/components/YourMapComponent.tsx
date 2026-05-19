@@ -47,9 +47,9 @@ export const YourMapComponent = () => {
     setGenerateMapModelQuality,
     // generateMapDownloadURL,
     setGenerateMapDownloadURL,
+    isMapGenerationLoading,
+    setIsMapGenerationLoading,
   } = useContext(MapGenerationContext);
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const [progress, setProgress] = useState(0);
   const [totalProgress, setTotalProgress] = useState(0);
@@ -57,7 +57,7 @@ export const YourMapComponent = () => {
   const [isError, setIsError] = useState(false);
 
   const getMapGenerationResult = () => {
-    setIsLoading(true);
+    setIsMapGenerationLoading(true);
     setTotalProgress(0);
     setProgress(0);
 
@@ -186,7 +186,7 @@ export const YourMapComponent = () => {
         });
       })
       .finally(() => {
-        setIsLoading(false);
+        setIsMapGenerationLoading(false);
       });
   };
 
@@ -208,7 +208,7 @@ export const YourMapComponent = () => {
         >
           reset
         </Button> */}
-        {isLoading && (
+        {isMapGenerationLoading && (
           <div className="space-y-2">
             <div className="w-full h-20 flex flex-row justify-center">
               <span className="loader "></span>
@@ -222,7 +222,7 @@ export const YourMapComponent = () => {
             </p>
           </div>
         )}
-        {!isLoading && (
+        {!isMapGenerationLoading && (
           <>
             {isError && (
               <>
@@ -230,7 +230,7 @@ export const YourMapComponent = () => {
                   Something wrong happened. Please try again.
                 </p>
                 <Button
-                  disabled={isLoading}
+                  disabled={isMapGenerationLoading}
                   variant="primary"
                   className=""
                   onClick={() => {
@@ -260,7 +260,7 @@ export const YourMapComponent = () => {
 };
 
 export const YourMapFooter = () => {
-  const { generateMapDownloadURL, setIsYourMapDialogVisible } =
+  const { setIsYourMapDialogVisible, isMapGenerationLoading } =
     useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -273,7 +273,7 @@ export const YourMapFooter = () => {
           onClick={() => {
             setIsYourMapDialogVisible(true);
           }}
-          disabled={!generateMapDownloadURL?.download_url}
+          disabled={isMapGenerationLoading}
           variant="primary"
           className=""
         >

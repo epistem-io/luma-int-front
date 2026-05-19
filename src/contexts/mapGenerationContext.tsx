@@ -147,6 +147,8 @@ export interface MapGenerationContextType {
   setGenerateMapDownloadURL: Dispatch<
     SetStateAction<GenerateMapDataDownloadURL | null>
   >;
+  isMapGenerationLoading: boolean;
+  setIsMapGenerationLoading: Dispatch<SetStateAction<boolean>>;
   summaryData: InputSummaryRes | null;
   setSummaryData: Dispatch<SetStateAction<InputSummaryRes | null>>;
   isDefineLULCChanged: boolean;
@@ -275,6 +277,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setGenerateMapModelQuality: () => {},
   generateMapDownloadURL: null,
   setGenerateMapDownloadURL: () => {},
+  isMapGenerationLoading: false,
+  setIsMapGenerationLoading: () => {},
   summaryData: null,
   setSummaryData: () => {},
   isDefineLULCChanged: true,
@@ -445,6 +449,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.generateMapDownloadURL,
   );
 
+  const [isMapGenerationLoading, setIsMapGenerationLoading] = useState(
+    DEFAULT_VALUE.isMapGenerationLoading,
+  );
+
   const [summaryData, setSummaryData] = useState<InputSummaryRes | null>(
     DEFAULT_VALUE.summaryData,
   );
@@ -542,6 +550,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapFeatureImportance(DEFAULT_VALUE.generateMapFeatureImportance);
     setGenerateMapModelQuality(DEFAULT_VALUE.generateMapModelQuality);
     setGenerateMapDownloadURL(DEFAULT_VALUE.generateMapDownloadURL);
+    setIsMapGenerationLoading(DEFAULT_VALUE.isMapGenerationLoading);
     setSummaryData(DEFAULT_VALUE.summaryData);
     setIsDefineLULCChanged(DEFAULT_VALUE.isDefineLULCChanged);
     setIsTrainingDataChanged(DEFAULT_VALUE.isTrainingDataChanged);
@@ -665,6 +674,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapModelQuality,
     generateMapDownloadURL,
     setGenerateMapDownloadURL,
+    isMapGenerationLoading,
+    setIsMapGenerationLoading,
     summaryData,
     setSummaryData,
     isDefineLULCChanged,

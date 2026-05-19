@@ -22,7 +22,8 @@ import { ConfirmDialog } from "./ConfirmDialog";
 
 export const YourMapDialog = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  const { sessionId, setIsLoginModalOpen } = useContext(GlobalContext);
+  const { sessionId, setSessionId, setIsLoginModalOpen } =
+    useContext(GlobalContext);
   const {
     generateMapDownloadURL,
     isYourMapDialogVisible,
@@ -47,7 +48,7 @@ export const YourMapDialog = () => {
       return;
     }
 
-    if (!generateMapDownloadURL?.download_url || !sessionId) {
+    if (!sessionId) {
       toast.error(commonT("somethingWrongHappened"));
       return;
     }
@@ -102,6 +103,7 @@ export const YourMapDialog = () => {
     handleCloseAllModals();
     resetMapState();
     resetMapGenerationState();
+    setSessionId("");
   };
 
   return (
@@ -149,7 +151,7 @@ export const YourMapDialog = () => {
           <div className="mx-auto mt-0 flex w-full max-w-[490px] flex-col gap-3">
             <Button
               onClick={handleDownload}
-              disabled={!generateMapDownloadURL?.download_url || isDownloading}
+              disabled={isDownloading}
               variant="primary"
               className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
             >
