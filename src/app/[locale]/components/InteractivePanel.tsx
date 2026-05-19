@@ -368,6 +368,7 @@ export const InteractivePanel = () => {
           )}
         </div>
         <CollapsibleContent
+          // forceMount={stepKey === PANEL_COMPONENT_KEY.YOUR_MAP}
           className={cn("collapsible-content-primitive relative pt-2", {
             "h-full": isOpen,
           })}

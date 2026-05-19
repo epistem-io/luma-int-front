@@ -149,6 +149,12 @@ export interface MapGenerationContextType {
   >;
   isMapGenerationLoading: boolean;
   setIsMapGenerationLoading: Dispatch<SetStateAction<boolean>>;
+  progress: number;
+  setProgress: Dispatch<SetStateAction<number>>;
+  totalProgress: number;
+  setTotalProgress: Dispatch<SetStateAction<number>>;
+  isGenerationError: boolean;
+  setIsGenerationError: Dispatch<SetStateAction<boolean>>;
   summaryData: InputSummaryRes | null;
   setSummaryData: Dispatch<SetStateAction<InputSummaryRes | null>>;
   isDefineLULCChanged: boolean;
@@ -279,6 +285,12 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setGenerateMapDownloadURL: () => {},
   isMapGenerationLoading: false,
   setIsMapGenerationLoading: () => {},
+  progress: 0,
+  setProgress: () => {},
+  totalProgress: 0,
+  setTotalProgress: () => {},
+  isGenerationError: false,
+  setIsGenerationError: () => {},
   summaryData: null,
   setSummaryData: () => {},
   isDefineLULCChanged: true,
@@ -452,6 +464,13 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [isMapGenerationLoading, setIsMapGenerationLoading] = useState(
     DEFAULT_VALUE.isMapGenerationLoading,
   );
+  const [progress, setProgress] = useState(DEFAULT_VALUE.progress);
+  const [totalProgress, setTotalProgress] = useState(
+    DEFAULT_VALUE.totalProgress,
+  );
+  const [isGenerationError, setIsGenerationError] = useState(
+    DEFAULT_VALUE.isGenerationError,
+  );
 
   const [summaryData, setSummaryData] = useState<InputSummaryRes | null>(
     DEFAULT_VALUE.summaryData,
@@ -551,6 +570,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapModelQuality(DEFAULT_VALUE.generateMapModelQuality);
     setGenerateMapDownloadURL(DEFAULT_VALUE.generateMapDownloadURL);
     setIsMapGenerationLoading(DEFAULT_VALUE.isMapGenerationLoading);
+    setProgress(DEFAULT_VALUE.progress);
+    setTotalProgress(DEFAULT_VALUE.totalProgress);
+    setIsGenerationError(DEFAULT_VALUE.isGenerationError);
     setSummaryData(DEFAULT_VALUE.summaryData);
     setIsDefineLULCChanged(DEFAULT_VALUE.isDefineLULCChanged);
     setIsTrainingDataChanged(DEFAULT_VALUE.isTrainingDataChanged);
@@ -676,6 +698,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapDownloadURL,
     isMapGenerationLoading,
     setIsMapGenerationLoading,
+    progress,
+    setProgress,
+    totalProgress,
+    setTotalProgress,
+    isGenerationError,
+    setIsGenerationError,
     summaryData,
     setSummaryData,
     isDefineLULCChanged,

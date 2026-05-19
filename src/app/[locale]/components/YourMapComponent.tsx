@@ -12,9 +12,8 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import TileLayer from "ol/layer/Tile";
 import { XYZ } from "ol/source";
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect } from "react";
 import { toast } from "sonner";
-import { set } from "zod";
 
 const VISUALIZATION = "visualization";
 const CALC_LULC_COMP = "calculate lulc composition";
@@ -35,7 +34,7 @@ export const YourMapComponent = () => {
   } = useContext(MapContext);
 
   const {
-    // generateMapDataVisualization,
+    generateMapDataVisualization,
     setGenerateMapDataVisualization,
     // generateMapLULC,
     setGenerateMapLULC,
@@ -49,15 +48,17 @@ export const YourMapComponent = () => {
     setGenerateMapDownloadURL,
     isMapGenerationLoading,
     setIsMapGenerationLoading,
+    progress,
+    setProgress,
+    totalProgress,
+    setTotalProgress,
+    isGenerationError,
+    setIsGenerationError,
   } = useContext(MapGenerationContext);
-
-  const [progress, setProgress] = useState(0);
-  const [totalProgress, setTotalProgress] = useState(0);
-
-  const [isError, setIsError] = useState(false);
 
   const getMapGenerationResult = () => {
     setIsMapGenerationLoading(true);
+    setIsGenerationError(false);
     setTotalProgress(0);
     setProgress(0);
 
@@ -92,11 +93,11 @@ export const YourMapComponent = () => {
           split.forEach((item) => {
             if (item === "") return;
 
-            // console.log("item", item);
+            console.log("item", item);
 
             const json: GenerateMapStream = JSON.parse(item);
 
-            // console.log("json", json);
+            console.log("json", json);
 
             if (totalProgress === 0) {
               setTotalProgress(json.w);
@@ -132,36 +133,41 @@ export const YourMapComponent = () => {
             }
 
             if (json.process === CALC_LULC_COMP) {
+              // console.log("data raw CALC_LULC_COMP", json.data);
               const data = json.data as GenerateMapDataLULCComp;
-              console.log("data CALC_LULC_COMP", data);
+              // console.log("data CALC_LULC_COMP", data);
               setGenerateMapLULC(data);
               return;
             }
 
             if (json.process === SAMPLE_DATA_QUALITY) {
+              // console.log("data raw SAMPLE_DATA_QUALITY", json.data);
               const data = json.data as GenerateMapDataSampleDataQuality;
-              console.log("data SAMPLE_DATA_QUALITY", data);
+              // console.log("data SAMPLE_DATA_QUALITY", data);
               setGenerateMapSampleQuality(data);
               return;
             }
 
             if (json.process === FEATURE_IMPORTANCE) {
+              // console.log("data raw FEATURE_IMPORTANCE", json.data);
               const data = json.data as GenerateMapDataFeatureImportance;
-              console.log("data FEATURE_IMPORTANCE", data);
+              // console.log("data FEATURE_IMPORTANCE", data);
               setGenerateMapFeatureImportance(data);
               return;
             }
 
             if (json.process === EVALUATE_MODEL_QUALITY) {
+              // console.log("data raw EVALUATE_MODEL_QUALITY", json.data);
               const data = json.data as GenerateMapDataEvalModelQuality;
-              console.log("data EVALUATE_MODEL_QUALITY", data);
+              // console.log("data EVALUATE_MODEL_QUALITY", data);
               setGenerateMapModelQuality(data);
               return;
             }
 
             if (json.process === DOWNLOAD_URL) {
+              // console.log("data raw DOWNLOAD_URL", json.data);
               const data = json.data as GenerateMapDataDownloadURL;
-              console.log("data DOWNLOAD_URL", data);
+              // console.log("data DOWNLOAD_URL", data);
               setGenerateMapDownloadURL(data);
               return;
             }
@@ -169,7 +175,7 @@ export const YourMapComponent = () => {
         }
       })
       .catch((e) => {
-        setIsError(true);
+        setIsGenerationError(true);
         if (e instanceof UnauthorizedError) {
           toast.error("Please log in to generate your map.", {
             duration: Infinity,
@@ -195,19 +201,21 @@ export const YourMapComponent = () => {
   };
 
   useEffect(() => {
+    if (generateMapDataVisualization || isMapGenerationLoading) return;
+    // console.log("getagain");
     getMapGenerationResult();
   }, []);
 
   return (
     <>
       <div className="space-y-4">
-        {/* <Button
+        <Button
           onClick={() => {
             reset();
           }}
         >
           reset
-        </Button> */}
+        </Button>
         {isMapGenerationLoading && (
           <div className="space-y-2">
             <div className="w-full h-20 flex flex-row justify-center">
@@ -224,24 +232,26 @@ export const YourMapComponent = () => {
         )}
         {!isMapGenerationLoading && (
           <>
-            {isError && (
+            {isGenerationError && (
               <>
                 <p className=" text-center">
                   Something wrong happened. Please try again.
                 </p>
-                <Button
-                  disabled={isMapGenerationLoading}
-                  variant="primary"
-                  className=""
-                  onClick={() => {
-                    getMapGenerationResult();
-                  }}
-                >
-                  Retry
-                </Button>
+                <div className="w-full flex flex-row justify-center">
+                  <Button
+                    disabled={isMapGenerationLoading}
+                    variant="primary"
+                    className=""
+                    onClick={() => {
+                      getMapGenerationResult();
+                    }}
+                  >
+                    Retry
+                  </Button>
+                </div>
               </>
             )}
-            {!isError && (
+            {!isGenerationError && (
               <>
                 <ModelAccuracyAssessment />
                 <LULCCompositionSummary />
