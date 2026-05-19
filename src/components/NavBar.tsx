@@ -3,6 +3,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import LanguageToggle from "./LanguageToggle";
+import { Button } from "./ui/button";
 
 interface NavBarProps {
   className?: string;
@@ -25,7 +26,7 @@ export function NavBar({ className }: NavBarProps) {
 
   return (
     <nav
-      className={cn("z-50 w-full bg-neutral-100", className)}
+      className={cn("z-50 w-full bg-white", className)}
       // className={cn("sticky top-0 z-50 w-full bg-neutral-100", className)}
     >
       <div className="w-full py-2 px-5">
@@ -54,7 +55,7 @@ export function NavBar({ className }: NavBarProps) {
             </div>
           </Link>
 
-          <div className="flex items-center space-x-10">
+          <div className="flex items-center space-x-5">
             {/* <nav className="flex items-center space-x-8">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center space-x-1 font-lato text-md font-regular text-neutral-700-baru transition-colors hover:text-foreground hover:cursor-pointer">
@@ -90,6 +91,12 @@ export function NavBar({ className }: NavBarProps) {
 
             <LanguageToggle />
             {/* Language Picker */}
+            <Button
+              variant={"outline"}
+              className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
+            >
+              Login
+            </Button>
             {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button
                 onClick={() => setCurrentLanguage("EN")}

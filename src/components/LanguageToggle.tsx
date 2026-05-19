@@ -14,7 +14,7 @@ const LanguageToggle = () => {
   const locale = useLocale();
 
   return (
-    <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
+    <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5 rounded-[8px]">
       <button
         onClick={() =>
           router.replace(
