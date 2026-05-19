@@ -2,7 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { GlobalContext } from "@/contexts/globalContext";
-import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import {
+  MapGenerationContext,
+  type DataTrainingActiveTab,
+} from "@/contexts/mapGenerationContext";
 import {
   ChangeEvent,
   useContext,
@@ -86,6 +89,8 @@ export const DataTrainingComponent = () => {
     setStepKey,
     isUploadingTrainingFile,
     setIsUploadingTrainingFile,
+    dataTrainingActiveTab,
+    setDataTrainingActiveTab,
     selectedDefault,
     selectedCustom,
     trainingFile,
@@ -104,11 +109,10 @@ export const DataTrainingComponent = () => {
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
-  const [activeTab, setActiveTab] = useState("upload");
   const startPointingButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
-    if (activeTab !== "oss") return;
+    if (dataTrainingActiveTab !== "oss") return;
 
     requestAnimationFrame(() => {
       startPointingButtonRef.current?.scrollIntoView({
@@ -116,7 +120,7 @@ export const DataTrainingComponent = () => {
         block: "center",
       });
     });
-  }, [activeTab]);
+  }, [dataTrainingActiveTab]);
 
   // useEffect(() => {
   //   console.log("upll", uploadedFilesArray);
@@ -291,8 +295,10 @@ export const DataTrainingComponent = () => {
         {selectedCustom && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
+              value={dataTrainingActiveTab}
+              onValueChange={(value) =>
+                setDataTrainingActiveTab(value as DataTrainingActiveTab)
+              }
               className="gap-y-3 mb-0"
             >
               <div className="px-0 py-0">

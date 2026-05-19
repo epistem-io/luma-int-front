@@ -31,6 +31,8 @@ export type LULCParamsAccordionSection =
   | "random-forest"
   | "data-validation";
 
+export type DataTrainingActiveTab = "upload" | "oss";
+
 export interface MapGenerationContextType {
   progressPanelIndex: number;
   setProgressPanelIndex: Dispatch<SetStateAction<number>>;
@@ -102,11 +104,13 @@ export interface MapGenerationContextType {
   trainingFilesize: number;
   trainingFileError: string;
   uploadedFilesArray: FileTrainingObject[];
+  dataTrainingActiveTab: DataTrainingActiveTab;
   setTrainingFile: Dispatch<SetStateAction<File | null>>;
   setTrainingFilename: Dispatch<SetStateAction<string>>;
   setTrainingFilesize: Dispatch<SetStateAction<number>>;
   setTrainingFileError: Dispatch<SetStateAction<string>>;
   setUploadedFilesArray: Dispatch<SetStateAction<FileTrainingObject[]>>;
+  setDataTrainingActiveTab: Dispatch<SetStateAction<DataTrainingActiveTab>>;
   classArray: LUCClass[];
   setClassArray: Dispatch<SetStateAction<LUCClass[]>>;
   pointingType: POINTING_TYPE;
@@ -237,11 +241,13 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   trainingFilesize: 0,
   trainingFileError: "",
   uploadedFilesArray: [],
+  dataTrainingActiveTab: "upload",
   setTrainingFile: () => {},
   setTrainingFilename: () => {},
   setTrainingFilesize: () => {},
   setTrainingFileError: () => {},
   setUploadedFilesArray: () => {},
+  setDataTrainingActiveTab: () => {},
   // classArray: TEMP_ARR,
   classArray: [],
   setClassArray: () => {},
@@ -400,6 +406,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [uploadedFilesArray, setUploadedFilesArray] = useState<
     FileTrainingObject[]
   >(DEFAULT_VALUE.uploadedFilesArray);
+  const [dataTrainingActiveTab, setDataTrainingActiveTab] =
+    useState<DataTrainingActiveTab>(DEFAULT_VALUE.dataTrainingActiveTab);
 
   //
 
@@ -521,6 +529,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setTrainingFilesize(DEFAULT_VALUE.trainingFilesize);
     setTrainingFileError(DEFAULT_VALUE.trainingFileError);
     setUploadedFilesArray(DEFAULT_VALUE.uploadedFilesArray);
+    setDataTrainingActiveTab(DEFAULT_VALUE.dataTrainingActiveTab);
     setClassArray(DEFAULT_VALUE.classArray);
     setPointingType(DEFAULT_VALUE.pointingType);
     setSelectedClass(DEFAULT_VALUE.selectedClass);
@@ -623,11 +632,13 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     trainingFilesize,
     trainingFileError,
     uploadedFilesArray,
+    dataTrainingActiveTab,
     setTrainingFile,
     setTrainingFilename,
     setTrainingFilesize,
     setTrainingFileError,
     setUploadedFilesArray,
+    setDataTrainingActiveTab,
     classArray,
     setClassArray,
     pointingType,

@@ -832,6 +832,7 @@ export const DefineLUCFooter = () => {
     setLUCFilesize,
     setDefaultArray,
     setIsDefineLULCChanged,
+    setDataTrainingActiveTab,
     isDefineLULCChanged,
   } = useContext(MapGenerationContext);
 
@@ -850,6 +851,7 @@ export const DefineLUCFooter = () => {
 
   const onClickNext = async () => {
     if (!isDefineLULCChanged) {
+      setDataTrainingActiveTab("upload");
       setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
       // WIP NEED CONFIRM
       setProgressPanelIndex(2);
@@ -898,6 +900,7 @@ export const DefineLUCFooter = () => {
           setClassArray(arr);
           setProgressPanelIndex(2);
 
+          setDataTrainingActiveTab("upload");
           setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
           // CONTINUE
         })
@@ -995,6 +998,7 @@ export const DefineLUCFooter = () => {
 
         setIsDefineLULCChanged(false);
         setProgressPanelIndex(2);
+        setDataTrainingActiveTab("upload");
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
         // CONTINUE
       })

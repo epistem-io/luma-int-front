@@ -38,7 +38,8 @@ export const OSSComponent = () => {
 };
 
 export const OSSFooter = () => {
-  const { setStepKey } = useContext(MapGenerationContext);
+  const { setStepKey, setDataTrainingActiveTab } =
+    useContext(MapGenerationContext);
   const { markerArray, setMarkerId, overlay, removeMarkerCursor } =
     useContext(MapContext);
 
@@ -55,6 +56,7 @@ export const OSSFooter = () => {
   const onClickNext = () => {
     setMarkerId("");
     overlay?.setPosition(undefined);
+    setDataTrainingActiveTab("oss");
 
     // removeMarkerCursor();
 

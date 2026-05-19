@@ -45,6 +45,7 @@ export const LULCParamsFooter = () => {
     setLULCParamsOpenAccordion,
     setStepKey,
     setProgressPanelIndex,
+    setDataTrainingActiveTab,
   } = useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
 
@@ -112,6 +113,7 @@ export const LULCParamsFooter = () => {
   };
 
   const onClickBack = () => {
+    setDataTrainingActiveTab("upload");
     setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
     setProgressPanelIndex(2);
   };
