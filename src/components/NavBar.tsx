@@ -10,6 +10,12 @@ import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import LanguageToggle from "./LanguageToggle";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface NavBarProps {
   className?: string;
@@ -27,10 +33,25 @@ const dataMethodsItems: MenuItem[] = [
   { label: "Validation", href: "/validation" },
 ];
 
+const getUserInitials = (name?: string, email?: string) => {
+  const nameParts = name?.trim().split(/\s+/).filter(Boolean) ?? [];
+
+  if (nameParts.length > 0) {
+    return nameParts
+      .slice(0, 2)
+      .map((part) => part.charAt(0))
+      .join("")
+      .toUpperCase();
+  }
+
+  return (email?.replace(/\s+/g, "").slice(0, 2) ?? "").toUpperCase();
+};
+
 export function NavBar({ className }: NavBarProps) {
   const t = useTranslations("LoginModal");
   const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { setIsLoginModalOpen } = useContext(GlobalContext);
+  const userInitials = getUserInitials(user?.name, user?.email);
 
   return (
     <nav
@@ -100,19 +121,25 @@ export function NavBar({ className }: NavBarProps) {
             <LanguageToggle />
             {/* Language Picker */}
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <span className="font-aptos text-sm leading-5 text-text-icons-base-main">
-                  {user?.name ?? user?.email}
-                </span>
-                <Button
-                  type="button"
-                  variant={"outline"}
-                  className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
-                  onClick={logout}
-                >
-                  Logout
-                </Button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Open user menu"
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF6FE] font-aptos text-sm font-semibold leading-5 text-primary-pink outline-none transition-colors hover:cursor-pointer hover:bg-[#FFEAFB] focus-visible:ring-2 focus-visible:ring-primary-pink focus-visible:ring-offset-2"
+                  >
+                    {userInitials || "U"}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[10rem]">
+                  <DropdownMenuItem
+                    className="font-aptos text-sm leading-5 text-primary-pink hover:cursor-pointer"
+                    onClick={logout}
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button
                 type="button"

@@ -7,6 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { AuthContext } from "@/contexts/authContext";
+import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { Download, Save, Share2, X } from "lucide-react";
@@ -16,6 +18,8 @@ import { toast } from "sonner";
 import { ConfirmDialog } from "./ConfirmDialog";
 
 export const YourMapDialog = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+  const { setIsLoginModalOpen } = useContext(GlobalContext);
   const {
     generateMapDownloadURL,
     isYourMapDialogVisible,
@@ -34,6 +38,11 @@ export const YourMapDialog = () => {
   };
 
   const handleDownload = async () => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     const fileUrl = generateMapDownloadURL?.download_url;
 
     if (!fileUrl) {
