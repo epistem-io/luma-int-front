@@ -56,6 +56,70 @@ export const YourMapComponent = () => {
     setIsGenerationError,
   } = useContext(MapGenerationContext);
 
+  const handleStreamMessage = (json: GenerateMapStream) => {
+    // console.log("json", json);
+
+    if (totalProgress === 0) {
+      setTotalProgress(json.w);
+    }
+
+    setProgress((prev) => prev + json.a);
+
+    if (json.process === VISUALIZATION) {
+      const data = json.data as GenerateMapDataVisualization;
+      // console.log("data VISUALIZATION", data);
+      setGenerateMapDataVisualization(data);
+
+      const temp = data.layers[0];
+
+      const xyzLayer = new TileLayer({
+        source: new XYZ({
+          url: temp.url,
+
+          // Optional: Add attributions if required by the tile service provider
+        }),
+        className: `final`,
+        zIndex: 10,
+        opacity: 1,
+      });
+
+      mapInstance?.addLayer(xyzLayer);
+      setFinalLayer(xyzLayer);
+      setFinalLayerVisible(true);
+
+      return;
+    }
+
+    if (json.process === CALC_LULC_COMP) {
+      const data = json.data as GenerateMapDataLULCComp;
+      setGenerateMapLULC(data);
+      return;
+    }
+
+    if (json.process === SAMPLE_DATA_QUALITY) {
+      const data = json.data as GenerateMapDataSampleDataQuality;
+      setGenerateMapSampleQuality(data);
+      return;
+    }
+
+    if (json.process === FEATURE_IMPORTANCE) {
+      const data = json.data as GenerateMapDataFeatureImportance;
+      setGenerateMapFeatureImportance(data);
+      return;
+    }
+
+    if (json.process === EVALUATE_MODEL_QUALITY) {
+      const data = json.data as GenerateMapDataEvalModelQuality;
+      setGenerateMapModelQuality(data);
+      return;
+    }
+
+    if (json.process === DOWNLOAD_URL) {
+      const data = json.data as GenerateMapDataDownloadURL;
+      setGenerateMapDownloadURL(data);
+    }
+  };
+
   const getMapGenerationResult = () => {
     setIsMapGenerationLoading(true);
     setIsGenerationError(false);
@@ -79,99 +143,30 @@ export const YourMapComponent = () => {
           throw new Error(JSON.stringify(response.text));
         }
 
+        const decoder = new TextDecoder();
+        let buffer = "";
+
         // @ts-ignore
         for await (const chunk of response.body) {
-          // Do something with each "chunk"
-          // console.log("Received chunk:", chunk);
-          const textChunk = new TextDecoder().decode(chunk);
-          // console.log("Received chunk:", textChunk.split("\n"));
+          buffer += decoder.decode(chunk, { stream: true });
 
-          const split = textChunk.split("\n");
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
 
-          // for each split
+          lines.forEach((line) => {
+            const item = line.trim();
 
-          split.forEach((item) => {
-            if (item === "") return;
+            if (!item) return;
 
-            console.log("item", item);
-
-            const json: GenerateMapStream = JSON.parse(item);
-
-            console.log("json", json);
-
-            if (totalProgress === 0) {
-              setTotalProgress(json.w);
-            }
-
-            setProgress((prev) => prev + json.a);
-
-            if (json.process === VISUALIZATION) {
-              const data = json.data as GenerateMapDataVisualization;
-              console.log("data VISUALIZATION", data);
-              setGenerateMapDataVisualization(data);
-
-              const temp = data.layers[0];
-
-              const xyzLayer = new TileLayer({
-                source: new XYZ({
-                  url: temp.url,
-
-                  // Optional: Add attributions if required by the tile service provider
-                }),
-                className: `final`,
-                zIndex: 10,
-                opacity: 1,
-              });
-
-              // console.log("xlayer", xyzLayer);
-              // temp.push(xyzLayer);
-              mapInstance?.addLayer(xyzLayer);
-              setFinalLayer(xyzLayer);
-              setFinalLayerVisible(true);
-
-              return;
-            }
-
-            if (json.process === CALC_LULC_COMP) {
-              // console.log("data raw CALC_LULC_COMP", json.data);
-              const data = json.data as GenerateMapDataLULCComp;
-              // console.log("data CALC_LULC_COMP", data);
-              setGenerateMapLULC(data);
-              return;
-            }
-
-            if (json.process === SAMPLE_DATA_QUALITY) {
-              // console.log("data raw SAMPLE_DATA_QUALITY", json.data);
-              const data = json.data as GenerateMapDataSampleDataQuality;
-              // console.log("data SAMPLE_DATA_QUALITY", data);
-              setGenerateMapSampleQuality(data);
-              return;
-            }
-
-            if (json.process === FEATURE_IMPORTANCE) {
-              // console.log("data raw FEATURE_IMPORTANCE", json.data);
-              const data = json.data as GenerateMapDataFeatureImportance;
-              // console.log("data FEATURE_IMPORTANCE", data);
-              setGenerateMapFeatureImportance(data);
-              return;
-            }
-
-            if (json.process === EVALUATE_MODEL_QUALITY) {
-              // console.log("data raw EVALUATE_MODEL_QUALITY", json.data);
-              const data = json.data as GenerateMapDataEvalModelQuality;
-              // console.log("data EVALUATE_MODEL_QUALITY", data);
-              setGenerateMapModelQuality(data);
-              return;
-            }
-
-            if (json.process === DOWNLOAD_URL) {
-              // console.log("data raw DOWNLOAD_URL", json.data);
-              const data = json.data as GenerateMapDataDownloadURL;
-              // console.log("data DOWNLOAD_URL", data);
-              setGenerateMapDownloadURL(data);
-              return;
-            }
+            // console.log("item", item);
+            handleStreamMessage(JSON.parse(item));
           });
+        }
+
+        const lastChunk = buffer.trim();
+
+        if (lastChunk) {
+          handleStreamMessage(JSON.parse(lastChunk));
         }
       })
       .catch((e) => {
