@@ -2,6 +2,7 @@ import { BasemapButton } from "./components/BasemapButton";
 import { FloatingPanel } from "./components/FloatingPanel";
 import { LegendPanel } from "./components/LegendPanel";
 import { LegendPanelNew } from "./components/LegendPanelNew";
+import { LoginPanel } from "./components/LoginPanel";
 import Map1 from "./components/Map";
 import { NewFloatingPanel } from "./components/NewFloatingPanel";
 import { ProgressPanel } from "./components/ProgressPanel";
@@ -24,6 +25,7 @@ export default function Home() {
       </div>
       {/* <LegendPanel /> */}
       <LegendPanelNew />
+      <LoginPanel />
     </div>
   );
 }

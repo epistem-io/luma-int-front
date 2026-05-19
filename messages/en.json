@@ -96,6 +96,19 @@
     "fileTooBig": "The file is too big",
     "fileTooBigCaption": "File exceeds {X}. Please select another file"
   },
+  "LoginModal": {
+    "title": "Login",
+    "description": "Enter your email below to login to your account",
+    "emailLabel": "Email",
+    "emailPlaceholder": "m@example",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "**********",
+    "forgotPassword": "Forgot your password?",
+    "submit": "Login",
+    "google": "Login with Google",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign up"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Next",

@@ -92,6 +92,19 @@
     "opacity": "Opacity"
   },
   "error": "Error",
+  "LoginModal": {
+    "title": "Masuk",
+    "description": "Masukkan email Anda di bawah untuk masuk ke akun Anda",
+    "emailLabel": "Email",
+    "emailPlaceholder": "m@example",
+    "passwordLabel": "Kata sandi",
+    "passwordPlaceholder": "**********",
+    "forgotPassword": "Lupa kata sandi Anda?",
+    "submit": "Masuk",
+    "google": "Masuk dengan Google",
+    "noAccount": "Belum punya akun?",
+    "signUp": "Daftar"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Berikutnya",

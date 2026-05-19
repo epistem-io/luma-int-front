@@ -34,6 +34,8 @@ export interface AnalysisResult {
 interface ContextType {
   sessionId: string;
   setSessionId: Dispatch<SetStateAction<string>>;
+  isLoginModalOpen: boolean;
+  setIsLoginModalOpen: Dispatch<SetStateAction<boolean>>;
   polygonData: PolygonData | null;
   setPolygonData: Dispatch<SetStateAction<null | PolygonData>>;
   analysisConfig: AnalysisConfig | null;
@@ -50,6 +52,8 @@ const DEFAULT_VALUE: ContextType = {
   analysisResult: null,
   setAnalysisResult: () => {},
   sessionId: "",
+  isLoginModalOpen: false,
+  setIsLoginModalOpen: () => {},
   // WIP
   // sessionId: "46c352ed-3b08-4862-96e6-2d03121a1f99",
   setSessionId: () => {},
@@ -59,6 +63,9 @@ const GlobalContext = createContext(DEFAULT_VALUE);
 
 const GlobalContextContainer = (props: PropsWithChildren) => {
   const [sessionId, setSessionId] = useState<string>(DEFAULT_VALUE.sessionId);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState<boolean>(
+    DEFAULT_VALUE.isLoginModalOpen,
+  );
   const [polygonData, setPolygonData] = useState<null | PolygonData>(null);
   const [analysisConfig, setAnalysisConfig] = useState<null | AnalysisConfig>(
     null,
@@ -74,6 +81,8 @@ const GlobalContextContainer = (props: PropsWithChildren) => {
     setAnalysisConfig,
     analysisResult,
     setAnalysisResult,
+    isLoginModalOpen,
+    setIsLoginModalOpen,
     sessionId,
     setSessionId,
   };

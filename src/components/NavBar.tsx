@@ -1,7 +1,12 @@
+"use client";
+
+import { useContext } from "react";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { GlobalContext } from "@/contexts/globalContext";
 import LanguageToggle from "./LanguageToggle";
 import { Button } from "./ui/button";
 
@@ -22,7 +27,8 @@ const dataMethodsItems: MenuItem[] = [
 ];
 
 export function NavBar({ className }: NavBarProps) {
-  // const [currentLanguage, setCurrentLanguage] = React.useState("EN");
+  const t = useTranslations("LoginModal");
+  const { setIsLoginModalOpen } = useContext(GlobalContext);
 
   return (
     <nav
@@ -92,10 +98,14 @@ export function NavBar({ className }: NavBarProps) {
             <LanguageToggle />
             {/* Language Picker */}
             <Button
+              type="button"
               variant={"outline"}
               className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
+              onClick={() => {
+                setIsLoginModalOpen(true);
+              }}
             >
-              Login
+              {t("title")}
             </Button>
             {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button
