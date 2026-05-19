@@ -1,7 +1,9 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -12,8 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export interface LoginModalProps {
   open: boolean;
@@ -27,6 +36,11 @@ export interface LoginModalProps {
   onSignUp?: () => void;
   isSubmitting?: boolean;
   isGoogleLoading?: boolean;
+}
+
+interface LoginFormValues {
+  email: string;
+  password: string;
 }
 
 const fieldClassName =
@@ -43,44 +57,29 @@ export default function LoginModal({
   isGoogleLoading = false,
 }: LoginModalProps) {
   const t = useTranslations("LoginModal");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
 
   const loginSchema = z.object({
     email: z.email({ message: t("errors.invalidEmail") }),
     password: z.string().min(8, { message: t("errors.passwordMin") }),
   });
 
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
   useEffect(() => {
     if (!open) {
-      setEmail("");
-      setPassword("");
-      setErrors({});
+      form.reset();
     }
-  }, [open]);
+  }, [form, open]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const result = loginSchema.safeParse({ email, password });
-
-    if (!result.success) {
-      const fieldErrors = result.error.flatten().fieldErrors;
-
-      setErrors({
-        email: fieldErrors.email?.[0],
-        password: fieldErrors.password?.[0],
-      });
-      return;
-    }
-
-    setErrors({});
-    await onSubmit?.({ email, password });
-  };
+  const handleSubmit = form.handleSubmit(async (values) => {
+    await onSubmit?.(values);
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,78 +95,65 @@ export default function LoginModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col">
-          <div className="flex flex-col gap-4 px-6 pb-6">
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="login-email"
-                className="font-aptos text-sm font-medium leading-5 text-text-icons-base-main"
-              >
-                {t("emailLabel")}
-              </Label>
-              <Input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value);
-                  if (errors.email) {
-                    setErrors((current) => ({ ...current, email: undefined }));
-                  }
-                }}
-                placeholder={t("emailPlaceholder")}
-                className={fieldClassName}
-                aria-invalid={Boolean(errors.email)}
+          <Form {...form}>
+            <div className="flex flex-col gap-4 px-6 pb-6">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <FormLabel className="font-aptos text-sm font-medium leading-5 text-text-icons-base-main">
+                      {t("emailLabel")}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id="login-email"
+                        type="email"
+                        autoComplete="email"
+                        placeholder={t("emailPlaceholder")}
+                        className={fieldClassName}
+                      />
+                    </FormControl>
+                    <FormMessage className="font-aptos text-sm leading-5" />
+                  </FormItem>
+                )}
               />
-              {errors.email ? (
-                <p className="font-aptos text-sm leading-5 text-destructive">
-                  {errors.email}
-                </p>
-              ) : null}
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-3">
-                <Label
-                  htmlFor="login-password"
-                  className="font-aptos text-sm font-medium leading-5 text-text-icons-base-main"
-                >
-                  {t("passwordLabel")}
-                </Label>
-                <button
-                  type="button"
-                  onClick={onForgotPassword}
-                  className="font-aptos text-sm leading-5 text-text-icons-base-main underline underline-offset-2 transition-opacity hover:cursor-pointer hover:opacity-75"
-                >
-                  {t("forgotPassword")}
-                </button>
-              </div>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <FormLabel className="font-aptos text-sm font-medium leading-5 text-text-icons-base-main">
+                        {t("passwordLabel")}
+                      </FormLabel>
+                      <button
+                        type="button"
+                        onClick={onForgotPassword}
+                        className="font-aptos text-sm leading-5 text-text-icons-base-main underline underline-offset-2 transition-opacity hover:cursor-pointer hover:opacity-75"
+                      >
+                        {t("forgotPassword")}
+                      </button>
+                    </div>
 
-              <Input
-                id="login-password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-                  if (errors.password) {
-                    setErrors((current) => ({
-                      ...current,
-                      password: undefined,
-                    }));
-                  }
-                }}
-                placeholder={t("passwordPlaceholder")}
-                className={fieldClassName}
-                aria-invalid={Boolean(errors.password)}
+                    <FormControl>
+                      <Input
+                        {...field}
+                        id="login-password"
+                        type="password"
+                        autoComplete="current-password"
+                        placeholder={t("passwordPlaceholder")}
+                        className={fieldClassName}
+                      />
+                    </FormControl>
+                    <FormMessage className="font-aptos text-sm leading-5" />
+                  </FormItem>
+                )}
               />
-              {errors.password ? (
-                <p className="font-aptos text-sm leading-5 text-destructive">
-                  {errors.password}
-                </p>
-              ) : null}
             </div>
-          </div>
+          </Form>
 
           <div className="flex flex-col gap-2 px-6 pb-6">
             <Button
