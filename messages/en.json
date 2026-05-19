@@ -138,6 +138,11 @@
     "description": "Please check your email to verify your account",
     "confirm": "Okay"
   },
+  "DownloadOnTheWayModal": {
+    "title": "Your map download is on the way",
+    "description": "We’re preparing your map and will send it shortly. You can safely close this window.",
+    "confirm": "Okay"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Next",

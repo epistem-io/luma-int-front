@@ -134,6 +134,11 @@
     "description": "Silakan periksa email Anda untuk memverifikasi akun",
     "confirm": "Oke"
   },
+  "DownloadOnTheWayModal": {
+    "title": "Unduhan peta Anda sedang diproses",
+    "description": "Kami sedang menyiapkan peta Anda dan akan segera mengirimkannya. Anda dapat menutup jendela ini dengan aman.",
+    "confirm": "Oke"
+  },
   "InteractivePanel": {
     "common": {
       "next": "Berikutnya",

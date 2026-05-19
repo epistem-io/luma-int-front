@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import DownloadOnTheWayModal from "@/components/DownloadOnTheWayModal";
 import {
   Dialog,
   DialogContent,
@@ -7,10 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DOWNLOAD_REQUEST_URL, GET_MOSAIC_URL } from "@/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Download, Save, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
@@ -19,7 +22,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
 
 export const YourMapDialog = () => {
   const { isAuthenticated } = useContext(AuthContext);
-  const { setIsLoginModalOpen } = useContext(GlobalContext);
+  const { sessionId, setIsLoginModalOpen } = useContext(GlobalContext);
   const {
     generateMapDownloadURL,
     isYourMapDialogVisible,
@@ -29,6 +32,7 @@ export const YourMapDialog = () => {
   const { resetMapState } = useContext(MapContext);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
+  const [isDownloadOnTheWayOpen, setIsDownloadOnTheWayOpen] = useState(false);
 
   const t = useTranslations("InteractivePanel.yourMap");
   const commonT = useTranslations("InteractivePanel.common");
@@ -43,9 +47,7 @@ export const YourMapDialog = () => {
       return;
     }
 
-    const fileUrl = generateMapDownloadURL?.download_url;
-
-    if (!fileUrl) {
+    if (!generateMapDownloadURL?.download_url || !sessionId) {
       toast.error(commonT("somethingWrongHappened"));
       return;
     }
@@ -53,31 +55,30 @@ export const YourMapDialog = () => {
     try {
       setIsDownloading(true);
 
-      const response = await fetch(fileUrl);
+      const response = await fetchWithAuth(DOWNLOAD_REQUEST_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          session_id: sessionId,
+        }),
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to download generated map");
+        throw new Error(commonT("somethingWrongHappened"));
       }
 
-      const blob = await response.blob();
-      const filename =
-        response.headers
-          .get("content-disposition")
-          ?.split("filename=")[1]
-          ?.replaceAll('"', "") || "generated-map";
-      const url = window.URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-
-      anchor.href = url;
-      anchor.download = filename;
-      anchor.style.display = "none";
-
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-
-      window.URL.revokeObjectURL(url);
+      setIsYourMapDialogVisible(false);
+      setIsCloseConfirmVisible(false);
+      setIsDownloadOnTheWayOpen(true);
     } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        setIsLoginModalOpen(true);
+        return;
+      }
+
       toast.error(
         error instanceof Error
           ? error.message
@@ -190,6 +191,11 @@ export const YourMapDialog = () => {
         subtitle={t("closePopup")}
         confirmButtonCaption={commonT("confirm")}
         cancelButtonCaption={commonT("cancel")}
+      />
+
+      <DownloadOnTheWayModal
+        open={isDownloadOnTheWayOpen}
+        onOpenChange={setIsDownloadOnTheWayOpen}
       />
     </>
   );
