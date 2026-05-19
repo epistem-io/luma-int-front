@@ -17,7 +17,7 @@ import {
 import { Slider } from "@/components/ui/slider";
 import {
   BASIC_INFORMATION_ACCORDION_TYPE,
-  SATELLITE_OPTIONS_ARRAY,
+  getAvailableSatelliteOptionsByYear,
 } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { ChevronDown } from "lucide-react";
@@ -28,6 +28,8 @@ export const SateliteCompositeAccordion = () => {
   const {
     isEditingSatelliteComposite,
     setIsEditingSatelliteComposite,
+    temporalCoverage,
+    temporalCoverageUnit,
     satelliteSource,
     setSatelliteSource,
     maximumCloudCover,
@@ -36,6 +38,16 @@ export const SateliteCompositeAccordion = () => {
 
   const t = useTranslations("InteractivePanel");
 
+  const selectedYear = Number(temporalCoverageUnit);
+  const hasSelectedTimePeriod =
+    temporalCoverage === "1" &&
+    temporalCoverageUnit !== "" &&
+    Number.isInteger(selectedYear);
+  const availableSatelliteOptions = hasSelectedTimePeriod
+    ? getAvailableSatelliteOptionsByYear(selectedYear)
+    : [];
+  const isSatelliteSelectDisabled =
+    !isEditingSatelliteComposite || !hasSelectedTimePeriod;
   const isFormDisabled = !isEditingSatelliteComposite;
   const [selectedSatellite, setSelectedSatellite] = useState(satelliteSource);
   const [cloudCoverage, setCloudCoverage] = useState(maximumCloudCover);
@@ -61,6 +73,18 @@ export const SateliteCompositeAccordion = () => {
     setSelectedSatellite(satelliteSource);
     setCloudCoverage(maximumCloudCover);
   }, [satelliteSource, maximumCloudCover, isEditingSatelliteComposite]);
+
+  useEffect(() => {
+    if (!hasSelectedTimePeriod) return;
+
+    const isCurrentSatelliteAvailable = availableSatelliteOptions.some(
+      (satellite) => satellite.value === selectedSatellite,
+    );
+
+    if (isCurrentSatelliteAvailable) return;
+
+    setSelectedSatellite(availableSatelliteOptions[0]?.value ?? "");
+  }, [hasSelectedTimePeriod, availableSatelliteOptions, selectedSatellite]);
 
   return (
     <AccordionItem
@@ -89,7 +113,7 @@ export const SateliteCompositeAccordion = () => {
               </p>
             </Label>
             <Select
-              disabled={isFormDisabled}
+              disabled={isSatelliteSelectDisabled}
               value={selectedSatellite}
               onValueChange={setSelectedSatellite}
             >
@@ -101,7 +125,7 @@ export const SateliteCompositeAccordion = () => {
                 />
               </SelectTrigger>
               <SelectContent position="item-aligned">
-                {SATELLITE_OPTIONS_ARRAY.map((satellite) => (
+                {availableSatelliteOptions.map((satellite) => (
                   <SelectItem
                     key={satellite.value}
                     value={satellite.value}

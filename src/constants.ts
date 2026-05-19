@@ -121,39 +121,55 @@ export const DEFAULT_LUC = [
 ];
 
 export const SATELLITE_OPTIONS_ARRAY = [
-  {
-    value: "L1_RAW",
-    label: "Landsat 1",
-  },
-  {
-    value: "L2_RAW",
-    label: "Landsat 2",
-  },
-  {
-    value: "L3_RAW",
-    label: "Landsat 3",
-  },
-  {
-    value: "L4_SR",
-    label: "Landsat 4",
-  },
-  {
-    value: "L5_SR",
-    label: "Landsat 5",
-  },
+  // {
+  //   value: "L1_RAW",
+  //   label: "Landsat 1",
+  // },
+  // {
+  //   value: "L2_RAW",
+  //   label: "Landsat 2",
+  // },
+  // {
+  //   value: "L3_RAW",
+  //   label: "Landsat 3",
+  // },
+  // {
+  //   value: "L4_SR",
+  //   label: "Landsat 4",
+  // },
+  // {
+  //   value: "L5_SR",
+  //   label: "Landsat 5",
+  // },
   {
     value: "L7_SR",
     label: "Landsat 7",
+    startYear: 1999,
+    endYear: 2021,
   },
   {
     value: "L8_SR",
     label: "Landsat 8",
+    startYear: 2013,
   },
   {
     value: "L9_SR",
     label: "Landsat 9",
+    startYear: 2021,
   },
 ];
+
+export const getAvailableSatelliteOptionsByYear = (year?: number) => {
+  if (!year) return [];
+
+  return SATELLITE_OPTIONS_ARRAY.filter((satellite) => {
+    const isAfterStartYear = year >= satellite.startYear;
+    const isBeforeEndYear =
+      satellite.endYear === undefined || year <= satellite.endYear;
+
+    return isAfterStartYear && isBeforeEndYear;
+  });
+};
 
 export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";
 // export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
