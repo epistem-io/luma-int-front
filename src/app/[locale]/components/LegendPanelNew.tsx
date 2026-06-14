@@ -77,8 +77,7 @@ export const LegendPanelNew = () => {
 
   const { polygonData, generateMapLULC } = useContext(MapGenerationContext);
 
-  const t = useTranslations("Legends");
-  const tInteractive = useTranslations("InteractivePanel");
+  const t = useTranslations("InteractivePanel");
 
   const [visArr, setVisArr] = useState<boolean[]>([]);
   const [accordionArr, setAccordionArr] = useState<string[]>([]);
@@ -156,7 +155,7 @@ export const LegendPanelNew = () => {
                   <div className="space-y-0 max-h-[360px] overflow-y-scroll">
                     <div className="">
                       <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-                        {tInteractive("layerAndComposites.layerAndComposites")}
+                        {t("layerAndComposites.layerAndComposites")}
                       </p>
                       {/* <p className="font-aptos text-neutral-700-baru text-md font-regular leading-6">
                         {tInteractive(
@@ -294,7 +293,7 @@ export const LegendPanelNew = () => {
                           <AccordionItem value="aoi" className="border-b-0">
                             <AccordionTrigger className="py-0">
                               <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                {tInteractive(
+                                {t(
                                   "layerAndComposites.areaOfInterest",
                                 )}
                               </p>
@@ -335,7 +334,7 @@ export const LegendPanelNew = () => {
                               <AccordionTrigger className="py-0 flex flex-row items-center">
                                 <div className="flex flex-row items-center gap-x-1">
                                   <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                    {tInteractive(
+                                    {t(
                                       "layerAndComposites.composite",
                                     )}
                                   </p>
@@ -377,7 +376,7 @@ export const LegendPanelNew = () => {
                             </div>
                             <AccordionContent>
                               <p className="text-l-regular text-neutral-700-baru mt-2">
-                                {tInteractive(
+                                {t(
                                   "layerAndComposites.compositeSubtitle",
                                 )}
                               </p>
@@ -391,7 +390,7 @@ export const LegendPanelNew = () => {
                                   />
                                   {/* <HelpCircle className="mt-px size-5 shrink-0 text-primary-pink" /> */}
                                   <p className="font-aptos text-[11.5px] leading-[16.68px] text-primary-pink">
-                                    {tInteractive(
+                                    {t(
                                       "layerAndComposites.compositeTip",
                                     )}
                                   </p>
@@ -450,7 +449,7 @@ export const LegendPanelNew = () => {
                             <AccordionTrigger className="py-0">
                               <div className="flex flex-row items-center gap-x-2">
                                 <p className="font-aptos text-[15px]] font-bold leading-5.5 text-text-icons-base-main">
-                                  {tInteractive("dataTraining.lulcClass")}
+                                  {t("dataTraining.lulcClass")}
                                 </p>
 
                                 <div
@@ -524,7 +523,7 @@ export const LegendPanelNew = () => {
                               <div className="mt-4">
                                 {/* WIP Copy */}
                                 <p className="text-s-medium text-text-icons-base-third">
-                                  {tInteractive(
+                                  {t(
                                     "layerAndComposites.legendLULCsubtitleBefore",
                                   )}
                                 </p>
@@ -572,9 +571,9 @@ export const LegendPanelNew = () => {
                     )}
                   >
                     <p className="font-aptos text-xl font-extrabold leading-6 text-text-icons-on-color">
-                      {tInteractive("layerAndComposites.layerAndComposites")}
+                      {t("layerAndComposites.layerAndComposites")}
                     </p>
-                    {/* <p className="bold-body-400">{tInteractive("legend")}</p> */}
+                    {/* <p className="bold-body-400">{t("legend")}</p> */}
                   </AccordionFullTrigger>
                   {/* <div className="w-15"></div> */}
                 </div>

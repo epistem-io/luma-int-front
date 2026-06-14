@@ -40,7 +40,7 @@ function colorsToStyle(colors: string[]) {
 export const LegendPanel = () => {
   const { layerLegendArray } = useContext(MapContext);
 
-  const t = useTranslations("Legends");
+  const t = useTranslations("InteractivePanel");
 
   const [visArr, setVisArr] = useState<boolean[]>([]);
 
@@ -74,10 +74,10 @@ export const LegendPanel = () => {
           <AccordionItem className="" value="legend-accordion">
             <AccordionFullTrigger className="px-4 py-1.5 hover:no-underline shadow z-40">
               <p className="bold-body-400">
-                {t("legend")}
+                {t("layerAndComposites.legend")}
                 {"  "}
                 <span className="regular-body-400">
-                  {t("activeLayer", { numOfLayer: layerLegendArray.length })}
+                  {t("layerAndComposites.activeLayer", { numOfLayer: layerLegendArray.length })}
                   {/* ({layerLegendArray.length} active layers) */}
                 </span>
               </p>

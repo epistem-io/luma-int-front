@@ -177,7 +177,7 @@ export default function LoginModal({
                 "disabled:border-neutral-400 disabled:bg-background-base-main disabled:text-text-icons-base-second",
               )}
             >
-              {t("google")}
+              {t("LoginModal.google")}
             </Button> */}
           </div>
         </form>
