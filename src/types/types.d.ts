@@ -181,6 +181,13 @@ interface LUCClass {
   class_name: string;
 }
 
+interface QuickTableRow {
+  id: string;
+  classId: string;
+  name: string;
+  color: string;
+}
+
 interface FileObject {
   file: File;
   filename: string;

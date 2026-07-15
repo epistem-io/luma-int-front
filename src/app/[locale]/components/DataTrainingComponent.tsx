@@ -87,6 +87,8 @@ export const DataTrainingComponent = () => {
     setDataTrainingActiveTab,
     selectedDefault,
     selectedCustom,
+    lucSource,
+    isAutoPointsFlow,
     trainingFile,
     trainingFilename,
     trainingFilesize,
@@ -270,7 +272,9 @@ export const DataTrainingComponent = () => {
     //   return;
     // }
 
-    if (selectedDefault) return;
+    // Auto-points flows (default scheme + quick table) don't use the manual
+    // marker cursor; only the uploaded-excel custom flow does.
+    if (isAutoPointsFlow) return;
 
     if (selectedCustom) {
       markerCursor(pointingType, classArray, true);
@@ -286,7 +290,7 @@ export const DataTrainingComponent = () => {
     <>
       <div className="space-y-4">
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
-        {selectedCustom && (
+        {lucSource === "excel" && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
               value={dataTrainingActiveTab}
@@ -862,7 +866,7 @@ export const DataTrainingFooter = () => {
     isUploadingTrainingFile,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
-    selectedCustom,
+    lucSource,
     classArray,
     isTrainingDataChanged,
     setIsTrainingDataChanged,
@@ -877,7 +881,7 @@ export const DataTrainingFooter = () => {
   const isNextDisabled =
     isUploadingTrainingFile ||
     isUpdatingTrainingData ||
-    (selectedCustom && classArray.length === 0);
+    (lucSource === "excel" && classArray.length === 0);
 
   const isBackDisabled = isUploadingTrainingFile || isUpdatingTrainingData;
 
@@ -928,7 +932,9 @@ export const DataTrainingFooter = () => {
       return;
     }
 
-    if (selectedCustom) {
+    // Only the uploaded-excel custom flow posts the user-placed markers.
+    // Quick table + default use the server's auto-placed training points.
+    if (lucSource === "excel") {
       updateLULC();
       return;
     }

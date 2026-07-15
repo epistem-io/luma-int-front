@@ -73,6 +73,7 @@ export const LUCClassTable = ({ summary = false }: Props) => {
       return {
         class_id: item.class_id,
         class_name: item.class_name,
+        class_color: item.class_color,
         count: markerArray.filter((marker) => marker.class_id === item.class_id)
           .length,
       };
@@ -96,6 +97,11 @@ export const LUCClassTable = ({ summary = false }: Props) => {
             <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-full">
               {t("dataTraining.lulcClass")}
             </TableHead>
+            {!summary && (
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-30">
+                {t("defineLUC.colorClassHeader")}
+              </TableHead>
+            )}
             <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
               {t("dataTraining.numberOfPoints")}
             </TableHead>
@@ -154,6 +160,17 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
                     {item.class_name}
+                  </TableCell>
+                  <TableCell className="font-aptos! text-center border-r">
+                    <div className="flex items-center justify-center gap-x-2">
+                      <span
+                        className="size-5 shrink-0 rounded-[4px] border border-neutral-300"
+                        style={{ backgroundColor: item.class_color }}
+                      />
+                      <span className="uppercase">
+                        {item.class_color.replace(/^#/, "")}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell className="font-aptos! text-center border-r max-w-25">
                     {item.count}

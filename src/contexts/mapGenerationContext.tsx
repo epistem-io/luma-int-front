@@ -33,6 +33,14 @@ export type LULCParamsAccordionSection =
 
 export type DataTrainingActiveTab = "upload" | "oss";
 
+export type LucCustomTab = "quick" | "excel";
+
+export type LucSource = "" | "quick" | "excel" | "default";
+
+// Quick Table flow: editing rows -> locked (read-only) -> confirmed (summary,
+// unlocks the Next button).
+export type LucQuickPhase = "editing" | "locked" | "confirmed";
+
 export interface MapGenerationContextType {
   progressPanelIndex: number;
   setProgressPanelIndex: Dispatch<SetStateAction<number>>;
@@ -87,12 +95,22 @@ export interface MapGenerationContextType {
   defaultArray: number[];
   selectedDefault: boolean;
   selectedCustom: boolean;
+  lucSource: LucSource;
+  isAutoPointsFlow: boolean;
+  lucQuickRows: QuickTableRow[];
+  lucCustomTab: LucCustomTab;
+  lucQuickPhase: LucQuickPhase;
+  lucExcelConfirmed: boolean;
   LUCfile: File | null;
   LUCfilename: string;
   LUCfilesize: number;
   isLUCLoading: boolean;
   haveDownloadedFile: boolean;
   setDefaultArray: Dispatch<SetStateAction<number[]>>;
+  setLucQuickRows: Dispatch<SetStateAction<QuickTableRow[]>>;
+  setLucCustomTab: Dispatch<SetStateAction<LucCustomTab>>;
+  setLucQuickPhase: Dispatch<SetStateAction<LucQuickPhase>>;
+  setLucExcelConfirmed: Dispatch<SetStateAction<boolean>>;
   setLUCFile: Dispatch<SetStateAction<File | null>>;
   setLUCFilename: Dispatch<SetStateAction<string>>;
   setLUCFilesize: Dispatch<SetStateAction<number>>;
@@ -232,12 +250,22 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   defaultArray: [],
   selectedDefault: false,
   selectedCustom: false,
+  lucSource: "",
+  isAutoPointsFlow: false,
+  lucQuickRows: [],
+  lucCustomTab: "quick",
+  lucQuickPhase: "editing",
+  lucExcelConfirmed: false,
   LUCfile: null,
   LUCfilename: "",
   LUCfilesize: 0,
   isLUCLoading: false,
   haveDownloadedFile: false,
   setDefaultArray: () => {},
+  setLucQuickRows: () => {},
+  setLucCustomTab: () => {},
+  setLucQuickPhase: () => {},
+  setLucExcelConfirmed: () => {},
   setLUCFile: () => {},
   setLUCFilename: () => {},
   setLUCFilesize: () => {},
@@ -380,16 +408,48 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [defaultArray, setDefaultArray] = useState<number[]>(
     DEFAULT_VALUE.defaultArray,
   );
-  const selectedDefault = defaultArray.length > 0;
 
   const [LUCfile, setLUCFile] = useState<File | null>(DEFAULT_VALUE.LUCfile);
-  const selectedCustom = !selectedDefault && LUCfile !== null;
   const [LUCfilename, setLUCFilename] = useState<string>(
     DEFAULT_VALUE.LUCfilename,
   );
   const [LUCfilesize, setLUCFilesize] = useState<number>(
     DEFAULT_VALUE.LUCfilesize,
   );
+
+  const [lucQuickRows, setLucQuickRows] = useState<QuickTableRow[]>(
+    DEFAULT_VALUE.lucQuickRows,
+  );
+  const [lucCustomTab, setLucCustomTab] = useState<LucCustomTab>(
+    DEFAULT_VALUE.lucCustomTab,
+  );
+  const [lucQuickPhase, setLucQuickPhase] = useState<LucQuickPhase>(
+    DEFAULT_VALUE.lucQuickPhase,
+  );
+  const [lucExcelConfirmed, setLucExcelConfirmed] = useState(
+    DEFAULT_VALUE.lucExcelConfirmed,
+  );
+
+  const hasValidQuickRows = lucQuickRows.some((r) => r.name.trim() !== "");
+
+  // Single source of truth for how LULC classes were defined. Priority:
+  // default scheme > quick table (when active w/ rows) > uploaded excel file.
+  const lucSource: LucSource =
+    defaultArray.length > 0
+      ? "default"
+      : lucCustomTab === "quick" && hasValidQuickRows
+        ? "quick"
+        : LUCfile !== null
+          ? "excel"
+          : "";
+
+  const selectedDefault = lucSource === "default";
+  // "custom" = user-defined classes (quick table or uploaded excel). Drives
+  // the outer custom-vs-default tab locking.
+  const selectedCustom = lucSource === "excel" || lucSource === "quick";
+  // Flows that get default training points auto-placed (default scheme + quick
+  // table), as opposed to the manual training UI used for uploaded excel.
+  const isAutoPointsFlow = lucSource === "default" || lucSource === "quick";
 
   const [isLUCLoading, setIsLUCLoading] = useState(DEFAULT_VALUE.isLUCLoading);
 
@@ -546,6 +606,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setPolygonData(DEFAULT_VALUE.polygonData);
     setAreaScopingPolygonError(DEFAULT_VALUE.areaScopingPolygonError);
     setDefaultArray(DEFAULT_VALUE.defaultArray);
+    setLucQuickRows(DEFAULT_VALUE.lucQuickRows);
+    setLucCustomTab(DEFAULT_VALUE.lucCustomTab);
+    setLucQuickPhase(DEFAULT_VALUE.lucQuickPhase);
+    setLucExcelConfirmed(DEFAULT_VALUE.lucExcelConfirmed);
     setLUCFile(DEFAULT_VALUE.LUCfile);
     setLUCFilename(DEFAULT_VALUE.LUCfilename);
     setLUCFilesize(DEFAULT_VALUE.LUCfilesize);
@@ -647,11 +711,21 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     defaultArray,
     selectedDefault,
     selectedCustom,
+    lucSource,
+    isAutoPointsFlow,
+    lucQuickRows,
+    lucCustomTab,
+    lucQuickPhase,
+    lucExcelConfirmed,
     LUCfile,
     LUCfilename,
     LUCfilesize,
     isLUCLoading,
     setDefaultArray,
+    setLucQuickRows,
+    setLucCustomTab,
+    setLucQuickPhase,
+    setLucExcelConfirmed,
     setLUCFile,
     setLUCFilename,
     setLUCFilesize,

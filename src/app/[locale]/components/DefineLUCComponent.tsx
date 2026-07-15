@@ -13,10 +13,14 @@ import {
   AlertCircleIcon,
   ChevronDown,
   ChevronLeft,
+  EyeClosedIcon,
+  EyeIcon,
   FileTextIcon,
+  PlusIcon,
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ChangeEvent, useContext, useState } from "react";
@@ -28,7 +32,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import {
+  LucCustomTab,
+  MapGenerationContext,
+} from "@/contexts/mapGenerationContext";
 import {
   DEFAULT_LUC,
   LUC_TEMPLATE_FILE_SIZE_LIMIT,
@@ -66,6 +73,9 @@ import { fromLonLat } from "ol/proj";
 //   );
 // };
 
+// Fallback palette for auto-assigning a color to a new Quick Table row.
+const QUICK_TABLE_COLORS = DEFAULT_LUC.map((l) => l.color);
+
 export const DefineLUCComponent = () => {
   const t = useTranslations("InteractivePanel");
 
@@ -73,6 +83,15 @@ export const DefineLUCComponent = () => {
     defaultArray,
     selectedDefault,
     selectedCustom,
+    lucQuickRows,
+    lucCustomTab,
+    lucQuickPhase,
+    isLUCLoading,
+    setLucQuickRows,
+    setLucCustomTab,
+    setLucQuickPhase,
+    setLucExcelConfirmed,
+    setIsLUCLoading,
     LUCfile,
     spatialResolution,
     LUCfilename,
@@ -86,8 +105,176 @@ export const DefineLUCComponent = () => {
     setIsDefineLULCChanged,
   } = useContext(MapGenerationContext);
 
+  const {
+    markerArray,
+    markerLayerVisibilityArray,
+    setMarkerLayerVisibilityArray,
+    markerVectorSource,
+  } = useContext(MapContext);
+
+  const { sessionId } = useContext(GlobalContext);
+
   // const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
   const [fileEnter, setFileEnter] = useState(false);
+  // Quick Table flow phases. "locked" freezes rows (read-only); "confirmed"
+  // swaps to the read-only Recorded LULC Feature summary and enables Next.
+  const isQuickLocked = lucQuickPhase === "locked";
+  const isQuickConfirmed = lucQuickPhase === "confirmed";
+
+  // Once confirmed, the tabs are replaced by the read-only Recorded LULC
+  // Feature summary and Next is enabled.
+  const isConfirmed = isQuickConfirmed;
+  const summaryRows: { classId: string; name: string; color: string }[] =
+    lucQuickRows.map((r) => ({
+      classId: r.classId,
+      name: r.name,
+      color: r.color,
+    }));
+
+  // Re-render the marker layer, omitting any class whose name is in the
+  // hidden list. Mirrors LUCClassTable so the eye toggle behaves the same
+  // wherever markers exist on the map.
+  const rerenderMarkers = (hiddenClassNames: string[]) => {
+    if (!markerVectorSource) return;
+    markerVectorSource.clear();
+
+    markerArray.forEach((item) => {
+      if (hiddenClassNames.includes(item.name)) return;
+      const markerFeature = new Feature({
+        geometry: new Point(item.coordinates),
+        id: item.id,
+      });
+      markerFeature.setStyle(
+        new Style({
+          image: new Icon({
+            anchor: [0.5, 1],
+            src: svgWithColor(item.class_color),
+            size: [92, 117],
+            height: 30,
+          }),
+        }),
+      );
+      markerVectorSource.addFeature(markerFeature);
+    });
+    markerVectorSource.changed();
+  };
+
+  const toggleMarkerVisibility = (name: string) => {
+    const className = name.trim();
+    if (!className) return;
+
+    const next = markerLayerVisibilityArray.includes(className)
+      ? markerLayerVisibilityArray.filter((n) => n !== className)
+      : [...markerLayerVisibilityArray, className];
+
+    setMarkerLayerVisibilityArray(next);
+    rerenderMarkers(next);
+  };
+
+  // Duplicate class names (case-insensitive, trimmed) — flagged inline and
+  // block the Next button in DefineLUCFooter.
+  const quickDuplicateNames = (() => {
+    const counts = new Map<string, number>();
+    lucQuickRows.forEach((r) => {
+      const key = r.name.trim().toLowerCase();
+      if (!key) return;
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    });
+    return counts;
+  })();
+
+  const isQuickRowDuplicate = (name: string) => {
+    const key = name.trim().toLowerCase();
+    return key !== "" && (quickDuplicateNames.get(key) ?? 0) > 1;
+  };
+
+  const isValidHex = (color: string) => /^#[0-9a-fA-F]{6}$/.test(color);
+
+  // Only allow locking/confirming a Quick Table with at least one named row
+  // and no duplicate names, so a confirmed table always yields a valid submit.
+  const hasQuickDuplicates = Array.from(quickDuplicateNames.values()).some(
+    (count) => count > 1,
+  );
+  const canLockQuick =
+    lucQuickRows.some((r) => r.name.trim() !== "") && !hasQuickDuplicates;
+
+  const addQuickRow = () => {
+    setIsDefineLULCChanged(true);
+    setLucQuickRows((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        classId: "",
+        name: "",
+        color: QUICK_TABLE_COLORS[prev.length % QUICK_TABLE_COLORS.length],
+      },
+    ]);
+  };
+
+  const updateQuickRow = (id: string, patch: Partial<QuickTableRow>) => {
+    setIsDefineLULCChanged(true);
+    setLucQuickRows((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...patch } : r)),
+    );
+  };
+
+  const removeQuickRow = (id: string) => {
+    setIsDefineLULCChanged(true);
+    setLucQuickRows((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  // Upload + parse the excel template, then load the parsed classes straight
+  // into the editable Quick Table so the user can still tweak / add rows.
+  const importExcel = (file: File) => {
+    setIsDefineLULCChanged(true);
+    setIsLUCLoading(true);
+
+    const body = new FormData();
+    body.append("file", file);
+    body.append("session_id", sessionId);
+
+    fetch(LUC_UPLOAD_URL, {
+      method: "POST",
+      body,
+    })
+      .then(async (response) => {
+        const json: LUCUploadRes = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            JSON.stringify(
+              `${json?.error?.message || response.text}. Trace: ${json?.trace}`,
+            ),
+          );
+        }
+
+        const rows: QuickTableRow[] = json.classes.map((item) => ({
+          id: crypto.randomUUID(),
+          classId: String(item.class_id),
+          name: item.class_name,
+          color: item.class_color,
+        }));
+
+        setLucQuickRows(rows);
+        setLucQuickPhase("editing");
+        // Drop the raw file — the editable rows are now the source of truth —
+        // and land the user on the Quick Table to review / add classes.
+        setLUCFile(null);
+        setLUCFilename("");
+        setLUCFilesize(0);
+        setLucCustomTab("quick");
+      })
+      .catch((e) => {
+        toast.error(`Error on reading file: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+      })
+      .finally(() => {
+        setIsLUCLoading(false);
+      });
+  };
 
   const onClickDownloadFile = () => {
     const link = document.createElement("a");
@@ -123,6 +310,7 @@ export const DefineLUCComponent = () => {
     setLUCFile(null);
     setLUCFilename("");
     setLUCFilesize(0);
+    setLucExcelConfirmed(false);
 
     const doc = document.getElementById(
       "luc-template-file-upload",
@@ -135,34 +323,29 @@ export const DefineLUCComponent = () => {
   const onResetInput = () => {
     setIsDefineLULCChanged(true);
     setDefaultArray([]);
+    setLucQuickRows([]);
+    setLucCustomTab("quick");
+    setLucQuickPhase("editing");
     setHaveDownloadedFile(false);
+    setMarkerLayerVisibilityArray([]);
+    rerenderMarkers([]);
 
     clearFile();
   };
 
-  const onUploadFile = (
-    e: ChangeEvent<HTMLInputElement>,
-    // cb: () => void,
-  ) => {
-    setIsDefineLULCChanged(true);
+  const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
     const target = e.target;
     const files = target?.files;
-
-    // console.log("fffiless", files);
 
     if (!files) return;
 
     const file = files[0];
+    if (!file) return;
 
-    // console.log("fffile", file);
+    importExcel(file);
 
-    setLUCFile(file);
-    setLUCFilename(file.name);
-    setLUCFilesize(file.size);
-    // const blobUrl = URL.createObjectURL(file);
-    // setAreaScopingPolygonUrl(file);
-    // setAreaScopingPolygonFileSize(file.size);
-    // setAreaScopingPolygonFileName(file.name);
+    // Allow re-selecting the same file later (onChange won't fire otherwise).
+    target.value = "";
   };
 
   const submitFile = () => {};
@@ -259,12 +442,64 @@ export const DefineLUCComponent = () => {
           </p>
         </div>
         {/* <div className="space-y-3"> */}
-        <Tabs
-          defaultValue={
-            selectedCustom ? "custom" : selectedDefault ? "default" : "custom"
-          }
-          className="gap-y-6 mb-0"
-        >
+        {isConfirmed ? (
+          <div className="rounded-[12px] border border-neutral-400 p-3 space-y-4">
+            <p className="font-aptos text-xl font-bold leading-6 text-primary-red-pink-normal">
+              {t("defineLUC.recordedLULCFeature")}
+            </p>
+            <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
+              <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
+                <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                    {t("defineLUC.idClassHeader")}
+                  </p>
+                </div>
+                <div className="flex-1 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                    {t("defineLUC.lulcClassHeader")}
+                  </p>
+                </div>
+                <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
+                    {t("defineLUC.colorClassHeader")}
+                  </p>
+                </div>
+              </div>
+              {summaryRows.map((row, index) => (
+                <div
+                  key={`${row.classId}-${index}`}
+                  className="flex border-b border-neutral-200 last:border-b-0"
+                >
+                  <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                      {row.classId}
+                    </p>
+                  </div>
+                  <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
+                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                      {row.name}
+                    </p>
+                  </div>
+                  <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-center gap-x-2">
+                    <span
+                      className="size-7 shrink-0 rounded-md border border-neutral-300"
+                      style={{ backgroundColor: row.color }}
+                    />
+                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                      {row.color.replace(/^#/, "")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <Tabs
+            defaultValue={
+              selectedCustom ? "custom" : selectedDefault ? "default" : "custom"
+            }
+            className="gap-y-6 mb-0"
+          >
           <div className="px-0 py-0">
             <TabsList className="w-full">
               <TabsTrigger disabled={selectedDefault} value="custom">
@@ -279,6 +514,211 @@ export const DefineLUCComponent = () => {
             </TabsList>
           </div>
           <TabsContent value="custom">
+            <Tabs
+              value={lucCustomTab}
+              onValueChange={(value) => setLucCustomTab(value as LucCustomTab)}
+              className="gap-y-6 mb-0"
+            >
+              <div className="px-0 py-0">
+                <TabsList
+                  variant="line"
+                  className="w-full border-0 bg-transparent p-0 rounded-none"
+                >
+                  <TabsTrigger
+                    value="quick"
+                    className="text-[#4A5468] data-[state=active]:text-[#CC4778] after:bg-[#CC4778]"
+                  >
+                    {t("defineLUC.quickTableTab")}
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="excel"
+                    className="text-[#4A5468] data-[state=active]:text-[#CC4778] after:bg-[#CC4778]"
+                  >
+                    {t("defineLUC.excelTemplateTab")}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="quick">
+                <div className="space-y-6">
+                  <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+                    {t("defineLUC.quickTableDescription")}
+                  </p>
+                  <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
+                    <div className="flex bg-[#FAEDF2] border-b border-neutral-300 text-xs">
+                      <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                          {t("defineLUC.idClassHeader")}
+                        </p>
+                      </div>
+                      <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                          {t("defineLUC.lulcClassHeader")}
+                        </p>
+                      </div>
+                      <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
+                          {t("defineLUC.colorClassHeader")}
+                        </p>
+                      </div>
+                      <div className="w-6 shrink-0 border-l border-neutral-300" />
+                      <div className="w-6 shrink-0 border-l border-neutral-300" />
+                    </div>
+
+                    {lucQuickRows.length === 0 && (
+                      <div className="px-3 py-3">
+                        <p className="font-aptos text-md font-regular leading-6 text-neutral-500 text-center text-sm">
+                          {t("defineLUC.quickTableEmptyHint")}
+                        </p>
+                      </div>
+                    )}
+
+                    {lucQuickRows.map((row) => {
+                      const duplicate = isQuickRowDuplicate(row.name);
+                      const hidden = markerLayerVisibilityArray.includes(
+                        row.name.trim(),
+                      );
+                      return (
+                        <div
+                          key={row.id}
+                          className="flex border-b border-neutral-200 last:border-b-0"
+                        >
+                          <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
+                            <Input
+                              value={row.classId}
+                              inputMode="numeric"
+                              readOnly={isQuickLocked}
+                              className="h-7 text-center"
+                              onChange={(e) =>
+                                updateQuickRow(row.id, {
+                                  classId: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-200 flex flex-col justify-center">
+                            <Input
+                              value={row.name}
+                              aria-invalid={duplicate}
+                              readOnly={isQuickLocked}
+                              className="max-w-[231px] h-7"
+                              onChange={(e) =>
+                                updateQuickRow(row.id, { name: e.target.value })
+                              }
+                            />
+                            {duplicate && (
+                              <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600">
+                                {t("defineLUC.duplicateClassError")}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-200 flex items-center justify-center gap-x-2">
+                            <label
+                              className={cn(
+                                "relative size-7 shrink-0 rounded-md border border-neutral-300 overflow-hidden",
+                                isQuickLocked
+                                  ? "pointer-events-none"
+                                  : "cursor-pointer",
+                              )}
+                            >
+                              <span
+                                className="block size-full"
+                                style={{ backgroundColor: row.color }}
+                              />
+                              <input
+                                type="color"
+                                value={
+                                  isValidHex(row.color) ? row.color : "#000000"
+                                }
+                                disabled={isQuickLocked}
+                                onChange={(e) =>
+                                  updateQuickRow(row.id, {
+                                    color: e.target.value,
+                                  })
+                                }
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                            </label>
+                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                              {row.color.replace(/^#/, "")}
+                            </p>
+                          </div>
+                          <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                            <Button
+                              variant={"ghost"}
+                              size={"icon"}
+                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                              onClick={() => toggleMarkerVisibility(row.name)}
+                            >
+                              {hidden ? (
+                                <EyeClosedIcon className="text-primary-red-pink-normal size-4" />
+                              ) : (
+                                <EyeIcon className="text-primary-red-pink-normal size-4" />
+                              )}
+                            </Button>
+                          </div>
+                          <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                            <Button
+                              variant={"ghost"}
+                              size={"icon"}
+                              disabled={isQuickLocked}
+                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                              onClick={() => removeQuickRow(row.id)}
+                            >
+                              <Trash2Icon className="text-text-icons-base-third size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {lucQuickRows.length > 0 && !isQuickLocked && (
+                      <button
+                        type="button"
+                        onClick={addQuickRow}
+                        className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:brightness-95 transition-all duration-200 cursor-pointer"
+                      >
+                        <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                        <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                          {t("defineLUC.addClass")}
+                        </p>
+                      </button>
+                    )}
+                  </div>
+
+                  {lucQuickRows.length === 0 ? (
+                    <div className="flex justify-center">
+                      <button
+                        type="button"
+                        onClick={addQuickRow}
+                        className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] h-7 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:brightness-95 transition-all duration-200 cursor-pointer"
+                      >
+                        <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                        <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                          {t("defineLUC.addClass")}
+                        </p>
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={!isQuickLocked && !canLockQuick}
+                      onClick={() =>
+                        setLucQuickPhase(isQuickLocked ? "confirmed" : "locked")
+                      }
+                      className="w-full py-3 rounded-[12px] bg-primary-red-pink-normal hover:brightness-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+                    >
+                      <p className="font-lato text-md font-bold leading-6 text-white text-center">
+                        {isQuickLocked
+                          ? t("defineLUC.confirmLULCClass")
+                          : t("defineLUC.lockLULCClass")}
+                      </p>
+                    </button>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="excel">
             <div className="space-y-6">
               <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
                 {t("defineLUC.classifyOwnTemplateDescription")}
@@ -406,16 +846,7 @@ export const DefineLUCComponent = () => {
                             if (item.kind === "file") {
                               const file = item.getAsFile();
                               if (file) {
-                                // const blobUrl = URL.createObjectURL(file);
-                                // setAreaScopingPolygonUrl(file);
-                                // setAreaScopingPolygonFileSize(file.size);
-                                // setAreaScopingPolygonFileName(file.name);
-                                // console.log("fileee", file);
-
-                                setIsDefineLULCChanged(true);
-                                setLUCFile(file);
-                                setLUCFilename(file.name);
-                                setLUCFilesize(file.size);
+                                importExcel(file);
                               }
                               // console.log(`items file[${i}].name = ${file?.name}`);
                             }
@@ -481,7 +912,14 @@ export const DefineLUCComponent = () => {
                   </Button>
                 </>
               )}
+              {isLUCLoading && (
+                <div className="w-full flex flex-row justify-center items-center py-2">
+                  <span className="loader md"></span>
+                </div>
+              )}
             </div>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
           <TabsContent value="default">
             <div className="space-y-6">
@@ -786,7 +1224,8 @@ export const DefineLUCComponent = () => {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        )}
 
         <input
           id="luc-template-file-upload"
@@ -822,7 +1261,10 @@ export const DefineLUCFooter = () => {
     defaultArray,
     selectedDefault,
     selectedCustom,
-    LUCfile,
+    lucSource,
+    lucQuickRows,
+    lucQuickPhase,
+    lucExcelConfirmed,
     LUCfilesize,
     isLUCLoading,
     setIsLUCLoading,
@@ -842,10 +1284,25 @@ export const DefineLUCFooter = () => {
 
   const { sessionId } = useContext(GlobalContext);
 
+  const validQuickRows = lucQuickRows.filter((r) => r.name.trim() !== "");
+
+  const hasDuplicateQuickNames = (() => {
+    const seen = new Set<string>();
+    for (const r of validQuickRows) {
+      const key = r.name.trim().toLowerCase();
+      if (seen.has(key)) return true;
+      seen.add(key);
+    }
+    return false;
+  })();
+
   const isNextDisabled =
     (!selectedCustom && !selectedDefault) ||
     isLUCLoading ||
-    (selectedCustom && LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT);
+    (lucSource === "excel" &&
+      (LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT || !lucExcelConfirmed)) ||
+    (lucSource === "quick" &&
+      (hasDuplicateQuickNames || lucQuickPhase !== "confirmed"));
 
   const isBackDisabled = isLUCLoading;
 
@@ -858,69 +1315,39 @@ export const DefineLUCFooter = () => {
       return;
     }
 
-    setIsLUCLoading(true);
-
-    if (selectedCustom) {
-      if (!LUCfile) {
-        toast.error("No LUC file selected.", {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
-        });
-        setIsLUCLoading(false);
-        return;
-      }
-
-      const body = new FormData();
-
-      body.append("file", LUCfile);
-      body.append("session_id", sessionId);
-
-      fetch(LUC_UPLOAD_URL, {
-        method: "POST",
-        body,
-      })
-        .then(async (response) => {
-          const json: LUCUploadRes = await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              JSON.stringify(
-                `${json?.error?.message || response.text}. Trace: ${json?.trace}`,
-              ),
-            );
-          }
-
-          const arr: LUCClass[] = json.classes.map((item) => ({
-            class_id: item.class_id,
-            class_name: item.class_name,
-            class_color: item.class_color,
-          }));
-
-          setClassArray(arr);
-          setProgressPanelIndex(2);
-
-          setDataTrainingActiveTab("upload");
-          setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
-          // CONTINUE
-        })
-        .catch((e) => {
-          toast.error(`Error on submitting file: ${e}`, {
-            duration: Infinity,
-            dismissible: true,
-            closeButton: true,
-          });
-        })
-        .finally(() => {
-          setIsLUCLoading(false);
-        });
-
+    if (lucSource === "excel") {
+      // The file was already uploaded + parsed during "Confirm LULC Class",
+      // so Next just advances to the Data Training step.
+      setIsDefineLULCChanged(false);
+      setProgressPanelIndex(2);
+      setDataTrainingActiveTab("upload");
+      setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
       return;
     }
 
-    const classes = defaultArray.map((item) =>
-      DEFAULT_LUC.find((item2) => item2.id === item),
-    );
+    setIsLUCLoading(true);
+
+    // Quick table and default scheme both submit as JSON and get default
+    // training points auto-placed; they differ only in the class source.
+    // Quick-table class ids are user-typed strings; the backend parses them
+    // to integers, so invalid ids surface as a submit error toast.
+    const classes: { id: string | number; name: string; color: string }[] =
+      lucSource === "quick"
+        ? validQuickRows.map((r) => ({
+            id: r.classId.trim(),
+            name: r.name.trim(),
+            color: r.color,
+          }))
+        : defaultArray
+            .map((item) => DEFAULT_LUC.find((item2) => item2.id === item))
+            .filter((item): item is (typeof DEFAULT_LUC)[number] =>
+              Boolean(item),
+            )
+            .map((item) => ({
+              id: item.id,
+              name: item.name,
+              color: item.color,
+            }));
 
     fetch(LUC_UPDATE_URL, {
       method: "POST",
@@ -930,9 +1357,9 @@ export const DefineLUCFooter = () => {
       body: JSON.stringify({
         session_id: sessionId,
         classes: classes.map((item) => ({
-          id: item?.id,
-          class: item?.name,
-          color: item?.color,
+          id: item.id,
+          class: item.name,
+          color: item.color,
         })),
       }),
     })
@@ -948,9 +1375,9 @@ export const DefineLUCFooter = () => {
         }
 
         const arr = classes.map((item) => ({
-          class_id: item?.id || -1,
-          class_name: item?.name || "",
-          class_color: item?.color || "",
+          class_id: Number(item.id) || -1,
+          class_name: item.name || "",
+          class_color: item.color || "",
         }));
 
         setClassArray(arr);

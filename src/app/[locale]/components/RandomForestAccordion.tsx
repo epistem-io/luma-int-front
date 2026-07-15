@@ -20,7 +20,7 @@ export const RandomForestAccordion = () => {
     minLeafPopulation,
     setMinLeafPopulation,
     minLeafPopulationError,
-    selectedDefault,
+    isAutoPointsFlow,
   } = useContext(MapGenerationContext);
 
   const tInteractive = useTranslations("InteractivePanel");
@@ -58,7 +58,7 @@ export const RandomForestAccordion = () => {
               </Label>
               <Input
                 type="text"
-                disabled={selectedDefault}
+                disabled={isAutoPointsFlow}
                 value={numberOfTrees}
                 onChange={(e) => {
                   setNumberOfTrees(e.target.value);
@@ -87,7 +87,7 @@ export const RandomForestAccordion = () => {
               </Label>
               <Input
                 type="text"
-                disabled={selectedDefault}
+                disabled={isAutoPointsFlow}
                 value={minLeafPopulation}
                 onChange={(e) => {
                   setMinLeafPopulation(e.target.value);
