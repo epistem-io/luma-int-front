@@ -433,11 +433,17 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const hasValidQuickRows = lucQuickRows.some((r) => r.name.trim() !== "");
 
   // Single source of truth for how LULC classes were defined. Priority:
-  // default scheme > quick table (when active w/ rows) > uploaded excel file.
+  // default scheme > editable class rows (whether typed manually or parsed
+  // from an uploaded excel) > raw uploaded file with no parsed rows.
+  //
+  // Uploading an excel populates the editable rows, so it resolves to "quick"
+  // (the auto-points flow) regardless of which custom tab is active — this lets
+  // the Excel tab keep showing the uploaded-file preview without flipping the
+  // flow to the "excel" branch (whose confirm gate is never satisfied).
   const lucSource: LucSource =
     defaultArray.length > 0
       ? "default"
-      : lucCustomTab === "quick" && hasValidQuickRows
+      : hasValidQuickRows
         ? "quick"
         : LUCfile !== null
           ? "excel"

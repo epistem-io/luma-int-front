@@ -10,7 +10,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
-  AlertCircleIcon,
   ChevronDown,
   ChevronLeft,
   EyeClosedIcon,
@@ -257,12 +256,9 @@ export const DefineLUCComponent = () => {
 
         setLucQuickRows(rows);
         setLucQuickPhase("editing");
-        // Drop the raw file — the editable rows are now the source of truth —
-        // and land the user on the Quick Table to review / add classes.
-        setLUCFile(null);
-        setLUCFilename("");
-        setLUCFilesize(0);
-        setLucCustomTab("quick");
+        setLUCFile(file);
+        setLUCFilename(file.name);
+        setLUCFilesize(file.size);
       })
       .catch((e) => {
         toast.error(`Error on reading file: ${e}`, {
@@ -349,6 +345,233 @@ export const DefineLUCComponent = () => {
   };
 
   const submitFile = () => {};
+
+  // Clears the uploaded file AND the parsed rows, returning the Excel tab to
+  // the dropzone — the preview card's trash button is a "start over".
+  const clearUploadedTemplate = () => {
+    setIsDefineLULCChanged(true);
+    setLUCFile(null);
+    setLUCFilename("");
+    setLUCFilesize(0);
+    setLucQuickRows([]);
+    setLucQuickPhase("editing");
+
+    const doc = document.getElementById(
+      "luc-template-file-upload",
+    ) as HTMLInputElement;
+    if (doc) doc.value = "";
+  };
+
+  // The editable class table (rows + add/lock/confirm controls). Shared by the
+  // Manual Input tab and the Excel Template tab (rendered beneath the preview
+  // card there) so the two views stay in sync without duplicating JSX.
+  const renderQuickTable = () => (
+    <>
+      <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
+        <div className="flex bg-[#FAEDF2] border-b border-neutral-300 text-xs">
+          <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
+            <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+              {t("defineLUC.idClassHeader")}
+            </p>
+          </div>
+          <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
+            <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+              {t("defineLUC.lulcClassHeader")}
+            </p>
+          </div>
+          <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
+            <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
+              {t("defineLUC.colorClassHeader")}
+            </p>
+          </div>
+          <div className="w-6 shrink-0 border-l border-neutral-300" />
+          <div className="w-6 shrink-0 border-l border-neutral-300" />
+        </div>
+
+        {lucQuickRows.length === 0 && (
+          <div className="px-3 py-3">
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-500 text-center text-sm">
+              {t("defineLUC.quickTableEmptyHint")}
+            </p>
+          </div>
+        )}
+
+        {lucQuickRows.map((row) => {
+          const duplicate = isQuickRowDuplicate(row.name);
+          const hidden = markerLayerVisibilityArray.includes(row.name.trim());
+          return (
+            <div
+              key={row.id}
+              className="flex border-b border-neutral-200 last:border-b-0"
+            >
+              <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
+                <Input
+                  value={row.classId}
+                  inputMode="numeric"
+                  readOnly={isQuickLocked}
+                  className="h-7 text-center"
+                  onChange={(e) =>
+                    updateQuickRow(row.id, {
+                      classId: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-200 flex flex-col justify-center">
+                <Input
+                  value={row.name}
+                  aria-invalid={duplicate}
+                  readOnly={isQuickLocked}
+                  className="max-w-[231px] h-7"
+                  onChange={(e) =>
+                    updateQuickRow(row.id, { name: e.target.value })
+                  }
+                />
+                {duplicate && (
+                  <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600">
+                    {t("defineLUC.duplicateClassError")}
+                  </p>
+                )}
+              </div>
+              <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-200 flex items-center justify-center gap-x-2">
+                <label
+                  className={cn(
+                    "relative size-7 shrink-0 rounded-md border border-neutral-300 overflow-hidden",
+                    isQuickLocked ? "pointer-events-none" : "cursor-pointer",
+                  )}
+                >
+                  <span
+                    className="block size-full"
+                    style={{ backgroundColor: row.color }}
+                  />
+                  <input
+                    type="color"
+                    value={isValidHex(row.color) ? row.color : "#000000"}
+                    disabled={isQuickLocked}
+                    onChange={(e) =>
+                      updateQuickRow(row.id, {
+                        color: e.target.value,
+                      })
+                    }
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </label>
+                <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                  {row.color.replace(/^#/, "")}
+                </p>
+              </div>
+              <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                  onClick={() => toggleMarkerVisibility(row.name)}
+                >
+                  {hidden ? (
+                    <EyeClosedIcon className="text-primary-red-pink-normal size-4" />
+                  ) : (
+                    <EyeIcon className="text-primary-red-pink-normal size-4" />
+                  )}
+                </Button>
+              </div>
+              <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  disabled={isQuickLocked}
+                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                  onClick={() => removeQuickRow(row.id)}
+                >
+                  <Trash2Icon className="text-text-icons-base-third size-4" />
+                </Button>
+              </div>
+            </div>
+          );
+        })}
+
+        {lucQuickRows.length > 0 && !isQuickLocked && (
+          <button
+            type="button"
+            onClick={addQuickRow}
+            className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:brightness-95 transition-all duration-200 cursor-pointer"
+          >
+            <PlusIcon className="size-4 text-primary-red-pink-normal" />
+            <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+              {t("defineLUC.addClass")}
+            </p>
+          </button>
+        )}
+      </div>
+
+      {lucQuickRows.length === 0 ? (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={addQuickRow}
+            className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] h-7 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:brightness-95 transition-all duration-200 cursor-pointer"
+          >
+            <PlusIcon className="size-4 text-primary-red-pink-normal" />
+            <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+              {t("defineLUC.addClass")}
+            </p>
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={!isQuickLocked && !canLockQuick}
+          onClick={() =>
+            setLucQuickPhase(isQuickLocked ? "confirmed" : "locked")
+          }
+          className="w-full py-3 rounded-[12px] bg-primary-red-pink-normal hover:brightness-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
+        >
+          <p className="font-lato text-md font-bold leading-6 text-white text-center">
+            {isQuickLocked
+              ? t("defineLUC.confirmLULCClass")
+              : t("defineLUC.lockLULCClass")}
+          </p>
+        </button>
+      )}
+    </>
+  );
+
+  // Compact file-preview card shown atop the parsed table after a successful
+  // upload. On the editable Excel tab it's removable (trash clears the file +
+  // parsed rows); on the read-only confirmed summary it's display-only.
+  const renderUploadedTemplateCard = ({ removable = true } = {}) => (
+    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
+      <div
+        className={cn(
+          "flex flex-row items-center gap-x-4",
+          removable ? "col-span-10" : "col-span-12",
+        )}
+      >
+        <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
+          <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
+        </div>
+        <div className="min-w-0">
+          <p className="overflow-hidden text-ellipsis whitespace-nowrap font-aptos text-lg font-bold leading-7 text-secondary-purple-dark">
+            {LUCfilename}
+          </p>
+          <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
+            {shortenKiloByte(LUCfilesize)}
+          </p>
+        </div>
+      </div>
+
+      {removable && (
+        <div className="col-span-2 flex flex-row justify-end">
+          <Button
+            variant={"ghost"}
+            className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+            onClick={clearUploadedTemplate}
+          >
+            <Trash2Icon className="text-secondary-purple-dark size-5" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-4">
@@ -492,6 +715,7 @@ export const DefineLUCComponent = () => {
                 </div>
               ))}
             </div>
+            {LUCfilename && renderUploadedTemplateCard({ removable: false })}
           </div>
         ) : (
           <Tabs
@@ -544,177 +768,7 @@ export const DefineLUCComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
                     {t("defineLUC.quickTableDescription")}
                   </p>
-                  <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
-                    <div className="flex bg-[#FAEDF2] border-b border-neutral-300 text-xs">
-                      <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
-                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                          {t("defineLUC.idClassHeader")}
-                        </p>
-                      </div>
-                      <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
-                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                          {t("defineLUC.lulcClassHeader")}
-                        </p>
-                      </div>
-                      <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-300 flex items-center justify-center">
-                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
-                          {t("defineLUC.colorClassHeader")}
-                        </p>
-                      </div>
-                      <div className="w-6 shrink-0 border-l border-neutral-300" />
-                      <div className="w-6 shrink-0 border-l border-neutral-300" />
-                    </div>
-
-                    {lucQuickRows.length === 0 && (
-                      <div className="px-3 py-3">
-                        <p className="font-aptos text-md font-regular leading-6 text-neutral-500 text-center text-sm">
-                          {t("defineLUC.quickTableEmptyHint")}
-                        </p>
-                      </div>
-                    )}
-
-                    {lucQuickRows.map((row) => {
-                      const duplicate = isQuickRowDuplicate(row.name);
-                      const hidden = markerLayerVisibilityArray.includes(
-                        row.name.trim(),
-                      );
-                      return (
-                        <div
-                          key={row.id}
-                          className="flex border-b border-neutral-200 last:border-b-0"
-                        >
-                          <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
-                            <Input
-                              value={row.classId}
-                              inputMode="numeric"
-                              readOnly={isQuickLocked}
-                              className="h-7 text-center"
-                              onChange={(e) =>
-                                updateQuickRow(row.id, {
-                                  classId: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-200 flex flex-col justify-center">
-                            <Input
-                              value={row.name}
-                              aria-invalid={duplicate}
-                              readOnly={isQuickLocked}
-                              className="max-w-[231px] h-7"
-                              onChange={(e) =>
-                                updateQuickRow(row.id, { name: e.target.value })
-                              }
-                            />
-                            {duplicate && (
-                              <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600">
-                                {t("defineLUC.duplicateClassError")}
-                              </p>
-                            )}
-                          </div>
-                          <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-200 flex items-center justify-center gap-x-2">
-                            <label
-                              className={cn(
-                                "relative size-7 shrink-0 rounded-md border border-neutral-300 overflow-hidden",
-                                isQuickLocked
-                                  ? "pointer-events-none"
-                                  : "cursor-pointer",
-                              )}
-                            >
-                              <span
-                                className="block size-full"
-                                style={{ backgroundColor: row.color }}
-                              />
-                              <input
-                                type="color"
-                                value={
-                                  isValidHex(row.color) ? row.color : "#000000"
-                                }
-                                disabled={isQuickLocked}
-                                onChange={(e) =>
-                                  updateQuickRow(row.id, {
-                                    color: e.target.value,
-                                  })
-                                }
-                                className="absolute inset-0 opacity-0 cursor-pointer"
-                              />
-                            </label>
-                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                              {row.color.replace(/^#/, "")}
-                            </p>
-                          </div>
-                          <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                            <Button
-                              variant={"ghost"}
-                              size={"icon"}
-                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                              onClick={() => toggleMarkerVisibility(row.name)}
-                            >
-                              {hidden ? (
-                                <EyeClosedIcon className="text-primary-red-pink-normal size-4" />
-                              ) : (
-                                <EyeIcon className="text-primary-red-pink-normal size-4" />
-                              )}
-                            </Button>
-                          </div>
-                          <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                            <Button
-                              variant={"ghost"}
-                              size={"icon"}
-                              disabled={isQuickLocked}
-                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                              onClick={() => removeQuickRow(row.id)}
-                            >
-                              <Trash2Icon className="text-text-icons-base-third size-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-
-                    {lucQuickRows.length > 0 && !isQuickLocked && (
-                      <button
-                        type="button"
-                        onClick={addQuickRow}
-                        className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:brightness-95 transition-all duration-200 cursor-pointer"
-                      >
-                        <PlusIcon className="size-4 text-primary-red-pink-normal" />
-                        <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
-                          {t("defineLUC.addClass")}
-                        </p>
-                      </button>
-                    )}
-                  </div>
-
-                  {lucQuickRows.length === 0 ? (
-                    <div className="flex justify-center">
-                      <button
-                        type="button"
-                        onClick={addQuickRow}
-                        className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] h-7 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:brightness-95 transition-all duration-200 cursor-pointer"
-                      >
-                        <PlusIcon className="size-4 text-primary-red-pink-normal" />
-                        <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
-                          {t("defineLUC.addClass")}
-                        </p>
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={!isQuickLocked && !canLockQuick}
-                      onClick={() =>
-                        setLucQuickPhase(isQuickLocked ? "confirmed" : "locked")
-                      }
-                      className="w-full py-3 rounded-[12px] bg-primary-red-pink-normal hover:brightness-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
-                    >
-                      <p className="font-lato text-md font-bold leading-6 text-white text-center">
-                        {isQuickLocked
-                          ? t("defineLUC.confirmLULCClass")
-                          : t("defineLUC.lockLULCClass")}
-                      </p>
-                    </button>
-                  )}
+                  {renderQuickTable()}
                 </div>
               </TabsContent>
 
@@ -723,104 +777,13 @@ export const DefineLUCComponent = () => {
               <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
                 {t("defineLUC.classifyOwnTemplateDescription")}
               </p>
-              {haveDownloadedFile && (
-                <>
-                  {LUCfile && (
-                    <>
-                      {LUCfilesize <= LUC_TEMPLATE_FILE_SIZE_LIMIT && (
-                        <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
-                          <div className="col-span-10 flex flex-row items-center gap-x-4">
-                            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-                              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="overflow-hidden text-ellipsis whitespace-nowrap font-aptos text-lg font-bold leading-7 text-secondary-purple-dark">
-                                {LUCfilename}
-                              </p>
-                              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                                {shortenKiloByte(LUCfilesize)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="col-span-2 flex flex-row justify-end">
-                            <Button
-                              variant={"ghost"}
-                              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                              onClick={() => {
-                                clearFile();
-                              }}
-                            >
-                              <Trash2Icon className="text-secondary-purple-dark size-5" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                      {LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT && (
-                        <>
-                          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
-                            <div className="col-span-10 flex flex-row items-center gap-x-4">
-                              <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
-                                <FileTextIcon className="text-danger-700 size-12 aspect-square" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="overflow-hidden text-ellipsis whitespace-nowrap font-aptos text-lg font-bold leading-7 text-danger-600">
-                                  {LUCfilename}
-                                </p>
-                                <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
-                                  {shortenKiloByte(LUCfilesize)}
-                                </p>
-                              </div>
-                            </div>
-                            <div className="col-span-2 flex flex-row justify-end">
-                              <Button
-                                variant={"ghost"}
-                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                onClick={() => {
-                                  clearFile();
-                                }}
-                              >
-                                <Trash2Icon className="text-danger-700 size-5" />
-                              </Button>
-                            </div>
-                          </div>
-                          <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                            <div className="flex flex-row gap-x-4 items-center">
-                              <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                                <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                              </div>
-                              <div className="">
-                                <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                                  {t("common.fileTooBigError", {
-                                    X: "500",
-                                  })}
-                                </p>
-                                <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                                  {t("common.fileTooBigErrorDesc", {
-                                    limit: "500MB",
-                                  })}
-                                </p>
-                              </div>
-                            </div>
-                            {/* <div className="">
-                              <Button
-                                variant={"ghost"}
-                                className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                                onClick={() => {
-                                  setLUCFile(null);
-                                  setLUCFilename("");
-                                  setLUCFilesize(0);
-                                }}
-                              >
-                                <Trash2Icon className="text-white size-5" />
-                              </Button>
-                            </div> */}
-                          </div>
-                        </>
-                      )}
-                    </>
-                  )}
-                  {!LUCfile && (
+              {haveDownloadedFile &&
+                (LUCfile ? (
+                  <>
+                    {renderUploadedTemplateCard()}
+                    {renderQuickTable()}
+                  </>
+                ) : (
                     <div
                       className={cn(
                         "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
@@ -895,9 +858,7 @@ export const DefineLUCComponent = () => {
                         </>
                       )}
                     </div>
-                  )}
-                </>
-              )}
+                  ))}
               {!haveDownloadedFile && !LUCfile && (
                 <>
                   <Button
