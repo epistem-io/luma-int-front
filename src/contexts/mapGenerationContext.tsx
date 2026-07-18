@@ -194,6 +194,8 @@ export interface MapGenerationContextType {
   minLeafPopulationError: string;
   setMinLeafPopulationError: Dispatch<SetStateAction<string>>;
   resetMapGenerationState: () => void;
+  quickManualSampling: boolean;
+  setQuickManualSampling: Dispatch<SetStateAction<boolean>>;
 }
 
 const DEFAULT_VALUE: MapGenerationContextType = {
@@ -340,6 +342,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   minLeafPopulationError: "",
   setMinLeafPopulationError: () => {},
   resetMapGenerationState: () => {},
+  quickManualSampling: false,
+  setQuickManualSampling: () => {},
 };
 
 const MapGenerationContext = createContext(DEFAULT_VALUE);
@@ -433,20 +437,13 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const hasValidQuickRows = lucQuickRows.some((r) => r.name.trim() !== "");
 
   // Single source of truth for how LULC classes were defined. Priority:
-  // default scheme > editable class rows (whether typed manually or parsed
-  // from an uploaded excel) > raw uploaded file with no parsed rows.
-  //
-  // Uploading an excel populates the editable rows, so it resolves to "quick"
-  // (the auto-points flow) regardless of which custom tab is active — this lets
-  // the Excel tab keep showing the uploaded-file preview without flipping the
-  // flow to the "excel" branch (whose confirm gate is never satisfied).
   const lucSource: LucSource =
     defaultArray.length > 0
       ? "default"
-      : hasValidQuickRows
-        ? "quick"
-        : LUCfile !== null
-          ? "excel"
+      : LUCfile !== null
+        ? "excel"
+        : hasValidQuickRows
+          ? "quick"
           : "";
 
   const selectedDefault = lucSource === "default";
@@ -582,6 +579,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.minLeafPopulationError,
   );
 
+  const [quickManualSampling, setQuickManualSampling] = useState(
+    DEFAULT_VALUE.quickManualSampling,
+  );
+
   const resetMapGenerationState = () => {
     setProgressPanelIndex(DEFAULT_VALUE.progressPanelIndex);
     setStepKey(DEFAULT_VALUE.stepKey);
@@ -653,6 +654,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setNumberOfTreesError(DEFAULT_VALUE.numberOfTreesError);
     setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
     setMinLeafPopulationError(DEFAULT_VALUE.minLeafPopulationError);
+    setQuickManualSampling(DEFAULT_VALUE.quickManualSampling);
 
     if (typeof document === "undefined") return;
 
@@ -805,6 +807,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     minLeafPopulationError,
     setMinLeafPopulationError,
     resetMapGenerationState,
+    quickManualSampling,
+    setQuickManualSampling,
   };
 
   // useEffect(() => {

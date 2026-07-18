@@ -34,25 +34,29 @@ export const LUCClassTable = ({ summary = false }: Props) => {
 
   const t = useTranslations("InteractivePanel");
 
-  const rerenderMarkers = (class_names: string[]) => {
+  const rerenderMarkers = (hiddenClassNames: string[]) => {
     if (!markerVectorSource) return;
     markerVectorSource.clear();
 
+    // OSS pins are named "Point N", not by class — so resolve the hidden
+    // class names to ids and filter on class_id, which every pin carries.
+    const hiddenClassIds = classArray
+      .filter((c) => hiddenClassNames.includes(c.class_name))
+      .map((c) => c.class_id);
+
     markerArray.forEach((item) => {
-      if (class_names.includes(item.name)) return;
+      if (hiddenClassIds.includes(item.class_id)) return;
+
       const markerFeature = new Feature({
         geometry: new Point(item.coordinates),
         id: item.id,
       });
 
-      const svg = svgWithColor(item.class_color);
-
       markerFeature.setStyle(
         new Style({
           image: new Icon({
-            anchor: [0.5, 1], // Anchor the bottom center of the icon
-            src: svg,
-            // src: "/images/marker.webp", // Use your own icon URL
+            anchor: [0.5, 1],
+            src: svgWithColor(item.class_color),
             size: [92, 117],
             height: 30,
           }),
@@ -68,17 +72,17 @@ export const LUCClassTable = ({ summary = false }: Props) => {
   }, [markerArray]);
 
   const classArrayCount = useMemo(() => {
-    // console.log("classarraycount", markerArray);
     return classArray.map((item) => {
       return {
         class_id: item.class_id,
         class_name: item.class_name,
         class_color: item.class_color,
-        count: markerArray.filter((marker) => marker.class_id === item.class_id)
-          .length,
+        count: markerArray.filter(
+          (marker) => marker.class_id === item.class_id,
+        ).length,
       };
     });
-  }, [markerArray]);
+  }, [markerArray, classArray]);
 
   // useEffect(() => {
   //   console.log("markk", markerLayerVisibilityArray);

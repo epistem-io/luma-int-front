@@ -100,6 +100,7 @@ export const DataTrainingComponent = () => {
     setTrainingFileError,
     setUploadedFilesArray,
     setIsTrainingDataChanged,
+    quickManualSampling
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -259,6 +260,8 @@ export const DataTrainingComponent = () => {
     });
   };
 
+  const canSampleManually = lucSource === "quick" || !quickManualSampling;
+
   const isNextDisabled =
     !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
 
@@ -274,11 +277,14 @@ export const DataTrainingComponent = () => {
 
     // Auto-points flows (default scheme + quick table) don't use the manual
     // marker cursor; only the uploaded-excel custom flow does.
-    if (isAutoPointsFlow) return;
+    // if (isAutoPointsFlow) return;
 
-    if (selectedCustom) {
+    // if (selectedCustom) {
+    //   markerCursor(pointingType, classArray, true);
+    //   return;
+    // }
+    if (canSampleManually) {
       markerCursor(pointingType, classArray, true);
-      return;
     }
   }, []);
 
@@ -290,7 +296,7 @@ export const DataTrainingComponent = () => {
     <>
       <div className="space-y-4">
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
-        {lucSource === "excel" && (
+        {canSampleManually && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
               value={dataTrainingActiveTab}
@@ -870,6 +876,7 @@ export const DataTrainingFooter = () => {
     classArray,
     isTrainingDataChanged,
     setIsTrainingDataChanged,
+    quickManualSampling
   } = useContext(MapGenerationContext);
 
   const { sessionId } = useContext(GlobalContext);
@@ -934,7 +941,7 @@ export const DataTrainingFooter = () => {
 
     // Only the uploaded-excel custom flow posts the user-placed markers.
     // Quick table + default use the server's auto-placed training points.
-    if (lucSource === "excel") {
+    if (lucSource === "excel" || quickManualSampling) {
       updateLULC();
       return;
     }

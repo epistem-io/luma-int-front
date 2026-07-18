@@ -42,6 +42,7 @@ import {
   LUC_UPDATE_URL,
   LUC_UPLOAD_URL,
   PANEL_COMPONENT_KEY,
+  POINTING_TYPE
 } from "@/constants";
 import { Label } from "@/components/ui/label";
 import { GlobalContext } from "@/contexts/globalContext";
@@ -102,13 +103,19 @@ export const DefineLUCComponent = () => {
     haveDownloadedFile,
     setHaveDownloadedFile,
     setIsDefineLULCChanged,
+    setClassArray,
+    setPointingType,
+    setSelectedClass,
+    setQuickManualSampling
   } = useContext(MapGenerationContext);
 
   const {
     markerArray,
+    setMarkerArray,
     markerLayerVisibilityArray,
     setMarkerLayerVisibilityArray,
     markerVectorSource,
+    setPointingType: setMapPointingType,
   } = useContext(MapContext);
 
   const { sessionId } = useContext(GlobalContext);
@@ -323,9 +330,16 @@ export const DefineLUCComponent = () => {
     setLucCustomTab("quick");
     setLucQuickPhase("editing");
     setHaveDownloadedFile(false);
-    setMarkerLayerVisibilityArray([]);
-    rerenderMarkers([]);
 
+    setMarkerLayerVisibilityArray([]);
+    setMarkerArray([]);
+    markerVectorSource?.clear();
+
+    setClassArray([]);
+    setPointingType(POINTING_TYPE.EMPTY);
+    setMapPointingType(POINTING_TYPE.EMPTY);
+    setSelectedClass("");
+    setQuickManualSampling(false)
     clearFile();
   };
 
@@ -355,6 +369,11 @@ export const DefineLUCComponent = () => {
     setLUCFilesize(0);
     setLucQuickRows([]);
     setLucQuickPhase("editing");
+    setLucExcelConfirmed(false);
+
+    setMarkerLayerVisibilityArray([]);
+    setMarkerArray([]);
+    markerVectorSource?.clear();
 
     const doc = document.getElementById(
       "luc-template-file-upload",
@@ -520,9 +539,13 @@ export const DefineLUCComponent = () => {
         <button
           type="button"
           disabled={!isQuickLocked && !canLockQuick}
-          onClick={() =>
-            setLucQuickPhase(isQuickLocked ? "confirmed" : "locked")
-          }
+          onClick={() => {
+            const nextPhase = isQuickLocked ? "confirmed" : "locked";
+            setLucQuickPhase(nextPhase);
+            // The excel flow gates Next on lucExcelConfirmed; both flows now
+            // confirm through this same Lock -> Confirm button.
+            setLucExcelConfirmed(nextPhase === "confirmed");
+          }}
           className="w-full py-3 rounded-[12px] bg-primary-red-pink-normal hover:brightness-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
         >
           <p className="font-lato text-md font-bold leading-6 text-white text-center">
@@ -1237,9 +1260,11 @@ export const DefineLUCFooter = () => {
     setIsDefineLULCChanged,
     setDataTrainingActiveTab,
     isDefineLULCChanged,
+    setQuickManualSampling
   } = useContext(MapGenerationContext);
 
-  const { setMarkerArray, renderArrayToMarkerVector } = useContext(MapContext);
+  const { setMarkerArray, renderArrayToMarkerVector, markerVectorSource } =
+    useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
 
@@ -1277,8 +1302,23 @@ export const DefineLUCFooter = () => {
     }
 
     if (lucSource === "excel") {
-      // The file was already uploaded + parsed during "Confirm LULC Class",
-      // so Next just advances to the Data Training step.
+      // The file was already uploaded + parsed when it was selected, so Next
+      // just advances to the Data Training step. Seed classArray from the
+      // confirmed rows the way main seeds it from the upload response — the
+      // Data Training step and On-Screen Sampling read it for the class list.
+      // No LUC_UPDATE_URL call here: that endpoint auto-places training
+      // points, and the excel flow places them manually.
+      setClassArray(
+        validQuickRows.map((r) => ({
+          class_id: Number(r.classId.trim()) || -1,
+          class_name: r.name.trim(),
+          class_color: r.color,
+        })),
+      );
+
+      setMarkerArray([]);
+      markerVectorSource?.clear();
+
       setIsDefineLULCChanged(false);
       setProgressPanelIndex(2);
       setDataTrainingActiveTab("upload");
@@ -1384,11 +1424,12 @@ export const DefineLUCFooter = () => {
 
         renderArrayToMarkerVector(markerArr);
 
+        setQuickManualSampling(lucSource === "quick" && markerArr.length === 0);
+
         setIsDefineLULCChanged(false);
         setProgressPanelIndex(2);
         setDataTrainingActiveTab("upload");
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
-        // CONTINUE
       })
       .catch((e) => {
         toast.error(`Error on submitting request: ${e}`, {
