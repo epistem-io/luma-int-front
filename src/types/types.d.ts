@@ -231,18 +231,36 @@ interface GenerateMapDataLULCComp {
   }[];
 }
 
-interface GenerateMapDataSampleDataQuality {
-  lowest_separability: {
-    min_td: number;
-    result_dict: {
-      Class1_ID: string;
-      Class1_Name: string;
-      Class2_ID: string;
-      Class2_Name: string;
-      Interpretation: string;
-      Separability_Level: string;
-      TD_Distance: number;
-    }[];
+interface SampleQualityPair {
+  Class1_ID: string;
+  Class1_Name: string;
+  Class2_ID: string;
+  Class2_Name: string;
+  TD_Distance: number;
+  Separability_Level: string;
+}
+
+type SampleQualityOverall = "good" | "med" | "poor";
+
+interface SampleQualityResult {
+  mean_td: number;
+  overall: SampleQualityOverall;
+  pair_counts: {
+    good: number;
+    weak: number;
+    poor: number;
+    total: number;
+  }
+  classes_good: number;
+  classes_total: number;
+  problem_pairs: SampleQualityPair[];
+}
+
+interface SampleQualityRes {
+  message: string;
+  sample_quality: SampleQualityResult | null;
+  error?: {
+    message: string;
   };
 }
 

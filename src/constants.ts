@@ -81,6 +81,7 @@ export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lu
 
 export const TRAINING_DATA_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/upload`;
 export const TRAINING_DATA_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data`;
+export const TRAINING_DATA_SEPARABILITY_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/separability`;
 export const PREDICTOR_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor`;
 
 export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/input-summary`;

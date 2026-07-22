@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LUCClassTable } from "./LUCClassTable";
+import { SampleQualityCard } from "./SampleQualityCard";
 import {
   DATA_TRAINING_FILE_SIZE_LIMIT,
   LUC_UPDATE_URL,
@@ -100,12 +101,35 @@ export const DataTrainingComponent = () => {
     setTrainingFileError,
     setUploadedFilesArray,
     setIsTrainingDataChanged,
-    quickManualSampling
+    quickManualSampling,
+    fetchSampleQuality,
+    sampleQuality,
+    setSampleQuality,
+    setSampleQualityError,
+    isSampleQualityLoading,
+    isUpdatingTrainingData,
+    setIsUpdatingTrainingData,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
+  const [summaryAccordionValue, setSummaryAccordionValue] = useState("");
+  const qualityViewRef = useRef<HTMLDivElement | null>(null);
+
+  // Once the quality result is shown, collapse the sample data summary and
+  // scroll the quality section into view so the result is the focus.
+  useEffect(() => {
+    if (sampleQuality) {
+      setSummaryAccordionValue("");
+      requestAnimationFrame(() => {
+        qualityViewRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }, [sampleQuality]);
   const startPointingButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -223,6 +247,36 @@ export const DataTrainingComponent = () => {
 
         renderArrayToMarkerVector(tempMarkerWithFeature);
 
+        // The upload endpoint parses the file but does not persist the points;
+        // post the merged markers first so the separability analysis sees them.
+        fetch(TRAINING_DATA_UPDATE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            training_data: tempMarkerWithFeature.map((item) => ({
+              class_id: item.class_id,
+              geometry: {
+                type: "Point",
+                coordinates: toLonLat(item.coordinates),
+              },
+            })),
+          }),
+        })
+          .then(() => {
+            setIsTrainingDataChanged(false);
+            fetchSampleQuality(sessionId);
+          })
+          .catch((e) => {
+            toast.error(`Error on submitting request: ${e}`, {
+              duration: Infinity,
+              dismissible: true,
+              closeButton: true,
+            });
+          });
+
         setTrainingFile(null);
         setTrainingFilename("");
         setTrainingFilesize(0);
@@ -262,6 +316,45 @@ export const DataTrainingComponent = () => {
 
   const canSampleManually = lucSource === "quick" || !quickManualSampling;
 
+  // OSS flow: posting the pinned points and running the separability analysis
+  // both happen here, on Confirm Sample Data (End Pointing only returns).
+  const onConfirmSampleData = () => {
+    setIsUpdatingTrainingData(true);
+    fetch(TRAINING_DATA_UPDATE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        session_id: sessionId,
+        training_data: markerArray.map((item) => ({
+          class_id: item?.class_id,
+          geometry: {
+            type: "Point",
+            coordinates: toLonLat(item?.coordinates),
+          },
+        })),
+      }),
+    })
+      .then(() => {
+        setIsTrainingDataChanged(false);
+        fetchSampleQuality(sessionId);
+      })
+      .catch((e) => {
+        toast.error(`Error on submitting request: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+      })
+      .finally(() => {
+        setIsUpdatingTrainingData(false);
+      });
+  };
+
+  const isConfirmSampleDataDisabled =
+    markerArray.length === 0 || isUpdatingTrainingData || isSampleQualityLoading;
+
   const isNextDisabled =
     !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
 
@@ -292,11 +385,81 @@ export const DataTrainingComponent = () => {
   //   console.log("marker arrya", markerArray);
   // }, [markerArray]);
 
+  // Uploaded-file preview card(s); shared by the upload tab and the
+  // quality-result view so the file stays visible after the analysis.
+  const renderUploadedFilesList = () =>
+    uploadedFilesArray.map((item, index) => {
+      return (
+        <div
+          key={`uploaded-file-${item.filename}-${index}`}
+          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
+        >
+          <div className="flex flex-row gap-x-4 items-center col-span-10">
+            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
+              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
+                {item.filename}
+              </p>
+              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
+                {shortenKiloByte(item.filesize)}
+              </p>
+            </div>
+          </div>
+
+          <div className="col-span-2 flex flex-row justify-end">
+            <Button
+              disabled={isUploadingTrainingFile}
+              variant={"ghost"}
+              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+              onClick={() => {
+                setTrainingFile(null);
+                setTrainingFilename("");
+                setTrainingFilesize(0);
+                setTrainingFileError("");
+
+                setUploadedFilesArray([]);
+
+                setMarkerArray([]);
+                markerVectorSource?.clear();
+
+                setSampleQuality(null);
+                setSampleQualityError("");
+
+                const doc = document.getElementById(
+                  "data-training-file-upload",
+                ) as HTMLInputElement;
+                if (!doc) return;
+
+                doc.value = "";
+              }}
+            >
+              <Trash2Icon className="text-secondary-purple-dark size-5" />
+            </Button>
+          </div>
+        </div>
+      );
+    });
+
+  // Once a result exists, the panel focuses on the quality card (plus the
+  // uploaded-file preview in the upload flow) and the sampling tabs hide.
+  const showQualityView = canSampleManually && sampleQuality !== null;
+
   return (
     <>
       <div className="space-y-4">
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
-        {canSampleManually && (
+        {showQualityView && (
+          <div
+            ref={qualityViewRef}
+            className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-4"
+          >
+            <SampleQualityCard />
+            {dataTrainingActiveTab === "upload" && renderUploadedFilesList()}
+          </div>
+        )}
+        {canSampleManually && !showQualityView && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
               value={dataTrainingActiveTab}
@@ -320,6 +483,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.uploadDataTrainingDescription")}
                   </p>
+                  <SampleQualityCard />
                   <div className="space-y-6">
                     {uploadedFilesArray.length === 0 && (
                       <div
@@ -421,56 +585,7 @@ export const DataTrainingComponent = () => {
                         )}
                       </div>
                     )}
-                    {uploadedFilesArray.map((item, index) => {
-                      return (
-                        <div
-                          key={`uploaded-file-${item.filename}-${index}`}
-                          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
-                        >
-                          <div className="flex flex-row gap-x-4 items-center col-span-10">
-                            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-                              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
-                                {item.filename}
-                              </p>
-                              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                                {shortenKiloByte(item.filesize)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="col-span-2 flex flex-row justify-end">
-                            <Button
-                              disabled={isUploadingTrainingFile}
-                              variant={"ghost"}
-                              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                              onClick={() => {
-                                setTrainingFile(null);
-                                setTrainingFilename("");
-                                setTrainingFilesize(0);
-                                setTrainingFileError("");
-
-                                setUploadedFilesArray([]);
-
-                                setMarkerArray([]);
-                                markerVectorSource?.clear();
-
-                                const doc = document.getElementById(
-                                  "data-training-file-upload",
-                                ) as HTMLInputElement;
-                                if (!doc) return;
-
-                                doc.value = "";
-                              }}
-                            >
-                              <Trash2Icon className="text-secondary-purple-dark size-5" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {renderUploadedFilesList()}
                     {trainingFile && (
                       <>
                         {trainingFilesize <= DATA_TRAINING_FILE_SIZE_LIMIT &&
@@ -655,6 +770,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.onScreenSamplingDescription")}
                   </p>
+                  <SampleQualityCard />
                   {/* <div className="space-y-2">
                     <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
                       {t("dataTraining.recordedLULC")}
@@ -833,7 +949,12 @@ export const DataTrainingComponent = () => {
             </Tabs>
           </div>
         )}
-        <Accordion type="single" collapsible>
+        <Accordion
+          type="single"
+          collapsible
+          value={summaryAccordionValue}
+          onValueChange={setSummaryAccordionValue}
+        >
           <AccordionItem
             value={"lulc-table"}
             className="rounded-xl border border-neutral-400  bg-white pb-3 last:border-b"
@@ -857,6 +978,29 @@ export const DataTrainingComponent = () => {
                     : "error"}
               </p>
               <LUCClassTable summary={false} />
+              {canSampleManually && dataTrainingActiveTab === "oss" && (
+                <div className="space-y-2">
+                  <Button
+                    disabled={isConfirmSampleDataDisabled}
+                    variant="primary"
+                    className="w-full"
+                    onClick={() => {
+                      onConfirmSampleData();
+                    }}
+                  >
+                    {!isUpdatingTrainingData &&
+                      t("dataTraining.confirmSampleData")}
+                    {isUpdatingTrainingData && (
+                      <div className="w-full h-10 flex flex-row justify-center items-center">
+                        <span className="loader sm"></span>
+                      </div>
+                    )}
+                  </Button>
+                  <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second text-center">
+                    {t("dataTraining.confirmSampleDataCaption")}
+                  </p>
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

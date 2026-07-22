@@ -7,7 +7,6 @@ import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { numberThousandSeparator } from "@/lib/utils";
-import { AlertCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import TileLayer from "ol/layer/Tile";
@@ -17,7 +16,6 @@ import { toast } from "sonner";
 
 const VISUALIZATION = "visualization";
 const CALC_LULC_COMP = "calculate lulc composition";
-const SAMPLE_DATA_QUALITY = "sample data quality";
 const FEATURE_IMPORTANCE = "feature importance";
 const EVALUATE_MODEL_QUALITY = "evaluate model quality";
 const DOWNLOAD_URL = "get download url";
@@ -38,8 +36,6 @@ export const YourMapComponent = () => {
     setGenerateMapDataVisualization,
     // generateMapLULC,
     setGenerateMapLULC,
-    generateMapSampleQuality,
-    setGenerateMapSampleQuality,
     // generateMapFeatureImportance,
     setGenerateMapFeatureImportance,
     // generateMapModelQuality,
@@ -93,12 +89,6 @@ export const YourMapComponent = () => {
     if (json.process === CALC_LULC_COMP) {
       const data = json.data as GenerateMapDataLULCComp;
       setGenerateMapLULC(data);
-      return;
-    }
-
-    if (json.process === SAMPLE_DATA_QUALITY) {
-      const data = json.data as GenerateMapDataSampleDataQuality;
-      setGenerateMapSampleQuality(data);
       return;
     }
 
@@ -250,9 +240,6 @@ export const YourMapComponent = () => {
               <>
                 <ModelAccuracyAssessment />
                 <LULCCompositionSummary />
-                {generateMapSampleQuality &&
-                  generateMapSampleQuality.lowest_separability.result_dict
-                    .length > 0 && <TrainingDataQuality />}
                 {/* <PredictorImportances /> */}
                 <ThematicAccuracyAssessment />
               </>
@@ -439,73 +426,6 @@ const LULCCompositionSummary = () => {
               ))}
             </div>
           </div>
-        </div>
-      </Card>
-    </>
-  );
-};
-
-const TrainingDataQuality = () => {
-  const t = useTranslations("InteractivePanel");
-  const { generateMapSampleQuality, selectedDefault, selectedCustom } =
-    useContext(MapGenerationContext);
-
-  return (
-    <>
-      <Card>
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("yourMap.trainingDataQuality")}
-            </p>
-            <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
-              {selectedCustom
-                ? t("yourMap.trainingDataQualityDescriptionOWN")
-                : selectedDefault
-                  ? t("yourMap.trainingDataQualityDescriptionDEFAULT")
-                  : "error"}
-            </p>
-          </div>
-
-          {selectedCustom && (
-            <div className="p-2 rounded-[12px] bg-danger-50 space-y-2 ">
-              <div className="flex flex-row gap-x-2">
-                <AlertCircleIcon className="size-6 text-danger-700" />
-                <p className="font-aptos text-md font-bold leading-6 text-danger-700">
-                  {t("yourMap.lowSeparabilityDetected")}
-                </p>
-              </div>
-
-              <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
-                <p className="font-bold">
-                  {t("yourMap.lowSeparabilityCaption1")}
-                </p>
-                <div className="">
-                  {generateMapSampleQuality?.lowest_separability?.result_dict.map(
-                    (item, index) => {
-                      return (
-                        <div
-                          className="flex flex-row gap-x-2 items-start"
-                          key={`separability-${index}`}
-                        >
-                          <div className="size-1 aspect-square mt-2 rounded-full bg-danger-800" />
-                          {/* WIP */}
-                          {/* <p className="">Class [X] and Class [Y]</p> */}
-                          <p className="">
-                            {t("yourMap.lowSeparabilityCaption2", {
-                              X: item.Class1_Name,
-                              Y: item.Class2_Name,
-                            })}
-                          </p>
-                        </div>
-                      );
-                    },
-                  )}
-                </div>
-                <p className="">{t("yourMap.lowSeparabilityCaption3")}</p>
-              </div>
-            </div>
-          )}
         </div>
       </Card>
     </>

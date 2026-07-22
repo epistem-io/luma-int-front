@@ -122,6 +122,9 @@
 
   --color-success-50: rgba(212, 241, 227, 1);
   --color-success-700: rgba(23, 111, 69, 1);
+
+  --color-warning-50: rgba(255, 248, 225, 1);
+  --color-warning-700: rgba(217, 152, 26, 1);
 }
 
 :root {

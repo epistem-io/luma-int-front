@@ -4,6 +4,7 @@ import {
   AREA_SCOPING_TYPE,
   PANEL_COMPONENT_KEY,
   POINTING_TYPE,
+  TRAINING_DATA_SEPARABILITY_URL
 } from "@/constants";
 import {
   createContext,
@@ -149,10 +150,6 @@ export interface MapGenerationContextType {
   >;
   generateMapLULC: GenerateMapDataLULCComp | null;
   setGenerateMapLULC: Dispatch<SetStateAction<GenerateMapDataLULCComp | null>>;
-  generateMapSampleQuality: GenerateMapDataSampleDataQuality | null;
-  setGenerateMapSampleQuality: Dispatch<
-    SetStateAction<GenerateMapDataSampleDataQuality | null>
-  >;
   generateMapFeatureImportance: GenerateMapDataFeatureImportance | null;
   setGenerateMapFeatureImportance: Dispatch<
     SetStateAction<GenerateMapDataFeatureImportance | null>
@@ -179,6 +176,13 @@ export interface MapGenerationContextType {
   setIsDefineLULCChanged: Dispatch<SetStateAction<boolean>>;
   isTrainingDataChanged: boolean;
   setIsTrainingDataChanged: Dispatch<SetStateAction<boolean>>;
+  sampleQuality: SampleQualityResult | null;
+  setSampleQuality: Dispatch<SetStateAction<SampleQualityResult | null>>;
+  isSampleQualityLoading: boolean;
+  setIsSampleQualityLoading: Dispatch<SetStateAction<boolean>>;
+  sampleQualityError: string;
+  setSampleQualityError: Dispatch<SetStateAction<string>>;
+  fetchSampleQuality: (sessionId: string) => void;
   isLULCParamsChanged: boolean;
   setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
   isYourMapDialogVisible: boolean;
@@ -305,8 +309,6 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setGenerateMapDataVisualization: () => {},
   generateMapLULC: null,
   setGenerateMapLULC: () => {},
-  generateMapSampleQuality: null,
-  setGenerateMapSampleQuality: () => {},
   generateMapFeatureImportance: null,
   setGenerateMapFeatureImportance: () => {},
   generateMapModelQuality: null,
@@ -327,6 +329,13 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setIsDefineLULCChanged: () => {},
   isTrainingDataChanged: true,
   setIsTrainingDataChanged: () => {},
+  sampleQuality: null,
+  setSampleQuality: () => {},
+  isSampleQualityLoading: false,
+  setIsSampleQualityLoading: () => {},
+  sampleQualityError: "",
+  setSampleQualityError: () => {},
+  fetchSampleQuality: () => {},
   isLULCParamsChanged: true,
   setIsLULCParamsChanged: () => {},
   isYourMapDialogVisible: false,
@@ -509,10 +518,6 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.generateMapLULC,
   );
 
-  const [generateMapSampleQuality, setGenerateMapSampleQuality] = useState(
-    DEFAULT_VALUE.generateMapSampleQuality,
-  );
-
   const [generateMapFeatureImportance, setGenerateMapFeatureImportance] =
     useState(DEFAULT_VALUE.generateMapFeatureImportance);
 
@@ -555,6 +560,40 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.isTrainingDataChanged,
   );
 
+  const [sampleQuality, setSampleQuality] = useState(DEFAULT_VALUE.sampleQuality);
+
+  const [isSampleQualityLoading, setIsSampleQualityLoading] = useState(
+    DEFAULT_VALUE.isSampleQualityLoading,
+  );
+
+  const [sampleQualityError, setSampleQualityError] = useState(
+    DEFAULT_VALUE.sampleQualityError,
+  );
+
+  const fetchSampleQuality = (sessionId: string) => {
+    setIsSampleQualityLoading(true);
+    setSampleQualityError("");
+    setSampleQuality(null);
+
+    fetch(
+      `${TRAINING_DATA_SEPARABILITY_URL}?${new URLSearchParams({ session_id: sessionId })}`,
+    )
+      .then(async (res) => {
+        const json: SampleQualityRes = await res.json();
+
+        if (!res.ok) {
+          throw new Error(json?.error?.message || String(res.status));
+        }
+
+        setSampleQuality(json.sample_quality);
+      })
+      .catch((err) => {
+        setSampleQualityError(String(err?.message || err));
+      })
+      .finally(() => {
+        setIsSampleQualityLoading(false);
+      });
+  };
   const [isLULCParamsChanged, setIsLULCParamsChanged] = useState(
     DEFAULT_VALUE.isLULCParamsChanged,
   );
@@ -636,7 +675,6 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsSummaryDialogOpen(DEFAULT_VALUE.isSummaryDialogOpen);
     setGenerateMapDataVisualization(DEFAULT_VALUE.generateMapDataVisualization);
     setGenerateMapLULC(DEFAULT_VALUE.generateMapLULC);
-    setGenerateMapSampleQuality(DEFAULT_VALUE.generateMapSampleQuality);
     setGenerateMapFeatureImportance(DEFAULT_VALUE.generateMapFeatureImportance);
     setGenerateMapModelQuality(DEFAULT_VALUE.generateMapModelQuality);
     setGenerateMapDownloadURL(DEFAULT_VALUE.generateMapDownloadURL);
@@ -647,6 +685,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSummaryData(DEFAULT_VALUE.summaryData);
     setIsDefineLULCChanged(DEFAULT_VALUE.isDefineLULCChanged);
     setIsTrainingDataChanged(DEFAULT_VALUE.isTrainingDataChanged);
+    setSampleQuality(DEFAULT_VALUE.sampleQuality);
+    setIsSampleQualityLoading(DEFAULT_VALUE.isSampleQualityLoading);
+    setSampleQualityError(DEFAULT_VALUE.sampleQualityError);
     setIsLULCParamsChanged(DEFAULT_VALUE.isLULCParamsChanged);
     setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
     setSelectedPredictors(DEFAULT_VALUE.selectedPredictors);
@@ -762,6 +803,13 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsUploadingTrainingFile,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
+    sampleQuality,
+    setSampleQuality,
+    isSampleQualityLoading,
+    setIsSampleQualityLoading,
+    sampleQualityError,
+    setSampleQualityError,
+    fetchSampleQuality,
     isSummaryDialogOpen,
     setIsSummaryDialogOpen,
     // mapGenerationResult,
@@ -770,8 +818,6 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setGenerateMapDataVisualization,
     generateMapLULC,
     setGenerateMapLULC,
-    generateMapSampleQuality,
-    setGenerateMapSampleQuality,
     generateMapFeatureImportance,
     setGenerateMapFeatureImportance,
     generateMapModelQuality,

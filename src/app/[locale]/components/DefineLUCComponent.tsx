@@ -12,10 +12,9 @@ import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronLeft,
-  EyeClosedIcon,
-  EyeIcon,
   FileTextIcon,
   PlusIcon,
+  SquarePenIcon,
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
@@ -127,6 +126,11 @@ export const DefineLUCComponent = () => {
   const isQuickLocked = lucQuickPhase === "locked";
   const isQuickConfirmed = lucQuickPhase === "confirmed";
 
+  // The table starts read-only; the pencil button above it toggles edit mode
+  // (row inputs + per-row delete + add row).
+  const [isQuickTableEditing, setIsQuickTableEditing] = useState(false);
+  const canEditQuickRows = isQuickTableEditing && !isQuickLocked;
+
   // Once confirmed, the tabs are replaced by the read-only Recorded LULC
   // Feature summary and Next is enabled.
   const isConfirmed = isQuickConfirmed;
@@ -163,18 +167,6 @@ export const DefineLUCComponent = () => {
       markerVectorSource.addFeature(markerFeature);
     });
     markerVectorSource.changed();
-  };
-
-  const toggleMarkerVisibility = (name: string) => {
-    const className = name.trim();
-    if (!className) return;
-
-    const next = markerLayerVisibilityArray.includes(className)
-      ? markerLayerVisibilityArray.filter((n) => n !== className)
-      : [...markerLayerVisibilityArray, className];
-
-    setMarkerLayerVisibilityArray(next);
-    rerenderMarkers(next);
   };
 
   // Duplicate class names (case-insensitive, trimmed) — flagged inline and
@@ -386,6 +378,26 @@ export const DefineLUCComponent = () => {
   // card there) so the two views stay in sync without duplicating JSX.
   const renderQuickTable = () => (
     <>
+      <div className="space-y-2">
+        {lucQuickRows.length > 0 && (
+          <div className="flex flex-row items-center justify-between">
+            <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
+              {t("defineLUC.classRecordedCount", { X: lucQuickRows.length })}
+            </p>
+            <Button
+              variant={"ghost"}
+              size={"icon"}
+              disabled={isQuickLocked}
+              className={cn(
+                "p-0 hover:brightness-95 cursor-pointer size-7 rounded-md",
+                isQuickTableEditing && "bg-primary-pink-hover",
+              )}
+              onClick={() => setIsQuickTableEditing((prev) => !prev)}
+            >
+              <SquarePenIcon className="text-primary-red-pink-normal size-4" />
+            </Button>
+          </div>
+        )}
       <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
         <div className="flex bg-[#FAEDF2] border-b border-neutral-300 text-xs">
           <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
@@ -403,8 +415,9 @@ export const DefineLUCComponent = () => {
               {t("defineLUC.colorClassHeader")}
             </p>
           </div>
-          <div className="w-6 shrink-0 border-l border-neutral-300" />
-          <div className="w-6 shrink-0 border-l border-neutral-300" />
+          {canEditQuickRows && (
+            <div className="w-6 shrink-0 border-l border-neutral-300" />
+          )}
         </div>
 
         {lucQuickRows.length === 0 && (
@@ -417,7 +430,6 @@ export const DefineLUCComponent = () => {
 
         {lucQuickRows.map((row) => {
           const duplicate = isQuickRowDuplicate(row.name);
-          const hidden = markerLayerVisibilityArray.includes(row.name.trim());
           return (
             <div
               key={row.id}
@@ -427,7 +439,7 @@ export const DefineLUCComponent = () => {
                 <Input
                   value={row.classId}
                   inputMode="numeric"
-                  readOnly={isQuickLocked}
+                  readOnly={!canEditQuickRows}
                   className="h-7 text-center"
                   onChange={(e) =>
                     updateQuickRow(row.id, {
@@ -440,7 +452,7 @@ export const DefineLUCComponent = () => {
                 <Input
                   value={row.name}
                   aria-invalid={duplicate}
-                  readOnly={isQuickLocked}
+                  readOnly={!canEditQuickRows}
                   className="max-w-[231px] h-7"
                   onChange={(e) =>
                     updateQuickRow(row.id, { name: e.target.value })
@@ -456,7 +468,7 @@ export const DefineLUCComponent = () => {
                 <label
                   className={cn(
                     "relative size-7 shrink-0 rounded-md border border-neutral-300 overflow-hidden",
-                    isQuickLocked ? "pointer-events-none" : "cursor-pointer",
+                    !canEditQuickRows ? "pointer-events-none" : "cursor-pointer",
                   )}
                 >
                   <span
@@ -466,7 +478,7 @@ export const DefineLUCComponent = () => {
                   <input
                     type="color"
                     value={isValidHex(row.color) ? row.color : "#000000"}
-                    disabled={isQuickLocked}
+                    disabled={!canEditQuickRows}
                     onChange={(e) =>
                       updateQuickRow(row.id, {
                         color: e.target.value,
@@ -479,36 +491,23 @@ export const DefineLUCComponent = () => {
                   {row.color.replace(/^#/, "")}
                 </p>
               </div>
-              <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                  onClick={() => toggleMarkerVisibility(row.name)}
-                >
-                  {hidden ? (
-                    <EyeClosedIcon className="text-primary-red-pink-normal size-4" />
-                  ) : (
-                    <EyeIcon className="text-primary-red-pink-normal size-4" />
-                  )}
-                </Button>
-              </div>
-              <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  disabled={isQuickLocked}
-                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                  onClick={() => removeQuickRow(row.id)}
-                >
-                  <Trash2Icon className="text-text-icons-base-third size-4" />
-                </Button>
-              </div>
+              {canEditQuickRows && (
+                <div className="w-6 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                  <Button
+                    variant={"ghost"}
+                    size={"icon"}
+                    className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                    onClick={() => removeQuickRow(row.id)}
+                  >
+                    <Trash2Icon className="text-text-icons-base-third size-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
 
-        {lucQuickRows.length > 0 && !isQuickLocked && (
+        {lucQuickRows.length > 0 && canEditQuickRows && (
           <button
             type="button"
             onClick={addQuickRow}
@@ -521,12 +520,17 @@ export const DefineLUCComponent = () => {
           </button>
         )}
       </div>
+      </div>
 
       {lucQuickRows.length === 0 ? (
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={addQuickRow}
+            onClick={() => {
+              // First row: drop straight into edit mode.
+              setIsQuickTableEditing(true);
+              addQuickRow();
+            }}
             className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] h-7 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:brightness-95 transition-all duration-200 cursor-pointer"
           >
             <PlusIcon className="size-4 text-primary-red-pink-normal" />
@@ -542,6 +546,7 @@ export const DefineLUCComponent = () => {
           onClick={() => {
             const nextPhase = isQuickLocked ? "confirmed" : "locked";
             setLucQuickPhase(nextPhase);
+            setIsQuickTableEditing(false);
             // The excel flow gates Next on lucExcelConfirmed; both flows now
             // confirm through this same Lock -> Confirm button.
             setLucExcelConfirmed(nextPhase === "confirmed");
@@ -689,54 +694,72 @@ export const DefineLUCComponent = () => {
         </div>
         {/* <div className="space-y-3"> */}
         {isConfirmed ? (
-          <div className="rounded-[12px] border border-neutral-400 p-3 space-y-4">
-            <p className="font-aptos text-xl font-bold leading-6 text-primary-red-pink-normal">
-              {t("defineLUC.recordedLULCFeature")}
-            </p>
-            <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
-              <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
-                <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                    {t("defineLUC.idClassHeader")}
-                  </p>
-                </div>
-                <div className="flex-1 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
-                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                    {t("defineLUC.lulcClassHeader")}
-                  </p>
-                </div>
-                <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
-                  <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
-                    {t("defineLUC.colorClassHeader")}
-                  </p>
-                </div>
-              </div>
-              {summaryRows.map((row, index) => (
-                <div
-                  key={`${row.classId}-${index}`}
-                  className="flex border-b border-neutral-200 last:border-b-0"
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex flex-row items-center justify-between">
+                <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
+                  {t("defineLUC.classRecordedCount", { X: summaryRows.length })}
+                </p>
+                <Button
+                  variant={"ghost"}
+                  size={"icon"}
+                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-md"
+                  onClick={() => {
+                    // Back to the editable table so rows can be adjusted;
+                    // Next locks again until the user re-confirms.
+                    setLucQuickPhase("editing");
+                    setLucExcelConfirmed(false);
+                    setIsQuickTableEditing(true);
+                  }}
                 >
+                  <SquarePenIcon className="text-primary-red-pink-normal size-4" />
+                </Button>
+              </div>
+              <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
+                <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
                   <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                      {row.classId}
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                      {t("defineLUC.noColumnHeader")}
                     </p>
                   </div>
-                  <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
-                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                      {row.name}
+                  <div className="flex-1 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                      {t("defineLUC.lulcClassHeader")}
                     </p>
                   </div>
-                  <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-center gap-x-2">
-                    <span
-                      className="size-7 shrink-0 rounded-md border border-neutral-300"
-                      style={{ backgroundColor: row.color }}
-                    />
-                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                      {row.color.replace(/^#/, "")}
+                  <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
+                      {t("defineLUC.colorClassHeader")}
                     </p>
                   </div>
                 </div>
-              ))}
+                {summaryRows.map((row, index) => (
+                  <div
+                    key={`${row.classId}-${index}`}
+                    className="flex border-b border-neutral-200 last:border-b-0"
+                  >
+                    <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                        {index + 1}
+                      </p>
+                    </div>
+                    <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
+                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                        {row.name}
+                      </p>
+                    </div>
+                    <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-center gap-x-2">
+                      <span
+                        className="size-7 shrink-0 rounded-md border border-neutral-300"
+                        style={{ backgroundColor: row.color }}
+                      />
+                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                        {row.color.replace(/^#/, "")}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
             {LUCfilename && renderUploadedTemplateCard({ removable: false })}
           </div>
