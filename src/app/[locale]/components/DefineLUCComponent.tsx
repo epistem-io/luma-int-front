@@ -19,6 +19,11 @@ import {
   UploadIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { ChangeEvent, useContext, useState } from "react";
@@ -40,6 +45,7 @@ import {
   LUC_TEMPLATE_FILENAME,
   LUC_UPDATE_URL,
   LUC_UPLOAD_URL,
+  LULC_CLASS_COLOR_PALETTE,
   PANEL_COMPONENT_KEY,
   POINTING_TYPE
 } from "@/constants";
@@ -73,7 +79,19 @@ import { fromLonLat } from "ol/proj";
 // };
 
 // Fallback palette for auto-assigning a color to a new Quick Table row.
-const QUICK_TABLE_COLORS = DEFAULT_LUC.map((l) => l.color);
+// Auto-assigned colors for new rows, cycled in order.
+const QUICK_TABLE_COLORS = [
+  "#EFC6D5",
+  "#CC4778",
+  "#FB7C54",
+  "#FBC12D",
+  "#A2A9F1",
+  "#8E9231",
+  "#00DF82",
+  "#015F4D",
+  "#043DCD",
+  "#0372FF",
+];
 
 export const DefineLUCComponent = () => {
   const t = useTranslations("InteractivePanel");
@@ -131,6 +149,11 @@ export const DefineLUCComponent = () => {
   const [isQuickTableEditing, setIsQuickTableEditing] = useState(false);
   const canEditQuickRows = isQuickTableEditing && !isQuickLocked;
 
+  // Which row's color-palette popover is open (row id), if any.
+  const [colorPopoverRowId, setColorPopoverRowId] = useState<string | null>(
+    null,
+  );
+
   // Once confirmed, the tabs are replaced by the read-only Recorded LULC
   // Feature summary and Next is enabled.
   const isConfirmed = isQuickConfirmed;
@@ -186,7 +209,6 @@ export const DefineLUCComponent = () => {
     return key !== "" && (quickDuplicateNames.get(key) ?? 0) > 1;
   };
 
-  const isValidHex = (color: string) => /^#[0-9a-fA-F]{6}$/.test(color);
 
   // Only allow locking/confirming a Quick Table with at least one named row
   // and no duplicate names, so a confirmed table always yields a valid submit.
@@ -246,14 +268,25 @@ export const DefineLUCComponent = () => {
           );
         }
 
-        const rows: QuickTableRow[] = json.classes.map((item) => ({
-          id: crypto.randomUUID(),
-          classId: String(item.class_id),
-          name: item.class_name,
-          color: item.class_color,
-        }));
+        // Merge with whatever is already in the table (e.g. manual input):
+        // uploaded classes get IDs continuing after the current highest ID.
+        setLucQuickRows((prev) => {
+          const maxId = prev.reduce((acc, r) => {
+            const n = parseInt(r.classId, 10);
+            return Number.isFinite(n) && n > acc ? n : acc;
+          }, 0);
 
-        setLucQuickRows(rows);
+          const uploadedRows: QuickTableRow[] = json.classes.map(
+            (item, index) => ({
+              id: crypto.randomUUID(),
+              classId: String(maxId + index + 1),
+              name: item.class_name,
+              color: item.class_color,
+            }),
+          );
+
+          return [...prev, ...uploadedRows];
+        });
         setLucQuickPhase("editing");
         setLUCFile(file);
         setLUCFilename(file.name);
@@ -464,29 +497,53 @@ export const DefineLUCComponent = () => {
                   </p>
                 )}
               </div>
-              <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-200 flex items-center justify-center gap-x-2">
-                <label
-                  className={cn(
-                    "relative size-7 shrink-0 rounded-md border border-neutral-300 overflow-hidden",
-                    !canEditQuickRows ? "pointer-events-none" : "cursor-pointer",
-                  )}
+              <div className="w-[160px] shrink-0 px-1 py-0.5 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
+                <Popover
+                  open={colorPopoverRowId === row.id}
+                  onOpenChange={(isOpen) => {
+                    setColorPopoverRowId(isOpen ? row.id : null);
+                  }}
                 >
-                  <span
-                    className="block size-full"
-                    style={{ backgroundColor: row.color }}
-                  />
-                  <input
-                    type="color"
-                    value={isValidHex(row.color) ? row.color : "#000000"}
-                    disabled={!canEditQuickRows}
-                    onChange={(e) =>
-                      updateQuickRow(row.id, {
-                        color: e.target.value,
-                      })
-                    }
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                </label>
+                  <PopoverTrigger asChild disabled={!canEditQuickRows}>
+                    <button
+                      type="button"
+                      className={cn(
+                        "size-7 shrink-0 rounded-md border border-neutral-300",
+                        !canEditQuickRows
+                          ? "cursor-default"
+                          : "cursor-pointer hover:brightness-95 transition-all duration-200",
+                      )}
+                      style={{ backgroundColor: row.color }}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    align="start"
+                    className="w-auto p-4 space-y-3 rounded-[12px]"
+                  >
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                      {t("defineLUC.selectClassColor")}
+                    </p>
+                    <div className="grid grid-cols-7 gap-2">
+                      {LULC_CLASS_COLOR_PALETTE.map((color) => (
+                        <button
+                          key={`palette-${row.id}-${color}`}
+                          type="button"
+                          className={cn(
+                            "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
+                            row.color.toLowerCase() === color.toLowerCase()
+                              ? "ring-2 ring-primary-pink ring-offset-1"
+                              : "border border-neutral-200",
+                          )}
+                          style={{ backgroundColor: color }}
+                          onClick={() => {
+                            updateQuickRow(row.id, { color });
+                            setColorPopoverRowId(null);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
                   {row.color.replace(/^#/, "")}
                 </p>
@@ -748,7 +805,7 @@ export const DefineLUCComponent = () => {
                         {row.name}
                       </p>
                     </div>
-                    <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-center gap-x-2">
+                    <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
                       <span
                         className="size-7 shrink-0 rounded-md border border-neutral-300"
                         style={{ backgroundColor: row.color }}

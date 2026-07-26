@@ -210,7 +210,7 @@ const SampleQualityResultCard = ({
           >
             {t("dataTraining.sampleQualityClassesCaption", {
               X: result.classes_good,
-              Y: result.classes_total,
+              Y: result.classes_analyzed ?? result.classes_total,
             })}
           </p>
         </div>
@@ -223,6 +223,51 @@ const SampleQualityResultCard = ({
           {result.mean_td.toFixed(2)}
         </p>
       </div>
+
+      {(result.classes_dropped?.length ?? 0) > 0 && (
+        <div className="bg-white rounded-md px-3 py-2 font-aptos text-sm font-regular leading-5 text-text-icons-base-main">
+          <p className="font-bold">
+            {t("dataTraining.sampleQualityDroppedClasses")}
+          </p>
+          <div className="">
+            {result.classes_dropped?.map((item) => (
+              <div
+                className="flex flex-row gap-x-2 items-start"
+                key={`sample-quality-dropped-${item.class_id}`}
+              >
+                <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
+                <p className="">{item.class_name}</p>
+              </div>
+            ))}
+          </div>
+          <p className="">{t("dataTraining.sampleQualityDroppedCaption")}</p>
+        </div>
+      )}
+
+      {(result.low_sample_classes?.length ?? 0) > 0 && (
+        <div className="bg-white rounded-md px-3 py-2 font-aptos text-sm font-regular leading-5 text-text-icons-base-main">
+          <p className="font-bold">
+            {t("dataTraining.sampleQualityLowSamples")}
+          </p>
+          <div className="">
+            {result.low_sample_classes?.map((item) => (
+              <div
+                className="flex flex-row gap-x-2 items-start"
+                key={`sample-quality-low-${item.class_id}`}
+              >
+                <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
+                <p className="">
+                  {t("dataTraining.sampleQualityLowSampleItem", {
+                    X: item.class_name,
+                    Y: item.pixels,
+                  })}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="">{t("dataTraining.sampleQualityLowSamplesCaption")}</p>
+        </div>
+      )}
 
       {result.problem_pairs.length > 0 && (
         <div className="bg-white rounded-md px-3 py-2 font-aptos text-sm font-regular leading-5 text-text-icons-base-main">

@@ -183,6 +183,12 @@ export interface MapGenerationContextType {
   sampleQualityError: string;
   setSampleQualityError: Dispatch<SetStateAction<string>>;
   fetchSampleQuality: (sessionId: string) => void;
+  thematicAccuracy: ThematicAccuracyResult | null;
+  setThematicAccuracy: Dispatch<SetStateAction<ThematicAccuracyResult | null>>;
+  isThematicAccuracyLoading: boolean;
+  setIsThematicAccuracyLoading: Dispatch<SetStateAction<boolean>>;
+  thematicAccuracyError: string;
+  setThematicAccuracyError: Dispatch<SetStateAction<string>>;
   isLULCParamsChanged: boolean;
   setIsLULCParamsChanged: Dispatch<SetStateAction<boolean>>;
   isYourMapDialogVisible: boolean;
@@ -336,6 +342,12 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   sampleQualityError: "",
   setSampleQualityError: () => {},
   fetchSampleQuality: () => {},
+  thematicAccuracy: null,
+  setThematicAccuracy: () => {},
+  isThematicAccuracyLoading: false,
+  setIsThematicAccuracyLoading: () => {},
+  thematicAccuracyError: "",
+  setThematicAccuracyError: () => {},
   isLULCParamsChanged: true,
   setIsLULCParamsChanged: () => {},
   isYourMapDialogVisible: false,
@@ -570,6 +582,18 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.sampleQualityError,
   );
 
+  const [thematicAccuracy, setThematicAccuracy] = useState(
+    DEFAULT_VALUE.thematicAccuracy,
+  );
+
+  const [isThematicAccuracyLoading, setIsThematicAccuracyLoading] = useState(
+    DEFAULT_VALUE.isThematicAccuracyLoading,
+  );
+
+  const [thematicAccuracyError, setThematicAccuracyError] = useState(
+    DEFAULT_VALUE.thematicAccuracyError,
+  );
+
   const fetchSampleQuality = (sessionId: string) => {
     setIsSampleQualityLoading(true);
     setSampleQualityError("");
@@ -688,6 +712,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSampleQuality(DEFAULT_VALUE.sampleQuality);
     setIsSampleQualityLoading(DEFAULT_VALUE.isSampleQualityLoading);
     setSampleQualityError(DEFAULT_VALUE.sampleQualityError);
+    setThematicAccuracy(DEFAULT_VALUE.thematicAccuracy);
+    setIsThematicAccuracyLoading(DEFAULT_VALUE.isThematicAccuracyLoading);
+    setThematicAccuracyError(DEFAULT_VALUE.thematicAccuracyError);
     setIsLULCParamsChanged(DEFAULT_VALUE.isLULCParamsChanged);
     setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
     setSelectedPredictors(DEFAULT_VALUE.selectedPredictors);
@@ -810,6 +837,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     sampleQualityError,
     setSampleQualityError,
     fetchSampleQuality,
+    thematicAccuracy,
+    setThematicAccuracy,
+    isThematicAccuracyLoading,
+    setIsThematicAccuracyLoading,
+    thematicAccuracyError,
+    setThematicAccuracyError,
     isSummaryDialogOpen,
     setIsSummaryDialogOpen,
     // mapGenerationResult,

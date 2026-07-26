@@ -272,9 +272,9 @@ export const FinalSummaryDialog = () => {
                               {CLASS_ARR_FIRST_HALF.map((item, index) => {
                                 return (
                                   <div key={`${item}${index}`}>
-                                    <div className="flex flex-row items-center gap-x-2">
-                                      <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
-                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                                    <div className="flex flex-row items-start gap-x-2">
+                                      <div className="size-2 aspect-square shrink-0 bg-secondary-purple-normal-hover rounded-full mt-2.5" />
+                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover min-w-0">
                                         {item.class_name}
                                       </p>
                                     </div>
@@ -286,9 +286,9 @@ export const FinalSummaryDialog = () => {
                               {CLASS_ARR_SECOND_HALF.map((item, index) => {
                                 return (
                                   <div key={`${item}${index}`}>
-                                    <div className="flex flex-row items-center gap-x-2">
-                                      <div className="size-2 aspect-square bg-secondary-purple-normal-hover rounded-full" />
-                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover heading-7">
+                                    <div className="flex flex-row items-start gap-x-2">
+                                      <div className="size-2 aspect-square shrink-0 bg-secondary-purple-normal-hover rounded-full mt-2.5" />
+                                      <p className="font-aptos text-lg font-bold heading-7 text-secondary-purple-normal-hover min-w-0">
                                         {item.class_name}
                                       </p>
                                     </div>

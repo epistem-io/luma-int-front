@@ -98,15 +98,20 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                 {t("finalSummary.featureID")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-full">
+            {!summary && (
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-10 whitespace-normal px-1">
+                {t("defineLUC.idClassHeader")}
+              </TableHead>
+            )}
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center whitespace-normal px-1">
               {t("dataTraining.lulcClass")}
             </TableHead>
             {!summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-30">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-24 whitespace-normal px-1">
                 {t("defineLUC.colorClassHeader")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-16 whitespace-normal px-1">
               {t("dataTraining.numberOfPoints")}
             </TableHead>
 
@@ -163,10 +168,13 @@ export const LUCClassTable = ({ summary = false }: Props) => {
               {classArrayCount.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
+                    {item.class_id}
+                  </TableCell>
+                  <TableCell className="font-aptos! text-center border-r whitespace-normal">
                     {item.class_name}
                   </TableCell>
-                  <TableCell className="font-aptos! text-center border-r">
-                    <div className="flex items-center justify-center gap-x-2">
+                  <TableCell className="font-aptos! border-r">
+                    <div className="flex items-center justify-start pl-3 gap-x-2">
                       <span
                         className="size-5 shrink-0 rounded-[4px] border border-neutral-300"
                         style={{ backgroundColor: item.class_color }}

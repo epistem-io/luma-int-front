@@ -1,17 +1,26 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { FETCH_GENERATE_MAP } from "@/constants";
+import { Label } from "@/components/ui/label";
+import { FETCH_GENERATE_MAP, THEMATIC_ACCURACY_URL } from "@/constants";
+import { UploadIcon } from "lucide-react";
+import { ThematicAccuracyDetailDialog } from "./ThematicAccuracyDetailDialog";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
-import { numberThousandSeparator } from "@/lib/utils";
+import { cn, numberThousandSeparator } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import TileLayer from "ol/layer/Tile";
 import { XYZ } from "ol/source";
-import { ReactNode, useContext, useEffect } from "react";
+import {
+  ChangeEvent,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 const VISUALIZATION = "visualization";
@@ -238,10 +247,14 @@ export const YourMapComponent = () => {
             )}
             {!isGenerationError && (
               <>
-                <ModelAccuracyAssessment />
-                <LULCCompositionSummary />
+                <div className="grid grid-cols-[3fr_4fr] gap-4 items-stretch">
+                  <ModelAccuracyAssessment />
+                  <LULCCompositionSummary />
+                </div>
                 {/* <PredictorImportances /> */}
-                <ThematicAccuracyAssessment />
+                <div id="thematic-accuracy-card">
+                  <ThematicAccuracyAssessment />
+                </div>
               </>
             )}
           </>
@@ -276,9 +289,20 @@ export const YourMapFooter = () => {
   );
 };
 
-const Card = ({ children }: { children: ReactNode }) => {
+const Card = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => {
   return (
-    <div className="p-3 rounded-[12px] border border-neutral-400 bg-white">
+    <div
+      className={cn(
+        "p-3 rounded-[12px] border border-neutral-400 bg-white",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -336,9 +360,14 @@ const LULCCompositionSummary = () => {
     <>
       <Card>
         <div className="space-y-5">
-          <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("yourMap.lulcCompositionSummary")}
-          </p>
+          <div className="space-y-1">
+            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+              {t("yourMap.lulcCompositionSummary")}
+            </p>
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+              {t("yourMap.lulcCompositionSummaryDescription")}
+            </p>
+          </div>
           <div className="flex flex-row w-full rounded-md overflow-hidden h-14">
             {generateMapLULC?.lulc_composition.length === 0 && "-"}
             {generateMapLULC?.lulc_composition.map((item, index) => (
@@ -352,7 +381,7 @@ const LULCCompositionSummary = () => {
               />
             ))}
           </div>
-          <div className="grid grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-2 gap-x-3">
             <div className="space-y-3">
               {ARR_FIRST_HALF.map((item, index) => (
                 <div
@@ -360,32 +389,36 @@ const LULCCompositionSummary = () => {
                   className="flex flex-row items-start"
                 >
                   <div
-                    className="size-5 aspect-square rounded-full mt-1 mr-2"
+                    className="size-4 aspect-square rounded-[4px] mt-1 mr-2 shrink-0"
                     style={{
                       backgroundColor: item.class_color,
                     }}
                   />
 
-                  <div className="mr-1 flex-1">
-                    <p className="text-black font-aptos text-lg font-semibold heading-7">
+                  <div className="mr-1 flex-1 min-w-0">
+                    <p
+                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-2 text-ellipsis"
+                      title={item.class_name}
+                    >
                       {item.class_name}
                     </p>
-                    <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {numberThousandSeparator(
-                        (item.area_m2 / 10000).toFixed(0),
-                      )}{" "}
-                      ha
-                    </p>
+                    <div className="flex flex-row items-baseline gap-x-1.5">
+                      <p
+                        className="font-noto-sans text-md font-bold leading-6 text-nowrap"
+                        style={{
+                          color: item.class_color,
+                        }}
+                      >
+                        {item.proportion.toFixed(0)}%
+                      </p>
+                      <p className="text-black font-aptos text-[13px] font-regular leading-4.5 whitespace-nowrap">
+                        {numberThousandSeparator(
+                          (item.area_m2 / 10000).toFixed(0),
+                        )}{" "}
+                        Ha
+                      </p>
+                    </div>
                   </div>
-
-                  <p
-                    className="font-noto-sans text-2xl font-bold heading-7.5 tracking-[-0.24px] text-nowrap"
-                    style={{
-                      color: item.class_color,
-                    }}
-                  >
-                    {item.proportion.toFixed(0)}%
-                  </p>
                 </div>
               ))}
             </div>
@@ -396,32 +429,36 @@ const LULCCompositionSummary = () => {
                   className="flex flex-row items-start"
                 >
                   <div
-                    className="size-5 aspect-square rounded-full mt-1 mr-2"
+                    className="size-4 aspect-square rounded-[4px] mt-1 mr-2 shrink-0"
                     style={{
                       backgroundColor: item.class_color,
                     }}
                   />
 
-                  <div className="mr-1 flex-1">
-                    <p className="text-black font-aptos text-lg font-semibold heading-7">
+                  <div className="mr-1 flex-1 min-w-0">
+                    <p
+                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-2 text-ellipsis"
+                      title={item.class_name}
+                    >
                       {item.class_name}
                     </p>
-                    <p className="text-black font-aptos text-[15px]] font-regular heading-5.5">
-                      {numberThousandSeparator(
-                        (item.area_m2 / 10000).toFixed(0),
-                      )}{" "}
-                      ha
-                    </p>
+                    <div className="flex flex-row items-baseline gap-x-1.5">
+                      <p
+                        className="font-noto-sans text-md font-bold leading-6 text-nowrap"
+                        style={{
+                          color: item.class_color,
+                        }}
+                      >
+                        {item.proportion.toFixed(0)}%
+                      </p>
+                      <p className="text-black font-aptos text-[13px] font-regular leading-4.5 whitespace-nowrap">
+                        {numberThousandSeparator(
+                          (item.area_m2 / 10000).toFixed(0),
+                        )}{" "}
+                        Ha
+                      </p>
+                    </div>
                   </div>
-
-                  <p
-                    className="font-noto-sans text-2xl font-bold heading-7.5 tracking-[-0.24px] text-nowrap"
-                    style={{
-                      color: item.class_color,
-                    }}
-                  >
-                    {item.proportion.toFixed(0)}%
-                  </p>
                 </div>
               ))}
             </div>
@@ -528,8 +565,8 @@ const ModelAccuracyAssessment = () => {
 
   return (
     <>
-      <Card>
-        <div className="space-y-4">
+      <Card className="h-full">
+        <div className="space-y-4 h-full flex flex-col">
           <div className="space-y-1">
             <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
               {t("yourMap.modelAccuracyAssessment")}
@@ -558,45 +595,44 @@ const ModelAccuracyAssessment = () => {
               </p>
             </div>
 
-            <div className="bg-white rounded-md px-2 py-1 font-aptos text-sm font-regular leading-5 text-danger-800">
-              {/* <div className="grid grid-cols-4"> */}
-              <div className="flex flex-row justify-evenly">
-                <div className="flex flex-col items-center">
-                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
+            <div className="bg-white rounded-md px-3 py-2">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                <div className="min-w-0">
+                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
                     {t("yourMap.overallAccuracy")}
                   </p>
-                  <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
+                  <p className="font-noto-sans text-xl font-bold leading-7 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.overall_accuracy.toFixed(
-                      0,
+                      1,
                     )}
                     %
                   </p>
                 </div>
-                <div className="flex flex-col items-center">
-                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
+                <div className="min-w-0">
+                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
                     {t("yourMap.kappaCoefficient")}
                   </p>
-                  <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
-                    {generateMapModelQuality?.model_quality.kappa.toFixed(2)}
+                  <p className="font-noto-sans text-xl font-bold leading-7 text-text-icons-base-main">
+                    {generateMapModelQuality?.model_quality.kappa.toFixed(3)}
                   </p>
                 </div>
-                <div className="flex flex-col items-center">
-                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
+                <div className="min-w-0">
+                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
                     {t("yourMap.averageF1Score")}
                   </p>
-                  <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
+                  <p className="font-noto-sans text-xl font-bold leading-7 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.average_f1_score.toFixed(
-                      2,
+                      3,
                     )}
                   </p>
                 </div>
-                <div className="flex flex-col items-center">
-                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second text-center">
+                <div className="min-w-0">
+                  <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
                     {t("yourMap.gMeanScore")}
                   </p>
-                  <p className="font-noto-sans text-2xl font-bold leading-7.5 text-text-icons-base-main">
+                  <p className="font-noto-sans text-xl font-bold leading-7 text-text-icons-base-main">
                     {generateMapModelQuality?.model_quality.gmean_score.toFixed(
-                      2,
+                      3,
                     )}
                   </p>
                 </div>
@@ -604,22 +640,21 @@ const ModelAccuracyAssessment = () => {
             </div>
           </div>
 
-          {/*
-          <div className="w-full flex flex-row justify-end">
+          <div className="w-full flex flex-row justify-end mt-auto">
             <Button
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
               onClick={() => {
-                // onResetInput();
+                document
+                  .getElementById("thematic-accuracy-card")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >
-              <div className="">
-                <p className="text-primary-pink font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-                  {t("yourMap.showAllPredictor")}
-                </p>
-              </div>
+              <p className="text-primary-pink font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
+                {t("yourMap.showDetail")}
+              </p>
             </Button>
-          </div>*/}
+          </div>
         </div>
       </Card>
     </>
@@ -628,6 +663,75 @@ const ModelAccuracyAssessment = () => {
 
 const ThematicAccuracyAssessment = () => {
   const t = useTranslations("InteractivePanel");
+  const { sessionId } = useContext(GlobalContext);
+  const {
+    thematicAccuracy,
+    setThematicAccuracy,
+    isThematicAccuracyLoading,
+    setIsThematicAccuracyLoading,
+    thematicAccuracyError,
+    setThematicAccuracyError,
+  } = useContext(MapGenerationContext);
+
+  const [showUpload, setShowUpload] = useState(false);
+  const [fileEnter, setFileEnter] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+
+  const submitValidationFile = (file: File) => {
+    setThematicAccuracyError("");
+    setIsThematicAccuracyLoading(true);
+
+    const body = new FormData();
+    body.append("file", file);
+    body.append("session_id", sessionId);
+
+    fetch(THEMATIC_ACCURACY_URL, {
+      method: "POST",
+      body,
+    })
+      .then(async (response) => {
+        const json: ThematicAccuracyRes = await response.json();
+
+        if (!response.ok) {
+          throw new Error(json?.error?.message || String(response.status));
+        }
+
+        setThematicAccuracy(json.thematic_accuracy);
+      })
+      .catch((e) => {
+        setThematicAccuracyError(String(e?.message || e));
+      })
+      .finally(() => {
+        setIsThematicAccuracyLoading(false);
+      });
+  };
+
+  const onUploadValidationFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+
+    submitValidationFile(file);
+
+    e.target.value = "";
+  };
+
+  const kappaLabel = thematicAccuracy
+    ? thematicAccuracy.kappa > 0.8
+      ? t("yourMap.thematicKappaAlmostPerfect")
+      : thematicAccuracy.kappa > 0.6
+        ? t("yourMap.thematicKappaSubstantial")
+        : thematicAccuracy.kappa > 0.4
+          ? t("yourMap.thematicKappaModerate")
+          : thematicAccuracy.kappa > 0.2
+            ? t("yourMap.thematicKappaFair")
+            : t("yourMap.thematicKappaSlight")
+    : "";
+
+  const ci = thematicAccuracy?.overall_accuracy_ci || [];
+  const wrongPoints = thematicAccuracy
+    ? thematicAccuracy.n_total - thematicAccuracy.n_correct
+    : 0;
+
   return (
     <>
       <Card>
@@ -640,47 +744,243 @@ const ThematicAccuracyAssessment = () => {
               {t("yourMap.thematicAccuracyAssessmentDescription")}
             </p>
           </div>
-          <div className="p-3 rounded-md bg-text-icons-base-main">
-            <div className="space-y-1">
-              <p className="font-aptos text-md font-bold leading-6 text-text-icons-on-color">
-                {t("yourMap.ronaAdTitle")}
-              </p>
 
-              <p className="font-aptos text-sm font-regular leading-5 text-text-icons-on-color">
-                {t.rich("yourMap.ronaAdDescription", {
-                  b: (t) => <b>{t}</b>,
-                })}
-              </p>
-            </div>
-            <div className="w-full flex flex-row justify-center mt-[35px]">
-              <Image
-                alt="rona"
-                width={1144}
-                height={1064}
-                src="/images/luma-displays.webp"
-                className="w-[275px] "
-              />
-            </div>
-            <div className="space-y-3">
-              <p className="font-pjs text-sm font-medium text-text-icons-on-color">
-                {t("yourMap.rona")}
-              </p>
-              <p className="font-pjs text-xl font-bold text-text-icons-on-color">
-                {t("yourMap.ronaTagline")}
-              </p>
-              <Button
-                className="w-full rounded-md hover:bg-primary-pink hover:cursor-default"
-                variant={"primary"}
-                disabled
-              >
-                <p className="font-aptos text-[13px]">
-                  {t("yourMap.ronaComingSoon")}
+          {/* Result summary */}
+          {thematicAccuracy && (
+            <div className="space-y-2">
+              <div className="p-3 rounded-[12px] bg-primary-pink-hover space-y-2">
+                <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                  {t("yourMap.thematicSummaryHeadline", {
+                    X: (thematicAccuracy.overall_accuracy * 100).toFixed(0),
+                  })}
                 </p>
-              </Button>
+                <div className="bg-white rounded-md px-3 py-2">
+                  <div className="grid grid-cols-4 gap-x-4">
+                    <div className="min-w-0">
+                      <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
+                        {t("yourMap.thematicOverallAgreement")}
+                      </p>
+                      <p className="font-noto-sans text-xl font-bold leading-7 text-success-700">
+                        {(thematicAccuracy.overall_accuracy * 100).toFixed(1)}%
+                      </p>
+                      <p className="font-aptos text-xs font-regular leading-4 text-text-icons-base-second">
+                        {t("yourMap.thematicCI", {
+                          X: (thematicAccuracy.confidence_level * 100).toFixed(
+                            0,
+                          ),
+                          A: (ci[0] * 100 || 0).toFixed(1),
+                          B: (ci[1] * 100 || 0).toFixed(1),
+                        })}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
+                        {t("yourMap.kappaCoefficient")}
+                      </p>
+                      <p className="font-noto-sans text-xl font-bold leading-7 text-success-700">
+                        {thematicAccuracy.kappa.toFixed(3)}
+                      </p>
+                      <p className="font-aptos text-xs font-regular leading-4 text-text-icons-base-second">
+                        {kappaLabel}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
+                        {t("yourMap.thematicPointsCorrect")}
+                      </p>
+                      <p className="font-noto-sans text-xl font-bold leading-7 text-success-700">
+                        {thematicAccuracy.n_correct}
+                      </p>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-aptos text-sm font-semibold leading-5 text-text-icons-base-second">
+                        {t("yourMap.thematicPointsWrong")}
+                      </p>
+                      <p className="font-noto-sans text-xl font-bold leading-7 text-danger-700">
+                        {wrongPoints}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-row items-center justify-between">
+                <Button
+                  variant={"ghost"}
+                  className="p-0 hover:bg-transparent cursor-pointer"
+                  onClick={() => {
+                    setThematicAccuracy(null);
+                    setThematicAccuracyError("");
+                    setShowUpload(true);
+                  }}
+                >
+                  <p className="text-text-icons-base-second font-aptos text-[13px] font-regular underline">
+                    {t("yourMap.thematicReupload")}
+                  </p>
+                </Button>
+                <Button
+                  variant={"ghost"}
+                  className="p-0 hover:bg-transparent cursor-pointer"
+                  onClick={() => {
+                    setIsDetailOpen(true);
+                  }}
+                >
+                  <p className="text-primary-pink font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
+                    {t("yourMap.showDetail")}
+                  </p>
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Analyzing */}
+          {!thematicAccuracy && isThematicAccuracyLoading && (
+            <div className="p-4 rounded-[12px] border border-neutral-400 bg-white flex flex-row items-center gap-x-3">
+              <span className="loader sm"></span>
+              <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+                {t("yourMap.thematicLoading")}
+              </p>
+            </div>
+          )}
+
+          {/* Error */}
+          {!thematicAccuracy &&
+            !isThematicAccuracyLoading &&
+            thematicAccuracyError !== "" && (
+              <div className="p-4 rounded-[12px] bg-danger-50 space-y-3">
+                <p className="font-aptos text-md font-bold leading-6 text-danger-800">
+                  {t("yourMap.thematicErrorCaption")}
+                </p>
+                <p className="font-aptos text-sm font-regular leading-5 text-danger-800">
+                  {thematicAccuracyError}
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setThematicAccuracyError("");
+                    setShowUpload(true);
+                  }}
+                >
+                  {t("dataTraining.sampleQualityRetry")}
+                </Button>
+              </div>
+            )}
+
+          {/* Upload dropzone */}
+          {!thematicAccuracy &&
+            !isThematicAccuracyLoading &&
+            thematicAccuracyError === "" &&
+            showUpload && (
+              <>
+                <div
+                  className={cn(
+                    "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
+                    "min-h-40.5",
+                    fileEnter && "border-primary-red-pink-normal",
+                  )}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setFileEnter(true);
+                  }}
+                  onDragLeave={() => {
+                    setFileEnter(false);
+                  }}
+                  onDragEnd={(e) => {
+                    e.preventDefault();
+                    setFileEnter(false);
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setFileEnter(false);
+                    const file = e.dataTransfer.files?.[0];
+                    if (file) {
+                      submitValidationFile(file);
+                    }
+                  }}
+                >
+                  {!fileEnter && (
+                    <>
+                      <div className="space-y-3">
+                        <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
+                        <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
+                          {t("dataTraining.dragAndDrop")} <br />
+                          {t("dataTraining.acceptedFormat", {
+                            X: ".zip (.shp, .shx, .dbf, .prj)",
+                          })}
+                        </p>
+                      </div>
+                      <Label
+                        htmlFor="thematic-validation-file-upload"
+                        className="w-50 mx-auto flex flex-row justify-center mb-0"
+                      >
+                        <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
+                          <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
+                            {t("dataTraining.browseFile")}
+                          </p>
+                        </div>
+                      </Label>
+                    </>
+                  )}
+
+                  {fileEnter && (
+                    <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
+                      <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
+                        {t("dataTraining.dropHere")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  id="thematic-validation-file-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".zip"
+                  multiple={false}
+                  onChange={onUploadValidationFile}
+                />
+              </>
+            )}
+
+          {/* Promo */}
+          {!thematicAccuracy &&
+            !isThematicAccuracyLoading &&
+            thematicAccuracyError === "" &&
+            !showUpload && (
+              <div className="p-4 rounded-md bg-text-icons-base-main space-y-4 overflow-hidden">
+                <p className="font-aptos text-lg font-bold leading-6.5 text-text-icons-on-color">
+                  {t("yourMap.thematicPromoTitle")}
+                </p>
+                <p className="font-aptos text-sm font-regular leading-5 text-text-icons-on-color opacity-80">
+                  {t("yourMap.thematicPromoCaption")}
+                </p>
+                <div className="flex flex-row justify-end">
+                  <Button
+                    variant={"primary"}
+                    className="px-6"
+                    onClick={() => {
+                      setShowUpload(true);
+                    }}
+                  >
+                    {t("yourMap.thematicValidateMap")}
+                  </Button>
+                </div>
+                {/* Bleeds out of the card padding so it sits flush with the
+                    bottom-left edge; the card's overflow-hidden crops it. */}
+                <Image
+                  alt="thematic accuracy assessment preview"
+                  width={709}
+                  height={258}
+                  src="/images/thematic-accuracy.webp"
+                  className="w-[95%] -ml-4 -mb-4 rounded-tr-md"
+                />
+              </div>
+            )}
         </div>
       </Card>
+      <ThematicAccuracyDetailDialog
+        open={isDetailOpen}
+        onOpenChange={setIsDetailOpen}
+      />
     </>
   );
 };

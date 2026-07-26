@@ -318,7 +318,7 @@ export const InteractivePanel = () => {
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="relative">
       <div
         className={cn(
-          "bg-background-base-main rounded-2xl w-120.75 pt-4 border-[1.5px] border-[#E7E6E6] space-y-0",
+          "bg-background-base-main rounded-2xl w-150 pt-4 border-[1.5px] border-[#E7E6E6] space-y-0",
           !isOpen && "pb-4",
         )}
         style={{

@@ -242,6 +242,18 @@ interface SampleQualityPair {
 
 type SampleQualityOverall = "good" | "med" | "poor";
 
+interface SampleQualityDroppedClass {
+  class_id: number;
+  class_name: string;
+  reason: string;
+}
+
+interface SampleQualityLowSampleClass {
+  class_id: number;
+  class_name: string;
+  pixels: number;
+}
+
 interface SampleQualityResult {
   mean_td: number;
   overall: SampleQualityOverall;
@@ -253,12 +265,56 @@ interface SampleQualityResult {
   }
   classes_good: number;
   classes_total: number;
+  // Optional: only returned by backends that report extraction coverage.
+  classes_analyzed?: number;
+  classes_dropped?: SampleQualityDroppedClass[];
+  low_sample_classes?: SampleQualityLowSampleClass[];
   problem_pairs: SampleQualityPair[];
 }
 
 interface SampleQualityRes {
   message: string;
   sample_quality: SampleQualityResult | null;
+  error?: {
+    message: string;
+  };
+}
+
+interface ThematicAccuracyPerClass {
+  class_id: number;
+  class_name: string;
+  class_color: string;
+  producer_accuracy: number;
+  user_accuracy: number;
+  f1_score: number;
+}
+
+interface ThematicAccuracyPoint {
+  lon: number;
+  lat: number;
+  actual_class_id: number;
+  actual_class_name: string;
+  predicted_class_id: number;
+  predicted_class_name: string;
+  is_correct: boolean;
+}
+
+interface ThematicAccuracyResult {
+  overall_accuracy: number;
+  overall_accuracy_ci: number[];
+  confidence_level: number;
+  kappa: number;
+  per_class: ThematicAccuracyPerClass[];
+  confusion_matrix: number[][];
+  n_total: number;
+  n_correct: number;
+  scale: number;
+  points: ThematicAccuracyPoint[];
+}
+
+interface ThematicAccuracyRes {
+  message: string;
+  thematic_accuracy: ThematicAccuracyResult;
   error?: {
     message: string;
   };

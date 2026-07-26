@@ -13,7 +13,7 @@ export const ProgressPanel = () => {
 
   return (
     <div
-      className="bg-content-gray rounded-2xl w-120.75 p-4 border-[1.5px] border-[#605E5E]"
+      className="bg-content-gray rounded-2xl w-150 p-4 border-[1.5px] border-[#605E5E]"
       style={{
         boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.08)",
       }}
