@@ -10,15 +10,26 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
+  ArrowRight,
   ChevronDown,
   ChevronLeft,
+  ChevronRight,
+  CirclePlus,
   FileTextIcon,
+  List,
   PlusIcon,
   SquarePenIcon,
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
@@ -93,6 +104,109 @@ const QUICK_TABLE_COLORS = [
   "#0372FF",
 ];
 
+// Shared by the Reset link and the leave-confirmation dialog: wipes every
+// step-2 classification input and returns the panel to the picker.
+export const useResetDefineLUCInputs = () => {
+  const {
+    setDefaultArray,
+    setLucQuickRows,
+    setLucCustomTab,
+    setLucQuickPhase,
+    setLucDefaultConfirmed,
+    setLucView,
+    setHaveDownloadedFile,
+    setIsDefineLULCChanged,
+    setClassArray,
+    setPointingType,
+    setSelectedClass,
+    setQuickManualSampling,
+    setLUCFile,
+    setLUCFilename,
+    setLUCFilesize,
+    setLucExcelConfirmed,
+  } = useContext(MapGenerationContext);
+  const {
+    setMarkerArray,
+    setMarkerLayerVisibilityArray,
+    markerVectorSource,
+    setPointingType: setMapPointingType,
+  } = useContext(MapContext);
+
+  return () => {
+    setIsDefineLULCChanged(true);
+    setDefaultArray([]);
+    setLucQuickRows([]);
+    setLucCustomTab("quick");
+    setLucQuickPhase("editing");
+    setLucDefaultConfirmed(false);
+    setLucView("picker");
+    setHaveDownloadedFile(false);
+
+    setMarkerLayerVisibilityArray([]);
+    setMarkerArray([]);
+    markerVectorSource?.clear();
+
+    setClassArray([]);
+    setPointingType(POINTING_TYPE.EMPTY);
+    setMapPointingType(POINTING_TYPE.EMPTY);
+    setSelectedClass("");
+    setQuickManualSampling(false);
+
+    setLUCFile(null);
+    setLUCFilename("");
+    setLUCFilesize(0);
+    setLucExcelConfirmed(false);
+
+    const doc = document.getElementById(
+      "luc-template-file-upload",
+    ) as HTMLInputElement;
+    if (doc) doc.value = "";
+  };
+};
+
+// Confirmation shown when the panel-header back button would leave a flow
+// that already has inputs; discarding runs the same reset as the Reset link.
+export const DefineLUCLeaveDialog = ({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) => {
+  const t = useTranslations("InteractivePanel");
+  const resetInputs = useResetDefineLUCInputs();
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[720px] p-6">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="font-noto-sans text-2xl font-bold text-primary-red-pink-normal text-center">
+            {t("defineLUC.leaveDialogTitle")}
+          </DialogTitle>
+          <DialogDescription className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center whitespace-pre-line">
+            {t("defineLUC.leaveDialogDescription")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid grid-cols-2 gap-x-4 pt-4">
+          <Button
+            variant="ghost"
+            className="bg-primary-pink-hover text-primary-red-pink-normal hover:brightness-95 transition-all duration-200"
+            onClick={() => {
+              resetInputs();
+              onOpenChange(false);
+            }}
+          >
+            {t("defineLUC.leaveDialogDiscard")}
+          </Button>
+          <Button variant="primary" onClick={() => onOpenChange(false)}>
+            {t("defineLUC.leaveDialogContinue")}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export const DefineLUCComponent = () => {
   const t = useTranslations("InteractivePanel");
 
@@ -103,6 +217,10 @@ export const DefineLUCComponent = () => {
     lucQuickRows,
     lucCustomTab,
     lucQuickPhase,
+    lucDefaultConfirmed,
+    lucView,
+    setLucDefaultConfirmed,
+    setLucView,
     isLUCLoading,
     setLucQuickRows,
     setLucCustomTab,
@@ -137,32 +255,52 @@ export const DefineLUCComponent = () => {
 
   const { sessionId } = useContext(GlobalContext);
 
-  // const [aiAccordionOpen, setAIAccordionOpen] = useState(false);
+  const [hierarchyOpen, setHierarchyOpen] = useState(true);
+  const [aiSectionOpen, setAISectionOpen] = useState(false);
+  // Local-only for now: the AI recommendation feature is "coming soon", so
+  // the prompt is typed but never submitted.
+  const [aiPrompt, setAIPrompt] = useState("");
   const [fileEnter, setFileEnter] = useState(false);
-  // Quick Table flow phases. "locked" freezes rows (read-only); "confirmed"
-  // swaps to the read-only Recorded LULC Feature summary and enables Next.
-  const isQuickLocked = lucQuickPhase === "locked";
+  // "confirmed" swaps to the read-only Recorded LULC Feature summary and
+  // enables Next. "locked" is the summary's inline edit mode: the summary
+  // stays on screen with editable rows while Next is disabled (the footer
+  // requires "confirmed" / lucExcelConfirmed) until Done re-confirms.
   const isQuickConfirmed = lucQuickPhase === "confirmed";
+  const isSummaryEditing = lucQuickPhase === "locked";
 
   // The table starts read-only; the pencil button above it toggles edit mode
   // (row inputs + per-row delete + add row).
   const [isQuickTableEditing, setIsQuickTableEditing] = useState(false);
-  const canEditQuickRows = isQuickTableEditing && !isQuickLocked;
+  const canEditQuickRows = isQuickTableEditing;
 
   // Which row's color-palette popover is open (row id), if any.
   const [colorPopoverRowId, setColorPopoverRowId] = useState<string | null>(
     null,
   );
 
-  // Once confirmed, the tabs are replaced by the read-only Recorded LULC
-  // Feature summary and Next is enabled.
-  const isConfirmed = isQuickConfirmed;
+  // Once confirmed, the flow views are replaced by the read-only Recorded
+  // LULC Feature summary and Next is enabled. Both flows converge here.
+  const isConfirmed = isQuickConfirmed || lucDefaultConfirmed;
+  // The summary also stays on screen during its inline edit mode.
+  const isSummaryShown = isConfirmed || isSummaryEditing;
+  // While a flow is open, it takes over the whole panel: InteractivePanel
+  // swaps the panel header to back + Hierarchy title, and the card chrome
+  // below is dropped.
+  const isFlowView = lucView !== "picker" && !isSummaryShown;
   const summaryRows: { classId: string; name: string; color: string }[] =
-    lucQuickRows.map((r) => ({
-      classId: r.classId,
-      name: r.name,
-      color: r.color,
-    }));
+    lucDefaultConfirmed
+      ? DEFAULT_LUC.filter((item) => defaultArray.includes(item.id)).map(
+          (item) => ({
+            classId: String(item.id),
+            name: item.name,
+            color: item.color,
+          }),
+        )
+      : lucQuickRows.map((r) => ({
+          classId: r.classId,
+          name: r.name,
+          color: r.color,
+        }));
 
   // Re-render the marker layer, omitting any class whose name is in the
   // hidden list. Mirrors LUCClassTable so the eye toggle behaves the same
@@ -220,15 +358,25 @@ export const DefineLUCComponent = () => {
 
   const addQuickRow = () => {
     setIsDefineLULCChanged(true);
-    setLucQuickRows((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        classId: "",
-        name: "",
-        color: QUICK_TABLE_COLORS[prev.length % QUICK_TABLE_COLORS.length],
-      },
-    ]);
+    setLucQuickRows((prev) => {
+      // Class IDs are hidden and auto-managed: new manual rows continue
+      // after the highest existing ID (uploaded files keep their own IDs).
+      const nextId =
+        prev.reduce((acc, r) => {
+          const n = parseInt(r.classId, 10);
+          return Number.isFinite(n) && n > acc ? n : acc;
+        }, 0) + 1;
+
+      return [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          classId: String(nextId),
+          name: "",
+          color: QUICK_TABLE_COLORS[prev.length % QUICK_TABLE_COLORS.length],
+        },
+      ];
+    });
   };
 
   const updateQuickRow = (id: string, patch: Partial<QuickTableRow>) => {
@@ -268,24 +416,37 @@ export const DefineLUCComponent = () => {
           );
         }
 
-        // Merge with whatever is already in the table (e.g. manual input):
-        // uploaded classes get IDs continuing after the current highest ID.
+        // Merge with whatever is already in the table (e.g. manual input).
+        // Uploaded classes always keep the file's own class IDs — the
+        // backend stored the scheme with those IDs and training data
+        // (pinned points / uploaded shapefiles) is validated against them.
+        // IDs are hidden and auto-managed, so a manual row colliding with
+        // an uploaded ID is silently renumbered instead.
         setLucQuickRows((prev) => {
-          const maxId = prev.reduce((acc, r) => {
-            const n = parseInt(r.classId, 10);
-            return Number.isFinite(n) && n > acc ? n : acc;
-          }, 0);
-
-          const uploadedRows: QuickTableRow[] = json.classes.map(
-            (item, index) => ({
-              id: crypto.randomUUID(),
-              classId: String(maxId + index + 1),
-              name: item.class_name,
-              color: item.class_color,
-            }),
+          const uploadedIds = new Set(json.classes.map((c) => c.class_id));
+          let nextFallbackId = Math.max(
+            0,
+            ...uploadedIds,
+            ...prev
+              .map((r) => parseInt(r.classId, 10))
+              .filter((n) => Number.isFinite(n)),
           );
 
-          return [...prev, ...uploadedRows];
+          const adjustedPrev = prev.map((r) => {
+            const n = parseInt(r.classId, 10);
+            if (Number.isFinite(n) && !uploadedIds.has(n)) return r;
+            nextFallbackId += 1;
+            return { ...r, classId: String(nextFallbackId) };
+          });
+
+          const uploadedRows: QuickTableRow[] = json.classes.map((item) => ({
+            id: crypto.randomUUID(),
+            classId: String(item.class_id),
+            name: item.class_name,
+            color: item.class_color,
+          }));
+
+          return [...adjustedPrev, ...uploadedRows];
         });
         setLucQuickPhase("editing");
         setLUCFile(file);
@@ -320,6 +481,9 @@ export const DefineLUCComponent = () => {
 
   const onToggleSwitch = (num: number, checked: boolean) => {
     setIsDefineLULCChanged(true);
+    // Any change after confirming invalidates the confirmation, disabling
+    // Next until the user re-confirms.
+    setLucDefaultConfirmed(false);
 
     if (!checked) {
       setDefaultArray(defaultArray.filter((item) => item !== num));
@@ -333,40 +497,7 @@ export const DefineLUCComponent = () => {
     setDefaultArray([...defaultArray, num]);
   };
 
-  const clearFile = () => {
-    setIsDefineLULCChanged(true);
-    setLUCFile(null);
-    setLUCFilename("");
-    setLUCFilesize(0);
-    setLucExcelConfirmed(false);
-
-    const doc = document.getElementById(
-      "luc-template-file-upload",
-    ) as HTMLInputElement;
-    if (!doc) return;
-
-    doc.value = "";
-  };
-
-  const onResetInput = () => {
-    setIsDefineLULCChanged(true);
-    setDefaultArray([]);
-    setLucQuickRows([]);
-    setLucCustomTab("quick");
-    setLucQuickPhase("editing");
-    setHaveDownloadedFile(false);
-
-    setMarkerLayerVisibilityArray([]);
-    setMarkerArray([]);
-    markerVectorSource?.clear();
-
-    setClassArray([]);
-    setPointingType(POINTING_TYPE.EMPTY);
-    setMapPointingType(POINTING_TYPE.EMPTY);
-    setSelectedClass("");
-    setQuickManualSampling(false)
-    clearFile();
-  };
+  const onResetInput = useResetDefineLUCInputs();
 
   const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
     const target = e.target;
@@ -420,7 +551,6 @@ export const DefineLUCComponent = () => {
             <Button
               variant={"ghost"}
               size={"icon"}
-              disabled={isQuickLocked}
               className={cn(
                 "p-0 hover:brightness-95 cursor-pointer size-7 rounded-md",
                 isQuickTableEditing && "bg-primary-pink-hover",
@@ -454,32 +584,48 @@ export const DefineLUCComponent = () => {
         </div>
 
         {lucQuickRows.length === 0 && (
-          <div className="px-3 py-3">
+          <div className="px-3 py-4 space-y-3">
             <p className="font-aptos text-md font-regular leading-6 text-neutral-500 text-center text-sm">
               {t("defineLUC.quickTableEmptyHint")}
             </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => {
+                  // First row: drop straight into edit mode.
+                  setIsQuickTableEditing(true);
+                  addQuickRow();
+                }}
+                className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] py-1.5 rounded-full bg-primary-pink-hover hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
+              >
+                <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                  {t("defineLUC.addClass")}
+                </p>
+              </button>
+            </div>
           </div>
         )}
 
-        {lucQuickRows.map((row) => {
+        {lucQuickRows.map((row, index) => {
           const duplicate = isQuickRowDuplicate(row.name);
           return (
             <div
               key={row.id}
-              className="flex border-b border-neutral-200 last:border-b-0"
+              className={cn(
+                "flex border-b border-neutral-200 last:border-b-0",
+                // Read-only rows get a hover highlight; edit mode keeps the
+                // flat background so the inputs stay the focus.
+                !canEditQuickRows &&
+                  "hover:bg-neutral-100 transition-colors duration-150",
+              )}
             >
               <div className="w-[75px] shrink-0 px-1 py-0.5 flex items-center justify-center">
-                <Input
-                  value={row.classId}
-                  inputMode="numeric"
-                  readOnly={!canEditQuickRows}
-                  className="h-7 text-center"
-                  onChange={(e) =>
-                    updateQuickRow(row.id, {
-                      classId: e.target.value,
-                    })
-                  }
-                />
+                {/* Display-only row number; the real class id lives hidden
+                    in row.classId. */}
+                <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                  {index + 1}
+                </p>
               </div>
               <div className="w-[160px] flex-1 px-1 py-0.5 border-l border-neutral-200 flex flex-col justify-center">
                 <Input
@@ -568,7 +714,7 @@ export const DefineLUCComponent = () => {
           <button
             type="button"
             onClick={addQuickRow}
-            className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:brightness-95 transition-all duration-200 cursor-pointer"
+            className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
           >
             <PlusIcon className="size-4 text-primary-red-pink-normal" />
             <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
@@ -579,44 +725,6 @@ export const DefineLUCComponent = () => {
       </div>
       </div>
 
-      {lucQuickRows.length === 0 ? (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => {
-              // First row: drop straight into edit mode.
-              setIsQuickTableEditing(true);
-              addQuickRow();
-            }}
-            className="flex flex-row items-center justify-center gap-x-1.5 w-[200px] h-7 rounded-[12px] shadow-[0px_1px_2px_rgba(0,0,0,0.05)] hover:brightness-95 transition-all duration-200 cursor-pointer"
-          >
-            <PlusIcon className="size-4 text-primary-red-pink-normal" />
-            <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
-              {t("defineLUC.addClass")}
-            </p>
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          disabled={!isQuickLocked && !canLockQuick}
-          onClick={() => {
-            const nextPhase = isQuickLocked ? "confirmed" : "locked";
-            setLucQuickPhase(nextPhase);
-            setIsQuickTableEditing(false);
-            // The excel flow gates Next on lucExcelConfirmed; both flows now
-            // confirm through this same Lock -> Confirm button.
-            setLucExcelConfirmed(nextPhase === "confirmed");
-          }}
-          className="w-full py-3 rounded-[12px] bg-primary-red-pink-normal hover:brightness-95 transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100"
-        >
-          <p className="font-lato text-md font-bold leading-6 text-white text-center">
-            {isQuickLocked
-              ? t("defineLUC.confirmLULCClass")
-              : t("defineLUC.lockLULCClass")}
-          </p>
-        </button>
-      )}
     </>
   );
 
@@ -660,117 +768,73 @@ export const DefineLUCComponent = () => {
 
   return (
     <div className="space-y-4">
-      {/*
-      <Collapsible open={aiAccordionOpen} onOpenChange={setAIAccordionOpen}>
+      <Collapsible open={hierarchyOpen} onOpenChange={setHierarchyOpen}>
         <div
-          className="bg-aneh p-px rounded-[13px]"
-          style={{
-            boxShadow:
-              "0 4px 4px 0 rgba(243, 235, 126, 0.25), 0 2px 8px 0 rgba(249, 245, 195, 0.29)",
-          }}
+          className={cn(
+            !isFlowView &&
+              !isSummaryShown &&
+              "rounded-[12px] bg-white p-3 border border-neutral-400 space-y-6",
+          )}
         >
-          <div className="bg-white p-3 h-fit rounded-[12px]">
-            <CollapsibleTrigger className="flex flex-row justify-between items-center w-full mb-3">
-              <div className="flex flex-row space-x-2 items-center">
-                <div className="w-fit p-2 rounded-sm border border-primary-300">
-                  <Image
-                    src="/images/shimmer.svg"
-                    unoptimized
-                    alt="Draw"
-                    width={16}
-                    height={16}
-                    className="object-contain h-4 w-auto text-primary-500"
-                  />
-                </div>
-                <p className="text-l-bold">{t("defineLUC.tryAI")}</p>
-              </div>
-
+          {/* Card chrome + Hierarchy header only frame the picker; the
+              summary renders flat under the panel title like the flows. */}
+          {!isFlowView && !isSummaryShown && (
+            <CollapsibleTrigger className="w-full flex flex-row items-center justify-between cursor-pointer">
+              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
+                {t("defineLUC.LUCHierarchy")}
+              </p>
               <ChevronDown
                 className={cn(
-                  "h-5 w-5 text-text-icons-base-main transition-transform duration-200",
-                  aiAccordionOpen ? "rotate-180" : "",
+                  "size-5 text-text-icons-base-main transition-transform duration-200",
+                  hierarchyOpen && "rotate-180",
                 )}
               />
             </CollapsibleTrigger>
-            <div className="rounded-sm bg-background-disableds p-2">
-              <ComingSoon />
-
-              {!aiAccordionOpen && (
-                <p className="font-aptos text-[15px] font-regular leading-5.5 text-neutrals-600 italic mt-3">
-                  {t("defineLUC.tryAITagline")}
-                </p>
-              )}
-
-              <CollapsibleContent className="collapsible-content-primitive mt-2">
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-m-medium italic">
-                      {t("defineLUC.tryAICaption")}{" "}
-                      <b className="font-extrabold">
-                        {t("defineLUC.tryAICaptionCont")}
-                      </b>
-                    </p>
-                  </div>
-                  <div>
-                    <Textarea
-                      className="m-0"
-                      defaultValue={t("defineLUC.tryAICaptionDefaultValue")}
-                      disabled
-                    />
-                  </div>
-                  <div className="flex flex-row justify-between items-center space-y-2">
-                    <p className="text-xs-regular text-neutrals-600 m-0">
-                      {t("defineLUC.tryAICaptionInstruction")}
-                    </p>
-                    <Button
-                      type="button"
-                      variant={"primary"}
-                      disabled
-                      // className="rounded-none bg-primary-pink py-1.5 px-2"
-                    >
-                      <p className="">
-                        {t("defineLUC.tryAICaptionSubmitButtonLabel")}
-                      </p>
-                    </Button>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </div>
-          </div>
-        </div>
-      </Collapsible>
-          */}
-      <div className="rounded-[12px] bg-white p-3 border border-neutral-400 space-y-6">
-        <div className="space-y-3">
-          <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-            {t("defineLUC.LUCHierarchy")}
-          </p>
-          <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-            {t("defineLUC.LUCHierarchyDescription")}
-          </p>
-        </div>
-        {/* <div className="space-y-3"> */}
-        {isConfirmed ? (
+          )}
+          <CollapsibleContent className="collapsible-content-primitive space-y-6">
+        {isSummaryShown ? (
           <div className="space-y-4">
+            {/* The edit-mode banner renders at the panel level (in
+                InteractivePanel) so it can span the full panel width. */}
             <div className="space-y-2">
               <div className="flex flex-row items-center justify-between">
                 <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
                   {t("defineLUC.classRecordedCount", { X: summaryRows.length })}
                 </p>
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-md"
-                  onClick={() => {
-                    // Back to the editable table so rows can be adjusted;
-                    // Next locks again until the user re-confirms.
-                    setLucQuickPhase("editing");
-                    setLucExcelConfirmed(false);
-                    setIsQuickTableEditing(true);
-                  }}
-                >
-                  <SquarePenIcon className="text-primary-red-pink-normal size-4" />
-                </Button>
+                {isSummaryEditing ? (
+                  <Button
+                    variant={"primary"}
+                    disabled={!canLockQuick}
+                    className="h-7 px-4"
+                    onClick={() => {
+                      setLucQuickPhase("confirmed");
+                      setLucExcelConfirmed(true);
+                    }}
+                  >
+                    {t("defineLUC.done")}
+                  </Button>
+                ) : (
+                  <Button
+                    variant={"ghost"}
+                    size={"icon"}
+                    className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-md"
+                    onClick={() => {
+                      // Default classes are fixed, so the pencil returns to
+                      // the accordion; own classes flip the summary into its
+                      // inline edit mode. Either way Next stays disabled
+                      // until the user re-confirms.
+                      if (lucDefaultConfirmed) {
+                        setLucDefaultConfirmed(false);
+                        setLucView("default");
+                        return;
+                      }
+                      setLucQuickPhase("locked");
+                      setLucExcelConfirmed(false);
+                    }}
+                  >
+                    <SquarePenIcon className="text-primary-red-pink-normal size-4" />
+                  </Button>
+                )}
               </div>
               <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
                 <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
@@ -789,78 +853,214 @@ export const DefineLUCComponent = () => {
                       {t("defineLUC.colorClassHeader")}
                     </p>
                   </div>
+                  {isSummaryEditing && (
+                    <div className="w-8 shrink-0 border-l border-neutral-300" />
+                  )}
                 </div>
-                {summaryRows.map((row, index) => (
-                  <div
-                    key={`${row.classId}-${index}`}
-                    className="flex border-b border-neutral-200 last:border-b-0"
-                  >
-                    <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                        {index + 1}
-                      </p>
-                    </div>
-                    <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
-                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                        {row.name}
-                      </p>
-                    </div>
-                    <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
-                      <span
-                        className="size-7 shrink-0 rounded-md border border-neutral-300"
-                        style={{ backgroundColor: row.color }}
-                      />
-                      <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                        {row.color.replace(/^#/, "")}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                {isSummaryEditing
+                  ? lucQuickRows.map((row, index) => {
+                      const duplicate = isQuickRowDuplicate(row.name);
+                      return (
+                        <div
+                          key={row.id}
+                          className="flex border-b border-neutral-200 last:border-b-0"
+                        >
+                          <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                              {index + 1}
+                            </p>
+                          </div>
+                          <div className="flex-1 px-1 py-1 border-l border-neutral-200 flex flex-col justify-center">
+                            <Input
+                              value={row.name}
+                              aria-invalid={duplicate}
+                              className="h-7 text-center"
+                              onChange={(e) =>
+                                updateQuickRow(row.id, { name: e.target.value })
+                              }
+                            />
+                            {duplicate && (
+                              <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600 text-center">
+                                {t("defineLUC.duplicateClassError")}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
+                            <Popover
+                              open={colorPopoverRowId === `summary-${row.id}`}
+                              onOpenChange={(isOpen) => {
+                                setColorPopoverRowId(
+                                  isOpen ? `summary-${row.id}` : null,
+                                );
+                              }}
+                            >
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="size-7 shrink-0 rounded-md border border-neutral-300 cursor-pointer hover:brightness-95 transition-all duration-200"
+                                  style={{ backgroundColor: row.color }}
+                                />
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align="start"
+                                className="w-auto p-4 space-y-3 rounded-[12px]"
+                              >
+                                <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                                  {t("defineLUC.selectClassColor")}
+                                </p>
+                                <div className="grid grid-cols-7 gap-2">
+                                  {LULC_CLASS_COLOR_PALETTE.map((color) => (
+                                    <button
+                                      key={`summary-palette-${row.id}-${color}`}
+                                      type="button"
+                                      className={cn(
+                                        "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
+                                        row.color.toLowerCase() ===
+                                          color.toLowerCase()
+                                          ? "ring-2 ring-primary-pink ring-offset-1"
+                                          : "border border-neutral-200",
+                                      )}
+                                      style={{ backgroundColor: color }}
+                                      onClick={() => {
+                                        updateQuickRow(row.id, { color });
+                                        setColorPopoverRowId(null);
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                              {row.color.replace(/^#/, "")}
+                            </p>
+                          </div>
+                          <div className="w-8 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                            <Button
+                              variant={"ghost"}
+                              size={"icon"}
+                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                              onClick={() => {
+                                // Deleting the last row leaves nothing to
+                                // confirm, so fall back to the own flow's
+                                // empty table instead of a stuck edit mode.
+                                if (lucQuickRows.length === 1) {
+                                  setLucQuickPhase("editing");
+                                  setLucView("own");
+                                }
+                                removeQuickRow(row.id);
+                              }}
+                            >
+                              <Trash2Icon className="text-text-icons-base-third size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  : summaryRows.map((row, index) => (
+                      <div
+                        key={`${row.classId}-${index}`}
+                        className="flex border-b border-neutral-200 last:border-b-0 hover:bg-neutral-100 transition-colors duration-150"
+                      >
+                        <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                            {index + 1}
+                          </p>
+                        </div>
+                        <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
+                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                            {row.name}
+                          </p>
+                        </div>
+                        <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
+                          <span
+                            className="size-7 shrink-0 rounded-md border border-neutral-300"
+                            style={{ backgroundColor: row.color }}
+                          />
+                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                            {row.color.replace(/^#/, "")}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
               </div>
             </div>
-            {LUCfilename && renderUploadedTemplateCard({ removable: false })}
+            {!isSummaryEditing &&
+              LUCfilename &&
+              renderUploadedTemplateCard()}
           </div>
-        ) : (
-          <Tabs
-            defaultValue={
-              selectedCustom ? "custom" : selectedDefault ? "default" : "custom"
-            }
-            className="gap-y-6 mb-0"
-          >
-          <div className="px-0 py-0">
-            <TabsList className="w-full">
-              <TabsTrigger disabled={selectedDefault} value="custom">
-                {t("defineLUC.classifyOwnTemplate")}
-              </TabsTrigger>
-              <TabsTrigger
-                disabled={selectedCustom || spatialResolution !== "100"}
-                value="default"
+        ) : lucView === "picker" ? (
+          <div className="space-y-6">
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+              {t("defineLUC.LUCHierarchyDescription")}
+            </p>
+            <div className="grid grid-cols-2 gap-x-4">
+              <button
+                type="button"
+                disabled={selectedDefault}
+                onClick={() => setLucView("own")}
+                className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
               >
-                {t("defineLUC.useDefaultScheme")}
-              </TabsTrigger>
-            </TabsList>
+                <div className="flex flex-row items-start justify-between">
+                  <CirclePlus className="size-8 text-primary-red-pink-normal" />
+                  <ChevronRight className="size-5 text-text-icons-base-main" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                    {t("defineLUC.classifyOwnTemplate")}
+                  </p>
+                  <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                    {t("defineLUC.classifyOwnCardCaption")}
+                  </p>
+                </div>
+              </button>
+              <button
+                type="button"
+                disabled={selectedCustom || spatialResolution !== "100"}
+                onClick={() => setLucView("default")}
+                className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+              >
+                <div className="flex flex-row items-start justify-between">
+                  <List className="size-8 text-primary-red-pink-normal" />
+                  <ChevronRight className="size-5 text-text-icons-base-main" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                    {t("defineLUC.useDefaultScheme")}
+                  </p>
+                  <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                    {t("defineLUC.useDefaultCardCaption")}
+                  </p>
+                </div>
+              </button>
+            </div>
           </div>
-          <TabsContent value="custom">
+        ) : lucView === "own" ? (
+          <div className="space-y-6">
+            <div className="flex flex-row items-center gap-x-4">
+              <CirclePlus
+                className="size-12 shrink-0 text-primary-red-pink-normal"
+                strokeWidth={1.5}
+              />
+              <div>
+                <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                  {t("defineLUC.classifyOwnTemplate")}
+                </p>
+                <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                  {t("defineLUC.classifyOwnCardCaption")}
+                </p>
+              </div>
+            </div>
             <Tabs
               value={lucCustomTab}
               onValueChange={(value) => setLucCustomTab(value as LucCustomTab)}
               className="gap-y-6 mb-0"
             >
               <div className="px-0 py-0">
-                <TabsList
-                  variant="line"
-                  className="w-full border-0 bg-transparent p-0 rounded-none"
-                >
-                  <TabsTrigger
-                    value="quick"
-                    className="text-[#4A5468] data-[state=active]:text-[#CC4778] after:bg-[#CC4778]"
-                  >
+                <TabsList className="w-full">
+                  <TabsTrigger value="quick">
                     {t("defineLUC.quickTableTab")}
                   </TabsTrigger>
-                  <TabsTrigger
-                    value="excel"
-                    className="text-[#4A5468] data-[state=active]:text-[#CC4778] after:bg-[#CC4778]"
-                  >
+                  <TabsTrigger value="excel">
                     {t("defineLUC.excelTemplateTab")}
                   </TabsTrigger>
                 </TabsList>
@@ -882,10 +1082,7 @@ export const DefineLUCComponent = () => {
               </p>
               {haveDownloadedFile &&
                 (LUCfile ? (
-                  <>
-                    {renderUploadedTemplateCard()}
-                    {renderQuickTable()}
-                  </>
+                  renderUploadedTemplateCard()
                 ) : (
                     <div
                       className={cn(
@@ -963,34 +1160,68 @@ export const DefineLUCComponent = () => {
                     </div>
                   ))}
               {!haveDownloadedFile && !LUCfile && (
-                <>
-                  <Button
-                    variant={"secondary"}
-                    className="w-full py-1.5 px-2 text-[13px] font-semibold leading-4.5"
-                    onClick={() => {
-                      // setHaveDownloadedFile(true);
-                      onClickDownloadFile();
-                    }}
-                  >
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClickDownloadFile();
+                  }}
+                  className="w-full py-2 rounded-[8px] bg-primary-pink-hover hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
+                >
+                  <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
                     {t("defineLUC.downloadFile")}
-                  </Button>
-                </>
+                  </p>
+                </button>
               )}
               {isLUCLoading && (
                 <div className="w-full flex flex-row justify-center items-center py-2">
                   <span className="loader md"></span>
                 </div>
               )}
+              {/* The class table is shared with Manual Input; keep it visible
+                  here whenever it already has rows so switching tabs never
+                  hides classes entered on the other tab. */}
+              {(LUCfile !== null || lucQuickRows.length > 0) &&
+                renderQuickTable()}
             </div>
               </TabsContent>
             </Tabs>
-          </TabsContent>
-          <TabsContent value="default">
-            <div className="space-y-6">
-              <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                {t("defineLUC.useDefaultSchemeDescription")}
-              </p>
-              <div className="space-y-5">
+            <div className="flex flex-row justify-end mt-3">
+              <Button
+                variant={"primary"}
+                disabled={!canLockQuick}
+                onClick={() => {
+                  // Single-step confirm replaces the old Lock -> Confirm
+                  // two-phase flow; lucExcelConfirmed keeps gating the excel
+                  // path in the footer.
+                  setLucQuickPhase("confirmed");
+                  setIsQuickTableEditing(false);
+                  setLucExcelConfirmed(true);
+                }}
+              >
+                {t("defineLUC.confirmLULCClass")}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="flex flex-row items-center gap-x-4">
+              <List
+                className="size-12 shrink-0 text-primary-red-pink-normal"
+                strokeWidth={1.5}
+              />
+              <div>
+                <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                  {t("defineLUC.useDefaultScheme")}
+                </p>
+                <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                  {t("defineLUC.useDefaultCardCaption")}
+                </p>
+              </div>
+            </div>
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+              {t("defineLUC.useDefaultSchemeDescription")}
+            </p>
+            <div className="space-y-5">
                 <Accordion type="multiple">
                   <AccordionItem value="vegetation-acc">
                     <div className="flex flex-row items-center justify-between">
@@ -1286,21 +1517,94 @@ export const DefineLUCComponent = () => {
                   </AccordionItem>
                 </Accordion>
               </div>
+              <div className="flex flex-row justify-end mt-3">
+                <Button
+                  variant={"primary"}
+                  disabled={defaultArray.length === 0}
+                  onClick={() => setLucDefaultConfirmed(true)}
+                >
+                  {t("defineLUC.confirmLULCClass")}
+                </Button>
+              </div>
             </div>
-          </TabsContent>
-          </Tabs>
         )}
+          </CollapsibleContent>
 
-        <input
-          id="luc-template-file-upload"
-          type="file"
-          className="hidden"
-          accept=".csv,.xls,.xlsx"
-          multiple={false}
-          onChange={onUploadFile}
-        />
-        {/* </div> */}
-      </div>
+          <input
+            id="luc-template-file-upload"
+            type="file"
+            className="hidden"
+            accept=".csv,.xls,.xlsx"
+            multiple={false}
+            onChange={onUploadFile}
+          />
+        </div>
+      </Collapsible>
+
+      {/* The AI teaser only accompanies the classification choice: it shows
+          on the picker view and disappears once a flow is open or classes
+          are confirmed. */}
+      {!isSummaryShown && lucView === "picker" && (
+      <Collapsible open={aiSectionOpen} onOpenChange={setAISectionOpen}>
+        <div
+          className="bg-aneh p-px rounded-[13px]"
+          style={{
+            boxShadow:
+              "0 4px 4px 0 rgba(243, 235, 126, 0.25), 0 2px 8px 0 rgba(249, 245, 195, 0.29)",
+          }}
+        >
+          <div className="bg-white p-3 h-fit rounded-[12px]">
+            <CollapsibleTrigger className="flex flex-row justify-between items-center w-full cursor-pointer">
+              <div className="flex flex-row space-x-2 items-center">
+                <div className="w-fit p-2 rounded-sm border border-primary-300">
+                  <Image
+                    src="/images/shimmer.svg"
+                    unoptimized
+                    alt="EPISTEM-AI"
+                    width={16}
+                    height={16}
+                    className="object-contain h-4 w-auto text-primary-500"
+                  />
+                </div>
+                <p className="text-l-bold">{t("defineLUC.tryAI")}</p>
+              </div>
+
+              <ChevronDown
+                className={cn(
+                  "h-5 w-5 text-text-icons-base-main transition-transform duration-200",
+                  aiSectionOpen ? "rotate-180" : "",
+                )}
+              />
+            </CollapsibleTrigger>
+
+            <div className="mt-3">
+              <ComingSoon />
+            </div>
+
+            <CollapsibleContent className="collapsible-content-primitive">
+              <div className="space-y-2 mt-3">
+                <Textarea
+                  className="m-0"
+                  value={aiPrompt}
+                  maxLength={500}
+                  placeholder={t("defineLUC.tryAICaptionDefaultValue")}
+                  onChange={(e) => setAIPrompt(e.target.value)}
+                />
+                <div className="flex flex-row justify-between items-center">
+                  <p className="text-xs-regular text-neutrals-600 m-0">
+                    {t("defineLUC.tryAICaptionInstruction")}
+                  </p>
+                  <Button type="button" variant={"primary"} disabled>
+                    {t("defineLUC.tryAICaptionSubmitButtonLabel")}
+                  </Button>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </div>
+        </div>
+      </Collapsible>
+      )}
+      {!isFlowView && (
       <Button
         variant={"ghost"}
         className="p-0 hover:bg-transparent cursor-pointer"
@@ -1314,6 +1618,7 @@ export const DefineLUCComponent = () => {
           </p>
         </div>
       </Button>
+      )}
     </div>
   );
 };
@@ -1329,6 +1634,8 @@ export const DefineLUCFooter = () => {
     lucQuickRows,
     lucQuickPhase,
     lucExcelConfirmed,
+    lucDefaultConfirmed,
+    lucView,
     LUCfilesize,
     isLUCLoading,
     setIsLUCLoading,
@@ -1368,9 +1675,19 @@ export const DefineLUCFooter = () => {
     (lucSource === "excel" &&
       (LUCfilesize > LUC_TEMPLATE_FILE_SIZE_LIMIT || !lucExcelConfirmed)) ||
     (lucSource === "quick" &&
-      (hasDuplicateQuickNames || lucQuickPhase !== "confirmed"));
+      (hasDuplicateQuickNames || lucQuickPhase !== "confirmed")) ||
+    (lucSource === "default" && !lucDefaultConfirmed);
 
   const isBackDisabled = isLUCLoading;
+
+  // The step-back button only appears before a classification method is
+  // chosen (picker) and after classes are confirmed; while a flow (or the
+  // summary's edit mode) is open, the panel-header back handles navigation.
+  const showBackButton =
+    lucView === "picker" || lucQuickPhase === "confirmed" || lucDefaultConfirmed;
+
+  // Next only exists on step 2's final panel: the confirmed summary.
+  const showNextButton = lucQuickPhase === "confirmed" || lucDefaultConfirmed;
 
   const onClickNext = async () => {
     if (!isDefineLULCChanged) {
@@ -1548,28 +1865,28 @@ export const DefineLUCFooter = () => {
 
   return (
     <div className="p-3 pt-4 gap-x-4 flex flex-row">
-      <Button
-        disabled={isBackDisabled}
-        onClick={() => {
-          onClickBack();
-        }}
-        variant={"outline"}
-        size={"icon"}
-      >
-        <ChevronLeft className="text-primary-pink size-4" />
-      </Button>
+      {showBackButton && (
+        <Button
+          disabled={isBackDisabled}
+          onClick={() => {
+            onClickBack();
+          }}
+          variant={"outline"}
+          size={"icon"}
+        >
+          <ChevronLeft className="text-primary-pink size-4" />
+        </Button>
+      )}
       <div className="grid grid-cols-2 gap-x-4 w-full">
         <div></div>
-        {isLUCLoading && (
+        {showNextButton && isLUCLoading && (
           <div className="w-full h-10 flex flex-row justify-center items-center">
             <span className="loader md"></span>
           </div>
         )}
-        {!isLUCLoading && (
+        {showNextButton && !isLUCLoading && (
           <Button
             onClick={() => {
-              // setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-              // setProgressPanelIndex(2);
               onClickNext();
             }}
             disabled={isNextDisabled}
@@ -1577,6 +1894,7 @@ export const DefineLUCFooter = () => {
             className=""
           >
             {t("common.next")}
+            <ArrowRight className="size-4" />
           </Button>
         )}
       </div>

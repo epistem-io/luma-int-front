@@ -24,8 +24,16 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleAlert,
+  SquarePenIcon,
 } from "lucide-react";
-import { JSX, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  JSX,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   BasicInformationComponent,
   BasicInformationFooter,
@@ -40,7 +48,11 @@ import {
   BasicInformationSummaryComponent,
   BasicInformationSummaryFooter,
 } from "./BasicInformatioSummaryComponent";
-import { DefineLUCComponent, DefineLUCFooter } from "./DefineLUCComponent";
+import {
+  DefineLUCComponent,
+  DefineLUCFooter,
+  DefineLUCLeaveDialog,
+} from "./DefineLUCComponent";
 import { set } from "zod";
 import { MapContext } from "@/contexts/mapContext";
 import {
@@ -137,6 +149,7 @@ export const InteractivePanel = () => {
   const {
     stepKey,
     setStepKey,
+    progressPanelIndex,
     polygonData,
     setAreaScopingPolygonArea,
     setAreaScopingPolygonFileName,
@@ -146,7 +159,27 @@ export const InteractivePanel = () => {
     setSpatialResolution,
     selectedDefault,
     selectedCustom,
+    lucView,
+    setLucView,
+    lucQuickPhase,
+    lucDefaultConfirmed,
+    lucQuickRows,
+    defaultArray,
+    LUCfile,
   } = useContext(MapGenerationContext);
+
+  // Leaving a step-2 flow that already has inputs asks for confirmation
+  // before discarding (DefineLUCLeaveDialog below).
+  const [isLucLeaveDialogOpen, setIsLucLeaveDialogOpen] = useState(false);
+  const hasLucInputs =
+    lucQuickRows.length > 0 || defaultArray.length > 0 || LUCfile !== null;
+
+  // While a step-2 classification flow is open (and not yet confirmed), the
+  // panel header becomes the flow header: back button + Hierarchy title.
+  // "locked" is the confirmed summary's inline edit mode, which keeps the
+  // normal step header like "confirmed" does.
+  const isLucFlowView =
+    lucView !== "picker" && lucQuickPhase === "editing" && !lucDefaultConfirmed;
 
   const t = useTranslations("InteractivePanel");
 
@@ -190,8 +223,21 @@ export const InteractivePanel = () => {
         [PANEL_COMPONENT_KEY.DEFINE_LUC]: {
           component: <DefineLUCComponent />,
           footer: <DefineLUCFooter />,
-          title: t("defineLUC.defineLUCTitle"),
-          subtitle: t("defineLUC.defineLUCDescription"),
+          title: isLucFlowView
+            ? t("defineLUC.LUCHierarchy")
+            : t("defineLUC.defineLUCTitle"),
+          subtitle: isLucFlowView
+            ? undefined
+            : t("defineLUC.defineLUCDescription"),
+          onClickBackCallback: isLucFlowView
+            ? () => {
+                if (hasLucInputs) {
+                  setIsLucLeaveDialogOpen(true);
+                  return;
+                }
+                setLucView("picker");
+              }
+            : undefined,
         },
         [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
           component: <DataTrainingComponent />,
@@ -232,7 +278,7 @@ export const InteractivePanel = () => {
           subtitle: t("yourMap.yourMapPanelDescription"),
         },
       };
-    }, [selectedCustom, selectedDefault]);
+    }, [selectedCustom, selectedDefault, isLucFlowView, hasLucInputs]);
 
   const [isOpen, setIsOpen] = useState(true);
   // const [subtitleHeight, setSubtitleHeight] = useState(0);
@@ -240,7 +286,7 @@ export const InteractivePanel = () => {
 
   const interactiveComponent = useMemo(() => {
     return PANEL_COMPONENT_ARRAY[stepKey];
-  }, [stepKey]);
+  }, [stepKey, PANEL_COMPONENT_ARRAY]);
 
   // const subtitleRef = useRef<null | HTMLDivElement>(null);
   // const footerRef = useRef<null | HTMLDivElement>(null);
@@ -315,10 +361,19 @@ export const InteractivePanel = () => {
   }, [subtitleHeight, footerHeight, titleHeight]);
 
   return (
+    <>
+      <DefineLUCLeaveDialog
+        open={isLucLeaveDialogOpen}
+        onOpenChange={setIsLucLeaveDialogOpen}
+      />
     <Collapsible open={isOpen} onOpenChange={setIsOpen} className="relative">
       <div
         className={cn(
-          "bg-background-base-main rounded-2xl w-150 pt-4 border-[1.5px] border-[#E7E6E6] space-y-0",
+          "bg-background-base-main rounded-2xl pt-4 border-[1.5px] border-[#E7E6E6] space-y-0",
+          // On 1080p-and-smaller screens the panel slims to w-120 for steps
+          // 1-4; step 5 and anything wider than 1920px keep the full w-150.
+          // (Step 5 runs with index 5 — the map-generation flow skips 4.)
+          progressPanelIndex >= 4 ? "w-150" : "w-120 min-[1921px]:w-150",
           !isOpen && "pb-4",
         )}
         style={{
@@ -380,12 +435,39 @@ export const InteractivePanel = () => {
                   {interactiveComponent.subtitle}
                 </p>
               </div>
+              {/* Step-2 summary edit-mode banner: lives at the panel level
+                  so it spans the full panel width, border to border. Inside
+                  the measured subtitle wrapper so the scroll-area height
+                  budget accounts for it. */}
+              {stepKey === PANEL_COMPONENT_KEY.DEFINE_LUC &&
+                lucQuickPhase === "locked" && (
+                  <div
+                    className="px-4 py-3 space-y-1 mb-3"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, #FAEDF2 0%, #FFF3F7 100%)",
+                    }}
+                  >
+                    <div className="flex flex-row items-center gap-x-2">
+                      <SquarePenIcon className="size-4 text-primary-red-pink-normal" />
+                      <p className="font-aptos text-md font-bold leading-6 text-primary-red-pink-normal">
+                        {t("defineLUC.editMode")}
+                      </p>
+                    </div>
+                    <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-second">
+                      {t("defineLUC.editModeCaption")}
+                    </p>
+                  </div>
+                )}
             </div>
           )}
           <div
-            className="overflow-scroll px-4"
+            className="overflow-y-auto overflow-x-hidden px-4 pb-3"
             style={{
-              maxHeight: `calc(100vh - 114px - 123px - 12px - 16px - ${titleHeight}px - 16px - 8px - ${footerHeight}px - ${subtitleHeight}px)`,
+              // 270px = navbar + progress panel + gaps + a 12px bottom
+              // breathing margin (measured; the old constants over-reserved
+              // ~20px and needlessly clipped short content).
+              maxHeight: `calc(100vh - 270px - ${titleHeight}px - ${footerHeight}px - ${subtitleHeight}px)`,
             }}
           >
             {interactiveComponent.component}
@@ -396,6 +478,7 @@ export const InteractivePanel = () => {
         </CollapsibleContent>
       </div>
     </Collapsible>
+    </>
     // <div className="h-full">
     // </div>
   );

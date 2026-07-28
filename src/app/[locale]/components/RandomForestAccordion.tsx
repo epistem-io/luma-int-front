@@ -4,8 +4,10 @@ import {
   AccordionFullTrigger,
   AccordionItem,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PANEL_COMPONENT_KEY } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
@@ -17,18 +19,85 @@ export const RandomForestAccordion = () => {
     numberOfTrees,
     setNumberOfTrees,
     numberOfTreesError,
+    setNumberOfTreesError,
     minLeafPopulation,
     setMinLeafPopulation,
     minLeafPopulationError,
+    setMinLeafPopulationError,
+    setLULCParamsOpenAccordion,
+    setStepKey,
+    setProgressPanelIndex,
     isAutoPointsFlow,
   } = useContext(MapGenerationContext);
 
   const tInteractive = useTranslations("InteractivePanel");
 
+  const validateField = (
+    value: string,
+    min: number,
+    max: number,
+    fieldLabel: string,
+  ) => {
+    const trimmedValue = value.trim();
+
+    if (!trimmedValue) {
+      return tInteractive("lulcParams.rfFieldRequired", { field: fieldLabel });
+    }
+
+    if (!/^\d+$/.test(trimmedValue)) {
+      return tInteractive("lulcParams.rfFieldInteger", { field: fieldLabel });
+    }
+
+    const parsedValue = Number(trimmedValue);
+
+    if (parsedValue < min || parsedValue > max) {
+      return tInteractive("lulcParams.rfFieldRange", {
+        field: fieldLabel,
+        min,
+        max,
+      });
+    }
+
+    return "";
+  };
+
+  // Validates and applies both fields; on success it behaves exactly like
+  // the footer's Next: collapse the accordion and open the mapping-parameter
+  // summary view.
+  const onClickSetVariable = () => {
+    const treesError = validateField(
+      numberOfTrees,
+      10,
+      500,
+      tInteractive("lulcParams.nOfTree"),
+    );
+    const minLeafError = validateField(
+      minLeafPopulation,
+      1,
+      50,
+      tInteractive("lulcParams.minLeafPop"),
+    );
+
+    setNumberOfTreesError(treesError);
+    setMinLeafPopulationError(minLeafError);
+
+    if (treesError || minLeafError) {
+      return;
+    }
+
+    setNumberOfTrees(numberOfTrees.trim());
+    setMinLeafPopulation(minLeafPopulation.trim());
+    setLULCParamsOpenAccordion("");
+    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY);
+    setProgressPanelIndex(3);
+  };
+
   return (
     <AccordionItem
       value={"random-forest"}
-      className="rounded-xl border border-neutral-400 bg-white pb-3"
+      // last:border-b overrides the ui primitive's last:border-b-0, which
+      // would otherwise strip this card's bottom border.
+      className="rounded-xl border border-neutral-400 bg-white pb-3 last:border-b"
     >
       <AccordionFullTrigger
         icon={
@@ -40,7 +109,7 @@ export const RandomForestAccordion = () => {
           {tInteractive("lulcParams.RFVariable")}
         </p>
       </AccordionFullTrigger>
-      <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+      <AccordionContent className="mt-2 space-y-6 px-3 pb-3">
         <div className="">
           <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
             {tInteractive.rich("lulcParams.RFVariableDesc", {
@@ -109,6 +178,17 @@ export const RandomForestAccordion = () => {
               )}
             </div>
           </div>
+        </div>
+        <div className="flex flex-row justify-start">
+          <Button
+            variant="primary"
+            disabled={isAutoPointsFlow}
+            onClick={() => {
+              onClickSetVariable();
+            }}
+          >
+            {tInteractive("lulcParams.setVariable")}
+          </Button>
         </div>
       </AccordionContent>
     </AccordionItem>

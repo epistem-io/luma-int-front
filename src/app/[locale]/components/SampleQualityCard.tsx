@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { PANEL_COMPONENT_KEY, POINTING_TYPE } from "@/constants";
+import { POINTING_TYPE } from "@/constants";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
@@ -34,10 +34,12 @@ export const SampleQualityCard = () => {
     sampleQuality,
     isSampleQualityLoading,
     sampleQualityError,
+    sampleQualityConfirmed,
     fetchSampleQuality,
     dataTrainingActiveTab,
     setSampleQuality,
     setSampleQualityError,
+    setSampleQualityConfirmed,
     setTrainingFile,
     setTrainingFilename,
     setTrainingFilesize,
@@ -46,16 +48,14 @@ export const SampleQualityCard = () => {
     setPointingType,
     setSelectedClass,
     setIsTrainingDataChanged,
-    setStepKey,
-    setProgressPanelIndex,
     isUpdatingTrainingData,
   } = useContext(MapGenerationContext);
-  const { setMarkerArray, markerVectorSource, markerVectorLayer } =
-    useContext(MapContext);
+  const { setMarkerArray, markerVectorSource } = useContext(MapContext);
 
   const clearQuality = () => {
     setSampleQuality(null);
     setSampleQualityError("");
+    setSampleQualityConfirmed(false);
   };
 
   const onClickReset = () => {
@@ -86,12 +86,19 @@ export const SampleQualityCard = () => {
     setSelectedClass("");
   };
 
+  // OSS: unlike the upload flow's reset, editing keeps every pinned point
+  // and the previous Single/Bulk choice — clearing the result just brings
+  // back the sampling panel (the chooser + Start Pointing) so the user can
+  // adjust points and regenerate.
+  const onClickEditPoints = () => {
+    setIsTrainingDataChanged(true);
+    clearQuality();
+  };
+
   const onClickConfirm = () => {
-    // Points are already posted before the analysis runs, so confirming
-    // only advances to the next step.
-    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-    markerVectorLayer?.setOpacity(0);
-    setProgressPanelIndex(3);
+    // Confirming only acknowledges the result — it unlocks the footer's
+    // Next button, which is what actually advances to step 4.
+    setSampleQualityConfirmed(true);
   };
 
   if (!isSampleQualityLoading && !sampleQuality && !sampleQualityError) {
@@ -135,21 +142,28 @@ export const SampleQualityCard = () => {
       {!isSampleQualityLoading && !sampleQualityError && sampleQuality && (
         <>
           <SampleQualityResultCard result={sampleQuality} />
+          {/* Once confirmed, the action row disappears — the result is
+              locked in and the footer's Next takes over. */}
+          {!sampleQualityConfirmed && (
           <div className="grid grid-cols-2 gap-x-4 pt-1">
             <Button
               disabled={isUpdatingTrainingData}
               variant="ghost"
               className="bg-primary-pink-hover text-primary-red-pink-normal hover:brightness-95 transition-all duration-200"
               onClick={() => {
-                onClickReset();
+                if (dataTrainingActiveTab === "upload") {
+                  onClickReset();
+                  return;
+                }
+                onClickEditPoints();
               }}
             >
               {dataTrainingActiveTab === "upload"
                 ? t("dataTraining.reuploadDataTraining")
-                : t("dataTraining.resetOnScreenSampling")}
+                : t("dataTraining.editOnScreenSampling")}
             </Button>
             <Button
-              disabled={isUpdatingTrainingData}
+              disabled={isUpdatingTrainingData || sampleQualityConfirmed}
               variant="primary"
               className=""
               onClick={() => {
@@ -159,6 +173,7 @@ export const SampleQualityCard = () => {
               {t("dataTraining.confirmSampleQuality")}
             </Button>
           </div>
+          )}
         </>
       )}
     </div>

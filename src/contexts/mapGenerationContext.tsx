@@ -36,6 +36,11 @@ export type DataTrainingActiveTab = "upload" | "oss";
 
 export type LucCustomTab = "quick" | "excel";
 
+// Which body the step-2 Hierarchy panel shows: the two-card picker, or one
+// of the classification flows. Lives in context so InteractivePanel can swap
+// the panel header (back button + title) while a flow is open.
+export type LucView = "picker" | "own" | "default";
+
 export type LucSource = "" | "quick" | "excel" | "default";
 
 // Quick Table flow: editing rows -> locked (read-only) -> confirmed (summary,
@@ -102,6 +107,8 @@ export interface MapGenerationContextType {
   lucCustomTab: LucCustomTab;
   lucQuickPhase: LucQuickPhase;
   lucExcelConfirmed: boolean;
+  lucDefaultConfirmed: boolean;
+  lucView: LucView;
   LUCfile: File | null;
   LUCfilename: string;
   LUCfilesize: number;
@@ -112,6 +119,8 @@ export interface MapGenerationContextType {
   setLucCustomTab: Dispatch<SetStateAction<LucCustomTab>>;
   setLucQuickPhase: Dispatch<SetStateAction<LucQuickPhase>>;
   setLucExcelConfirmed: Dispatch<SetStateAction<boolean>>;
+  setLucDefaultConfirmed: Dispatch<SetStateAction<boolean>>;
+  setLucView: Dispatch<SetStateAction<LucView>>;
   setLUCFile: Dispatch<SetStateAction<File | null>>;
   setLUCFilename: Dispatch<SetStateAction<string>>;
   setLUCFilesize: Dispatch<SetStateAction<number>>;
@@ -182,6 +191,14 @@ export interface MapGenerationContextType {
   setIsSampleQualityLoading: Dispatch<SetStateAction<boolean>>;
   sampleQualityError: string;
   setSampleQualityError: Dispatch<SetStateAction<string>>;
+  // Whether the user has acknowledged the current separability result via
+  // Confirm Sample Quality; gates Next on the Data Training step.
+  sampleQualityConfirmed: boolean;
+  setSampleQualityConfirmed: Dispatch<SetStateAction<boolean>>;
+  // Whether an analysis has ever completed this session — survives Edit
+  // (which clears the result) so the score banner can say "Regenerate".
+  sampleQualityGenerated: boolean;
+  setSampleQualityGenerated: Dispatch<SetStateAction<boolean>>;
   fetchSampleQuality: (sessionId: string) => void;
   thematicAccuracy: ThematicAccuracyResult | null;
   setThematicAccuracy: Dispatch<SetStateAction<ThematicAccuracyResult | null>>;
@@ -268,6 +285,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   lucCustomTab: "quick",
   lucQuickPhase: "editing",
   lucExcelConfirmed: false,
+  lucDefaultConfirmed: false,
+  lucView: "picker" as LucView,
   LUCfile: null,
   LUCfilename: "",
   LUCfilesize: 0,
@@ -278,6 +297,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setLucCustomTab: () => {},
   setLucQuickPhase: () => {},
   setLucExcelConfirmed: () => {},
+  setLucDefaultConfirmed: () => {},
+  setLucView: () => {},
   setLUCFile: () => {},
   setLUCFilename: () => {},
   setLUCFilesize: () => {},
@@ -340,6 +361,10 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   isSampleQualityLoading: false,
   setIsSampleQualityLoading: () => {},
   sampleQualityError: "",
+  sampleQualityConfirmed: false,
+  setSampleQualityConfirmed: () => {},
+  sampleQualityGenerated: false,
+  setSampleQualityGenerated: () => {},
   setSampleQualityError: () => {},
   fetchSampleQuality: () => {},
   thematicAccuracy: null,
@@ -454,6 +479,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [lucExcelConfirmed, setLucExcelConfirmed] = useState(
     DEFAULT_VALUE.lucExcelConfirmed,
   );
+  const [lucDefaultConfirmed, setLucDefaultConfirmed] = useState(
+    DEFAULT_VALUE.lucDefaultConfirmed,
+  );
+  const [lucView, setLucView] = useState<LucView>(DEFAULT_VALUE.lucView);
 
   const hasValidQuickRows = lucQuickRows.some((r) => r.name.trim() !== "");
 
@@ -581,6 +610,12 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [sampleQualityError, setSampleQualityError] = useState(
     DEFAULT_VALUE.sampleQualityError,
   );
+  const [sampleQualityConfirmed, setSampleQualityConfirmed] = useState(
+    DEFAULT_VALUE.sampleQualityConfirmed,
+  );
+  const [sampleQualityGenerated, setSampleQualityGenerated] = useState(
+    DEFAULT_VALUE.sampleQualityGenerated,
+  );
 
   const [thematicAccuracy, setThematicAccuracy] = useState(
     DEFAULT_VALUE.thematicAccuracy,
@@ -598,6 +633,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsSampleQualityLoading(true);
     setSampleQualityError("");
     setSampleQuality(null);
+    // A fresh result always needs a fresh confirmation.
+    setSampleQualityConfirmed(false);
 
     fetch(
       `${TRAINING_DATA_SEPARABILITY_URL}?${new URLSearchParams({ session_id: sessionId })}`,
@@ -610,6 +647,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
         }
 
         setSampleQuality(json.sample_quality);
+        setSampleQualityGenerated(true);
       })
       .catch((err) => {
         setSampleQualityError(String(err?.message || err));
@@ -680,6 +718,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setLucCustomTab(DEFAULT_VALUE.lucCustomTab);
     setLucQuickPhase(DEFAULT_VALUE.lucQuickPhase);
     setLucExcelConfirmed(DEFAULT_VALUE.lucExcelConfirmed);
+    setLucDefaultConfirmed(DEFAULT_VALUE.lucDefaultConfirmed);
+    setLucView(DEFAULT_VALUE.lucView);
     setLUCFile(DEFAULT_VALUE.LUCfile);
     setLUCFilename(DEFAULT_VALUE.LUCfilename);
     setLUCFilesize(DEFAULT_VALUE.LUCfilesize);
@@ -712,6 +752,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSampleQuality(DEFAULT_VALUE.sampleQuality);
     setIsSampleQualityLoading(DEFAULT_VALUE.isSampleQualityLoading);
     setSampleQualityError(DEFAULT_VALUE.sampleQualityError);
+    setSampleQualityConfirmed(DEFAULT_VALUE.sampleQualityConfirmed);
+    setSampleQualityGenerated(DEFAULT_VALUE.sampleQualityGenerated);
     setThematicAccuracy(DEFAULT_VALUE.thematicAccuracy);
     setIsThematicAccuracyLoading(DEFAULT_VALUE.isThematicAccuracyLoading);
     setThematicAccuracyError(DEFAULT_VALUE.thematicAccuracyError);
@@ -793,6 +835,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     lucCustomTab,
     lucQuickPhase,
     lucExcelConfirmed,
+    lucDefaultConfirmed,
+    lucView,
     LUCfile,
     LUCfilename,
     LUCfilesize,
@@ -802,6 +846,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setLucCustomTab,
     setLucQuickPhase,
     setLucExcelConfirmed,
+    setLucDefaultConfirmed,
+    setLucView,
     setLUCFile,
     setLUCFilename,
     setLUCFilesize,
@@ -836,6 +882,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsSampleQualityLoading,
     sampleQualityError,
     setSampleQualityError,
+    sampleQualityConfirmed,
+    setSampleQualityConfirmed,
+    sampleQualityGenerated,
+    setSampleQualityGenerated,
     fetchSampleQuality,
     thematicAccuracy,
     setThematicAccuracy,

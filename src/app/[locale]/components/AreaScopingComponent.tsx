@@ -416,7 +416,7 @@ export const AreaScopingComponent = () => {
                 areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
                   <>
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                      <div className="space-y-3 col-span-2 text-center w-full">
+                      <div className="space-y-3 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                           {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
@@ -436,8 +436,8 @@ export const AreaScopingComponent = () => {
                 polygonData &&
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
                   <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
-                      <div className="space-y-3 col-span-2 text-center w-full">
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
+                      <div className="space-y-3 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                           {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
@@ -460,7 +460,7 @@ export const AreaScopingComponent = () => {
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                             {t("common.areaTooBigErrorDesc", {
-                              limit: "100,000 Ha",
+                              X: "100,000 Ha",
                             })}
                           </p>
                         </div>
@@ -664,7 +664,7 @@ export const AreaScopingComponent = () => {
                 areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
                   <>
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                      <div className="space-y-3 col-span-2 text-center w-full">
+                      <div className="space-y-3 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                           {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
@@ -683,7 +683,7 @@ export const AreaScopingComponent = () => {
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
                   <>
                     <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                      <div className="space-y-3 col-span-2 text-center w-full">
+                      <div className="space-y-3 text-center w-full">
                         <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
                           {t("areaScoping.selectedAreaHasTotalArea")}
                         </p>
@@ -706,7 +706,7 @@ export const AreaScopingComponent = () => {
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                             {t("common.areaTooBigErrorDesc", {
-                              limit: "100,000",
+                              X: "100,000 Ha",
                             })}
                           </p>
                         </div>

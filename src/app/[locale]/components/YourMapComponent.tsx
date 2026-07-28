@@ -397,7 +397,7 @@ const LULCCompositionSummary = () => {
 
                   <div className="mr-1 flex-1 min-w-0">
                     <p
-                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-2 text-ellipsis"
+                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-1 text-ellipsis"
                       title={item.class_name}
                     >
                       {item.class_name}
@@ -437,7 +437,7 @@ const LULCCompositionSummary = () => {
 
                   <div className="mr-1 flex-1 min-w-0">
                     <p
-                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-2 text-ellipsis"
+                      className="text-black font-aptos text-sm font-semibold leading-5 line-clamp-1 text-ellipsis"
                       title={item.class_name}
                     >
                       {item.class_name}

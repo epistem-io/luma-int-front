@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { TimePeriodAccordion } from "./TimePeriodAccordion";
 import { AreaScopingAccordion } from "./AreaScopingAccordion";
@@ -232,7 +232,12 @@ export const BasicInformationSummaryFooter = () => {
         variant="primary"
         className=""
       >
-        {isPreviewingMosaic && t("common.next")}
+        {isPreviewingMosaic && (
+          <>
+            {t("common.next")}
+            <ArrowRight className="size-4" />
+          </>
+        )}
         {!isPreviewingMosaic && (
           <>
             {isMosaicLoading && (

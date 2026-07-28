@@ -53,7 +53,7 @@ export const OSSFooter = () => {
 
   // End Pointing unlocks once at least one point exists and every point has a
   // class; it only returns to the sampling panel — posting and the quality
-  // analysis happen there via Confirm Sample Data.
+  // analysis happen there via the score banner's Generate button.
   const isNextDisabled = markerArray.length === 0 || !allMarkerClassFilled;
 
   const onClickNext = () => {

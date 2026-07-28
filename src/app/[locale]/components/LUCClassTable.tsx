@@ -94,29 +94,29 @@ export const LUCClassTable = ({ summary = false }: Props) => {
         <TableHeader className="bg-primary-red-pink-light">
           <TableRow>
             {summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center align-middle border-r border-neutral-300">
                 {t("finalSummary.featureID")}
               </TableHead>
             )}
             {!summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-10 whitespace-normal px-1">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-10 whitespace-normal px-1 border-r border-neutral-300">
                 {t("defineLUC.idClassHeader")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center whitespace-normal px-1">
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle whitespace-normal px-1 border-r border-neutral-300 last:border-r-0">
               {t("dataTraining.lulcClass")}
             </TableHead>
             {!summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-24 whitespace-normal px-1">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-24 whitespace-normal px-1 border-r border-neutral-300">
                 {t("defineLUC.colorClassHeader")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center w-16 whitespace-normal px-1">
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-16 whitespace-normal px-1 last:border-r-0 border-r border-neutral-300">
               {t("dataTraining.numberOfPoints")}
             </TableHead>
 
             {!summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center flex flex-row justify-start">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center align-middle w-10 px-1">
                 <Button
                   variant={"ghost"}
                   className="p-0 rounded-full hover:cursor-pointer text-black!"
@@ -151,7 +151,7 @@ export const LUCClassTable = ({ summary = false }: Props) => {
               {summaryData?.data.training_data_summary.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
-                    {item.class_id}
+                    {index + 1}
                   </TableCell>
                   <TableCell className="font-aptos! text-center border-r">
                     {item.class_name}
@@ -168,13 +168,13 @@ export const LUCClassTable = ({ summary = false }: Props) => {
               {classArrayCount.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
-                    {item.class_id}
+                    {index + 1}
                   </TableCell>
                   <TableCell className="font-aptos! text-center border-r whitespace-normal">
                     {item.class_name}
                   </TableCell>
                   <TableCell className="font-aptos! border-r">
-                    <div className="flex items-center justify-start pl-3 gap-x-2">
+                    <div className="flex items-center justify-center gap-x-2">
                       <span
                         className="size-5 shrink-0 rounded-[4px] border border-neutral-300"
                         style={{ backgroundColor: item.class_color }}
@@ -184,11 +184,11 @@ export const LUCClassTable = ({ summary = false }: Props) => {
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="font-aptos! text-center border-r max-w-25">
+                  <TableCell className="font-aptos! text-center border-r">
                     {item.count}
                   </TableCell>
 
-                  <TableCell className="font-aptos! ">
+                  <TableCell className="font-aptos! text-center">
                     <Button
                       variant={"ghost"}
                       className="p-0 rounded-full hover:cursor-pointer"

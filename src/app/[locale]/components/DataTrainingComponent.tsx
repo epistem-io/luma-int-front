@@ -42,6 +42,8 @@ import {
 } from "@/constants";
 import {
   AlertCircleIcon,
+  ArrowRight,
+  BadgeCheck,
   ChevronDown,
   ChevronLeft,
   FileTextIcon,
@@ -104,6 +106,8 @@ export const DataTrainingComponent = () => {
     quickManualSampling,
     fetchSampleQuality,
     sampleQuality,
+    sampleQualityGenerated,
+    sampleQualityConfirmed,
     setSampleQuality,
     setSampleQualityError,
     isSampleQualityLoading,
@@ -114,7 +118,10 @@ export const DataTrainingComponent = () => {
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
-  const [summaryAccordionValue, setSummaryAccordionValue] = useState("");
+  // The summary starts expanded; it auto-collapses once a separability
+  // result arrives so the result becomes the focus.
+  const [summaryAccordionValue, setSummaryAccordionValue] =
+    useState("lulc-table");
   const qualityViewRef = useRef<HTMLDivElement | null>(null);
 
   // Once the quality result is shown, collapse the sample data summary and
@@ -314,29 +321,72 @@ export const DataTrainingComponent = () => {
     });
   };
 
-  const canSampleManually = lucSource === "quick" || !quickManualSampling;
+  // The default scheme uses server-placed sample points only: no
+  // upload/on-screen-sampling chooser and no separability analysis — step 3
+  // is just the sample data summary.
+  const canSampleManually =
+    lucSource !== "default" &&
+    (lucSource === "quick" || !quickManualSampling);
 
-  // OSS flow: posting the pinned points and running the separability analysis
-  // both happen here, on Confirm Sample Data (End Pointing only returns).
-  const onConfirmSampleData = () => {
-    setIsUpdatingTrainingData(true);
-    fetch(TRAINING_DATA_UPDATE_URL, {
+  // The uploaded-classes flow never posts its (possibly edited) scheme on
+  // step-2 Next, because POST /lulc-classes wipes training data and
+  // auto-places default points. So before posting manually-placed points,
+  // re-sync the confirmed classes — the /training-data POST that follows
+  // replaces whatever default points the sync creates, and the backend then
+  // validates class_ids against the scheme the user actually confirmed.
+  const syncClassesIfNeeded = () => {
+    if (lucSource !== "excel") return Promise.resolve();
+
+    return fetch(LUC_UPDATE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         session_id: sessionId,
-        training_data: markerArray.map((item) => ({
-          class_id: item?.class_id,
-          geometry: {
-            type: "Point",
-            coordinates: toLonLat(item?.coordinates),
-          },
+        classes: classArray.map((item) => ({
+          id: item.class_id,
+          class: item.class_name,
+          color: item.class_color,
         })),
       }),
-    })
-      .then(() => {
+    }).then(async (response) => {
+      if (!response.ok) {
+        const json = await response.json().catch(() => null);
+        throw new Error(String(json?.error?.message || response.status));
+      }
+    });
+  };
+
+  // OSS flow: posting the pinned points and running the separability analysis
+  // both happen here, on the score banner's Generate button (End Pointing
+  // only returns to this panel).
+  const onConfirmSampleData = () => {
+    setIsUpdatingTrainingData(true);
+    syncClassesIfNeeded()
+      .then(() =>
+        fetch(TRAINING_DATA_UPDATE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            training_data: markerArray.map((item) => ({
+              class_id: item?.class_id,
+              geometry: {
+                type: "Point",
+                coordinates: toLonLat(item?.coordinates),
+              },
+            })),
+          }),
+        }),
+      )
+      .then(async (response) => {
+        if (!response.ok) {
+          const json = await response.json().catch(() => null);
+          throw new Error(String(json?.error?.message || response.status));
+        }
         setIsTrainingDataChanged(false);
         fetchSampleQuality(sessionId);
       })
@@ -394,7 +444,12 @@ export const DataTrainingComponent = () => {
           key={`uploaded-file-${item.filename}-${index}`}
           className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
         >
-          <div className="flex flex-row gap-x-4 items-center col-span-10">
+          <div
+            className={cn(
+              "flex flex-row gap-x-4 items-center",
+              sampleQualityConfirmed ? "col-span-12" : "col-span-10",
+            )}
+          >
             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
             </div>
@@ -408,6 +463,7 @@ export const DataTrainingComponent = () => {
             </div>
           </div>
 
+          {!sampleQualityConfirmed && (
           <div className="col-span-2 flex flex-row justify-end">
             <Button
               disabled={isUploadingTrainingFile}
@@ -438,6 +494,7 @@ export const DataTrainingComponent = () => {
               <Trash2Icon className="text-secondary-purple-dark size-5" />
             </Button>
           </div>
+          )}
         </div>
       );
     });
@@ -770,6 +827,55 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.onScreenSamplingDescription")}
                   </p>
+                  {/* OSS separability analysis is on-demand: Check Score
+                      posts the pinned points and runs the analysis (the
+                      upload tab still analyzes automatically after upload).
+                      The banner only appears once at least one sample point
+                      has been placed. */}
+                  {markerArray.length > 0 && (
+                  <div className="relative rounded-[12px] bg-[#313131] overflow-hidden min-h-[120px]">
+                    {/* Decorative artwork as background: hugs the card's
+                        bottom-right corner (the SVG is pre-cropped at
+                        232x84 with the art bleeding off its bottom). */}
+                    <Image
+                      src="/images/banner-generate.svg"
+                      alt=""
+                      width={232}
+                      height={84}
+                      unoptimized
+                      className="pointer-events-none select-none absolute bottom-0 right-0 z-0 w-[232px] h-auto"
+                    />
+                    <div className="relative z-10 p-4 space-y-1.5 max-w-[calc(100%-150px)]">
+                      <div className="flex flex-row items-center gap-x-2">
+                        <BadgeCheck className="size-5 shrink-0 text-white" />
+                        <p className="font-aptos text-lg font-bold leading-6 text-white">
+                          {t("dataTraining.sampleScoreTitle")}
+                        </p>
+                      </div>
+                      <p className="font-aptos text-sm font-regular leading-5 text-neutral-400">
+                        {sampleQualityGenerated
+                          ? t("dataTraining.sampleScoreRegenCaption")
+                          : t("dataTraining.sampleScoreCaption")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="absolute z-10 bottom-3 right-3 h-8 px-4 rounded-[8px] bg-primary-pink-hover text-primary-red-pink-normal hover:bg-neutral-100 transition-all duration-200"
+                      disabled={isConfirmSampleDataDisabled}
+                      onClick={() => {
+                        onConfirmSampleData();
+                      }}
+                    >
+                      {isUpdatingTrainingData || isSampleQualityLoading ? (
+                        <span className="loader sm"></span>
+                      ) : sampleQualityGenerated ? (
+                        t("dataTraining.regenerate")
+                      ) : (
+                        t("dataTraining.checkScore")
+                      )}
+                    </Button>
+                  </div>
+                  )}
                   <SampleQualityCard />
                   {/* <div className="space-y-2">
                     <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
@@ -978,29 +1084,6 @@ export const DataTrainingComponent = () => {
                     : "error"}
               </p>
               <LUCClassTable summary={false} />
-              {canSampleManually && dataTrainingActiveTab === "oss" && (
-                <div className="space-y-2">
-                  <Button
-                    disabled={isConfirmSampleDataDisabled}
-                    variant="primary"
-                    className="w-full"
-                    onClick={() => {
-                      onConfirmSampleData();
-                    }}
-                  >
-                    {!isUpdatingTrainingData &&
-                      t("dataTraining.confirmSampleData")}
-                    {isUpdatingTrainingData && (
-                      <div className="w-full h-10 flex flex-row justify-center items-center">
-                        <span className="loader sm"></span>
-                      </div>
-                    )}
-                  </Button>
-                  <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second text-center">
-                    {t("dataTraining.confirmSampleDataCaption")}
-                  </p>
-                </div>
-              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
@@ -1020,7 +1103,10 @@ export const DataTrainingFooter = () => {
     classArray,
     isTrainingDataChanged,
     setIsTrainingDataChanged,
-    quickManualSampling
+    quickManualSampling,
+    sampleQuality,
+    isSampleQualityLoading,
+    sampleQualityConfirmed,
   } = useContext(MapGenerationContext);
 
   const { sessionId } = useContext(GlobalContext);
@@ -1032,30 +1118,67 @@ export const DataTrainingFooter = () => {
   const isNextDisabled =
     isUploadingTrainingFile ||
     isUpdatingTrainingData ||
-    (lucSource === "excel" && classArray.length === 0);
+    (lucSource === "excel" && classArray.length === 0) ||
+    // A separability result that exists (or is being computed) must be
+    // acknowledged via Confirm Sample Quality before moving on.
+    isSampleQualityLoading ||
+    (sampleQuality !== null && !sampleQualityConfirmed);
 
   const isBackDisabled = isUploadingTrainingFile || isUpdatingTrainingData;
 
-  const updateLULC = () => {
-    setIsUpdatingTrainingData(true);
-    fetch(TRAINING_DATA_UPDATE_URL, {
+  // Same class-sync as the Generate button: the uploaded-classes flow never
+  // posted its edited scheme, and POST /training-data validates class_ids
+  // against the backend's stored classes.
+  const syncClassesIfNeeded = () => {
+    if (lucSource !== "excel") return Promise.resolve();
+
+    return fetch(LUC_UPDATE_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         session_id: sessionId,
-        training_data: markerArray.map((item) => ({
-          class_id: item?.class_id,
-          geometry: {
-            type: "Point",
-            // coordinates: [item?.coordinates[0], item?.coordinates[1]],
-            coordinates: toLonLat(item?.coordinates),
-          },
+        classes: classArray.map((item) => ({
+          id: item.class_id,
+          class: item.class_name,
+          color: item.class_color,
         })),
       }),
-    })
+    }).then(async (response) => {
+      if (!response.ok) {
+        const json = await response.json().catch(() => null);
+        throw new Error(String(json?.error?.message || response.status));
+      }
+    });
+  };
+
+  const updateLULC = () => {
+    setIsUpdatingTrainingData(true);
+    syncClassesIfNeeded()
+      .then(() =>
+        fetch(TRAINING_DATA_UPDATE_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            session_id: sessionId,
+            training_data: markerArray.map((item) => ({
+              class_id: item?.class_id,
+              geometry: {
+                type: "Point",
+                coordinates: toLonLat(item?.coordinates),
+              },
+            })),
+          }),
+        }),
+      )
       .then(async (response) => {
+        if (!response.ok) {
+          const json = await response.json().catch(() => null);
+          throw new Error(String(json?.error?.message || response.status));
+        }
         setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
         markerVectorLayer?.setOpacity(0);
         setProgressPanelIndex(3);
@@ -1125,7 +1248,12 @@ export const DataTrainingFooter = () => {
           variant="primary"
           className=""
         >
-          {!isUpdatingTrainingData && t("common.next")}
+          {!isUpdatingTrainingData && (
+            <>
+              {t("common.next")}
+              <ArrowRight className="size-4" />
+            </>
+          )}
           {isUpdatingTrainingData && (
             <div className="w-full h-10 flex flex-row justify-center items-center">
               <span className="loader sm"></span>

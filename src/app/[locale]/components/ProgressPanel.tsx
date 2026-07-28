@@ -6,6 +6,7 @@ import { StepBar } from "./StepBar";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { useContext } from "react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 export const ProgressPanel = () => {
   const { progressPanelIndex } = useContext(MapGenerationContext);
@@ -13,7 +14,13 @@ export const ProgressPanel = () => {
 
   return (
     <div
-      className="bg-content-gray rounded-2xl w-150 p-4 border-[1.5px] border-[#605E5E]"
+      className={cn(
+        "bg-content-gray rounded-2xl p-4 border-[1.5px] border-[#605E5E]",
+        // On 1080p-and-smaller screens the panel slims to w-120 for steps
+        // 1-4; step 5 and anything wider than 1920px keep the full w-150.
+        // (Step 5 runs with index 5 — the map-generation flow skips 4.)
+        progressPanelIndex >= 4 ? "w-150" : "w-120 min-[1921px]:w-150",
+      )}
       style={{
         boxShadow: "0 0 8px 0 rgba(0, 0, 0, 0.08)",
       }}
