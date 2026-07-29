@@ -13,9 +13,8 @@ import { useContext } from "react";
 import { LULC_PREDICTORS } from "./lulcPredictors";
 
 export const SelectPredictorAccordion = () => {
-  const t = useTranslations("AnalysisPanel");
   const tInteractive = useTranslations("InteractivePanel");
-  const { selectedPredictors, setSelectedPredictors, selectedDefault } =
+  const { selectedPredictors, setSelectedPredictors, isAutoPointsFlow } =
     useContext(MapGenerationContext);
 
   const togglePredictor = (predictorId: string, checked: boolean) => {
@@ -33,7 +32,7 @@ export const SelectPredictorAccordion = () => {
   return (
     <AccordionItem
       value="predictor"
-      className="rounded-xl border border-neutral-400 bg-white pb-3"
+      className="rounded-xl border border-neutral-400 bg-white pb-3 last:border-b"
     >
       <AccordionFullTrigger
         icon={
@@ -70,7 +69,7 @@ export const SelectPredictorAccordion = () => {
                     onCheckedChange={(nextChecked) =>
                       togglePredictor(predictor.value, nextChecked === true)
                     }
-                    disabled={selectedDefault}
+                    disabled={isAutoPointsFlow}
                     className={cn(
                       "mt-0.5 border-neutral-500",
                       checked &&
@@ -90,26 +89,23 @@ export const SelectPredictorAccordion = () => {
             })}
           </div>
 
-          <ComingSoon />
-
-          <div className="rounded-xl bg-white p-0">
-            <div className="space-y-4 rounded-xl border border-dashed border-[rgba(184,187,199,1)] p-6 cursor-not-allowed">
-              <p className="text-l-bold text-text-icons-base-third text-center">
-                {t("Section4.selectPredictorDesc")}
-              </p>
-              <div className="mx-auto w-fit rounded-full border border-neutral-600 p-2">
-                <Upload className="h-5 w-5 text-text-icons-base-third" />
-              </div>
-              <div className="text-center">
-                <p className="text-l-medium text-text-icons-base-third">
-                  {t("Section4.fileUploadDesc1")}{" "}
-                  <b className="text-primary-pink underline">
-                    {t("Section4.fileUploadDesc2")}
-                  </b>{" "}
-                  {t("Section4.fileUploadDesc3")}
+          {/* Whole disabled-upload section shares one grey container: the
+              coming-soon notice on top, the dashed dropzone below. */}
+          <div className="rounded-xl bg-text-icons-disabled p-2 space-y-2 cursor-not-allowed">
+            <ComingSoon />
+            <div className="rounded-xl border-2 border-dashed border-neutral-300 bg-[#E8EAED] p-6 space-y-4">
+              <Upload className="size-8 mx-auto text-text-icons-base-third" />
+              <div className="text-center space-y-0.5">
+                <p className="font-aptos text-md font-regular leading-6 text-text-icons-base-third">
+                  {tInteractive("lulcParams.predictorUploadDragDrop")}
                 </p>
-                <p className="text-s-medium text-text-icons-light-base-second">
-                  {t("Section4.fileUploadSupportedFiles")}
+                <p className="font-aptos text-md font-regular leading-6 text-text-icons-base-third">
+                  {tInteractive("lulcParams.predictorUploadFormat")}
+                </p>
+              </div>
+              <div className="mx-auto w-[220px] rounded-full bg-white py-2">
+                <p className="font-aptos text-[13px] font-semibold leading-4.5 text-text-icons-base-third text-center">
+                  {tInteractive("lulcParams.predictorUploadBrowse")}
                 </p>
               </div>
             </div>

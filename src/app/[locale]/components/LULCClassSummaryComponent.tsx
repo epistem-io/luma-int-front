@@ -187,23 +187,6 @@ export const LULCClassSummaryComponent = () => {
               </div>
             </div>
           </LULCSummarySection>
-
-          <div className="h-0.5 w-full bg-secondary-purple-light-active" />
-
-          <LULCSummarySection
-            title={t("lulcParams.dataValidation")}
-            isEditing={isLULCSummaryChangeInput}
-            isEditDisabled
-          >
-            <div>
-              <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                {t("lulcParams.uploadedFile")}
-              </p>
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                {t("lulcParams.validationFilePlaceholder")}
-              </p>
-            </div>
-          </LULCSummarySection>
         </div>
       </div>
 

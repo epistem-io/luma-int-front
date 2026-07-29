@@ -61,7 +61,16 @@ export function NavBar({ className }: NavBarProps) {
       <div className="w-full py-2 px-5">
         <div className="flex items-center justify-between">
           {/* Logo and Title */}
-          <Link href="/">
+          {/* External landing page: plain <a> (next-intl's Link would
+              locale-prefix it), NEXT_PUBLIC_ so the client bundle sees it. */}
+          <a
+            href={
+              process.env.NEXT_PUBLIC_LANDING_PAGE_URL ??
+              "https://epistem.io/id/luma"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <div className="flex items-center space-x-3">
               <div className="flex h-12.5 w-12.5 items-center justify-center rounded-lg overflow-hidden">
                 <Image
@@ -82,7 +91,7 @@ export function NavBar({ className }: NavBarProps) {
                 </h2>
               </div>
             </div>
-          </Link>
+          </a>
 
           <div className="flex items-center space-x-5">
             {/* <nav className="flex items-center space-x-8">

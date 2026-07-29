@@ -81,6 +81,40 @@ export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lu
 
 export const TRAINING_DATA_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/upload`;
 export const TRAINING_DATA_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data`;
+export const TRAINING_DATA_SEPARABILITY_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/training-data/separability`;
+export const THEMATIC_ACCURACY_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/thematic-accuracy`;
+
+// Selectable swatches for the LULC class color picker (7-column grid).
+export const LULC_CLASS_COLOR_PALETTE = [
+  "#14532D",
+  "#3D9970",
+  "#6FCF6F",
+  "#8BC53F",
+  "#DDE26A",
+  "#D3E4AC",
+  "#F2C511",
+  "#1B2A5B",
+  "#37474F",
+  "#1565E0",
+  "#19A7E8",
+  "#6C63FF",
+  "#00778B",
+  "#17B8A6",
+  "#C2477F",
+  "#F43F5E",
+  "#B00020",
+  "#4A0E24",
+  "#7B3F14",
+  "#8E6E6E",
+  "#D35400",
+  "#FFA3AC",
+  "#C9A575",
+  "#FFEBD2",
+  "#A855F7",
+  "#DDE3EA",
+  "#C9F7E8",
+  "#D98A00",
+];
 export const PREDICTOR_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor`;
 
 export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/input-summary`;

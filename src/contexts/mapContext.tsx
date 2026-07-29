@@ -942,12 +942,15 @@ const MapContextContainer = (props: PropsWithChildren) => {
   };
 
   const renderArrayToMarkerVector = (arr: Marker[]) => {
-    if (!arr || arr.length === 0) return;
-
     if (!markerVectorSource) return;
 
     markerVectorSource.clear();
 
+    if (!arr || arr.length === 0) {
+      markerVectorSource.addFeature(new Feature());
+      return;
+    };
+    
     arr.forEach((item) => {
       const markerFeature =
         item.map_feature ||

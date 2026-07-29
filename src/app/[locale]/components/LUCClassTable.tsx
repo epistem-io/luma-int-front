@@ -34,25 +34,29 @@ export const LUCClassTable = ({ summary = false }: Props) => {
 
   const t = useTranslations("InteractivePanel");
 
-  const rerenderMarkers = (class_names: string[]) => {
+  const rerenderMarkers = (hiddenClassNames: string[]) => {
     if (!markerVectorSource) return;
     markerVectorSource.clear();
 
+    // OSS pins are named "Point N", not by class — so resolve the hidden
+    // class names to ids and filter on class_id, which every pin carries.
+    const hiddenClassIds = classArray
+      .filter((c) => hiddenClassNames.includes(c.class_name))
+      .map((c) => c.class_id);
+
     markerArray.forEach((item) => {
-      if (class_names.includes(item.name)) return;
+      if (hiddenClassIds.includes(item.class_id)) return;
+
       const markerFeature = new Feature({
         geometry: new Point(item.coordinates),
         id: item.id,
       });
 
-      const svg = svgWithColor(item.class_color);
-
       markerFeature.setStyle(
         new Style({
           image: new Icon({
-            anchor: [0.5, 1], // Anchor the bottom center of the icon
-            src: svg,
-            // src: "/images/marker.webp", // Use your own icon URL
+            anchor: [0.5, 1],
+            src: svgWithColor(item.class_color),
             size: [92, 117],
             height: 30,
           }),
@@ -68,16 +72,17 @@ export const LUCClassTable = ({ summary = false }: Props) => {
   }, [markerArray]);
 
   const classArrayCount = useMemo(() => {
-    // console.log("classarraycount", markerArray);
     return classArray.map((item) => {
       return {
         class_id: item.class_id,
         class_name: item.class_name,
-        count: markerArray.filter((marker) => marker.class_id === item.class_id)
-          .length,
+        class_color: item.class_color,
+        count: markerArray.filter(
+          (marker) => marker.class_id === item.class_id,
+        ).length,
       };
     });
-  }, [markerArray]);
+  }, [markerArray, classArray]);
 
   // useEffect(() => {
   //   console.log("markk", markerLayerVisibilityArray);
@@ -89,19 +94,29 @@ export const LUCClassTable = ({ summary = false }: Props) => {
         <TableHeader className="bg-primary-red-pink-light">
           <TableRow>
             {summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center align-middle border-r border-neutral-300">
                 {t("finalSummary.featureID")}
               </TableHead>
             )}
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-full">
+            {!summary && (
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-10 whitespace-normal px-1 border-r border-neutral-300">
+                {t("defineLUC.idClassHeader")}
+              </TableHead>
+            )}
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle whitespace-normal px-1 border-r border-neutral-300 last:border-r-0">
               {t("dataTraining.lulcClass")}
             </TableHead>
-            <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
+            {!summary && (
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-24 whitespace-normal px-1 border-r border-neutral-300">
+                {t("defineLUC.colorClassHeader")}
+              </TableHead>
+            )}
+            <TableHead className="text-black font-aptos text-xs font-semibold leading-4 text-center align-middle w-16 whitespace-normal px-1 last:border-r-0 border-r border-neutral-300">
               {t("dataTraining.numberOfPoints")}
             </TableHead>
 
             {!summary && (
-              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center flex flex-row justify-start">
+              <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center align-middle w-10 px-1">
                 <Button
                   variant={"ghost"}
                   className="p-0 rounded-full hover:cursor-pointer text-black!"
@@ -136,7 +151,7 @@ export const LUCClassTable = ({ summary = false }: Props) => {
               {summaryData?.data.training_data_summary.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
-                    {item.class_id}
+                    {index + 1}
                   </TableCell>
                   <TableCell className="font-aptos! text-center border-r">
                     {item.class_name}
@@ -153,13 +168,27 @@ export const LUCClassTable = ({ summary = false }: Props) => {
               {classArrayCount.map((item, index) => (
                 <TableRow key={index}>
                   <TableCell className="font-aptos! text-center border-r">
+                    {index + 1}
+                  </TableCell>
+                  <TableCell className="font-aptos! text-center border-r whitespace-normal">
                     {item.class_name}
                   </TableCell>
-                  <TableCell className="font-aptos! text-center border-r max-w-25">
+                  <TableCell className="font-aptos! border-r">
+                    <div className="flex items-center justify-center gap-x-2">
+                      <span
+                        className="size-5 shrink-0 rounded-[4px] border border-neutral-300"
+                        style={{ backgroundColor: item.class_color }}
+                      />
+                      <span className="uppercase">
+                        {item.class_color.replace(/^#/, "")}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-aptos! text-center border-r">
                     {item.count}
                   </TableCell>
 
-                  <TableCell className="font-aptos! ">
+                  <TableCell className="font-aptos! text-center">
                     <Button
                       variant={"ghost"}
                       className="p-0 rounded-full hover:cursor-pointer"

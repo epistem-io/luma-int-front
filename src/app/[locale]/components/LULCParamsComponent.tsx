@@ -1,7 +1,6 @@
 import { Accordion } from "@/components/ui/accordion";
 import { SelectPredictorAccordion } from "./SelectPredictorAccordion";
 import { RandomForestAccordion } from "./RandomForestAccordion";
-import { DataValidationAccordion } from "./DataValidationAccordion";
 import { useContext } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { PANEL_COMPONENT_KEY } from "@/constants";
@@ -26,7 +25,6 @@ export const LULCParamsComponent = () => {
       >
         <SelectPredictorAccordion />
         <RandomForestAccordion />
-        <DataValidationAccordion />
         {/* <AreaScopingAccordion />
         <TimePeriodAccordion />
         <SateliteCompositeAccordion /> */}

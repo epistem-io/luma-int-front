@@ -51,7 +51,10 @@ export const OSSFooter = () => {
     (item) => item.class_id !== -1,
   );
 
-  const isNextDisabled = !allMarkerClassFilled;
+  // End Pointing unlocks once at least one point exists and every point has a
+  // class; it only returns to the sampling panel — posting and the quality
+  // analysis happen there via the score banner's Generate button.
+  const isNextDisabled = markerArray.length === 0 || !allMarkerClassFilled;
 
   const onClickNext = () => {
     setMarkerId("");
@@ -66,17 +69,8 @@ export const OSSFooter = () => {
   return (
     <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
       <div></div>
-      {/* {isLUCLoading && (
-          <div className="w-full h-10 flex flex-row justify-center">
-            <span className="loader sm"></span>
-          </div>
-        )} */}
-      {/* {!isLUCLoading && (
-        )} */}
       <Button
         onClick={() => {
-          // setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-          // setProgressPanelIndex(2);
           onClickNext();
         }}
         disabled={isNextDisabled}

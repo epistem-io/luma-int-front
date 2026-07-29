@@ -141,7 +141,7 @@ export const TimePeriodAccordion = () => {
   return (
     <AccordionItem
       value={BASIC_INFORMATION_ACCORDION_TYPE.PERIOD}
-      className="rounded-xl border border-neutral-400 bg-white pb-3"
+      className="rounded-xl border border-neutral-400 bg-white pb-3 last:border-b"
     >
       <AccordionFullTrigger
         icon={

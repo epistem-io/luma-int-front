@@ -21,6 +21,11 @@ export const LULC_PREDICTORS: LULCPredictor[] = [
     description: "Normalized Difference Vegetation Index",
   },
   {
+    value: "EVI",
+    label: "EVI",
+    description: "Enhanced Vegetation Index",
+  },
+  {
     value: "NDBI",
     label: "NDBI",
     description: "Normalized Difference Built-Up Index",
@@ -28,7 +33,7 @@ export const LULC_PREDICTORS: LULCPredictor[] = [
   {
     value: "MNDWI",
     label: "MNDWI",
-    description: "Modified Normalized Difference Vegetation Index",
+    description: "Modified Normalized Difference Water Index",
   },
   // {
   //   value: "ndwi",

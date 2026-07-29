@@ -181,6 +181,13 @@ interface LUCClass {
   class_name: string;
 }
 
+interface QuickTableRow {
+  id: string;
+  classId: string;
+  name: string;
+  color: string;
+}
+
 interface FileObject {
   file: File;
   filename: string;
@@ -224,18 +231,92 @@ interface GenerateMapDataLULCComp {
   }[];
 }
 
-interface GenerateMapDataSampleDataQuality {
-  lowest_separability: {
-    min_td: number;
-    result_dict: {
-      Class1_ID: string;
-      Class1_Name: string;
-      Class2_ID: string;
-      Class2_Name: string;
-      Interpretation: string;
-      Separability_Level: string;
-      TD_Distance: number;
-    }[];
+interface SampleQualityPair {
+  Class1_ID: string;
+  Class1_Name: string;
+  Class2_ID: string;
+  Class2_Name: string;
+  TD_Distance: number;
+  Separability_Level: string;
+}
+
+type SampleQualityOverall = "good" | "med" | "poor";
+
+interface SampleQualityDroppedClass {
+  class_id: number;
+  class_name: string;
+  reason: string;
+}
+
+interface SampleQualityLowSampleClass {
+  class_id: number;
+  class_name: string;
+  pixels: number;
+}
+
+interface SampleQualityResult {
+  mean_td: number;
+  overall: SampleQualityOverall;
+  pair_counts: {
+    good: number;
+    weak: number;
+    poor: number;
+    total: number;
+  }
+  classes_good: number;
+  classes_total: number;
+  // Optional: only returned by backends that report extraction coverage.
+  classes_analyzed?: number;
+  classes_dropped?: SampleQualityDroppedClass[];
+  low_sample_classes?: SampleQualityLowSampleClass[];
+  problem_pairs: SampleQualityPair[];
+}
+
+interface SampleQualityRes {
+  message: string;
+  sample_quality: SampleQualityResult | null;
+  error?: {
+    message: string;
+  };
+}
+
+interface ThematicAccuracyPerClass {
+  class_id: number;
+  class_name: string;
+  class_color: string;
+  producer_accuracy: number;
+  user_accuracy: number;
+  f1_score: number;
+}
+
+interface ThematicAccuracyPoint {
+  lon: number;
+  lat: number;
+  actual_class_id: number;
+  actual_class_name: string;
+  predicted_class_id: number;
+  predicted_class_name: string;
+  is_correct: boolean;
+}
+
+interface ThematicAccuracyResult {
+  overall_accuracy: number;
+  overall_accuracy_ci: number[];
+  confidence_level: number;
+  kappa: number;
+  per_class: ThematicAccuracyPerClass[];
+  confusion_matrix: number[][];
+  n_total: number;
+  n_correct: number;
+  scale: number;
+  points: ThematicAccuracyPoint[];
+}
+
+interface ThematicAccuracyRes {
+  message: string;
+  thematic_accuracy: ThematicAccuracyResult;
+  error?: {
+    message: string;
   };
 }
 
