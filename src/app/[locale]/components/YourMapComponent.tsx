@@ -736,15 +736,6 @@ const ThematicAccuracyAssessment = () => {
     <>
       <Card>
         <div className="space-y-5">
-          <div className="">
-            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("yourMap.thematicAccuracyAssessment")}
-            </p>
-            <p className="font-aptos text-md font-regular leading-6 text-neutral-700 mt-2">
-              {t("yourMap.thematicAccuracyAssessmentDescription")}
-            </p>
-          </div>
-
           {/* Result summary */}
           {thematicAccuracy && (
             <div className="space-y-2">
@@ -955,7 +946,7 @@ const ThematicAccuracyAssessment = () => {
                 </p>
                 <div className="flex flex-row justify-end">
                   <Button
-                    variant={"primary"}
+                    variant={"secondary"}
                     className="px-6"
                     onClick={() => {
                       setShowUpload(true);

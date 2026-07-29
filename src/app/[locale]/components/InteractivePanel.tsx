@@ -466,8 +466,10 @@ export const InteractivePanel = () => {
             style={{
               // 270px = navbar + progress panel + gaps + a 12px bottom
               // breathing margin (measured; the old constants over-reserved
-              // ~20px and needlessly clipped short content).
-              maxHeight: `calc(100vh - 270px - ${titleHeight}px - ${footerHeight}px - ${subtitleHeight}px)`,
+              // ~20px and needlessly clipped short content). The min() caps
+              // the whole panel at 885px on tall screens (861 = 885 minus
+              // the panel's own vertical chrome).
+              maxHeight: `calc(min(100vh - 270px, 861px) - ${titleHeight}px - ${footerHeight}px - ${subtitleHeight}px)`,
             }}
           >
             {interactiveComponent.component}

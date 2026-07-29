@@ -197,6 +197,24 @@ async function loadBundledMessages(locale: Locale): Promise<IntlMessages> {
   return (await import(`../../messages/${locale}.json`)).default;
 }
 
+// Tolgee wins where it has a value; anything it doesn't know yet falls back
+// to the bundled messages instead of rendering as a raw key path.
+function deepMerge(base: IntlMessages, override: IntlMessages): IntlMessages {
+  const result: Record<string, unknown> = { ...base };
+
+  for (const [key, value] of Object.entries(override)) {
+    const existing = result[key];
+
+    if (isRecord(existing) && isRecord(value)) {
+      result[key] = deepMerge(existing, value);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
 async function fetchTolgeeMessages(locale: Locale): Promise<IntlMessages> {
   const errors: string[] = [];
 
@@ -226,7 +244,10 @@ async function fetchTolgeeMessages(locale: Locale): Promise<IntlMessages> {
 
       const text = await response.text();
       const payload = JSON.parse(text) as unknown;
-      const messages = extractMessagesFromPayload(payload, locale);
+      const messages = deepMerge(
+        await loadBundledMessages(locale),
+        extractMessagesFromPayload(payload, locale),
+      );
 
       lastSuccessfulMessages.set(locale, messages);
       return messages;

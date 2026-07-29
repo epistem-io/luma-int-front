@@ -118,17 +118,15 @@ export const DataTrainingComponent = () => {
   const t = useTranslations("InteractivePanel");
 
   const [fileEnter, setFileEnter] = useState(false);
-  // The summary starts expanded; it auto-collapses once a separability
-  // result arrives so the result becomes the focus.
+  // The summary starts (and stays) expanded — a separability result no
+  // longer collapses it; the user can still toggle it manually.
   const [summaryAccordionValue, setSummaryAccordionValue] =
     useState("lulc-table");
   const qualityViewRef = useRef<HTMLDivElement | null>(null);
 
-  // Once the quality result is shown, collapse the sample data summary and
-  // scroll the quality section into view so the result is the focus.
+  // Once the quality result is shown, scroll it into view.
   useEffect(() => {
     if (sampleQuality) {
-      setSummaryAccordionValue("");
       requestAnimationFrame(() => {
         qualityViewRef.current?.scrollIntoView({
           behavior: "smooth",
