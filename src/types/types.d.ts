@@ -324,12 +324,27 @@ interface GenerateMapDataFeatureImportance {
   feature_importance: { Band: string; Importance: number }[];
 }
 
+interface ModelQualityPerClass {
+  class_id: number;
+  class_name: string | null;
+  class_color: string | null;
+  recall: number;
+  precision: number;
+  f1_score: number;
+  gmean_score: number;
+}
+
 interface GenerateMapDataEvalModelQuality {
   model_quality: {
     overall_accuracy: number;
     kappa: number;
     average_f1_score: number;
     gmean_score: number;
+    // Detail fields (absent on older backend responses).
+    per_class?: ModelQualityPerClass[];
+    confusion_matrix?: number[][];
+    actual_class_ids?: number[];
+    predicted_class_ids?: number[];
   };
 }
 
