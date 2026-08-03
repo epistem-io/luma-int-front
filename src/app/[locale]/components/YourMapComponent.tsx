@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { FETCH_GENERATE_MAP, THEMATIC_ACCURACY_URL } from "@/constants";
 import { UploadIcon } from "lucide-react";
 import { ThematicAccuracyDetailDialog } from "./ThematicAccuracyDetailDialog";
+import { ModelAccuracyDetailDialog } from "./ModelAccuracyDetailDialog";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
@@ -563,6 +564,11 @@ const ModelAccuracyAssessment = () => {
   const { generateMapModelQuality, selectedDefault, selectedCustom } =
     useContext(MapGenerationContext);
 
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const hasDetail = Boolean(
+    generateMapModelQuality?.model_quality.per_class?.length,
+  );
+
   return (
     <>
       <Card className="h-full">
@@ -640,11 +646,21 @@ const ModelAccuracyAssessment = () => {
             </div>
           </div>
 
+          <ModelAccuracyDetailDialog
+            open={isDetailOpen}
+            onOpenChange={setIsDetailOpen}
+          />
           <div className="w-full flex flex-row justify-end mt-auto">
             <Button
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
               onClick={() => {
+                // Older backend responses have no detail payload; fall back
+                // to the previous scroll-to-thematic behavior there.
+                if (hasDetail) {
+                  setIsDetailOpen(true);
+                  return;
+                }
                 document
                   .getElementById("thematic-accuracy-card")
                   ?.scrollIntoView({ behavior: "smooth", block: "start" });
