@@ -199,7 +199,7 @@ export const MosaicSummary = () => {
                 {t("basicInformation.rataRata")}
               </p>
               <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                {mosaicStatistic?.statistics?.mean}%
+                {mosaicStatistic?.statistics?.mean.toFixed(2)}%
               </p>
             </div>
             <div className="">

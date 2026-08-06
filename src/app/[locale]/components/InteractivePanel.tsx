@@ -164,15 +164,14 @@ export const InteractivePanel = () => {
     lucQuickPhase,
     lucDefaultConfirmed,
     lucQuickRows,
-    defaultArray,
     LUCfile,
   } = useContext(MapGenerationContext);
 
-  // Leaving a step-2 flow that already has inputs asks for confirmation
-  // before discarding (DefineLUCLeaveDialog below).
+  // Only the Own Classification flow guards back-navigation with the
+  // leave-confirmation dialog (DefineLUCLeaveDialog below); the Default
+  // Scheme flow keeps its toggles and returns to the picker silently.
   const [isLucLeaveDialogOpen, setIsLucLeaveDialogOpen] = useState(false);
-  const hasLucInputs =
-    lucQuickRows.length > 0 || defaultArray.length > 0 || LUCfile !== null;
+  const hasOwnLucInputs = lucQuickRows.length > 0 || LUCfile !== null;
 
   // While a step-2 classification flow is open (and not yet confirmed), the
   // panel header becomes the flow header: back button + Hierarchy title.
@@ -231,7 +230,7 @@ export const InteractivePanel = () => {
             : t("defineLUC.defineLUCDescription"),
           onClickBackCallback: isLucFlowView
             ? () => {
-                if (hasLucInputs) {
+                if (lucView === "own" && hasOwnLucInputs) {
                   setIsLucLeaveDialogOpen(true);
                   return;
                 }
@@ -278,7 +277,7 @@ export const InteractivePanel = () => {
           subtitle: t("yourMap.yourMapPanelDescription"),
         },
       };
-    }, [selectedCustom, selectedDefault, isLucFlowView, hasLucInputs]);
+    }, [selectedCustom, selectedDefault, isLucFlowView, lucView, hasOwnLucInputs]);
 
   const [isOpen, setIsOpen] = useState(true);
   // const [subtitleHeight, setSubtitleHeight] = useState(0);
