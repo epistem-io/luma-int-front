@@ -33,4 +33,30 @@ function useObservedHeight<T extends HTMLElement>() {
   return { ref, height };
 }
 
-export { useObservedHeight };
+// Brief "Saving…" feedback on step-transition buttons: the checkpoint write
+// itself is near-instant, so the state is held for a minimum visible window
+// before (and, for async actions, during) the transition.
+const SAVING_FEEDBACK_MS = 600;
+
+function useSavingTransition() {
+  const [isSaving, setIsSaving] = useState(false);
+  const pendingRef = useRef(false);
+
+  const runWithSaving = useCallback((action: () => void | Promise<void>) => {
+    if (pendingRef.current) return;
+    pendingRef.current = true;
+    setIsSaving(true);
+    window.setTimeout(() => {
+      void Promise.resolve()
+        .then(() => action())
+        .finally(() => {
+          pendingRef.current = false;
+          setIsSaving(false);
+        });
+    }, SAVING_FEEDBACK_MS);
+  }, []);
+
+  return { isSaving, runWithSaving };
+}
+
+export { useObservedHeight, useSavingTransition };

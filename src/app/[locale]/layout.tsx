@@ -13,6 +13,8 @@ import { routing } from "@/i18n/routing";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/Analytics";
 import { MapGenerationContextContainer } from "@/contexts/mapGenerationContext";
+import { SessionCheckpointContainer } from "@/contexts/sessionCheckpointContext";
+import { ResumeSessionDialog } from "@/app/[locale]/components/ResumeSessionDialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -233,12 +235,15 @@ export default async function RootLayout({
             <GlobalContextContainer>
               <MapContextContainer>
                 <MapGenerationContextContainer>
-                  <div className="relative">
-                    <NavBar />
-                    {children}
-                    <Toaster />
-                    <Analytics />
-                  </div>
+                  <SessionCheckpointContainer>
+                    <div className="relative">
+                      <NavBar />
+                      {children}
+                      <ResumeSessionDialog />
+                      <Toaster />
+                      <Analytics />
+                    </div>
+                  </SessionCheckpointContainer>
                 </MapGenerationContextContainer>
               </MapContextContainer>
             </GlobalContextContainer>

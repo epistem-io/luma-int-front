@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
+import { useSavingTransition } from "@/lib/hooks";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
   ArrowRight,
@@ -1654,6 +1655,7 @@ export const DefineLUCFooter = () => {
     useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
+  const { isSaving, runWithSaving } = useSavingTransition();
 
   const { sessionId } = useContext(GlobalContext);
 
@@ -1887,14 +1889,23 @@ export const DefineLUCFooter = () => {
         {showNextButton && !isLUCLoading && (
           <Button
             onClick={() => {
-              onClickNext();
+              runWithSaving(onClickNext);
             }}
-            disabled={isNextDisabled}
+            disabled={isNextDisabled || isSaving}
             variant="primary"
             className=""
           >
-            {t("common.next")}
-            <ArrowRight className="size-4" />
+            {isSaving ? (
+              <>
+                <span className="loader sm"></span>
+                {t("common.saving")}
+              </>
+            ) : (
+              <>
+                {t("common.next")}
+                <ArrowRight className="size-4" />
+              </>
+            )}
           </Button>
         )}
       </div>

@@ -13,6 +13,7 @@ import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Download, Save, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -31,6 +32,7 @@ export const YourMapDialog = () => {
     resetMapGenerationState,
   } = useContext(MapGenerationContext);
   const { resetMapState } = useContext(MapContext);
+  const { clearCheckpoint } = useContext(SessionCheckpointContext);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const [isDownloadOnTheWayOpen, setIsDownloadOnTheWayOpen] = useState(false);
@@ -104,6 +106,7 @@ export const YourMapDialog = () => {
     resetMapState();
     resetMapGenerationState();
     setSessionId("");
+    clearCheckpoint();
   };
 
   return (

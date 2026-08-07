@@ -217,7 +217,6 @@ export const MosaicSummary = () => {
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
               disabled={isDownloadMosaicDisabled}
               onClick={async () => {
-                // onResetInput();
 
                 const fileUrl = mosaicStatistic?.download_url || "";
                 const response = await fetch(fileUrl);
@@ -230,7 +229,6 @@ export const MosaicSummary = () => {
                 a.download = filename || "mosaic-map";
                 a.style.display = "none";
                 a.href = url;
-                // a.download = "mosaic-map";
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);

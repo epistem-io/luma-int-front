@@ -8,6 +8,7 @@ import {
 } from "@/contexts/mapGenerationContext";
 import { PANEL_COMPONENT_KEY, PREDICTOR_URL } from "@/constants";
 import { type ReactNode, useContext, useMemo, useState } from "react";
+import { useSavingTransition } from "@/lib/hooks";
 import { useTranslations } from "next-intl";
 import { LULC_PREDICTORS } from "./lulcPredictors";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -216,6 +217,7 @@ export const LULCClassSummaryFooter = () => {
   const { sessionId } = useContext(GlobalContext);
   const t = useTranslations("InteractivePanel");
   const [isLoading, setIsLoading] = useState(false);
+  const { isSaving, runWithSaving } = useSavingTransition();
 
   const onChangeInputClick = () => {
     if (isLULCSummaryChangeInput) {
@@ -271,11 +273,18 @@ export const LULCClassSummaryFooter = () => {
           : t("common.changeInput")}
       </Button>
       <Button
-        onClick={onClickNext}
+        onClick={() => runWithSaving(onClickNext)}
         variant="primary"
-        disabled={isLULCSummaryChangeInput || isLoading}
+        disabled={isLULCSummaryChangeInput || isLoading || isSaving}
       >
-        {isLoading ? <span className="loader sm"></span> : t("common.next")}
+        {isLoading || isSaving ? (
+          <>
+            <span className="loader sm"></span>
+            {t("common.saving")}
+          </>
+        ) : (
+          t("common.next")
+        )}
       </Button>
     </div>
   );

@@ -20,6 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
+import { useSavingTransition } from "@/lib/hooks";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import { fromLonLat, toLonLat } from "ol/proj";
 
@@ -1112,6 +1113,7 @@ export const DataTrainingFooter = () => {
   const { markerVectorLayer, markerArray } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
+  const { isSaving, runWithSaving } = useSavingTransition();
 
   const isNextDisabled =
     isUploadingTrainingFile ||
@@ -1240,13 +1242,19 @@ export const DataTrainingFooter = () => {
         <div></div>
         <Button
           onClick={() => {
-            onClickNext();
+            runWithSaving(onClickNext);
           }}
-          disabled={isNextDisabled}
+          disabled={isNextDisabled || isSaving}
           variant="primary"
           className=""
         >
-          {!isUpdatingTrainingData && (
+          {!isUpdatingTrainingData && isSaving && (
+            <>
+              <span className="loader sm"></span>
+              {t("common.saving")}
+            </>
+          )}
+          {!isUpdatingTrainingData && !isSaving && (
             <>
               {t("common.next")}
               <ArrowRight className="size-4" />

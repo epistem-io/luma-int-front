@@ -6,6 +6,7 @@ import { LoginPanel } from "./components/LoginPanel";
 import Map1 from "./components/Map";
 import { NewFloatingPanel } from "./components/NewFloatingPanel";
 import { ProgressPanel } from "./components/ProgressPanel";
+import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import { SignUpPanel } from "./components/SignUpPanel";
 import { ZoomButton } from "./components/ZoomButton";
 
@@ -20,6 +21,9 @@ export default function Home() {
         <NewFloatingPanel />
       </div>
       <Map1 />
+      <div className="absolute z-20 top-8 right-24">
+        <SaveStatusIndicator />
+      </div>
       <div className="flex flex-col gap-y-4 absolute right-10 top-8 ">
         <ZoomButton />
         <BasemapButton />

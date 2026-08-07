@@ -7,6 +7,7 @@
     "build:production": "cp .env.production .env.local && next build",
     "build:staging": "cp .env.staging .env.local && next build",
     "start": "next start",
+    "test": "vitest run",
     "lint": "biome check",
     "deploy:production": "cp .env.production .env.local && next build && next start",
     "deploy:staging": "cp .env.staging .env.local && next build && next start"
@@ -53,9 +54,11 @@
     "@types/react-dom": "19.2.3",
     "eslint": "9",
     "eslint-config-next": "16.1.6",
+    "jsdom": "^30.0.1",
     "tailwindcss": "4",
     "tw-animate-css": "1.3.6",
-    "typescript": "5"
+    "typescript": "5",
+    "vitest": "^4.1.10"
   },
   "overrides": {
     "@types/react": "19.2.13",
