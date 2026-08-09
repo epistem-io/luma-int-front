@@ -20,6 +20,7 @@ import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { ShareMapDialog } from "./ShareMapDialog";
 
 export const YourMapDialog = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -36,6 +37,7 @@ export const YourMapDialog = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const [isDownloadOnTheWayOpen, setIsDownloadOnTheWayOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const t = useTranslations("InteractivePanel.yourMap");
   const commonT = useTranslations("InteractivePanel.common");
@@ -90,6 +92,20 @@ export const YourMapDialog = () => {
     } finally {
       setIsDownloading(false);
     }
+  };
+
+  const handleShare = () => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (!sessionId) {
+      toast.error(commonT("somethingWrongHappened"));
+      return;
+    }
+
+    setIsShareOpen(true);
   };
 
   const handleCloseRequest = () => {
@@ -163,8 +179,9 @@ export const YourMapDialog = () => {
             </Button>
             <Button
               type="button"
-              disabled
-              className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
+              onClick={handleShare}
+              variant="primary"
+              className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
             >
               <Share2 className="size-4" />
               {t("shareMap")}
@@ -202,6 +219,8 @@ export const YourMapDialog = () => {
         open={isDownloadOnTheWayOpen}
         onOpenChange={setIsDownloadOnTheWayOpen}
       />
+
+      <ShareMapDialog open={isShareOpen} onOpenChange={setIsShareOpen} />
     </>
   );
 };

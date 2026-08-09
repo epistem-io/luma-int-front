@@ -258,35 +258,17 @@ export const DefineLUCComponent = () => {
 
   const [hierarchyOpen, setHierarchyOpen] = useState(true);
   const [aiSectionOpen, setAISectionOpen] = useState(false);
-  // Local-only for now: the AI recommendation feature is "coming soon", so
-  // the prompt is typed but never submitted.
   const [aiPrompt, setAIPrompt] = useState("");
   const [fileEnter, setFileEnter] = useState(false);
-  // "confirmed" swaps to the read-only Recorded LULC Feature summary and
-  // enables Next. "locked" is the summary's inline edit mode: the summary
-  // stays on screen with editable rows while Next is disabled (the footer
-  // requires "confirmed" / lucExcelConfirmed) until Done re-confirms.
   const isQuickConfirmed = lucQuickPhase === "confirmed";
   const isSummaryEditing = lucQuickPhase === "locked";
-
-  // The table starts read-only; the pencil button above it toggles edit mode
-  // (row inputs + per-row delete + add row).
   const [isQuickTableEditing, setIsQuickTableEditing] = useState(false);
   const canEditQuickRows = isQuickTableEditing;
-
-  // Which row's color-palette popover is open (row id), if any.
   const [colorPopoverRowId, setColorPopoverRowId] = useState<string | null>(
     null,
   );
-
-  // Once confirmed, the flow views are replaced by the read-only Recorded
-  // LULC Feature summary and Next is enabled. Both flows converge here.
   const isConfirmed = isQuickConfirmed || lucDefaultConfirmed;
-  // The summary also stays on screen during its inline edit mode.
   const isSummaryShown = isConfirmed || isSummaryEditing;
-  // While a flow is open, it takes over the whole panel: InteractivePanel
-  // swaps the panel header to back + Hierarchy title, and the card chrome
-  // below is dropped.
   const isFlowView = lucView !== "picker" && !isSummaryShown;
   const summaryRows: { classId: string; name: string; color: string }[] =
     lucDefaultConfirmed
@@ -302,10 +284,6 @@ export const DefineLUCComponent = () => {
           name: r.name,
           color: r.color,
         }));
-
-  // Re-render the marker layer, omitting any class whose name is in the
-  // hidden list. Mirrors LUCClassTable so the eye toggle behaves the same
-  // wherever markers exist on the map.
   const rerenderMarkers = (hiddenClassNames: string[]) => {
     if (!markerVectorSource) return;
     markerVectorSource.clear();
@@ -331,8 +309,6 @@ export const DefineLUCComponent = () => {
     markerVectorSource.changed();
   };
 
-  // Duplicate class names (case-insensitive, trimmed) — flagged inline and
-  // block the Next button in DefineLUCFooter.
   const quickDuplicateNames = (() => {
     const counts = new Map<string, number>();
     lucQuickRows.forEach((r) => {
@@ -348,9 +324,6 @@ export const DefineLUCComponent = () => {
     return key !== "" && (quickDuplicateNames.get(key) ?? 0) > 1;
   };
 
-
-  // Only allow locking/confirming a Quick Table with at least one named row
-  // and no duplicate names, so a confirmed table always yields a valid submit.
   const hasQuickDuplicates = Array.from(quickDuplicateNames.values()).some(
     (count) => count > 1,
   );
@@ -360,8 +333,6 @@ export const DefineLUCComponent = () => {
   const addQuickRow = () => {
     setIsDefineLULCChanged(true);
     setLucQuickRows((prev) => {
-      // Class IDs are hidden and auto-managed: new manual rows continue
-      // after the highest existing ID (uploaded files keep their own IDs).
       const nextId =
         prev.reduce((acc, r) => {
           const n = parseInt(r.classId, 10);
@@ -392,8 +363,6 @@ export const DefineLUCComponent = () => {
     setLucQuickRows((prev) => prev.filter((r) => r.id !== id));
   };
 
-  // Upload + parse the excel template, then load the parsed classes straight
-  // into the editable Quick Table so the user can still tweak / add rows.
   const importExcel = (file: File) => {
     setIsDefineLULCChanged(true);
     setIsLUCLoading(true);
@@ -417,12 +386,6 @@ export const DefineLUCComponent = () => {
           );
         }
 
-        // Merge with whatever is already in the table (e.g. manual input).
-        // Uploaded classes always keep the file's own class IDs — the
-        // backend stored the scheme with those IDs and training data
-        // (pinned points / uploaded shapefiles) is validated against them.
-        // IDs are hidden and auto-managed, so a manual row colliding with
-        // an uploaded ID is silently renumbered instead.
         setLucQuickRows((prev) => {
           const uploadedIds = new Set(json.classes.map((c) => c.class_id));
           let nextFallbackId = Math.max(
@@ -490,15 +453,37 @@ export const DefineLUCComponent = () => {
       setDefaultArray(defaultArray.filter((item) => item !== num));
       return;
     }
-    // if (defaultArray.includes(num)) {
-    //   setDefaultArray(defaultArray.filter((item) => item !== num));
-    //   return;
-    // }
 
     setDefaultArray([...defaultArray, num]);
   };
 
   const onResetInput = useResetDefineLUCInputs();
+
+  const onDownloadClassesCsv = () => {
+    const escapeCsv = (value: string) =>
+      /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+    const lines = summaryRows.map((row, index) =>
+      [
+        row.classId.trim() || String(index + 1),
+        escapeCsv(row.name),
+        row.color.toUpperCase(),
+      ].join(","),
+    );
+    const csv = ["ID,Land Cover Class,Color", ...lines].join("\r\n");
+    const utf8Bom = String.fromCharCode(0xfeff);
+    const blob = new Blob([utf8Bom, csv], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "lulc-classes.csv";
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
     const target = e.target;
@@ -517,8 +502,6 @@ export const DefineLUCComponent = () => {
 
   const submitFile = () => {};
 
-  // Clears the uploaded file AND the parsed rows, returning the Excel tab to
-  // the dropzone — the preview card's trash button is a "start over".
   const clearUploadedTemplate = () => {
     setIsDefineLULCChanged(true);
     setLUCFile(null);
@@ -538,9 +521,6 @@ export const DefineLUCComponent = () => {
     if (doc) doc.value = "";
   };
 
-  // The editable class table (rows + add/lock/confirm controls). Shared by the
-  // Manual Input tab and the Excel Template tab (rendered beneath the preview
-  // card there) so the two views stay in sync without duplicating JSX.
   const renderQuickTable = () => (
     <>
       <div className="space-y-2">
@@ -983,11 +963,24 @@ export const DefineLUCComponent = () => {
                         </div>
                       </div>
                     ))}
+                {isSummaryEditing && (
+                  <button
+                    type="button"
+                    onClick={addQuickRow}
+                    className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
+                  >
+                    <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                    <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                      {t("defineLUC.addClass")}
+                    </p>
+                  </button>
+                )}
               </div>
             </div>
-            {!isSummaryEditing &&
-              LUCfilename &&
-              renderUploadedTemplateCard()}
+            {/* Read-only summary: file card is display-only; the trash
+                button only appears while the inline edit mode is active. */}
+            {LUCfilename &&
+              renderUploadedTemplateCard({ removable: isSummaryEditing })}
           </div>
         ) : lucView === "picker" ? (
           <div className="space-y-6">
@@ -1605,7 +1598,22 @@ export const DefineLUCComponent = () => {
         </div>
       </Collapsible>
       )}
-      {!isFlowView && (
+      {!isFlowView && isSummaryShown && (
+      <Button
+        variant={"ghost"}
+        className="p-0 hover:bg-transparent cursor-pointer"
+        onClick={() => {
+          onDownloadClassesCsv();
+        }}
+      >
+        <div className="">
+          <p className="text-text-icons-base-third font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
+            {t("defineLUC.downloadClassesCsv")}
+          </p>
+        </div>
+      </Button>
+      )}
+      {!isFlowView && !isSummaryShown && (
       <Button
         variant={"ghost"}
         className="p-0 hover:bg-transparent cursor-pointer"

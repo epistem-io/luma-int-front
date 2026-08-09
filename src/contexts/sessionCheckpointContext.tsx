@@ -288,6 +288,11 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
           mg.setLUCFile(new File([], luc.LUCfilename || "template.xlsx"));
         }
         mg.setIsDefineLULCChanged(false);
+        // Same derivation as the step 2 → 3 transition: quick flow with no
+        // auto-placed points means the user samples manually on step 3.
+        mg.setQuickManualSampling(
+          luc.lucSource === "quick" && (cp.training?.markers.length ?? 0) === 0,
+        );
       }
 
       const { training } = cp;
@@ -310,7 +315,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
           })),
         );
         mg.setSampleQualityConfirmed(training.sampleQualityConfirmed);
-        mg.setIsTrainingDataChanged(false);
+        // Unconfirmed markers (auto-placed or in-progress OSS pins) are
+        // restored too, but step 3 still requires the user's confirmation.
+        mg.setIsTrainingDataChanged(!training.confirmed);
       }
 
       const { params } = cp;
@@ -378,7 +385,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     () => [
       Boolean(lastSavedCheckpoint?.basicInfo),
       Boolean(lastSavedCheckpoint?.luc),
-      Boolean(lastSavedCheckpoint?.training),
+      Boolean(lastSavedCheckpoint?.training?.confirmed),
       Boolean(lastSavedCheckpoint?.params),
       Boolean(lastSavedCheckpoint?.mapGenerated),
     ],

@@ -70,6 +70,10 @@ export interface SessionCheckpoint {
   };
   training?: {
     method: "oss" | "upload";
+    // True only when the user confirmed the sample data (step 3 recorded);
+    // markers are persisted earlier because the quick/default flow auto-places
+    // points on entering step 3.
+    confirmed: boolean;
     markers: CheckpointMarker[];
     uploadedFiles: CheckpointUploadedFile[];
     sampleQualityConfirmed: boolean;
@@ -255,9 +259,10 @@ export function buildCheckpoint(
     };
   }
 
-  if (isStep3Recorded(i)) {
+  if (i.markerArray.length > 0 || i.uploadedFiles.length > 0) {
     checkpoint.training = {
       method: i.dataTrainingActiveTab === "oss" ? "oss" : "upload",
+      confirmed: isStep3Recorded(i),
       markers: i.markerArray,
       uploadedFiles: i.uploadedFiles,
       sampleQualityConfirmed: i.sampleQualityConfirmed,
