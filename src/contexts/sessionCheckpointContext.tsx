@@ -202,6 +202,31 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
   }, [draftSig, candidate, pendingResume, debouncedDraftSave]);
 
   const offeredEmailsRef = useRef<Set<string>>(new Set());
+
+  const wasAuthenticatedRef = useRef(false);
+  useEffect(() => {
+    if (isAuthenticated) {
+      wasAuthenticatedRef.current = true;
+      return;
+    }
+    if (!wasAuthenticatedRef.current) return;
+    wasAuthenticatedRef.current = false;
+
+    debouncedDraftSave.cancel();
+    lastConfirmationSigRef.current = "";
+    lastDraftSigRef.current = "";
+    offeredEmailsRef.current.clear();
+    restoreMosaicStartedRef.current = false;
+    setLastSavedCheckpoint(null);
+    setSaveStatus("idle");
+    setPendingResume(null);
+    setIsRestoring(false);
+
+    mapContext.resetMapState();
+    mg.resetMapGenerationState();
+    setSessionId("");
+  }, [isAuthenticated, debouncedDraftSave, mapContext, mg, setSessionId]);
+
   useEffect(() => {
     if (!isHydrated || !isAuthenticated || !user) return;
     if (offeredEmailsRef.current.has(user.email)) return;
