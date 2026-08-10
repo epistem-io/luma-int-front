@@ -133,9 +133,12 @@ export const ShareMapDialog = ({ open, onOpenChange }: ShareMapDialogProps) => {
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <Form {...form}>
             <div className="flex flex-col gap-4">
+              {/* disabled lives on the Input, not the FormField: react-hook-form
+                  excludes disabled fields from handleSubmit values, so
+                  disabled={isSubmitting} on the Controller can strip
+                  recipient_name/recipient_email from the request mid-submit. */}
               <FormField
                 control={form.control}
-                disabled={isSubmitting}
                 name="recipientName"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
@@ -147,6 +150,7 @@ export const ShareMapDialog = ({ open, onOpenChange }: ShareMapDialogProps) => {
                         {...field}
                         id="share-recipient-name"
                         type="text"
+                        disabled={isSubmitting}
                         autoComplete="name"
                         placeholder={t("shareRecipientNamePlaceholder")}
                         className={fieldClassName}
@@ -159,7 +163,6 @@ export const ShareMapDialog = ({ open, onOpenChange }: ShareMapDialogProps) => {
 
               <FormField
                 control={form.control}
-                disabled={isSubmitting}
                 name="recipientEmail"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
@@ -171,6 +174,7 @@ export const ShareMapDialog = ({ open, onOpenChange }: ShareMapDialogProps) => {
                         {...field}
                         id="share-recipient-email"
                         type="email"
+                        disabled={isSubmitting}
                         autoComplete="email"
                         placeholder={t("shareRecipientEmailPlaceholder")}
                         className={fieldClassName}
