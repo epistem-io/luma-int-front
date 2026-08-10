@@ -33,6 +33,7 @@ import {
   getTemporalRangeText,
   numberThousandSeparator,
 } from "@/lib/utils";
+import { useSavingTransition } from "@/lib/hooks";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
@@ -167,8 +168,10 @@ export const BasicInformationSummaryFooter = () => {
   const { sessionId } = useContext(GlobalContext);
 
   const t = useTranslations("InteractivePanel");
+  const { isSaving, runWithSaving } = useSavingTransition();
 
-  const isNextDisabled = isBasicInformationChangeInput || isMosaicLoading;
+  const isNextDisabled =
+    isBasicInformationChangeInput || isMosaicLoading || isSaving;
   // isPreviewingMosaic || isBasicInformationChangeInput || isMosaicLoading;
   const isCancelDisabled = isMosaicLoading;
 
@@ -188,8 +191,10 @@ export const BasicInformationSummaryFooter = () => {
 
   const onNextClick = () => {
     if (isPreviewingMosaic) {
-      setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-      setProgressPanelIndex(1);
+      runWithSaving(() => {
+        setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
+        setProgressPanelIndex(1);
+      });
 
       return;
     }
@@ -232,7 +237,13 @@ export const BasicInformationSummaryFooter = () => {
         variant="primary"
         className=""
       >
-        {isPreviewingMosaic && (
+        {isPreviewingMosaic && isSaving && (
+          <>
+            <span className="loader sm"></span>
+            {t("common.saving")}
+          </>
+        )}
+        {isPreviewingMosaic && !isSaving && (
           <>
             {t("common.next")}
             <ArrowRight className="size-4" />

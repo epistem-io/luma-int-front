@@ -42,7 +42,7 @@ export const TimePeriodSummary = ({
           <div className="space-y-3">
             <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
               {/* WIP */}
-              {t("timePeriod.yourSelectedTimePeriod")} huhi
+              {t("timePeriod.yourSelectedTimePeriod")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
               <div className="space-y-1 col-span-1">

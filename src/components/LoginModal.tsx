@@ -97,9 +97,12 @@ export default function LoginModal({
         <form onSubmit={handleSubmit} className="flex flex-col">
           <Form {...form}>
             <div className="flex flex-col gap-4 px-6 pb-6">
+              {/* disabled lives on the Input, not the FormField: react-hook-form
+                  excludes disabled fields from handleSubmit values, so
+                  disabled={isSubmitting} on the Controller can strip
+                  email/password from the request mid-submit. */}
               <FormField
                 control={form.control}
-                disabled={isSubmitting}
                 name="email"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
@@ -111,6 +114,7 @@ export default function LoginModal({
                         {...field}
                         id="login-email"
                         type="email"
+                        disabled={isSubmitting}
                         autoComplete="email"
                         placeholder={t("emailPlaceholder")}
                         className={fieldClassName}
@@ -123,7 +127,6 @@ export default function LoginModal({
 
               <FormField
                 control={form.control}
-                disabled={isSubmitting}
                 name="password"
                 render={({ field }) => (
                   <FormItem className="flex flex-col gap-2">
@@ -145,6 +148,7 @@ export default function LoginModal({
                         {...field}
                         id="login-password"
                         type="password"
+                        disabled={isSubmitting}
                         autoComplete="current-password"
                         placeholder={t("passwordPlaceholder")}
                         className={fieldClassName}

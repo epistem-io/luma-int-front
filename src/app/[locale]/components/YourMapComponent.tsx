@@ -85,7 +85,9 @@ export const YourMapComponent = () => {
           // Optional: Add attributions if required by the tile service provider
         }),
         className: `final`,
-        zIndex: 10,
+        // Above the mosaic composites (10) even when a resume re-fetches them
+        // concurrently, below the AOI outline (20) and markers (100).
+        zIndex: 15,
         opacity: 1,
       });
 

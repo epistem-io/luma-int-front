@@ -75,6 +75,7 @@ export const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
 
 export const GET_MOSAIC_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic`;
 export const DOWNLOAD_REQUEST_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/download-request`;
+export const SHARE_MAP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/share-map`;
 
 export const LUC_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-classes/upload`;
 export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-classes`;
