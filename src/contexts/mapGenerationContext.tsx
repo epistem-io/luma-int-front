@@ -64,6 +64,8 @@ export interface MapGenerationContextType {
   setAreaScopingPolygonArea: Dispatch<SetStateAction<number>>;
   areaScopingPolygonFileSize: number;
   setAreaScopingPolygonFileSize: Dispatch<SetStateAction<number>>;
+  areaScopingRegency: RegencyOption | null;
+  setAreaScopingRegency: Dispatch<SetStateAction<RegencyOption | null>>;
   spatialResolution: string;
   setSpatialResolution: Dispatch<SetStateAction<string>>;
   isEditingTemporalCoverage: boolean;
@@ -220,6 +222,9 @@ export interface MapGenerationContextType {
   setMinLeafPopulation: Dispatch<SetStateAction<string>>;
   minLeafPopulationError: string;
   setMinLeafPopulationError: Dispatch<SetStateAction<string>>;
+  /** Training share of the sample split, in percent (10-90). */
+  splitRatio: number;
+  setSplitRatio: Dispatch<SetStateAction<number>>;
   resetMapGenerationState: () => void;
   quickManualSampling: boolean;
   setQuickManualSampling: Dispatch<SetStateAction<boolean>>;
@@ -246,6 +251,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setAreaScopingPolygonArea: () => {},
   areaScopingPolygonFileSize: 0,
   setAreaScopingPolygonFileSize: () => {},
+  areaScopingRegency: null,
+  setAreaScopingRegency: () => {},
   spatialResolution: "",
   setSpatialResolution: () => {},
   isEditingTemporalCoverage: true,
@@ -387,6 +394,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setMinLeafPopulation: () => {},
   minLeafPopulationError: "",
   setMinLeafPopulationError: () => {},
+  splitRatio: 70,
+  setSplitRatio: () => {},
   resetMapGenerationState: () => {},
   quickManualSampling: false,
   setQuickManualSampling: () => {},
@@ -416,6 +425,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [areaScopingPolygonFileSize, setAreaScopingPolygonFileSize] = useState(
     DEFAULT_VALUE.areaScopingPolygonFileSize,
   );
+  const [areaScopingRegency, setAreaScopingRegency] = useState<
+    RegencyOption | null
+  >(DEFAULT_VALUE.areaScopingRegency);
   const [spatialResolution, setSpatialResolution] = useState(
     DEFAULT_VALUE.spatialResolution,
   );
@@ -680,6 +692,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.minLeafPopulationError,
   );
 
+  const [splitRatio, setSplitRatio] = useState<number>(
+    DEFAULT_VALUE.splitRatio,
+  );
+
   const [quickManualSampling, setQuickManualSampling] = useState(
     DEFAULT_VALUE.quickManualSampling,
   );
@@ -695,6 +711,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setAreaScopingPolygonFileName(DEFAULT_VALUE.areaScopingPolygonFileName);
     setAreaScopingPolygonArea(DEFAULT_VALUE.areaScopingPolygonArea);
     setAreaScopingPolygonFileSize(DEFAULT_VALUE.areaScopingPolygonFileSize);
+    setAreaScopingRegency(DEFAULT_VALUE.areaScopingRegency);
     setSpatialResolution(DEFAULT_VALUE.spatialResolution);
     setisEditingTemporalCoverage(DEFAULT_VALUE.isEditingTemporalCoverage);
     setTemporalCoverage(DEFAULT_VALUE.temporalCoverage);
@@ -764,6 +781,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setNumberOfTreesError(DEFAULT_VALUE.numberOfTreesError);
     setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
     setMinLeafPopulationError(DEFAULT_VALUE.minLeafPopulationError);
+    setSplitRatio(DEFAULT_VALUE.splitRatio);
     setQuickManualSampling(DEFAULT_VALUE.quickManualSampling);
 
     if (typeof document === "undefined") return;
@@ -798,6 +816,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setAreaScopingPolygonArea,
     areaScopingPolygonFileSize,
     setAreaScopingPolygonFileSize,
+    areaScopingRegency,
+    setAreaScopingRegency,
     spatialResolution,
     setSpatialResolution,
     isEditingTemporalCoverage,
@@ -935,6 +955,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setMinLeafPopulation,
     minLeafPopulationError,
     setMinLeafPopulationError,
+    splitRatio,
+    setSplitRatio,
     resetMapGenerationState,
     quickManualSampling,
     setQuickManualSampling,

@@ -387,7 +387,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
         setIsLegendVisible(["legend-accordion"]);
       })
       .catch((e) => {
-        toast.error(`Error on upload training data: ${e}`, {
+        toast.error(`Error on generating image mosaic: ${e}`, {
           duration: Infinity,
           dismissible: true,
           closeButton: true,

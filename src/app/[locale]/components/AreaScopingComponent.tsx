@@ -9,6 +9,7 @@ import {
   AREA_SCOPING_POLYGON_AREA_LIMIT,
   AREA_SCOPING_TYPE,
   FETCH_POLYGON_URL,
+  FETCH_REGENCY_AOI_URL,
   FETCH_UPLOAD_URL,
   PANEL_COMPONENT_KEY,
 } from "@/constants";
@@ -46,6 +47,7 @@ import Stroke from "ol/style/Stroke";
 import Style, { GeometryFunction } from "ol/style/Style";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { RegencyCombobox } from "./RegencyCombobox";
 import { SpatialResolutionSelect } from "./SpatialResolutionSelect";
 
 // const styles = (strokeWidth: number) => [
@@ -89,10 +91,12 @@ export const AreaScopingComponent = () => {
     polygonData,
     isAreaScopingLoading,
     areaScopingPolygonError,
+    areaScopingRegency,
     setAreaScopingPolygonArea,
     setAreaScopingPolygonFileName,
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
+    setAreaScopingRegency,
     setPolygonData,
     setIsAreaScopingLoading,
     setAreaScopingPolygonError,
@@ -105,6 +109,7 @@ export const AreaScopingComponent = () => {
     mapInstance,
     setVectorLayer,
     setLayerLegendArray,
+    vectorSource,
   } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
@@ -727,6 +732,109 @@ export const AreaScopingComponent = () => {
           <SpatialResolutionSelect />
         </div>
       )}
+      {areaScopingType === AREA_SCOPING_TYPE.REGENCY && (
+        <div className="pb-3 space-y-4" data-testid="area-scoping-regency-panel">
+          <div className="flex flex-row gap-x-3 items-center">
+            <Image
+              src="/svgs/regency-search.svg"
+              alt="select-regency"
+              width={24}
+              height={24}
+              className="size-16 aspect-square text-primary-pink"
+            />
+            <div className="space-y-2">
+              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
+                {t("areaScoping.selectRegency")}
+              </p>
+              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
+                {t("areaScoping.selectRegencySubtitle")}
+              </p>
+            </div>
+          </div>
+
+          <RegencyCombobox
+            value={areaScopingRegency}
+            disabled={isAreaScopingLoading}
+            onChange={(regency) => {
+              setAreaScopingRegency(regency);
+              // A new choice invalidates any polygon fetched for the old one
+              if (polygonData) {
+                setPolygonData(null);
+                setAreaScopingPolygonArea(0);
+                vectorSource?.clear();
+              }
+            }}
+          />
+
+          {isAreaScopingLoading && (
+            <>
+              <div className="w-full h-10 flex flex-row justify-center">
+                <span className="loader "></span>
+              </div>
+            </>
+          )}
+
+          {!isAreaScopingLoading && (
+            <>
+              {polygonData &&
+                areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
+                  <>
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
+                      <div className="space-y-3 text-center w-full">
+                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
+                          {t("areaScoping.selectedAreaHasTotalArea")}
+                        </p>
+                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
+                          {numberThousandSeparator(
+                            areaScopingPolygonArea.toFixed(0),
+                          )}{" "}
+                          Ha
+                        </p>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+              {polygonData &&
+                areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
+                  <>
+                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
+                      <div className="space-y-3 text-center w-full">
+                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
+                          {t("areaScoping.selectedAreaHasTotalArea")}
+                        </p>
+                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
+                          {numberThousandSeparator(
+                            areaScopingPolygonArea.toFixed(0),
+                          )}{" "}
+                          Ha
+                        </p>
+                      </div>
+                    </div>
+                    <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
+                      <div className="flex flex-row gap-x-4 items-center">
+                        <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
+                          <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
+                        </div>
+                        <div className="">
+                          <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
+                            {t("common.areaTooBigError")}
+                          </p>
+                          <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
+                            {t("common.areaTooBigErrorDesc", {
+                              X: "100,000 Ha",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+            </>
+          )}
+          <SpatialResolutionSelect />
+        </div>
+      )}
     </>
   );
 };
@@ -741,12 +849,14 @@ export const AreaScopingFooter = () => {
     areaScopingPolygonFileSize,
     areaScopingPolygonUrl,
     areaScopingPolygonError,
+    areaScopingRegency,
     polygonData,
     isAreaScopingLoading,
     setAreaScopingPolygonArea,
     setAreaScopingPolygonFileName,
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
+    setAreaScopingRegency,
     setPolygonData,
     setIsAreaScopingLoading,
     setAreaScopingPolygonError,
@@ -773,6 +883,7 @@ export const AreaScopingFooter = () => {
     setAreaScopingPolygonArea(0);
     setAreaScopingPolygonFileSize(0);
     setAreaScopingPolygonError("");
+    setAreaScopingRegency(null);
     setPolygonData(null);
 
     if (vectorLayer && mapInstance) {
@@ -786,7 +897,8 @@ export const AreaScopingFooter = () => {
     (areaScopingType === AREA_SCOPING_TYPE.UPLOAD &&
       !areaScopingPolygonFileName &&
       !areaScopingPolygonUrl) ||
-    (areaScopingType === AREA_SCOPING_TYPE.DRAW && !polygonData);
+    (areaScopingType === AREA_SCOPING_TYPE.DRAW && !polygonData) ||
+    (areaScopingType === AREA_SCOPING_TYPE.REGENCY && !areaScopingRegency);
 
   const isConfirmDisabled =
     isAreaScopingLoading ||
@@ -794,9 +906,58 @@ export const AreaScopingFooter = () => {
     spatialResolution === "" ||
     (polygonData && areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT) ||
     (areaScopingType === AREA_SCOPING_TYPE.DRAW && !polygonData) ||
+    (areaScopingType === AREA_SCOPING_TYPE.REGENCY && !areaScopingRegency) ||
     (areaScopingType === AREA_SCOPING_TYPE.UPLOAD &&
       !areaScopingPolygonFileName &&
       areaScopingPolygonFileSize < AREA_SCOPING_FILE_SIZE_LIMIT);
+
+  /**
+   * Put a backend AOI response on the map (replacing the current vector layer),
+   * fit the view to it and store area/id in context.
+   * Shared by the upload and regency flows.
+   */
+  const applyAoiResponse = (json: GeosAoiRes) => {
+    const tempPolygon =
+      json.geometry.type === "MultiPolygon"
+        ? new MultiPolygon(
+            json.geometry.coordinates as Coordinate[][][],
+          ).transform("EPSG:4326", "EPSG:3857")
+        : (new Polygon(json.geometry.coordinates as Coordinate[][]).transform(
+            "EPSG:4326",
+            "EPSG:3857",
+          ) as Polygon);
+
+    const polygonFeature = new Feature<Polygon | MultiPolygon>(tempPolygon);
+    const newVectorSource = new VectorSource({
+      features: [polygonFeature],
+      wrapX: false,
+    });
+    const newVectorLayer = new VectorLayer({
+      source: newVectorSource,
+      style: stylesTransparentFill(3),
+    });
+
+    newVectorLayer.setZIndex(Infinity);
+    setVectorSource(newVectorSource);
+    setVectorLayer(newVectorLayer);
+    mapInstance?.addLayer(newVectorLayer);
+
+    setPolygon(tempPolygon);
+
+    setAreaScopingPolygonArea(json.data.area_size);
+    setPolygonData({
+      area_size: json.data.area_size,
+      id: json.data.id,
+    });
+    setSessionId(json.data.session_id);
+
+    const extent = newVectorSource.getExtent();
+    if (!extent || !mapInstance) return;
+
+    mapInstance.getView()?.fit(extent, {
+      padding: [150, 150, 150, 600],
+    });
+  };
 
   const onSubmitShp = async () => {
     if (!areaScopingPolygonUrl) return;
@@ -823,97 +984,7 @@ export const AreaScopingFooter = () => {
           );
         }
 
-        if (json.geometry.type === "MultiPolygon") {
-          const coordinates = json.geometry.coordinates as Coordinate[][][];
-
-          // vectorSource?.clear();
-
-          const tempPolygon = new MultiPolygon(coordinates).transform(
-            "EPSG:4326",
-            "EPSG:3857",
-          );
-
-          const polygonFeature = new Feature<MultiPolygon>(tempPolygon);
-          const newVectorSource = new VectorSource({
-            features: [polygonFeature],
-            wrapX: false,
-          });
-          const newVectorLayer = new VectorLayer({
-            source: newVectorSource,
-            style: stylesTransparentFill(3),
-          });
-
-          newVectorLayer.setZIndex(Infinity);
-          setVectorSource(newVectorSource);
-          setVectorLayer(newVectorLayer);
-          mapInstance?.addLayer(newVectorLayer);
-
-          setPolygon(tempPolygon);
-
-          const extent = newVectorSource.getExtent();
-
-          if (!extent || !mapInstance) return;
-
-          const view = mapInstance.getView();
-
-          view?.fit(extent, {
-            padding: [150, 150, 150, 600],
-          });
-
-          setAreaScopingPolygonArea(json.data.area_size);
-
-          setPolygonData({
-            area_size: json.data.area_size,
-            id: json.data.id,
-          });
-
-          return;
-        }
-
-        const coordinates = json.geometry.coordinates as Coordinate[][];
-
-        // vectorSource?.clear();
-
-        const tempPolygon = new Polygon(coordinates).transform(
-          "EPSG:4326",
-          "EPSG:3857",
-        ) as Polygon;
-        const polygonFeature = new Feature<Polygon>(tempPolygon);
-        const newVectorSource = new VectorSource({
-          features: [polygonFeature],
-          wrapX: false,
-        });
-
-        const newVectorLayer = new VectorLayer({
-          source: newVectorSource,
-          style: stylesTransparentFill(3),
-        });
-
-        newVectorLayer.setZIndex(Infinity);
-        setVectorSource(newVectorSource);
-        setVectorLayer(newVectorLayer);
-        mapInstance?.addLayer(newVectorLayer);
-
-        setPolygon(tempPolygon);
-
-        const extent = newVectorSource.getExtent();
-
-        if (!extent || !mapInstance) return;
-
-        const view = mapInstance.getView();
-
-        view?.fit(extent, {
-          padding: [150, 150, 150, 600],
-        });
-
-        setAreaScopingPolygonArea(json.data.area_size);
-
-        setPolygonData({
-          area_size: json.data.area_size,
-          id: json.data.id,
-        });
-
-        setSessionId(json.data.session_id);
+        applyAoiResponse(json);
       })
       .catch((e) => {
         toast.error(`Error on uploading file: ${e}`, {
@@ -932,8 +1003,72 @@ export const AreaScopingFooter = () => {
       });
   };
 
+  /**
+   * Regency flow: fetch the Kabupaten/Kota polygon, put it on the map and —
+   * when it is within the area limit — return to Basic Information straight
+   * away (the user only needs one Confirm click).
+   */
+  const onSubmitRegency = async () => {
+    if (!areaScopingRegency) return;
+
+    setIsAreaScopingLoading(true);
+    setAreaScopingPolygonError("");
+
+    fetch(FETCH_REGENCY_AOI_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        code: areaScopingRegency.code,
+        session_id: sessionId,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(async (response) => {
+        const json: GeosRegencyAoiRes = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            JSON.stringify(
+              `${json?.error?.message || response.statusText}. Trace: ${json?.trace}`,
+            ),
+          );
+        }
+
+        applyAoiResponse(json);
+
+        if (json.data.area_size <= AREA_SCOPING_POLYGON_AREA_LIMIT) {
+          setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
+        }
+      })
+      .catch((e) => {
+        toast.error(`Error on selecting regency: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+      })
+      .finally(() => {
+        setIsAreaScopingLoading(false);
+      });
+  };
+
   const onClickConfirm = () => {
     if (areaScopingType === AREA_SCOPING_TYPE.DRAW) {
+      setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
+      return;
+    }
+
+    if (areaScopingType === AREA_SCOPING_TYPE.REGENCY) {
+      if (!areaScopingRegency) return;
+
+      if (!polygonData) {
+        onSubmitRegency();
+        return;
+      }
+
+      if (areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT) return;
+
       setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION);
       return;
     }

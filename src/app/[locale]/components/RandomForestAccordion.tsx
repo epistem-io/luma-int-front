@@ -7,12 +7,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { PANEL_COMPONENT_KEY } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
+
+const SPLIT_RATIO_TICKS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
 export const RandomForestAccordion = () => {
   const {
@@ -24,6 +27,8 @@ export const RandomForestAccordion = () => {
     setMinLeafPopulation,
     minLeafPopulationError,
     setMinLeafPopulationError,
+    splitRatio,
+    setSplitRatio,
     setLULCParamsOpenAccordion,
     setStepKey,
     setProgressPanelIndex,
@@ -176,6 +181,51 @@ export const RandomForestAccordion = () => {
                   {tInteractive("lulcParams.fillWNum", { min: 1, max: 50 })}
                 </p>
               )}
+            </div>
+          </div>
+          {/* Split ratio: training share in percent. 0 and 100 are shown as
+              tick labels but not selectable (min/max 10-90) — an empty
+              training or testing set would break the stratified split. */}
+          <div className="space-y-3">
+            <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+              {tInteractive("lulcParams.splitRatio")}
+            </p>
+            <Slider
+              step={10}
+              min={10}
+              max={90}
+              value={[splitRatio]}
+              disabled={isAutoPointsFlow}
+              trackBgColor="bg-neutral-300"
+              onValueChange={(value) => setSplitRatio(value[0] ?? 70)}
+            />
+            <div className="flex flex-row justify-between">
+              {SPLIT_RATIO_TICKS.map((tick) => (
+                <p
+                  key={tick}
+                  className="font-aptos text-sm font-bold leading-5 text-primary-pink"
+                >
+                  {tick}
+                </p>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 space-x-5">
+              <div className="space-y-1">
+                <p className="font-aptos text-base font-regular leading-6 text-text-icons-base-second">
+                  {tInteractive("lulcParams.training")}
+                </p>
+                <p className="font-noto-sans text-3xl font-regular leading-9 text-text-icons-base-main">
+                  {splitRatio}%
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="font-aptos text-base font-regular leading-6 text-text-icons-base-second">
+                  {tInteractive("lulcParams.testing")}
+                </p>
+                <p className="font-noto-sans text-3xl font-regular leading-9 text-text-icons-base-main">
+                  {100 - splitRatio}%
+                </p>
+              </div>
             </div>
           </div>
         </div>

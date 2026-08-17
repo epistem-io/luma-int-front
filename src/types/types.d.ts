@@ -23,6 +23,24 @@ interface GeosAoiRes extends ErrorableResponse {
   message: string;
 }
 
+/** One Kabupaten/Kota entry from GET /geos/aoi/regencies */
+interface RegencyOption {
+  code: string; // BPS code (KDPKAB), unique key
+  name: string; // raw WADMKK name
+  type: "kabupaten" | "kota";
+  province: string;
+  label: string; // "Kabupaten X" / "Kota X"
+}
+
+interface GeosRegencyListRes extends ErrorableResponse {
+  data: RegencyOption[];
+  message: string;
+}
+
+interface GeosRegencyAoiRes extends GeosAoiRes {
+  regency: RegencyOption;
+}
+
 interface GetMosaicRes extends ErrorableResponse {
   message: string;
   results: {
@@ -40,6 +58,15 @@ interface GetMosaicRes extends ErrorableResponse {
       tanggal_perekaman: string;
       tutupan_awan: number;
     }[];
+    /** URL, "" = failed, null = not computed yet (fetch via GET_MOSAIC_DOWNLOAD_URL) */
+    download_url: string | null;
+  };
+}
+
+interface GetMosaicDownloadUrlRes extends ErrorableResponse {
+  message: string;
+  results: {
+    /** "" when Earth Engine refused to build the download (e.g. > 50 MB) */
     download_url: string;
   };
 }
@@ -55,7 +82,8 @@ interface MosaicStatistics {
     tanggal_perekaman: string;
     tutupan_awan: number;
   }[];
-  download_url: string;
+  /** URL, "" = failed, null = not computed yet (fetch lazily on download) */
+  download_url: string | null;
 }
 
 interface PolygonData extends ErrorableResponse {
