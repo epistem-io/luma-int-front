@@ -65,10 +65,23 @@ export const TEMPORAL_COVERAGE_ARRAY = [
   {
     value: "5",
     labelFunction: (i18n: TFunction) => i18n("timePeriod.customDate"),
-    label: "Custom Date (coming soon)",
-    disabled: true,
+    label: "Custom Date",
+    // disabled: true,
   },
 ];
+
+export const TEMPORAL_COVERAGE_VALUE = {
+  BY_YEAR: "1",
+  BY_SEMESTER: "2",
+  BY_QUARTER: "3",
+  BY_MONTH: "4",
+  CUSTOM_DATE: "5",
+} as const;
+
+export const CUSTOM_DATE_RANGE_SEPARATOR = " to ";
+
+export const CUSTOM_DATE_RANGE_MIN = "2013-01-01";
+export const CUSTOM_DATE_RANGE_MAX = "2025-12-31";
 
 export const FETCH_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/upload`;
 export const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
@@ -201,6 +214,17 @@ export const getAvailableSatelliteOptionsByYear = (year?: number) => {
     const isAfterStartYear = year >= satellite.startYear;
     const isBeforeEndYear =
       satellite.endYear === undefined || year <= satellite.endYear;
+
+    return isAfterStartYear && isBeforeEndYear;
+  });
+};
+
+export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endYear?: number) => {
+  if (!startYear || !endYear) return [];
+
+  return SATELLITE_OPTIONS_ARRAY.filter((satellite) => {
+    const isAfterStartYear = startYear >= satellite.startYear;
+    const isBeforeEndYear = satellite.endYear === undefined || endYear <= satellite.endYear;
 
     return isAfterStartYear && isBeforeEndYear;
   });

@@ -18,8 +18,10 @@ import { Slider } from "@/components/ui/slider";
 import {
   BASIC_INFORMATION_ACCORDION_TYPE,
   getAvailableSatelliteOptionsByYear,
+  getAvailableSatelliteOptionsByYearRange,
 } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { getTemporalYearRange } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
@@ -38,13 +40,10 @@ export const SateliteCompositeAccordion = () => {
 
   const t = useTranslations("InteractivePanel");
 
-  const selectedYear = Number(temporalCoverageUnit);
-  const hasSelectedTimePeriod =
-    temporalCoverage === "1" &&
-    temporalCoverageUnit !== "" &&
-    Number.isInteger(selectedYear);
+  const yearRange = getTemporalYearRange(temporalCoverage, temporalCoverageUnit);
+  const hasSelectedTimePeriod = yearRange !== null;
   const availableSatelliteOptions = hasSelectedTimePeriod
-    ? getAvailableSatelliteOptionsByYear(selectedYear)
+    ? getAvailableSatelliteOptionsByYearRange(yearRange[0], yearRange[1])
     : [];
   const isSatelliteSelectDisabled =
     !isEditingSatelliteComposite || !hasSelectedTimePeriod;
