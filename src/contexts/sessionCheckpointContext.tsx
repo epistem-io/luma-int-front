@@ -109,6 +109,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
           areaScopingPolygonFileName: mg.areaScopingPolygonFileName,
           areaScopingPolygonFileSize: mg.areaScopingPolygonFileSize,
           polygonData: mg.polygonData,
+          areaScopingRegency: mg.areaScopingRegency,
           spatialResolution: mg.spatialResolution,
           temporalCoverage: mg.temporalCoverage,
           temporalCoverageUnit: mg.temporalCoverageUnit,
@@ -144,6 +145,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
           selectedPredictors: mg.selectedPredictors,
           numberOfTrees: mg.numberOfTrees,
           minLeafPopulation: mg.minLeafPopulation,
+          splitRatio: mg.splitRatio,
           mapGenerated: Boolean(mg.generateMapDownloadURL),
         }
       : null;
@@ -251,6 +253,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
         mg.setAreaScopingPolygonFileName(basicInfo.polygonFileName);
         mg.setAreaScopingPolygonFileSize(basicInfo.polygonFileSize);
         mg.setPolygonData(basicInfo.polygonData);
+        mg.setAreaScopingRegency(basicInfo.regency ?? null);
         mg.setSpatialResolution(basicInfo.spatialResolution);
         mg.setTemporalCoverage(basicInfo.temporalCoverage);
         mg.setTemporalCoverageUnit(basicInfo.temporalCoverageUnit);
@@ -350,6 +353,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
         mg.setSelectedPredictors(params.selectedPredictors);
         mg.setNumberOfTrees(params.numberOfTrees);
         mg.setMinLeafPopulation(params.minLeafPopulation);
+        if (typeof params.splitRatio === "number") {
+          mg.setSplitRatio(params.splitRatio);
+        }
         mg.setIsLULCParamsChanged(false);
       }
 
@@ -363,6 +369,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       if (drafts?.params) {
         mg.setSelectedPredictors(drafts.params.selectedPredictors);
         mg.setNumberOfTrees(drafts.params.numberOfTrees);
+        if (typeof drafts.params.splitRatio === "number") {
+          mg.setSplitRatio(drafts.params.splitRatio);
+        }
       }
 
       lastConfirmationSigRef.current = "";

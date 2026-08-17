@@ -127,6 +127,33 @@ export const AreaScopingAccordion = () => {
                 </p>
               </div>
             </div>
+            <div
+              data-testid="area-scoping-regency-card"
+              className="p-4 rounded-xl space-y-2 border border-primary-red-pink-normal hover:brightness-95 hover:cursor-pointer transition-all duration-200 bg-white"
+              onClick={() => {
+                setAreaScopingType(AREA_SCOPING_TYPE.REGENCY);
+                setStepKey(PANEL_COMPONENT_KEY.AREA_SCOPING);
+              }}
+            >
+              <div className="flex flex-row justify-between items-start gap-x-3">
+                <div className="flex flex-row items-center gap-x-3 min-w-0">
+                  <Image
+                    src="/svgs/regency-search.svg"
+                    alt="select-regency"
+                    width={28}
+                    height={28}
+                    className="size-7 aspect-square text-primary-pink shrink-0"
+                  />
+                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main truncate">
+                    {t("areaScoping.selectRegency")}
+                  </p>
+                </div>
+                <ChevronRight className="size-5 text-neutral-700-baru shrink-0" />
+              </div>
+              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutral-700-baru">
+                {t("areaScoping.selectRegencySubtitle")}
+              </p>
+            </div>
           </>
         )}
         {polygonData &&

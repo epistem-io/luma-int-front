@@ -16,6 +16,7 @@ import {
 import {
   BASIC_INFORMATION_ACCORDION_TYPE,
   TEMPORAL_COVERAGE_ARRAY,
+  YEAR_OPTIONS_ARRAY,
 } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn, getTemporalRangeText } from "@/lib/utils";
@@ -28,61 +29,6 @@ import * as z from "zod";
 import { TimePeriodSummary } from "./TimePeriodSummary";
 import { NamespaceKeys, useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
-
-const YEAR_ARRAY = [
-  {
-    value: "2025",
-    label: "2025",
-  },
-  {
-    value: "2024",
-    label: "2024",
-  },
-  {
-    value: "2023",
-    label: "2023",
-  },
-  {
-    value: "2022",
-    label: "2022",
-  },
-  {
-    value: "2021",
-    label: "2021",
-  },
-  {
-    value: "2020",
-    label: "2020",
-  },
-  {
-    value: "2019",
-    label: "2019",
-  },
-  {
-    value: "2018",
-    label: "2018",
-  },
-  {
-    value: "2017",
-    label: "2017",
-  },
-  {
-    value: "2016",
-    label: "2016",
-  },
-  {
-    value: "2015",
-    label: "2015",
-  },
-  {
-    value: "2014",
-    label: "2014",
-  },
-  {
-    value: "2013",
-    label: "2013",
-  },
-];
 
 export const TimePeriodAccordion = () => {
   const {
@@ -238,7 +184,7 @@ export const TimePeriodAccordion = () => {
                               />
                             </SelectTrigger>
                             <SelectContent position="item-aligned">
-                              {YEAR_ARRAY.map((item) => (
+                              {YEAR_OPTIONS_ARRAY.map((item) => (
                                 <SelectItem key={item.value} value={item.value}>
                                   {item.label}
                                 </SelectItem>

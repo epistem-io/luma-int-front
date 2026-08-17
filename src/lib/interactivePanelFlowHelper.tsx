@@ -19,6 +19,7 @@ export const resetAreaScopingData = ({
   mapGenerationContext.setAreaScopingPolygonArea(0);
   mapGenerationContext.setAreaScopingPolygonFileSize(0);
   mapGenerationContext.setAreaScopingPolygonError("");
+  mapGenerationContext.setAreaScopingRegency(null);
   mapGenerationContext.setPolygonData(null);
 
   mapContext.vectorSource?.clear();

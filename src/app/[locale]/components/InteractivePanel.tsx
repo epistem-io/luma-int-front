@@ -155,6 +155,7 @@ export const InteractivePanel = () => {
     setAreaScopingPolygonFileName,
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
+    setAreaScopingRegency,
     setPolygonData,
     setSpatialResolution,
     selectedDefault,
@@ -206,6 +207,7 @@ export const InteractivePanel = () => {
             setAreaScopingPolygonFileName("");
             setAreaScopingPolygonFileSize(0);
             setAreaScopingPolygonUrl(null);
+            setAreaScopingRegency(null);
             vectorSource?.clear();
             setPolygonData(null);
             setSpatialResolution("");

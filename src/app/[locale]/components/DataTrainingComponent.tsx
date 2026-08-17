@@ -502,6 +502,17 @@ export const DataTrainingComponent = () => {
   // uploaded-file preview in the upload flow) and the sampling tabs hide.
   const showQualityView = canSampleManually && sampleQuality !== null;
 
+  const minSamplesHint = (
+    <div className="rounded-r-[8px] border-l-2 border-primary-red-pink-normal bg-primary-red-pink-normal/10 px-2.5 py-2">
+      <div className="flex flex-row items-center gap-x-2">
+        <Image src="/svgs/idea.svg" alt="" width={20} height={20} />
+        <p className="font-aptos text-[13px] leading-[18px] text-primary-pink">
+          {t("dataTraining.minSamplesNotEnforced")}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="space-y-4">
@@ -539,6 +550,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.uploadDataTrainingDescription")}
                   </p>
+                  {minSamplesHint}
                   <SampleQualityCard />
                   <div className="space-y-6">
                     {uploadedFilesArray.length === 0 && (
@@ -826,6 +838,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.onScreenSamplingDescription")}
                   </p>
+                  {minSamplesHint}
                   {/* OSS separability analysis is on-demand: Check Score
                       posts the pinned points and runs the analysis (the
                       upload tab still analyzes automatically after upload).

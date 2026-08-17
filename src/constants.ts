@@ -16,6 +16,7 @@ export enum PANEL_COMPONENT_KEY {
 export enum AREA_SCOPING_TYPE {
   UPLOAD = "upload",
   DRAW = "draw",
+  REGENCY = "regency",
 }
 
 export enum BASIC_INFORMATION_ACCORDION_TYPE {
@@ -31,7 +32,7 @@ export enum BASEMAP_TYPE {
 }
 
 export const AREA_SCOPING_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
-export const AREA_SCOPING_POLYGON_AREA_LIMIT = 100000;
+export const AREA_SCOPING_POLYGON_AREA_LIMIT = 1000000;
 
 export const LUC_TEMPLATE_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 
@@ -72,8 +73,11 @@ export const TEMPORAL_COVERAGE_ARRAY = [
 
 export const FETCH_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/upload`;
 export const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
+export const FETCH_REGENCY_LIST_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/regencies`;
+export const FETCH_REGENCY_AOI_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/regency`;
 
 export const GET_MOSAIC_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic`;
+export const GET_MOSAIC_DOWNLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic/download-url`;
 export const DOWNLOAD_REQUEST_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/download-request`;
 export const SHARE_MAP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/share-map`;
 
@@ -168,14 +172,18 @@ export const SATELLITE_OPTIONS_ARRAY = [
   //   value: "L3_RAW",
   //   label: "Landsat 3",
   // },
-  // {
-  //   value: "L4_SR",
-  //   label: "Landsat 4",
-  // },
-  // {
-  //   value: "L5_SR",
-  //   label: "Landsat 5",
-  // },
+  {
+    value: "L4_SR",
+    label: "Landsat 4",
+    startYear: 1982,
+    endYear: 1993,
+  },
+  {
+    value: "L5_SR",
+    label: "Landsat 5",
+    startYear: 1984,
+    endYear: 2012,
+  },
   {
     value: "L7_SR",
     label: "Landsat 7",
@@ -193,6 +201,21 @@ export const SATELLITE_OPTIONS_ARRAY = [
     startYear: 2021,
   },
 ];
+
+// Year range selectable in the Time Period step: from the earliest satellite
+// start year up to the latest year with (mostly) complete imagery.
+export const SATELLITE_MIN_YEAR = Math.min(
+  ...SATELLITE_OPTIONS_ARRAY.map((satellite) => satellite.startYear),
+);
+export const SATELLITE_MAX_YEAR = 2025;
+
+export const YEAR_OPTIONS_ARRAY = Array.from(
+  { length: SATELLITE_MAX_YEAR - SATELLITE_MIN_YEAR + 1 },
+  (_, index) => {
+    const year = String(SATELLITE_MAX_YEAR - index);
+    return { value: year, label: year };
+  },
+);
 
 export const getAvailableSatelliteOptionsByYear = (year?: number) => {
   if (!year) return [];
