@@ -465,7 +465,7 @@ export const AreaScopingComponent = () => {
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                             {t("common.areaTooBigErrorDesc", {
-                              X: "100,000 Ha",
+                              X: "1,000,000 Ha",
                             })}
                           </p>
                         </div>
@@ -711,7 +711,7 @@ export const AreaScopingComponent = () => {
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                             {t("common.areaTooBigErrorDesc", {
-                              X: "100,000 Ha",
+                              X: "1,000,000 Ha",
                             })}
                           </p>
                         </div>
@@ -822,7 +822,7 @@ export const AreaScopingComponent = () => {
                           </p>
                           <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
                             {t("common.areaTooBigErrorDesc", {
-                              X: "100,000 Ha",
+                              X: "1,000,000 Ha",
                             })}
                           </p>
                         </div>

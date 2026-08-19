@@ -45,6 +45,7 @@ import {
 
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
+import { MosaicDownloadDialog } from "./MosaicDownloadDialog";
 
 export const MosaicSummary = () => {
   const { temporalCoverage, temporalCoverageUnit, polygonData } =
@@ -100,6 +101,7 @@ export const MosaicSummary = () => {
     // });
   }, []);
 
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const [isFetchingDownloadUrl, setIsFetchingDownloadUrl] = useState(false);
 
   const isDownloadMosaicDisabled =
@@ -125,6 +127,44 @@ export const MosaicSummary = () => {
       );
     }
     return json.results?.download_url ?? "";
+  };
+
+  const downloadMosaicToDevice = async () => {
+    const fileUrl = await resolveMosaicDownloadUrl();
+    if (!fileUrl) {
+      toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
+      return;
+    }
+    const response = await fetch(fileUrl);
+    const blob = await response.blob();
+    const filename = response.headers
+      .get("content-disposition")
+      ?.split("filename=")[1];
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.download = filename || "mosaic-map";
+    a.style.display = "none";
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  const handleConfirmDownload = async () => {
+    setIsFetchingDownloadUrl(true);
+    try {
+      await downloadMosaicToDevice();
+      setIsDownloadDialogOpen(false);
+    } catch (e) {
+      toast.error(`Error on downloading mosaic: ${e}`, {
+        duration: Infinity,
+        dismissible: true,
+        closeButton: true,
+      });
+    } finally {
+      setIsFetchingDownloadUrl(false);
+    }
   };
 
   return (
@@ -241,37 +281,7 @@ export const MosaicSummary = () => {
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
               disabled={isDownloadMosaicDisabled}
-              onClick={async () => {
-                setIsFetchingDownloadUrl(true);
-                try {
-                  const fileUrl = await resolveMosaicDownloadUrl();
-                  if (!fileUrl) {
-                    toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
-                    return;
-                  }
-                  const response = await fetch(fileUrl);
-                  const blob = await response.blob();
-                  const filename = response.headers
-                    .get("content-disposition")
-                    ?.split("filename=")[1];
-                  const url = window.URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.download = filename || "mosaic-map";
-                  a.style.display = "none";
-                  a.href = url;
-                  document.body.appendChild(a);
-                  a.click();
-                  window.URL.revokeObjectURL(url);
-                } catch (e) {
-                  toast.error(`Error on downloading mosaic: ${e}`, {
-                    duration: Infinity,
-                    dismissible: true,
-                    closeButton: true,
-                  });
-                } finally {
-                  setIsFetchingDownloadUrl(false);
-                }
-              }}
+              onClick={() => setIsDownloadDialogOpen(true)}
             >
               <div className="">
                 <p className="text-neutral-700-baru font-aptos text-md font-regular leading-6 underline">
@@ -280,6 +290,12 @@ export const MosaicSummary = () => {
               </div>
             </Button>
           </div>
+          <MosaicDownloadDialog
+            open={isDownloadDialogOpen}
+            onOpenChange={setIsDownloadDialogOpen}
+            onConfirm={handleConfirmDownload}
+            isSubmitting={isFetchingDownloadUrl}
+          />
         </div>
       </div>
     </div>

@@ -136,9 +136,13 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
               class_color,
             }),
           ),
+          // Use the stored filename/filesize, not the File object: after a
+          // restore the File is a 0-byte placeholder (new File([], name)),
+          // so re-saving from f.file.size would persist 0 → "0B" on the
+          // next refresh.
           uploadedFiles: mg.uploadedFilesArray.map((f) => ({
-            name: f.file.name,
-            size: f.file.size,
+            name: f.filename || f.file.name,
+            size: f.filesize || f.file.size,
           })),
           isTrainingDataChanged: mg.isTrainingDataChanged,
           sampleQualityConfirmed: mg.sampleQualityConfirmed,

@@ -81,9 +81,6 @@ export const TEMPORAL_COVERAGE_VALUE = {
 
 export const CUSTOM_DATE_RANGE_SEPARATOR = " to ";
 
-export const CUSTOM_DATE_RANGE_MIN = "2013-01-01";
-export const CUSTOM_DATE_RANGE_MAX = "2025-12-31";
-
 export const FETCH_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/upload`;
 export const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
 export const FETCH_REGENCY_LIST_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/regencies`;
@@ -220,10 +217,14 @@ export const SATELLITE_OPTIONS_ARRAY = [
 export const SATELLITE_MIN_YEAR = Math.min(
   ...SATELLITE_OPTIONS_ARRAY.map((satellite) => satellite.startYear),
 );
-export const SATELLITE_MAX_YEAR = 2025;
+export const SATELLITE_MAX_YEAR = 2026;
+export const TIME_PERIOD_MIN_YEAR = 1972;
+export const CUSTOM_DATE_RANGE_MIN_YEAR = TIME_PERIOD_MIN_YEAR;
+export const CUSTOM_DATE_RANGE_MIN = `${CUSTOM_DATE_RANGE_MIN_YEAR}-01-01`;
+export const CUSTOM_DATE_RANGE_MAX = `${SATELLITE_MAX_YEAR}-12-31`;
 
 export const YEAR_OPTIONS_ARRAY = Array.from(
-  { length: SATELLITE_MAX_YEAR - SATELLITE_MIN_YEAR + 1 },
+  { length: SATELLITE_MAX_YEAR - TIME_PERIOD_MIN_YEAR + 1 },
   (_, index) => {
     const year = String(SATELLITE_MAX_YEAR - index);
     return { value: year, label: year };

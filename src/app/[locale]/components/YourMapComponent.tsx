@@ -957,7 +957,9 @@ const ThematicAccuracyAssessment = () => {
             !showUpload && (
               <div className="p-4 rounded-md bg-text-icons-base-main space-y-4 overflow-hidden">
                 <p className="font-aptos text-lg font-bold leading-6.5 text-text-icons-on-color">
-                  {t("yourMap.thematicPromoTitle")}
+                  {t.rich("yourMap.thematicPromoTitle", {
+                    br: () => <br />,
+                  })}
                 </p>
                 <p className="font-aptos text-sm font-regular leading-5 text-text-icons-on-color opacity-80">
                   {t("yourMap.thematicPromoCaption")}

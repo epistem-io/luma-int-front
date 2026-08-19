@@ -195,7 +195,6 @@ export const RandomForestAccordion = () => {
               min={10}
               max={90}
               value={[splitRatio]}
-              disabled={isAutoPointsFlow}
               trackBgColor="bg-neutral-300"
               onValueChange={(value) => setSplitRatio(value[0] ?? 70)}
             />

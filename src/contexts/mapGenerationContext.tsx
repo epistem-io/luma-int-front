@@ -34,6 +34,14 @@ export type LULCParamsAccordionSection =
 
 export type DataTrainingActiveTab = "upload" | "oss";
 
+/** Optional tuning for the separability analysis (see LumaLite Module 4). */
+export interface SampleQualityOptions {
+  /** Sampling scale in metres; defaults to the session's spatial resolution. */
+  scale?: number;
+  /** Per-class pixel cap; defaults to 5000 on the backend. */
+  maxPixelsPerClass?: number;
+}
+
 export type LucCustomTab = "quick" | "excel";
 
 // Which body the step-2 Hierarchy panel shows: the two-card picker, or one
@@ -201,7 +209,10 @@ export interface MapGenerationContextType {
   // (which clears the result) so the score banner can say "Regenerate".
   sampleQualityGenerated: boolean;
   setSampleQualityGenerated: Dispatch<SetStateAction<boolean>>;
-  fetchSampleQuality: (sessionId: string) => void;
+  fetchSampleQuality: (
+    sessionId: string,
+    options?: SampleQualityOptions,
+  ) => void;
   thematicAccuracy: ThematicAccuracyResult | null;
   setThematicAccuracy: Dispatch<SetStateAction<ThematicAccuracyResult | null>>;
   isThematicAccuracyLoading: boolean;
@@ -641,16 +652,25 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.thematicAccuracyError,
   );
 
-  const fetchSampleQuality = (sessionId: string) => {
+  const fetchSampleQuality = (
+    sessionId: string,
+    options?: SampleQualityOptions,
+  ) => {
     setIsSampleQualityLoading(true);
     setSampleQualityError("");
     setSampleQuality(null);
     // A fresh result always needs a fresh confirmation.
     setSampleQualityConfirmed(false);
 
-    fetch(
-      `${TRAINING_DATA_SEPARABILITY_URL}?${new URLSearchParams({ session_id: sessionId })}`,
-    )
+    // Optional analysis tuning (both fall back to the backend defaults:
+    // scale = session spatial resolution, max pixels per class = 5000).
+    const params = new URLSearchParams({ session_id: sessionId });
+    if (options?.scale) params.set("scale", String(options.scale));
+    if (options?.maxPixelsPerClass) {
+      params.set("max_pixels_per_class", String(options.maxPixelsPerClass));
+    }
+
+    fetch(`${TRAINING_DATA_SEPARABILITY_URL}?${params}`)
       .then(async (res) => {
         const json: SampleQualityRes = await res.json();
 

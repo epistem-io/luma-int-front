@@ -24,6 +24,7 @@ import {
 } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import {
+  cn,
   formatCustomDateRange,
   getTemporalPeriodText,
   getTemporalRangeText,
@@ -263,12 +264,33 @@ export const TimePeriodAccordion = () => {
                               placeholder={t("timePeriod.byYearPlaceholder")}
                             />
                           </SelectTrigger>
-                          <SelectContent position="item-aligned">
-                            {YEAR_ARRAY.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
-                                {item.label}
-                              </SelectItem>
-                            ))}
+                          {/* Dropdown anchored under the trigger (popper),
+                              capped in height, with the years laid out as a
+                              4-column grid like the date picker's year view
+                              instead of one long single-column list. */}
+                          <SelectContent
+                            position="popper"
+                            align="start"
+                            className="max-h-72 w-[var(--radix-select-trigger-width)] rounded-xl border-neutral-400 shadow-lg"
+                          >
+                            <div className="grid grid-cols-4 gap-1 p-1">
+                              {YEAR_OPTIONS_ARRAY.map((item) => (
+                                <SelectItem
+                                  key={item.value}
+                                  value={item.value}
+                                  className={cn(
+                                    "h-9 justify-center rounded-lg px-0 pr-0 font-aptos text-md leading-6 text-text-icons-base-main",
+                                    "cursor-pointer focus:bg-primary-red-pink-light focus:text-primary-pink",
+                                    "data-[state=checked]:bg-primary-pink data-[state=checked]:font-bold data-[state=checked]:text-text-icons-on-color data-[state=checked]:focus:bg-primary-pink",
+                                    // Hide the check-mark slot; the filled
+                                    // pill already marks the selection.
+                                    "[&>span:first-child]:hidden",
+                                  )}
+                                >
+                                  {item.label}
+                                </SelectItem>
+                              ))}
+                            </div>
                           </SelectContent>
                         </Select>
                         {fieldState.invalid && (
@@ -278,30 +300,6 @@ export const TimePeriodAccordion = () => {
                     </FieldGroup>
                   )}
                 />
-                            <SelectTrigger
-                              aria-invalid={fieldState.invalid}
-                              className="w-full"
-                            >
-                              <SelectValue
-                                placeholder={t("timePeriod.byYearPlaceholder")}
-                              />
-                            </SelectTrigger>
-                            <SelectContent position="item-aligned">
-                              {YEAR_OPTIONS_ARRAY.map((item) => (
-                                <SelectItem key={item.value} value={item.value}>
-                                  {item.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {fieldState.invalid && (
-                            <FieldError errors={[fieldState.error]} />
-                          )}
-                        </Field>
-                      </FieldGroup>
-                    )}
-                  />
-                </>
               )}
 
               {temporalCoverageVal === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE && (
@@ -334,6 +332,10 @@ export const TimePeriodAccordion = () => {
                                 {label}
                               </p>
                             </Label>
+                            {/* The calendar opens over its own field row
+                                (top edge at the label), left-aligned to the
+                                field: Start Date at the panel's left edge,
+                                End Date from the right column outward. */}
                             <DatePicker
                               id={name}
                               value={field.value}
@@ -342,6 +344,9 @@ export const TimePeriodAccordion = () => {
                               max={max}
                               placeholder={t("timePeriod.selectDate")}
                               invalid={fieldState.invalid}
+                              side="bottom"
+                              align="start"
+                              sideOffset={-72}
                             />
                             {fieldState.invalid && (
                               <FieldError errors={[fieldState.error]} />

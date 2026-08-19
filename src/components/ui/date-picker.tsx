@@ -7,9 +7,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn, formatDayMonth, fromISODate, toISODate } from "@/lib/utils";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ComponentProps } from "react";
 
 const WEEKDAY_ANCHOR = new Date(2024, 0, 1);
 
@@ -17,6 +23,8 @@ interface CalendarView {
   year: number;
   month: number;
 }
+
+type PopoverContentProps = ComponentProps<typeof PopoverContent>;
 
 interface DatePickerProps {
   value: string;
@@ -28,6 +36,12 @@ interface DatePickerProps {
   invalid?: boolean;
   disabled?: boolean;
   id?: string;
+  /** Popover placement passthrough (Radix). Defaults: bottom / start. */
+  side?: PopoverContentProps["side"];
+  align?: PopoverContentProps["align"];
+  sideOffset?: PopoverContentProps["sideOffset"];
+  alignOffset?: PopoverContentProps["alignOffset"];
+  avoidCollisions?: PopoverContentProps["avoidCollisions"];
 }
 
 export const DatePicker = ({
@@ -40,6 +54,11 @@ export const DatePicker = ({
   invalid = false,
   disabled = false,
   id,
+  side = "bottom",
+  align = "start",
+  sideOffset = 4,
+  alignOffset,
+  avoidCollisions = true,
 }: DatePickerProps) => {
   const locale = useLocale();
   const t = useTranslations("InteractivePanel");
@@ -103,19 +122,42 @@ export const DatePicker = ({
     );
   }, [view]);
 
+  // Newest year first (same order as the "By year" select), bounded by
+  // min/max when given.
   const yearOptions = useMemo(() => {
     const minYear = min ? Number(min.slice(0, 4)) : view.year - 10;
     const maxYear = max ? Number(max.slice(0, 4)) : view.year + 10;
     return Array.from(
       { length: Math.max(maxYear - minYear + 1, 1) },
-      (_, i) => minYear + i,
+      (_, i) => maxYear - i,
     );
   }, [min, max, view.year]);
+
+  // Keep the current year visible when the (scrollable) year grid opens.
+  const selectedYearRef = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (!isYearView) return;
+    selectedYearRef.current?.scrollIntoView({ block: "center" });
+  }, [isYearView]);
 
   const goToMonth = (delta: number) =>
     setView(({ year, month }) => {
       const next = new Date(year, month + delta, 1);
       return { year: next.getFullYear(), month: next.getMonth() };
+    });
+
+  // Picking a year keeps the month unless that month falls outside min/max
+  // (e.g. jumping to the min year while viewing January before min).
+  const goToYear = (year: number) =>
+    setView(({ month }) => {
+      let nextMonth = month;
+      if (min && year === Number(min.slice(0, 4))) {
+        nextMonth = Math.max(nextMonth, Number(min.slice(5, 7)) - 1);
+      }
+      if (max && year === Number(max.slice(0, 4))) {
+        nextMonth = Math.min(nextMonth, Number(max.slice(5, 7)) - 1);
+      }
+      return { year, month: nextMonth };
     });
 
   // Last day of the previous month / first day of the next month.
@@ -163,17 +205,35 @@ export const DatePicker = ({
       </PopoverTrigger>
 
       <PopoverContent
-        align="start"
+        side={side}
+        align={align}
+        sideOffset={sideOffset}
+        alignOffset={alignOffset}
+        avoidCollisions={avoidCollisions}
+        collisionPadding={8}
         className="w-80 rounded-xl border-neutral-400 p-4 shadow-lg"
       >
         <div className="space-y-3">
+          {/* Year switcher: a pill that toggles between the month grid and
+              the year grid; the chevron flips to show which one is open. */}
           <div className="flex justify-center">
             <button
               type="button"
+              aria-expanded={isYearView}
               onClick={() => setIsYearView((current) => !current)}
-              className="font-aptos text-md font-bold leading-6 text-primary-pink hover:underline"
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-3 py-1 font-aptos text-md font-bold leading-6 text-primary-pink transition-colors",
+                "hover:bg-primary-red-pink-light",
+                isYearView && "bg-primary-red-pink-light",
+              )}
             >
               {view.year}
+              <ChevronDown
+                className={cn(
+                  "size-4 transition-transform duration-200",
+                  isYearView && "rotate-180",
+                )}
+              />
             </button>
           </div>
 
@@ -208,24 +268,34 @@ export const DatePicker = ({
           )}
 
           {isYearView ? (
-            <div className="grid grid-cols-4 gap-2 pt-1">
-              {yearOptions.map((year) => (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => {
-                    setView((current) => ({ ...current, year }));
-                    setIsYearView(false);
-                  }}
-                  className={cn(
-                    "rounded-lg py-2 font-aptos text-md leading-6 text-text-icons-base-main hover:bg-primary-red-pink-light",
-                    year === view.year &&
-                      "bg-primary-red-pink-light font-bold text-primary-pink",
-                  )}
-                >
-                  {year}
-                </button>
-              ))}
+            // Same footprint as the month grid (weekday row + 6 week rows)
+            // so the popover doesn't jump in height; scrolls when the range
+            // is long (e.g. 1972 → today).
+            <div className="max-h-[276px] overflow-y-auto pr-1 -mr-1">
+              <div className="grid grid-cols-4 gap-2 pt-1">
+                {yearOptions.map((year) => {
+                  const isCurrent = year === view.year;
+                  return (
+                    <button
+                      key={year}
+                      ref={isCurrent ? selectedYearRef : undefined}
+                      type="button"
+                      onClick={() => {
+                        goToYear(year);
+                        setIsYearView(false);
+                      }}
+                      className={cn(
+                        "h-9 rounded-lg font-aptos text-md leading-6 text-text-icons-base-main transition-colors",
+                        "hover:bg-primary-red-pink-light",
+                        isCurrent &&
+                          "bg-primary-pink font-bold text-text-icons-on-color hover:bg-primary-pink",
+                      )}
+                    >
+                      {year}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <>
