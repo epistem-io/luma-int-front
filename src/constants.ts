@@ -16,6 +16,7 @@ export enum PANEL_COMPONENT_KEY {
 export enum AREA_SCOPING_TYPE {
   UPLOAD = "upload",
   DRAW = "draw",
+  REGENCY = "regency",
 }
 
 export enum BASIC_INFORMATION_ACCORDION_TYPE {
@@ -31,7 +32,7 @@ export enum BASEMAP_TYPE {
 }
 
 export const AREA_SCOPING_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
-export const AREA_SCOPING_POLYGON_AREA_LIMIT = 100000;
+export const AREA_SCOPING_POLYGON_AREA_LIMIT = 1000000;
 
 export const LUC_TEMPLATE_FILE_SIZE_LIMIT = 1024 * 1024 * 5;
 
@@ -65,15 +66,28 @@ export const TEMPORAL_COVERAGE_ARRAY = [
   {
     value: "5",
     labelFunction: (i18n: TFunction) => i18n("timePeriod.customDate"),
-    label: "Custom Date (coming soon)",
-    disabled: true,
+    label: "Custom Date",
+    // disabled: true,
   },
 ];
 
+export const TEMPORAL_COVERAGE_VALUE = {
+  BY_YEAR: "1",
+  BY_SEMESTER: "2",
+  BY_QUARTER: "3",
+  BY_MONTH: "4",
+  CUSTOM_DATE: "5",
+} as const;
+
+export const CUSTOM_DATE_RANGE_SEPARATOR = " to ";
+
 export const FETCH_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/upload`;
 export const FETCH_POLYGON_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi`;
+export const FETCH_REGENCY_LIST_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/regencies`;
+export const FETCH_REGENCY_AOI_URL = `${process.env.NEXT_PUBLIC_API_URL}/geos/aoi/regency`;
 
 export const GET_MOSAIC_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic`;
+export const GET_MOSAIC_DOWNLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic/download-url`;
 export const DOWNLOAD_REQUEST_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/download-request`;
 export const SHARE_MAP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/share-map`;
 
@@ -168,14 +182,18 @@ export const SATELLITE_OPTIONS_ARRAY = [
   //   value: "L3_RAW",
   //   label: "Landsat 3",
   // },
-  // {
-  //   value: "L4_SR",
-  //   label: "Landsat 4",
-  // },
-  // {
-  //   value: "L5_SR",
-  //   label: "Landsat 5",
-  // },
+  {
+    value: "L4_SR",
+    label: "Landsat 4",
+    startYear: 1982,
+    endYear: 1993,
+  },
+  {
+    value: "L5_SR",
+    label: "Landsat 5",
+    startYear: 1984,
+    endYear: 2012,
+  },
   {
     value: "L7_SR",
     label: "Landsat 7",
@@ -194,6 +212,25 @@ export const SATELLITE_OPTIONS_ARRAY = [
   },
 ];
 
+// Year range selectable in the Time Period step: from the earliest satellite
+// start year up to the latest year with (mostly) complete imagery.
+export const SATELLITE_MIN_YEAR = Math.min(
+  ...SATELLITE_OPTIONS_ARRAY.map((satellite) => satellite.startYear),
+);
+export const SATELLITE_MAX_YEAR = 2026;
+export const TIME_PERIOD_MIN_YEAR = 1972;
+export const CUSTOM_DATE_RANGE_MIN_YEAR = TIME_PERIOD_MIN_YEAR;
+export const CUSTOM_DATE_RANGE_MIN = `${CUSTOM_DATE_RANGE_MIN_YEAR}-01-01`;
+export const CUSTOM_DATE_RANGE_MAX = `${SATELLITE_MAX_YEAR}-12-31`;
+
+export const YEAR_OPTIONS_ARRAY = Array.from(
+  { length: SATELLITE_MAX_YEAR - TIME_PERIOD_MIN_YEAR + 1 },
+  (_, index) => {
+    const year = String(SATELLITE_MAX_YEAR - index);
+    return { value: year, label: year };
+  },
+);
+
 export const getAvailableSatelliteOptionsByYear = (year?: number) => {
   if (!year) return [];
 
@@ -201,6 +238,17 @@ export const getAvailableSatelliteOptionsByYear = (year?: number) => {
     const isAfterStartYear = year >= satellite.startYear;
     const isBeforeEndYear =
       satellite.endYear === undefined || year <= satellite.endYear;
+
+    return isAfterStartYear && isBeforeEndYear;
+  });
+};
+
+export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endYear?: number) => {
+  if (!startYear || !endYear) return [];
+
+  return SATELLITE_OPTIONS_ARRAY.filter((satellite) => {
+    const isAfterStartYear = startYear >= satellite.startYear;
+    const isBeforeEndYear = satellite.endYear === undefined || endYear <= satellite.endYear;
 
     return isAfterStartYear && isBeforeEndYear;
   });

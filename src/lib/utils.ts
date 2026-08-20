@@ -10,7 +10,9 @@ import Style, { GeometryFunction } from "ol/style/Style";
 import Feature from "ol/Feature";
 import { MultiPoint, SimpleGeometry } from "ol/geom";
 import { FeatureLike } from "ol/Feature";
+import { CUSTOM_DATE_RANGE_SEPARATOR, TEMPORAL_COVERAGE_VALUE } from "@/constants";
 
+const ISO_DATE_PARSER = /^\d{4}-\d{2}-\d{2}$/;
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -28,12 +30,96 @@ export function numberThousandSeparator(x: string | number | null | undefined) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, THOUSAND_SEPARATOR);
 }
 
-export function getTemporalRangeText(
+export function parseCustomDateRange(temporalCoverage: string) {
+  const [startDate = "", endDate = ""] = temporalCoverage.split(CUSTOM_DATE_RANGE_SEPARATOR);
+  const isValid = ISO_DATE_PARSER.test(startDate) && ISO_DATE_PARSER.test(endDate);
+
+  return {startDate, endDate, isValid};
+}
+
+export function formatCustomDateRange(startDate: string, endDate: string) {
+  return `${startDate}${CUSTOM_DATE_RANGE_SEPARATOR}${endDate}`;
+}
+
+export const toISODate = (date: Date) => {
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
+export const fromISODate = (value?: string) => {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) return null;
+  const date = new Date(year, month - 1, day);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+export function formatDayMonth(date: Date, locale = "en", withYear = true) {
+  const month = new Intl.DateTimeFormat(locale, { month: "long" }).format(date);
+  return withYear
+    ? `${date.getDate()} ${month} ${date.getFullYear()}`
+    : `${date.getDate()} ${month}`;
+}
+
+export function formatDateRangeText(
+  startISO: string,
+  endISO: string,
+  locale = "en",
+) {
+  const start = fromISODate(startISO);
+  const end = fromISODate(endISO);
+  if (!start || !end) return "";
+
+  const isSameYear = start.getFullYear() === end.getFullYear();
+  return `${formatDayMonth(start, locale, !isSameYear)} - ${formatDayMonth(end, locale)}`;
+}
+
+export function getTemporalYearRange(
+  temporalCoverage: string,
+  temporalCoverageUnit: string,
+): [number, number] | null {
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.BY_YEAR) {
+    const year = Number(temporalCoverageUnit);
+    return temporalCoverageUnit !== "" && Number.isInteger(year) ? [year, year] : null;
+  }
+
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE) {
+    const {startDate, endDate, isValid} = parseCustomDateRange(temporalCoverageUnit);
+    if (!isValid) return null;
+    return [Number(startDate.slice(0, 4)), Number(endDate.slice(0, 4))];
+  }
+
+  return null;
+}
+
+export function getTemporalPeriodText(
   temporalCoverage: string,
   temporalCoverageUnit: string,
 ) {
-  if (temporalCoverage === "1") {
-    return `1 January - 31 December ${temporalCoverageUnit}`;
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE) {
+    const {startDate, endDate, isValid} = parseCustomDateRange(temporalCoverageUnit);
+    return isValid ? `${startDate} - ${endDate}` : "";
+  }
+  return temporalCoverageUnit;
+}
+
+export function getTemporalRangeText(
+  temporalCoverage: string,
+  temporalCoverageUnit: string,
+  locale = "en",
+) {
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.BY_YEAR) {
+    return formatDateRangeText(
+      `${temporalCoverageUnit}-01-01`,
+      `${temporalCoverageUnit}-12-31`,
+      locale,
+    );
+  }
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE) {
+    const { startDate, endDate, isValid } =
+      parseCustomDateRange(temporalCoverageUnit);
+    return isValid ? formatDateRangeText(startDate, endDate, locale) : "";
   }
   return `${temporalCoverage} ${temporalCoverageUnit}`;
 }
@@ -42,8 +128,11 @@ export function getTemporalRangeDateStart(
   temporalCoverage: string,
   temporalCoverageUnit: string,
 ) {
-  if (temporalCoverage === "1") {
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.BY_YEAR) {
     return `${temporalCoverageUnit}-01-01`;
+  }
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE) {
+    return parseCustomDateRange(temporalCoverageUnit).startDate;
   }
   return `${temporalCoverage} ${temporalCoverageUnit}`;
 }
@@ -52,8 +141,11 @@ export function getTemporalRangeDateEnd(
   temporalCoverage: string,
   temporalCoverageUnit: string,
 ) {
-  if (temporalCoverage === "1") {
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.BY_YEAR) {
     return `${temporalCoverageUnit}-12-31`;
+  }
+  if (temporalCoverage === TEMPORAL_COVERAGE_VALUE.CUSTOM_DATE) {
+    return parseCustomDateRange(temporalCoverageUnit).endDate;
   }
   return `${temporalCoverage} ${temporalCoverageUnit}`;
 }

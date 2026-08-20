@@ -190,6 +190,7 @@
       "reselect": "Reselect",
       "confirm": "Confirm",
       "cancel": "Cancel",
+      "save": "Save",
       "changeInput": "Change input",
       "changeInputCancelFooter": "Cancel change",
       "confirmSubtitle": "Any existing data in the selected area will be deleted, all other data will remain.",
@@ -205,7 +206,9 @@
       "areaTooBigError": "Selected area is too large",
       "areaTooBigErrorDesc": "The selected area exceeds the {X} limit. Please reduce your selection to process the results.",
       "retry": "Retry",
-      "somethingWrongHappened": "Something went wrong. Please try again."
+      "somethingWrongHappened": "Something went wrong. Please try again.",
+      "seeMore": "See More...",
+      "seeLess": "See Less"
     },
     "basicInformation": {
       "basicInformationTitle": "Basic Information",
@@ -255,9 +258,26 @@
       "1x1km2": "1 km x 1 km",
       "selectedAreaHasTotalArea": "Approximate size of your mapping area",
       "uploadSHPSubtitleBR": "Define the area you want to map",
-      "areaOfInterest": "Area of Interest"
+      "areaOfInterest": "Area of Interest",
+      "loadingRegencies": "Loading districts…",
+      "loadRegenciesError": "Failed to load the district list.",
+      "noRegencyFound": "No district or city found.",
+      "selectRegency": "Select district/city",
+      "selectRegencyPlaceholder": "Select district/city",
+      "selectRegencySearchPlaceholder": "Search district or city…",
+      "selectRegencySubtitle": "Choose an administrative district or city to use its boundary as your mapping area."
     },
     "timePeriod": {
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "selectDate": "Select date",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "yearRequired": "Please select a year.",
+      "startDateRequired": "Please select a start date.",
+      "endDateRequired": "Please select an end date.",
+      "endDateBeforeStartDate": "End date must be on or after the start date.",
+      "dateOutOfRange": "Please choose a date between {min} and {max}.",
       "timePeriod": "Time Period",
       "temporalCoverageLabel": "Determine the time period of your land use and land cover mapping.",
       "temporalCoveragePlaceholder": "Select time interval",
@@ -267,7 +287,7 @@
       "bySemester": "By semester (coming soon)",
       "byQuarter": "By quarter (coming soon)",
       "byMonth": "By month (coming soon)",
-      "customDate": "Custom date range",
+      "customDate": "Specific Date",
       "setTimePeriod": "Set time period",
       "yourSelectedTimePeriod": "Time period selected",
       "temporalResolution": "Time interval",
@@ -398,6 +418,11 @@
       "sampleScoreRegenCaption": "Edited your sample points? Regenerate the separability analysis to update your score.",
       "generate": "Generate",
       "regenerate": "Regenerate",
+      "recheckScore": "Recheck Score",
+      "separabilityParamsTitle": "Spectral Separability Analysis",
+      "separabilityParamsDescription": "Optional: adjust these parameters if you have a large amount of sample data.",
+      "separabilityScaleLabel": "Spatial resolution (m):",
+      "separabilityMaxPixelsLabel": "Maximum pixels per class:",
       "editOnScreenSampling": "Edit Sample Points",
       "pinYourPoint": "Pin Your Point",
       "addFeature": "Add Feature",
@@ -428,7 +453,8 @@
       "resetOnScreenSampling": "Reset On Screen Sampling",
       "confirmSampleQuality": "Confirm",
       "confirmSampleData": "Confirm Sample Data",
-      "confirmSampleDataCaption": "By confirming the sample data, Luma will analyze your training data quality."
+      "confirmSampleDataCaption": "By confirming the sample data, Luma will analyze your training data quality.",
+      "minSamplesNotEnforced": "A minimum of 20 samples per class is recommended but not enforced."
     },
     "lulcParams": {
       "selectLULCListParams": "Customize Mapping Parameters",
@@ -458,7 +484,16 @@
       "browseFile": "Browse file",
       "dropHere": "Drop here",
       "RFVariableDesc": "Random Forest is used to classify satellite images into LULC classes using training data. It works by combining many decision trees, which each make a prediction for every pixel. The final result is based on the majority vote from all trees, making the classification more accurate and reliable.",
-      "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is."
+      "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is.",
+      "predictorGroups": {
+        "landBuiltUp": "Land & built-up",
+        "vegetation": "Vegetation",
+        "waterHumidity": "Water & humidity"
+      },
+      "splitRatio": "Training / testing split",
+      "splitRatioSummary": "Training / testing split",
+      "testing": "Testing",
+      "training": "Training"
     },
     "finalSummary": {
       "finalSummaryTitle": "Ready to generate your map?",
@@ -525,7 +560,7 @@
       "predictedHeader": "Predicted",
       "thematicAccuracyAssessment": "Thematic Map Accuracy Assessment",
       "thematicAccuracyAssessmentDescription": "The thematic accuracy assessment measures how accurate the generated LULC map is using independent validation data.",
-      "thematicPromoTitle": "Already have a reference map? Measure your map's accuracy.",
+      "thematicPromoTitle": "Already have a reference map? <br></br> Measure your map's accuracy.",
       "thematicPromoCaption": "Upload a trusted reference map (e.g., KLHK map, ground-truth survey), and Luma will calculate your map's classification error rate.",
       "thematicValidateMap": "Validate Map",
       "thematicLoading": "Validating your map. This may take several minutes…",

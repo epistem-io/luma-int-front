@@ -64,6 +64,21 @@ import Feature from "ol/Feature";
 import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
+import { Input } from "@/components/ui/input";
+
+// Separability analysis tuning bounds/defaults (same as LumaLite Module 4).
+const SEPARABILITY_SCALE_DEFAULT = 30;
+const SEPARABILITY_SCALE_MIN = 10;
+const SEPARABILITY_SCALE_MAX = 1000;
+const SEPARABILITY_MAX_PIXELS_DEFAULT = 5000;
+const SEPARABILITY_MAX_PIXELS_MIN = 1000;
+const SEPARABILITY_MAX_PIXELS_MAX = 10000;
+
+const clampInt = (raw: string, fallback: number, min: number, max: number) => {
+  const parsed = parseInt(raw, 10);
+  if (Number.isNaN(parsed)) return fallback;
+  return Math.min(Math.max(parsed, min), max);
+};
 
 export const DataTrainingComponent = () => {
   const { sessionId } = useContext(GlobalContext);
@@ -108,13 +123,27 @@ export const DataTrainingComponent = () => {
     fetchSampleQuality,
     sampleQuality,
     sampleQualityGenerated,
-    sampleQualityConfirmed,
+    setSampleQualityGenerated,
     setSampleQuality,
+    sampleQualityError,
     setSampleQualityError,
     isSampleQualityLoading,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
+    spatialResolution,
   } = useContext(MapGenerationContext);
+
+  // Optional separability-analysis tuning (mirrors LumaLite Module 4):
+  // sampling scale defaults to the session's spatial resolution, the
+  // per-class pixel cap to 5000. Both are plain text inputs so the user can
+  // clear/retype freely; values are parsed + clamped when the analysis runs.
+  const [isScoreParamsOpen, setIsScoreParamsOpen] = useState(false);
+  const [separabilityScale, setSeparabilityScale] = useState(
+    spatialResolution || String(SEPARABILITY_SCALE_DEFAULT),
+  );
+  const [separabilityMaxPixels, setSeparabilityMaxPixels] = useState(
+    String(SEPARABILITY_MAX_PIXELS_DEFAULT),
+  );
 
   const t = useTranslations("InteractivePanel");
 
@@ -253,35 +282,10 @@ export const DataTrainingComponent = () => {
 
         renderArrayToMarkerVector(tempMarkerWithFeature);
 
-        // The upload endpoint parses the file but does not persist the points;
-        // post the merged markers first so the separability analysis sees them.
-        fetch(TRAINING_DATA_UPDATE_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            training_data: tempMarkerWithFeature.map((item) => ({
-              class_id: item.class_id,
-              geometry: {
-                type: "Point",
-                coordinates: toLonLat(item.coordinates),
-              },
-            })),
-          }),
-        })
-          .then(() => {
-            setIsTrainingDataChanged(false);
-            fetchSampleQuality(sessionId);
-          })
-          .catch((e) => {
-            toast.error(`Error on submitting request: ${e}`, {
-              duration: Infinity,
-              dismissible: true,
-              closeButton: true,
-            });
-          });
+        // The upload endpoint only parses the file; like the OSS flow, the
+        // parsed points are posted and the separability analysis is run
+        // on demand from the score banner's Check Score button
+        // (onConfirmSampleData), not automatically after upload.
 
         setTrainingFile(null);
         setTrainingFilename("");
@@ -320,19 +324,9 @@ export const DataTrainingComponent = () => {
     });
   };
 
-  // The default scheme uses server-placed sample points only: no
-  // upload/on-screen-sampling chooser and no separability analysis — step 3
-  // is just the sample data summary.
   const canSampleManually =
     lucSource !== "default" &&
     (lucSource === "quick" || !quickManualSampling);
-
-  // The uploaded-classes flow never posts its (possibly edited) scheme on
-  // step-2 Next, because POST /lulc-classes wipes training data and
-  // auto-places default points. So before posting manually-placed points,
-  // re-sync the confirmed classes — the /training-data POST that follows
-  // replaces whatever default points the sync creates, and the backend then
-  // validates class_ids against the scheme the user actually confirmed.
   const syncClassesIfNeeded = () => {
     if (lucSource !== "excel") return Promise.resolve();
 
@@ -387,7 +381,20 @@ export const DataTrainingComponent = () => {
           throw new Error(String(json?.error?.message || response.status));
         }
         setIsTrainingDataChanged(false);
-        fetchSampleQuality(sessionId);
+        fetchSampleQuality(sessionId, {
+          scale: clampInt(
+            separabilityScale,
+            Number(spatialResolution) || SEPARABILITY_SCALE_DEFAULT,
+            SEPARABILITY_SCALE_MIN,
+            SEPARABILITY_SCALE_MAX,
+          ),
+          maxPixelsPerClass: clampInt(
+            separabilityMaxPixels,
+            SEPARABILITY_MAX_PIXELS_DEFAULT,
+            SEPARABILITY_MAX_PIXELS_MIN,
+            SEPARABILITY_MAX_PIXELS_MAX,
+          ),
+        });
       })
       .catch((e) => {
         toast.error(`Error on submitting request: ${e}`, {
@@ -411,31 +418,11 @@ export const DataTrainingComponent = () => {
 
   useEffect(() => {
     markerVectorLayer?.setOpacity(1);
-    // if (markerArray.length > 0) {
-    //   // console.log("markerarr", markerArray);
-    //   renderArrayToMarkerVector(markerArray);
-    //   return;
-    // }
-
-    // Auto-points flows (default scheme + quick table) don't use the manual
-    // marker cursor; only the uploaded-excel custom flow does.
-    // if (isAutoPointsFlow) return;
-
-    // if (selectedCustom) {
-    //   markerCursor(pointingType, classArray, true);
-    //   return;
-    // }
     if (canSampleManually) {
       markerCursor(pointingType, classArray, true);
     }
   }, []);
 
-  // useEffect(() => {
-  //   console.log("marker arrya", markerArray);
-  // }, [markerArray]);
-
-  // Uploaded-file preview card(s); shared by the upload tab and the
-  // quality-result view so the file stays visible after the analysis.
   const renderUploadedFilesList = () =>
     uploadedFilesArray.map((item, index) => {
       return (
@@ -443,12 +430,7 @@ export const DataTrainingComponent = () => {
           key={`uploaded-file-${item.filename}-${index}`}
           className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
         >
-          <div
-            className={cn(
-              "flex flex-row gap-x-4 items-center",
-              sampleQualityConfirmed ? "col-span-12" : "col-span-10",
-            )}
-          >
+          <div className="flex flex-row gap-x-4 items-center col-span-10">
             <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
               <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
             </div>
@@ -462,7 +444,8 @@ export const DataTrainingComponent = () => {
             </div>
           </div>
 
-          {!sampleQualityConfirmed && (
+          {/* Removing the file is how the user re-uploads: it clears the
+              points and any separability result so the banner resets. */}
           <div className="col-span-2 flex flex-row justify-end">
             <Button
               disabled={isUploadingTrainingFile}
@@ -481,6 +464,8 @@ export const DataTrainingComponent = () => {
 
                 setSampleQuality(null);
                 setSampleQualityError("");
+                setSampleQualityGenerated(false);
+                setIsScoreParamsOpen(false);
 
                 const doc = document.getElementById(
                   "data-training-file-upload",
@@ -493,29 +478,214 @@ export const DataTrainingComponent = () => {
               <Trash2Icon className="text-secondary-purple-dark size-5" />
             </Button>
           </div>
-          )}
         </div>
       );
     });
 
-  // Once a result exists, the panel focuses on the quality card (plus the
-  // uploaded-file preview in the upload flow) and the sampling tabs hide.
-  const showQualityView = canSampleManually && sampleQuality !== null;
+  const hasQualityContent =
+    isSampleQualityLoading || sampleQuality !== null || !!sampleQualityError;
+
+  const isScoreButtonDisabled =
+    isConfirmSampleDataDisabled || isUploadingTrainingFile;
+
+  const renderScoreBanner = () => (
+    <div
+      ref={qualityViewRef}
+      className="rounded-[12px] overflow-hidden border border-neutral-400"
+    >
+      <div
+        className={cn(
+          "relative bg-[#313131]",
+          hasQualityContent ? "min-h-[56px]" : "min-h-[120px]",
+        )}
+      >
+        {/* Decorative artwork as background: hugs the card's bottom-right
+            corner (the SVG is pre-cropped at 232x84 with the art bleeding
+            off its bottom). */}
+        {/* Full header uses the tall artwork; the compact (result) header
+            uses a wide, short crop of the same art so it fills the single
+            row without being scaled down. */}
+        {hasQualityContent ? (
+          <Image
+            src="/images/banner-generate-compact.svg"
+            alt=""
+            width={232}
+            height={56}
+            unoptimized
+            className="pointer-events-none select-none absolute top-0 right-0 z-0 h-full w-auto"
+          />
+        ) : (
+          <Image
+            src="/images/banner-generate.svg"
+            alt=""
+            width={232}
+            height={84}
+            unoptimized
+            className="pointer-events-none select-none absolute bottom-0 right-0 z-0 w-[232px] h-auto"
+          />
+        )}
+        <div
+          className={cn(
+            "relative z-10 p-4 max-w-[calc(100%-150px)]",
+            hasQualityContent ? "py-3.5" : "space-y-1.5",
+          )}
+        >
+          <div className="flex flex-row items-center gap-x-2">
+            <BadgeCheck className="size-5 shrink-0 text-white" />
+            <p className="font-aptos text-lg font-bold leading-6 text-white">
+              {t("dataTraining.sampleScoreTitle")}
+            </p>
+          </div>
+          {!hasQualityContent && (
+            <p className="font-aptos text-sm font-regular leading-5 text-neutral-400">
+              {sampleQualityGenerated
+                ? t("dataTraining.sampleScoreRegenCaption")
+                : t("dataTraining.sampleScoreCaption")}
+            </p>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          aria-expanded={isScoreParamsOpen}
+          className={cn(
+            // Same look/hover as the secondary button variant (light pink,
+            // slightly brighter on hover) instead of going grey.
+            "absolute z-10 right-3 h-8 px-4 rounded-[8px] bg-primary-pink-hover text-primary-red-pink-normal font-bold hover:bg-primary-red-pink-light-hover hover:text-primary-red-pink-normal hover:brightness-105 transition-all duration-200",
+            hasQualityContent ? "top-3" : "bottom-3",
+            "disabled:opacity-100 disabled:bg-neutral-200 disabled:text-neutral-500",
+          )}
+          disabled={isScoreButtonDisabled}
+          onClick={() => {
+            if (!isScoreParamsOpen) {
+              setIsScoreParamsOpen(true);
+              return;
+            }
+            // Collapse the params again so a later Recheck Score goes
+            // through the same expand → run flow.
+            setIsScoreParamsOpen(false);
+            onConfirmSampleData();
+          }}
+        >
+          {isUpdatingTrainingData || isSampleQualityLoading ? (
+            <span className="loader sm"></span>
+          ) : (
+            <>
+              {sampleQualityGenerated
+                ? t("dataTraining.recheckScore")
+                : t("dataTraining.checkScore")}
+              {!isScoreParamsOpen && <ChevronDown className="size-4" />}
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Body: the analysis (loading / result / error) once it exists,
+          otherwise the optional parameter form. Opening the form (Recheck)
+          hides the previous result until the new run starts. */}
+      {hasQualityContent && !isScoreParamsOpen && (
+        <div className="bg-white px-4 pt-4 pb-5">
+          <SampleQualityCard />
+        </div>
+      )}
+
+      {isScoreParamsOpen && (
+        <div className="bg-primary-red-pink-light/60 px-4 pt-4 pb-5 space-y-4">
+          <div className="space-y-0.5">
+            <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+              {t("dataTraining.separabilityParamsTitle")}
+            </p>
+            <p className="font-aptos text-md font-regular leading-6 text-text-icons-base-second">
+              {t("dataTraining.separabilityParamsDescription")}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-x-4">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="separability-scale"
+                className="m-0 font-aptos text-md font-regular leading-6 text-text-icons-base-main"
+              >
+                {t("dataTraining.separabilityScaleLabel")}
+              </Label>
+              <Input
+                id="separability-scale"
+                type="number"
+                inputMode="numeric"
+                min={SEPARABILITY_SCALE_MIN}
+                max={SEPARABILITY_SCALE_MAX}
+                step={10}
+                value={separabilityScale}
+                onChange={(e) => setSeparabilityScale(e.target.value)}
+                onBlur={() =>
+                  setSeparabilityScale(
+                    String(
+                      clampInt(
+                        separabilityScale,
+                        Number(spatialResolution) || SEPARABILITY_SCALE_DEFAULT,
+                        SEPARABILITY_SCALE_MIN,
+                        SEPARABILITY_SCALE_MAX,
+                      ),
+                    ),
+                  )
+                }
+                className="h-11 rounded-[8px] bg-white font-aptos text-md"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="separability-max-pixels"
+                className="m-0 font-aptos text-md font-regular leading-6 text-text-icons-base-main"
+              >
+                {t("dataTraining.separabilityMaxPixelsLabel")}
+              </Label>
+              <Input
+                id="separability-max-pixels"
+                type="number"
+                inputMode="numeric"
+                min={SEPARABILITY_MAX_PIXELS_MIN}
+                max={SEPARABILITY_MAX_PIXELS_MAX}
+                step={500}
+                value={separabilityMaxPixels}
+                onChange={(e) => setSeparabilityMaxPixels(e.target.value)}
+                onBlur={() =>
+                  setSeparabilityMaxPixels(
+                    String(
+                      clampInt(
+                        separabilityMaxPixels,
+                        SEPARABILITY_MAX_PIXELS_DEFAULT,
+                        SEPARABILITY_MAX_PIXELS_MIN,
+                        SEPARABILITY_MAX_PIXELS_MAX,
+                      ),
+                    ),
+                  )
+                }
+                className="h-11 rounded-[8px] bg-white font-aptos text-md"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const minSamplesHint = (
+    <div className="rounded-r-[8px] border-l-2 border-primary-red-pink-normal bg-primary-red-pink-normal/10 px-2.5 py-2">
+      <div className="flex flex-row items-center gap-x-2">
+        <Image src="/svgs/idea.svg" alt="" width={20} height={20} />
+        <p className="font-aptos text-[13px] leading-[18px] text-primary-pink">
+          {t("dataTraining.minSamplesNotEnforced")}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <>
       <div className="space-y-4">
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
-        {showQualityView && (
-          <div
-            ref={qualityViewRef}
-            className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-4"
-          >
-            <SampleQualityCard />
-            {dataTrainingActiveTab === "upload" && renderUploadedFilesList()}
-          </div>
-        )}
-        {canSampleManually && !showQualityView && (
+        {/* Score banner (+ optional analysis params / the analysis result)
+            lives above the tabs, so it's visible in both flows at all times. */}
+        {canSampleManually && renderScoreBanner()}
+        {canSampleManually && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
               value={dataTrainingActiveTab}
@@ -539,7 +709,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.uploadDataTrainingDescription")}
                   </p>
-                  <SampleQualityCard />
+                  {minSamplesHint}
                   <div className="space-y-6">
                     {uploadedFilesArray.length === 0 && (
                       <div
@@ -826,62 +996,7 @@ export const DataTrainingComponent = () => {
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
                     {t("dataTraining.onScreenSamplingDescription")}
                   </p>
-                  {/* OSS separability analysis is on-demand: Check Score
-                      posts the pinned points and runs the analysis (the
-                      upload tab still analyzes automatically after upload).
-                      The banner only appears once at least one sample point
-                      has been placed. */}
-                  {markerArray.length > 0 && (
-                  <div className="relative rounded-[12px] bg-[#313131] overflow-hidden min-h-[120px]">
-                    {/* Decorative artwork as background: hugs the card's
-                        bottom-right corner (the SVG is pre-cropped at
-                        232x84 with the art bleeding off its bottom). */}
-                    <Image
-                      src="/images/banner-generate.svg"
-                      alt=""
-                      width={232}
-                      height={84}
-                      unoptimized
-                      className="pointer-events-none select-none absolute bottom-0 right-0 z-0 w-[232px] h-auto"
-                    />
-                    <div className="relative z-10 p-4 space-y-1.5 max-w-[calc(100%-150px)]">
-                      <div className="flex flex-row items-center gap-x-2">
-                        <BadgeCheck className="size-5 shrink-0 text-white" />
-                        <p className="font-aptos text-lg font-bold leading-6 text-white">
-                          {t("dataTraining.sampleScoreTitle")}
-                        </p>
-                      </div>
-                      <p className="font-aptos text-sm font-regular leading-5 text-neutral-400">
-                        {sampleQualityGenerated
-                          ? t("dataTraining.sampleScoreRegenCaption")
-                          : t("dataTraining.sampleScoreCaption")}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="absolute z-10 bottom-3 right-3 h-8 px-4 rounded-[8px] bg-primary-pink-hover text-primary-red-pink-normal hover:bg-neutral-100 transition-all duration-200"
-                      disabled={isConfirmSampleDataDisabled}
-                      onClick={() => {
-                        onConfirmSampleData();
-                      }}
-                    >
-                      {isUpdatingTrainingData || isSampleQualityLoading ? (
-                        <span className="loader sm"></span>
-                      ) : sampleQualityGenerated ? (
-                        t("dataTraining.regenerate")
-                      ) : (
-                        t("dataTraining.checkScore")
-                      )}
-                    </Button>
-                  </div>
-                  )}
-                  <SampleQualityCard />
-                  {/* <div className="space-y-2">
-                    <p className="text-text-icons-base-main font-aptos text-xl font-bold leading-6">
-                      {t("dataTraining.recordedLULC")}
-                    </p>
-                    <LUCClassTable summary={false} />
-                  </div> */}
+                  {minSamplesHint}
                   <Tabs defaultValue="pinpoint" className="gap-y-3 mb-0">
                     <div className="px-0">
                       <TabsList className="w-full bg-transparent rounded-none border-0 p-0 gap-0">
@@ -1103,9 +1218,7 @@ export const DataTrainingFooter = () => {
     isTrainingDataChanged,
     setIsTrainingDataChanged,
     quickManualSampling,
-    sampleQuality,
     isSampleQualityLoading,
-    sampleQualityConfirmed,
   } = useContext(MapGenerationContext);
 
   const { sessionId } = useContext(GlobalContext);
@@ -1119,10 +1232,9 @@ export const DataTrainingFooter = () => {
     isUploadingTrainingFile ||
     isUpdatingTrainingData ||
     (lucSource === "excel" && classArray.length === 0) ||
-    // A separability result that exists (or is being computed) must be
-    // acknowledged via Confirm Sample Quality before moving on.
-    isSampleQualityLoading ||
-    (sampleQuality !== null && !sampleQualityConfirmed);
+    // Only block while the separability analysis is still running; a shown
+    // result needs no explicit confirmation to move on.
+    isSampleQualityLoading;
 
   const isBackDisabled = isUploadingTrainingFile || isUpdatingTrainingData;
 
