@@ -20,6 +20,7 @@ import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "./ConfirmDialog";
+import { ImproveAccuracyDialog } from "./ImproveAccuracyDialog";
 import { ShareMapDialog } from "./ShareMapDialog";
 
 export const YourMapDialog = () => {
@@ -38,6 +39,7 @@ export const YourMapDialog = () => {
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const [isDownloadOnTheWayOpen, setIsDownloadOnTheWayOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isImproveOpen, setIsImproveOpen] = useState(false);
 
   const t = useTranslations("InteractivePanel.yourMap");
   const commonT = useTranslations("InteractivePanel.common");
@@ -196,8 +198,9 @@ export const YourMapDialog = () => {
             </Button>
             <Button
               type="button"
-              disabled
-              className="text-l-bold h-10 rounded-[12px] border border-[#C9C9C9] bg-neutrals-300 text-text-icons-base-third opacity-100"
+              onClick={() => setIsImproveOpen(true)}
+              variant="primary"
+              className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
             >
               {t("improveAccuracy")}
             </Button>
@@ -221,6 +224,11 @@ export const YourMapDialog = () => {
       />
 
       <ShareMapDialog open={isShareOpen} onOpenChange={setIsShareOpen} />
+
+      <ImproveAccuracyDialog
+        open={isImproveOpen}
+        onOpenChange={setIsImproveOpen}
+      />
     </>
   );
 };

@@ -37,6 +37,7 @@ export const FinalSummaryDialog = () => {
     temporalCoverageUnit,
     summaryData,
     setSummaryData,
+    setIsImprovementMode,
   } = useContext(MapGenerationContext);
 
   const { resetMosaicLayer } = useContext(MapContext);
@@ -57,6 +58,7 @@ export const FinalSummaryDialog = () => {
   };
 
   const onConfirm = () => {
+    setIsImprovementMode(false);
     setStepKey(PANEL_COMPONENT_KEY.YOUR_MAP);
     // resetMosaicLayer();
     setProgressPanelIndex(5);

@@ -166,6 +166,7 @@ export const InteractivePanel = () => {
     lucDefaultConfirmed,
     lucQuickRows,
     LUCfile,
+    isImprovementMode,
   } = useContext(MapGenerationContext);
 
   // Only the Own Classification flow guards back-navigation with the
@@ -497,6 +498,24 @@ export const InteractivePanel = () => {
                     </div>
                     <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-second">
                       {t("defineLUC.editModeCaption")}
+                    </p>
+                  </div>
+                )}
+              {/* Step-4 improvement-mode banner (entered via Improve Accuracy
+                  on step 5): same panel-level, edge-to-edge treatment as the
+                  step-2 banner above, so it stays out of the scroll area. */}
+              {(stepKey === PANEL_COMPONENT_KEY.LULC_PARAMS ||
+                stepKey === PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY) &&
+                isImprovementMode && (
+                  <div className="px-4 py-3 space-y-1 mb-3 bg-amber-50">
+                    <div className="flex flex-row items-center gap-x-2">
+                      <SquarePenIcon className="size-4 text-amber-800" />
+                      <p className="font-aptos text-md font-bold leading-6 text-amber-800">
+                        {t("lulcParams.improvementMode")}
+                      </p>
+                    </div>
+                    <p className="font-aptos text-sm font-regular leading-5 text-amber-700">
+                      {t("lulcParams.improvementModeCaption")}
                     </p>
                   </div>
                 )}

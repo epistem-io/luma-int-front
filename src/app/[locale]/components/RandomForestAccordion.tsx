@@ -183,17 +183,15 @@ export const RandomForestAccordion = () => {
               )}
             </div>
           </div>
-          {/* Split ratio: training share in percent. 0 and 100 are shown as
-              tick labels but not selectable (min/max 10-90) — an empty
-              training or testing set would break the stratified split. */}
+          {/* Split ratio: training share in percent. */}
           <div className="space-y-3">
             <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
               {tInteractive("lulcParams.splitRatio")}
             </p>
             <Slider
               step={10}
-              min={10}
-              max={90}
+              min={0}
+              max={100}
               value={[splitRatio]}
               trackBgColor="bg-neutral-300"
               onValueChange={(value) => setSplitRatio(value[0] ?? 70)}

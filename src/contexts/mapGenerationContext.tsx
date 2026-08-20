@@ -236,6 +236,9 @@ export interface MapGenerationContextType {
   /** Training share of the sample split, in percent (10-90). */
   splitRatio: number;
   setSplitRatio: Dispatch<SetStateAction<number>>;
+  /** True while the user is redoing step 4 via "Improve Accuracy" from step 5. */
+  isImprovementMode: boolean;
+  setIsImprovementMode: Dispatch<SetStateAction<boolean>>;
   resetMapGenerationState: () => void;
   quickManualSampling: boolean;
   setQuickManualSampling: Dispatch<SetStateAction<boolean>>;
@@ -407,6 +410,8 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setMinLeafPopulationError: () => {},
   splitRatio: 70,
   setSplitRatio: () => {},
+  isImprovementMode: false,
+  setIsImprovementMode: () => {},
   resetMapGenerationState: () => {},
   quickManualSampling: false,
   setQuickManualSampling: () => {},
@@ -720,6 +725,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.quickManualSampling,
   );
 
+  const [isImprovementMode, setIsImprovementMode] = useState(
+    DEFAULT_VALUE.isImprovementMode,
+  );
+
   const resetMapGenerationState = () => {
     setProgressPanelIndex(DEFAULT_VALUE.progressPanelIndex);
     setStepKey(DEFAULT_VALUE.stepKey);
@@ -803,6 +812,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setMinLeafPopulationError(DEFAULT_VALUE.minLeafPopulationError);
     setSplitRatio(DEFAULT_VALUE.splitRatio);
     setQuickManualSampling(DEFAULT_VALUE.quickManualSampling);
+    setIsImprovementMode(DEFAULT_VALUE.isImprovementMode);
 
     if (typeof document === "undefined") return;
 
@@ -977,6 +987,8 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setMinLeafPopulationError,
     splitRatio,
     setSplitRatio,
+    isImprovementMode,
+    setIsImprovementMode,
     resetMapGenerationState,
     quickManualSampling,
     setQuickManualSampling,
