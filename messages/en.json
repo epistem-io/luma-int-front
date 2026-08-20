@@ -235,7 +235,15 @@
       "minimum": "Minimum",
       "rataRata": "Average",
       "maksimum": "Maximum",
-      "downloadMosaicMap": "Download composite"
+      "downloadMosaicMap": "Download composite",
+      "downloadDialogTitle": "Download composite",
+      "downloadDialogDescription": "Choose where you want to save the composite of the obtained satellite imagery.",
+      "downloadDialogDriveTitle": "Save to Google Drive",
+      "downloadDialogDriveDescription": "Export the composite directly to your Google Drive account",
+      "downloadDialogDeviceTitle": "Save to this device",
+      "downloadDialogDeviceDescription": "Download the composite file to your device",
+      "downloadDialogComingSoon": "Coming soon",
+      "downloadDialogConfirm": "Download"
     },
     "areaScoping": {
       "areaScoping": "Geographic Area",

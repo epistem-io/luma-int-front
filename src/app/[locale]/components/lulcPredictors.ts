@@ -2,7 +2,7 @@ export interface LULCPredictor {
   value: string;
   label: string;
   description: string;
-  disabled?: string;
+  disabled?: boolean;
 }
 
 export interface LULCPredictorGroup {

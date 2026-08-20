@@ -231,7 +231,15 @@
       "minimum": "Minimum",
       "rataRata": "Rata-rata",
       "maksimum": "Maksimum",
-      "downloadMosaicMap": "Unduh gabungan citra"
+      "downloadMosaicMap": "Unduh gabungan citra",
+      "downloadDialogTitle": "Unduh gabungan citra",
+      "downloadDialogDescription": "Pilih tempat penyimpanan gabungan citra satelit yang diperoleh.",
+      "downloadDialogDriveTitle": "Simpan ke Google Drive",
+      "downloadDialogDriveDescription": "Ekspor gabungan citra langsung ke akun Google Drive Anda",
+      "downloadDialogDeviceTitle": "Simpan ke perangkat ini",
+      "downloadDialogDeviceDescription": "Unduh berkas gabungan citra ke perangkat Anda",
+      "downloadDialogComingSoon": "Segera hadir",
+      "downloadDialogConfirm": "Unduh"
     },
     "areaScoping": {
       "areaScoping": "Penentuan Wilayah",
