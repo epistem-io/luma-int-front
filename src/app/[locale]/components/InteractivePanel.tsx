@@ -58,6 +58,7 @@ import { MapContext } from "@/contexts/mapContext";
 import {
   DataTrainingComponent,
   DataTrainingFooter,
+  DataTrainingScoreBanner,
 } from "./DataTrainingComponent";
 import { OSSComponent, OSSFooter } from "./OSSComponent";
 import { LULCParamsComponent, LULCParamsFooter } from "./LULCParamsComponent";
@@ -519,6 +520,15 @@ export const InteractivePanel = () => {
                     </p>
                   </div>
                 )}
+              {/* Step-3 score banner: pinned under the description, outside
+                  the scroll area, so Check Training Data Quality is always
+                  in view. A tall result scrolls within this wrapper instead
+                  of crushing the tabs area below. */}
+              {stepKey === PANEL_COMPONENT_KEY.DATA_TRAINING && (
+                <div className="px-4 pb-3 max-h-[45vh] overflow-y-auto">
+                  <DataTrainingScoreBanner />
+                </div>
+              )}
             </div>
           )}
           <div

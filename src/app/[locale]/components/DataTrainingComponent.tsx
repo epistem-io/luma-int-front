@@ -80,57 +80,26 @@ const clampInt = (raw: string, fallback: number, min: number, max: number) => {
   return Math.min(Math.max(parsed, min), max);
 };
 
-export const DataTrainingComponent = () => {
+// Score banner pinned at the panel level: InteractivePanel renders this under
+// the step description, outside the scroll area, so it never scrolls away.
+export const DataTrainingScoreBanner = () => {
+  const t = useTranslations("InteractivePanel");
   const { sessionId } = useContext(GlobalContext);
-
-  const {
-    setMarkerArray,
-    markerArray,
-    renderArrayToMarkerVector,
-    removeMarkerCursor,
-    markerCursor,
-    markerVectorLayer,
-    markerVectorSource,
-  } = useContext(MapContext);
-
+  const { markerArray } = useContext(MapContext);
   const {
     classArray,
-    pointingType,
-    selectedClass,
-    setSelectedClass,
-    setPointingType,
-    setStepKey,
-    isUploadingTrainingFile,
-    setIsUploadingTrainingFile,
-    dataTrainingActiveTab,
-    setDataTrainingActiveTab,
-    selectedDefault,
-    selectedCustom,
     lucSource,
-    isAutoPointsFlow,
-    trainingFile,
-    trainingFilename,
-    trainingFilesize,
-    trainingFileError,
-    uploadedFilesArray,
-    setTrainingFile,
-    setTrainingFilename,
-    setTrainingFilesize,
-    setTrainingFileError,
-    setUploadedFilesArray,
-    setIsTrainingDataChanged,
     quickManualSampling,
+    spatialResolution,
     fetchSampleQuality,
     sampleQuality,
     sampleQualityGenerated,
-    setSampleQualityGenerated,
-    setSampleQuality,
     sampleQualityError,
-    setSampleQualityError,
     isSampleQualityLoading,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
-    spatialResolution,
+    setIsTrainingDataChanged,
+    isUploadingTrainingFile,
   } = useContext(MapGenerationContext);
 
   // Optional separability-analysis tuning (mirrors LumaLite Module 4):
@@ -145,193 +114,15 @@ export const DataTrainingComponent = () => {
     String(SEPARABILITY_MAX_PIXELS_DEFAULT),
   );
 
-  const t = useTranslations("InteractivePanel");
-
-  const [fileEnter, setFileEnter] = useState(false);
-  // The summary starts (and stays) expanded — a separability result no
-  // longer collapses it; the user can still toggle it manually.
-  const [summaryAccordionValue, setSummaryAccordionValue] =
-    useState("lulc-table");
-  const qualityViewRef = useRef<HTMLDivElement | null>(null);
-
-  // Once the quality result is shown, scroll it into view.
+  // Clearing the training data resets sampleQualityGenerated (file delete in
+  // DataTrainingComponent); collapse the params form along with it.
   useEffect(() => {
-    if (sampleQuality) {
-      requestAnimationFrame(() => {
-        qualityViewRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      });
-    }
-  }, [sampleQuality]);
-  const startPointingButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    if (dataTrainingActiveTab !== "oss") return;
-
-    requestAnimationFrame(() => {
-      startPointingButtonRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-  }, [dataTrainingActiveTab]);
-
-  // useEffect(() => {
-  //   console.log("upll", uploadedFilesArray);
-  // }, [uploadedFilesArray]);
-
-  const onClickStartPointing = () => {
-    removeMarkerCursor();
-    setIsTrainingDataChanged(true);
-    // Editing points invalidates any previous separability result: hide it
-    // so the user has to recheck the score. sampleQualityGenerated stays
-    // true so the banner keeps its "Recheck Score" / regenerate wording.
-    setSampleQuality(null);
-    setSampleQualityError("");
-    setStepKey(PANEL_COMPONENT_KEY.OSS);
-  };
-
-  const submitFile = (fileObj: FileObject) => {
-    setIsTrainingDataChanged(true);
-    setTrainingFileError("");
-
-    if (!fileObj) return;
-
-    setTrainingFile(fileObj.file);
-    setTrainingFilename(fileObj.filename);
-    setTrainingFilesize(fileObj.filesize);
-
-    if (fileObj.filesize > DATA_TRAINING_FILE_SIZE_LIMIT) return;
-
-    setIsUploadingTrainingFile(true);
-
-    const body = new FormData();
-
-    body.append("file", fileObj.file);
-    body.append("session_id", sessionId);
-
-    fetch(TRAINING_DATA_UPLOAD_URL, {
-      method: "POST",
-      body,
-    })
-      .then(async (response) => {
-        const json: TrainingDataUploadRes = await response.json();
-
-        if (!response.ok) {
-          setTrainingFileError(json?.error?.message || String(response.text));
-          throw new Error(
-            JSON.stringify(
-              `${json?.error?.message || response.text}. Trace: ${json?.trace}`,
-            ),
-          );
-        }
-
-        const training_data = json.training_data.map((item) => ({
-          ...item,
-          id: crypto.randomUUID(),
-        }));
-
-        setUploadedFilesArray((prev) => [
-          ...prev,
-          {
-            file: fileObj.file,
-            filename: fileObj.filename,
-            filesize: fileObj.filesize,
-            training_data,
-          },
-        ]);
-
-        const tempMarkerArray = [
-          ...markerArray,
-          ...training_data.map((item) => ({
-            coordinates: [
-              fromLonLat(item.geometry.coordinates)[0],
-              fromLonLat(item.geometry.coordinates)[1],
-            ] as [number, number],
-            id: item.id,
-            // WIP NAME WITH POINT
-            name: item.class_name,
-            class_id: item.class_id,
-            class_color: item.class_color,
-          })),
-        ];
-
-        const tempMarkerWithFeature = tempMarkerArray.map((item) => ({
-          ...item,
-          map_feature: new Feature({
-            geometry: new Point(item.coordinates),
-            id: item.id,
-            property: {
-              class_name: item.name,
-            },
-          }),
-        }));
-
-        tempMarkerWithFeature.forEach((item) => {
-          item.map_feature.setStyle(
-            new Style({
-              image: new Icon({
-                anchor: [0.5, 1], // Anchor the bottom center of the icon
-                src: svgWithColor(item.class_color),
-                // src: "/images/marker.webp", // Use your own icon URL
-                size: [92, 117],
-                height: 30,
-              }),
-            }),
-          );
-        });
-
-        setMarkerArray(tempMarkerWithFeature);
-
-        renderArrayToMarkerVector(tempMarkerWithFeature);
-
-        // The upload endpoint only parses the file; like the OSS flow, the
-        // parsed points are posted and the separability analysis is run
-        // on demand from the score banner's Check Score button
-        // (onConfirmSampleData), not automatically after upload.
-
-        setTrainingFile(null);
-        setTrainingFilename("");
-        setTrainingFilesize(0);
-        // console.log("jjson", json);
-      })
-      .catch((e) => {
-        toast.error(`Error on uploading file: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
-        });
-        // console.log("errorr", e);
-      })
-      .finally(() => {
-        setIsUploadingTrainingFile(false);
-      });
-  };
-
-  const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
-    const target = e.target;
-    const files = target?.files;
-
-    if (!files) return;
-
-    const file = files[0];
-
-    // setTrainingFile(file);
-    // setTrainingFilename(file.name);
-    // setTrainingFilesize(file.size);
-
-    submitFile({
-      file,
-      filename: file.name,
-      filesize: file.size,
-    });
-  };
+    if (!sampleQualityGenerated) setIsScoreParamsOpen(false);
+  }, [sampleQualityGenerated]);
 
   const canSampleManually =
-    lucSource !== "default" &&
-    (lucSource === "quick" || !quickManualSampling);
+    lucSource !== "default" && (lucSource === "quick" || !quickManualSampling);
+
   const syncClassesIfNeeded = () => {
     if (lucSource !== "excel") return Promise.resolve();
 
@@ -416,88 +207,16 @@ export const DataTrainingComponent = () => {
   const isConfirmSampleDataDisabled =
     markerArray.length === 0 || isUpdatingTrainingData || isSampleQualityLoading;
 
-  const isNextDisabled =
-    !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
-
-  const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
-
-  useEffect(() => {
-    markerVectorLayer?.setOpacity(1);
-    if (canSampleManually) {
-      markerCursor(pointingType, classArray, true);
-    }
-  }, []);
-
-  const renderUploadedFilesList = () =>
-    uploadedFilesArray.map((item, index) => {
-      return (
-        <div
-          key={`uploaded-file-${item.filename}-${index}`}
-          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
-        >
-          <div className="flex flex-row gap-x-4 items-center col-span-10">
-            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
-                {item.filename}
-              </p>
-              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                {shortenKiloByte(item.filesize)}
-              </p>
-            </div>
-          </div>
-
-          {/* Removing the file is how the user re-uploads: it clears the
-              points and any separability result so the banner resets. */}
-          <div className="col-span-2 flex flex-row justify-end">
-            <Button
-              disabled={isUploadingTrainingFile}
-              variant={"ghost"}
-              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-              onClick={() => {
-                setTrainingFile(null);
-                setTrainingFilename("");
-                setTrainingFilesize(0);
-                setTrainingFileError("");
-
-                setUploadedFilesArray([]);
-
-                setMarkerArray([]);
-                markerVectorSource?.clear();
-
-                setSampleQuality(null);
-                setSampleQualityError("");
-                setSampleQualityGenerated(false);
-                setIsScoreParamsOpen(false);
-
-                const doc = document.getElementById(
-                  "data-training-file-upload",
-                ) as HTMLInputElement;
-                if (!doc) return;
-
-                doc.value = "";
-              }}
-            >
-              <Trash2Icon className="text-secondary-purple-dark size-5" />
-            </Button>
-          </div>
-        </div>
-      );
-    });
-
   const hasQualityContent =
     isSampleQualityLoading || sampleQuality !== null || !!sampleQualityError;
 
   const isScoreButtonDisabled =
     isConfirmSampleDataDisabled || isUploadingTrainingFile;
 
-  const renderScoreBanner = () => (
-    <div
-      ref={qualityViewRef}
-      className="rounded-[12px] overflow-hidden border border-neutral-400"
-    >
+  if (!canSampleManually) return null;
+
+  return (
+    <div className="rounded-[12px] overflow-hidden border border-neutral-400">
       <div
         className={cn(
           "relative bg-[#313131]",
@@ -671,6 +390,297 @@ export const DataTrainingComponent = () => {
       )}
     </div>
   );
+};
+
+export const DataTrainingComponent = () => {
+  const { sessionId } = useContext(GlobalContext);
+
+  const {
+    setMarkerArray,
+    markerArray,
+    renderArrayToMarkerVector,
+    removeMarkerCursor,
+    markerCursor,
+    markerVectorLayer,
+    markerVectorSource,
+  } = useContext(MapContext);
+
+  const {
+    classArray,
+    pointingType,
+    selectedClass,
+    setSelectedClass,
+    setPointingType,
+    setStepKey,
+    isUploadingTrainingFile,
+    setIsUploadingTrainingFile,
+    dataTrainingActiveTab,
+    setDataTrainingActiveTab,
+    selectedDefault,
+    selectedCustom,
+    lucSource,
+    isAutoPointsFlow,
+    trainingFile,
+    trainingFilename,
+    trainingFilesize,
+    trainingFileError,
+    uploadedFilesArray,
+    setTrainingFile,
+    setTrainingFilename,
+    setTrainingFilesize,
+    setTrainingFileError,
+    setUploadedFilesArray,
+    setIsTrainingDataChanged,
+    quickManualSampling,
+    setSampleQualityGenerated,
+    setSampleQuality,
+    setSampleQualityError,
+  } = useContext(MapGenerationContext);
+
+  const t = useTranslations("InteractivePanel");
+
+  const [fileEnter, setFileEnter] = useState(false);
+  // The summary starts (and stays) expanded — a separability result no
+  // longer collapses it; the user can still toggle it manually.
+  const [summaryAccordionValue, setSummaryAccordionValue] =
+    useState("lulc-table");
+  const startPointingButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (dataTrainingActiveTab !== "oss") return;
+
+    requestAnimationFrame(() => {
+      startPointingButtonRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  }, [dataTrainingActiveTab]);
+
+  // useEffect(() => {
+  //   console.log("upll", uploadedFilesArray);
+  // }, [uploadedFilesArray]);
+
+  const onClickStartPointing = () => {
+    removeMarkerCursor();
+    setIsTrainingDataChanged(true);
+    // Editing points invalidates any previous separability result: hide it
+    // so the user has to recheck the score. sampleQualityGenerated stays
+    // true so the banner keeps its "Recheck Score" / regenerate wording.
+    setSampleQuality(null);
+    setSampleQualityError("");
+    setStepKey(PANEL_COMPONENT_KEY.OSS);
+  };
+
+  const submitFile = (fileObj: FileObject) => {
+    setIsTrainingDataChanged(true);
+    setTrainingFileError("");
+
+    if (!fileObj) return;
+
+    setTrainingFile(fileObj.file);
+    setTrainingFilename(fileObj.filename);
+    setTrainingFilesize(fileObj.filesize);
+
+    if (fileObj.filesize > DATA_TRAINING_FILE_SIZE_LIMIT) return;
+
+    setIsUploadingTrainingFile(true);
+
+    const body = new FormData();
+
+    body.append("file", fileObj.file);
+    body.append("session_id", sessionId);
+
+    fetch(TRAINING_DATA_UPLOAD_URL, {
+      method: "POST",
+      body,
+    })
+      .then(async (response) => {
+        const json: TrainingDataUploadRes = await response.json();
+
+        if (!response.ok) {
+          setTrainingFileError(json?.error?.message || String(response.text));
+          throw new Error(
+            JSON.stringify(
+              `${json?.error?.message || response.text}. Trace: ${json?.trace}`,
+            ),
+          );
+        }
+
+        const training_data = json.training_data.map((item) => ({
+          ...item,
+          id: crypto.randomUUID(),
+        }));
+
+        setUploadedFilesArray((prev) => [
+          ...prev,
+          {
+            file: fileObj.file,
+            filename: fileObj.filename,
+            filesize: fileObj.filesize,
+            training_data,
+          },
+        ]);
+
+        const tempMarkerArray = [
+          ...markerArray,
+          ...training_data.map((item) => ({
+            coordinates: [
+              fromLonLat(item.geometry.coordinates)[0],
+              fromLonLat(item.geometry.coordinates)[1],
+            ] as [number, number],
+            id: item.id,
+            // WIP NAME WITH POINT
+            name: item.class_name,
+            class_id: item.class_id,
+            class_color: item.class_color,
+          })),
+        ];
+
+        const tempMarkerWithFeature = tempMarkerArray.map((item) => ({
+          ...item,
+          map_feature: new Feature({
+            geometry: new Point(item.coordinates),
+            id: item.id,
+            property: {
+              class_name: item.name,
+            },
+          }),
+        }));
+
+        tempMarkerWithFeature.forEach((item) => {
+          item.map_feature.setStyle(
+            new Style({
+              image: new Icon({
+                anchor: [0.5, 1], // Anchor the bottom center of the icon
+                src: svgWithColor(item.class_color),
+                // src: "/images/marker.webp", // Use your own icon URL
+                size: [92, 117],
+                height: 30,
+              }),
+            }),
+          );
+        });
+
+        setMarkerArray(tempMarkerWithFeature);
+
+        renderArrayToMarkerVector(tempMarkerWithFeature);
+
+        // The upload endpoint only parses the file; like the OSS flow, the
+        // parsed points are posted and the separability analysis is run
+        // on demand from the score banner's Check Score button
+        // (onConfirmSampleData), not automatically after upload.
+
+        setTrainingFile(null);
+        setTrainingFilename("");
+        setTrainingFilesize(0);
+        // console.log("jjson", json);
+      })
+      .catch((e) => {
+        toast.error(`Error on uploading file: ${e}`, {
+          duration: Infinity,
+          dismissible: true,
+          closeButton: true,
+        });
+        // console.log("errorr", e);
+      })
+      .finally(() => {
+        setIsUploadingTrainingFile(false);
+      });
+  };
+
+  const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const target = e.target;
+    const files = target?.files;
+
+    if (!files) return;
+
+    const file = files[0];
+
+    // setTrainingFile(file);
+    // setTrainingFilename(file.name);
+    // setTrainingFilesize(file.size);
+
+    submitFile({
+      file,
+      filename: file.name,
+      filesize: file.size,
+    });
+  };
+
+  const canSampleManually =
+    lucSource !== "default" &&
+    (lucSource === "quick" || !quickManualSampling);
+
+  const isNextDisabled =
+    !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
+
+  const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
+
+  useEffect(() => {
+    markerVectorLayer?.setOpacity(1);
+    if (canSampleManually) {
+      markerCursor(pointingType, classArray, true);
+    }
+  }, []);
+
+  const renderUploadedFilesList = () =>
+    uploadedFilesArray.map((item, index) => {
+      return (
+        <div
+          key={`uploaded-file-${item.filename}-${index}`}
+          className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second"
+        >
+          <div className="flex flex-row gap-x-4 items-center col-span-10">
+            <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
+              <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
+                {item.filename}
+              </p>
+              <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
+                {shortenKiloByte(item.filesize)}
+              </p>
+            </div>
+          </div>
+
+          {/* Removing the file is how the user re-uploads: it clears the
+              points and any separability result so the banner resets. */}
+          <div className="col-span-2 flex flex-row justify-end">
+            <Button
+              disabled={isUploadingTrainingFile}
+              variant={"ghost"}
+              className="hover:brightness-95 cursor-pointer size-7 rounded-full"
+              onClick={() => {
+                setTrainingFile(null);
+                setTrainingFilename("");
+                setTrainingFilesize(0);
+                setTrainingFileError("");
+
+                setUploadedFilesArray([]);
+
+                setMarkerArray([]);
+                markerVectorSource?.clear();
+
+                setSampleQuality(null);
+                setSampleQualityError("");
+                setSampleQualityGenerated(false);
+
+                const doc = document.getElementById(
+                  "data-training-file-upload",
+                ) as HTMLInputElement;
+                if (!doc) return;
+
+                doc.value = "";
+              }}
+            >
+              <Trash2Icon className="text-secondary-purple-dark size-5" />
+            </Button>
+          </div>
+        </div>
+      );
+    });
 
   const minSamplesHint = (
     <div className="rounded-r-[8px] border-l-2 border-primary-red-pink-normal bg-primary-red-pink-normal/10 px-2.5 py-2">
@@ -687,9 +697,9 @@ export const DataTrainingComponent = () => {
     <>
       <div className="space-y-4">
         {/* {selectedDefault && <LUCClassTable summary={false} />} */}
-        {/* Score banner (+ optional analysis params / the analysis result)
-            lives above the tabs, so it's visible in both flows at all times. */}
-        {canSampleManually && renderScoreBanner()}
+        {/* Score banner: rendered by InteractivePanel under the step
+            description (DataTrainingScoreBanner), pinned above this
+            scroll area. */}
         {canSampleManually && (
           <div className="rounded-[12px] bg-white p-3 py-5 border border-neutral-400 space-y-6">
             <Tabs
