@@ -80,7 +80,9 @@ const DataTable = ({
               <th
                 key={h.label}
                 className={cn(
-                  "px-3 py-2 border-b border-r border-[#E4E5EA] last:border-r-0 font-aptos text-sm font-regular leading-5 text-[#7D8398] whitespace-nowrap",
+                  // Headers wrap (no nowrap) so wide metric names don't force
+                  // the table past the dialog width into horizontal scroll.
+                  "px-3 py-2 border-b border-r border-[#E4E5EA] last:border-r-0 font-aptos text-sm font-regular leading-5 text-[#7D8398]",
                   headerBg,
                   alignClass(h.align),
                 )}
@@ -391,12 +393,14 @@ export const ModelAccuracyDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[98vw] sm:max-w-[1600px] max-h-[96vh] overflow-y-auto">
+      {/* Fixed header/footer: the dialog itself no longer scrolls (title and
+          the absolute X button stay put); only the middle section does. */}
+      <DialogContent className="w-[98vw] sm:max-w-[1600px] max-h-[96vh] grid-rows-[auto_minmax(0,1fr)_auto]">
         <DialogTitle className="text-primary-pink font-aptos text-2xl font-bold tracking-[-0.24px] pr-8">
           {t("yourMap.modelAccuracyDetailTitle")}
         </DialogTitle>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto min-h-0 pr-1">
           <div className="grid grid-cols-[210px_1fr] gap-4 items-stretch">
             {/* Overall model accuracy */}
             <DetailSection title={t("yourMap.modelOverallResultTitle")}>
@@ -613,7 +617,7 @@ export const ModelAccuracyDetailDialog = ({
                           key={`hm-row-${a.class_id}`}
                           className="flex flex-row items-stretch"
                         >
-                          <div className="w-44 shrink-0 flex items-center justify-end pr-3">
+                          <div className="w-36 shrink-0 flex items-center justify-end pr-3">
                             <p className="font-aptos text-xs font-regular text-text-icons-base-second text-right">
                               {t("yourMap.thematicMatrixActualLabel", {
                                 X: a.class_id,
@@ -626,7 +630,7 @@ export const ModelAccuracyDetailDialog = ({
                             return (
                               <div
                                 key={`hm-cell-${a.class_id}-${b.class_id}`}
-                                className="flex-1 min-w-16 h-14 flex items-center justify-center"
+                                className="flex-1 min-w-12 h-12 flex items-center justify-center"
                                 style={{ backgroundColor: heatColor(value) }}
                               >
                                 <p
@@ -647,11 +651,11 @@ export const ModelAccuracyDetailDialog = ({
 
                       {/* X labels (rotated) */}
                       <div className="flex flex-row">
-                        <div className="w-44 shrink-0" />
+                        <div className="w-36 shrink-0" />
                         {displayClasses.map((b) => (
                           <div
                             key={`hm-x-${b.class_id}`}
-                            className="flex-1 min-w-16 h-36 pt-2 overflow-visible"
+                            className="flex-1 min-w-12 h-36 pt-2 overflow-visible"
                           >
                             <p className="rotate-45 origin-top-left whitespace-nowrap font-aptos text-xs font-regular text-text-icons-base-second ml-8">
                               {t("yourMap.thematicMatrixPredictedLabel", {
@@ -695,27 +699,28 @@ export const ModelAccuracyDetailDialog = ({
               </div>
             </DetailSection>
 
-          {/* Downloads */}
-          <div className="grid grid-cols-2 gap-4">
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={() => {
-                downloadRawData();
-              }}
-            >
-              {t("yourMap.thematicDownloadRawData")}
-            </Button>
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={() => {
-                downloadChart();
-              }}
-            >
-              {t("yourMap.thematicDownloadChart")}
-            </Button>
-          </div>
+        </div>
+
+        {/* Downloads — fixed below the scrollable content */}
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={() => {
+              downloadRawData();
+            }}
+          >
+            {t("yourMap.thematicDownloadRawData")}
+          </Button>
+          <Button
+            variant="primary"
+            className="w-full"
+            onClick={() => {
+              downloadChart();
+            }}
+          >
+            {t("yourMap.thematicDownloadChart")}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -185,6 +185,11 @@ export const DataTrainingComponent = () => {
   const onClickStartPointing = () => {
     removeMarkerCursor();
     setIsTrainingDataChanged(true);
+    // Editing points invalidates any previous separability result: hide it
+    // so the user has to recheck the score. sampleQualityGenerated stays
+    // true so the banner keeps its "Recheck Score" / regenerate wording.
+    setSampleQuality(null);
+    setSampleQualityError("");
     setStepKey(PANEL_COMPONENT_KEY.OSS);
   };
 
