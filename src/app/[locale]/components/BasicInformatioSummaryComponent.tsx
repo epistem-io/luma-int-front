@@ -57,9 +57,22 @@ export const BasicInformationSummaryComponent = () => {
     isBasicInformationChangeInput,
     satelliteSource,
     maximumCloudCover,
+    spatialResolution,
   } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
+
+  // Same wording as the resolution picker (AreaScopingAccordion /
+  // SpatialResolutionSelect); falls back to the raw value for unknown ones.
+  const spatialResolutionLabelMap: Record<string, string> = {
+    "30": t("areaScoping.30x30m2"),
+    "100": t("areaScoping.100x100m2"),
+    "500": t("areaScoping.500x500m2"),
+    "1000": t("areaScoping.1x1km2"),
+  };
+  const spatialResolutionLabel = spatialResolution
+    ? (spatialResolutionLabelMap[spatialResolution] ?? `${spatialResolution} m`)
+    : undefined;
 
   // const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false)
 
@@ -73,6 +86,7 @@ export const BasicInformationSummaryComponent = () => {
           <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second space-y-4">
             <AreaScopingSummary
               areaSizeString={`${numberThousandSeparator(areaScopingPolygonArea.toFixed(0))} Ha`}
+              spatialResolutionString={spatialResolutionLabel}
               accordion={false}
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {

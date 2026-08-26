@@ -12,7 +12,6 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { cn, numberThousandSeparator } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import TileLayer from "ol/layer/Tile";
 import { XYZ } from "ol/source";
 import {
@@ -691,7 +690,6 @@ const ThematicAccuracyAssessment = () => {
     setThematicAccuracyError,
   } = useContext(MapGenerationContext);
 
-  const [showUpload, setShowUpload] = useState(false);
   const [fileEnter, setFileEnter] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
 
@@ -754,6 +752,15 @@ const ThematicAccuracyAssessment = () => {
     <>
       <Card>
         <div className="space-y-5">
+          <div className="space-y-1">
+            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+              {t("yourMap.thematicAccuracyAssessment")}
+            </p>
+            <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
+              {t("yourMap.thematicAccuracyAssessmentDescription")}
+            </p>
+          </div>
+
           {/* Result summary */}
           {thematicAccuracy && (
             <div className="space-y-2">
@@ -819,7 +826,6 @@ const ThematicAccuracyAssessment = () => {
                   onClick={() => {
                     setThematicAccuracy(null);
                     setThematicAccuracyError("");
-                    setShowUpload(true);
                   }}
                 >
                   <p className="text-text-icons-base-second font-aptos text-[13px] font-regular underline">
@@ -866,7 +872,6 @@ const ThematicAccuracyAssessment = () => {
                   variant="outline"
                   onClick={() => {
                     setThematicAccuracyError("");
-                    setShowUpload(true);
                   }}
                 >
                   {t("dataTraining.sampleQualityRetry")}
@@ -877,12 +882,11 @@ const ThematicAccuracyAssessment = () => {
           {/* Upload dropzone */}
           {!thematicAccuracy &&
             !isThematicAccuracyLoading &&
-            thematicAccuracyError === "" &&
-            showUpload && (
+            thematicAccuracyError === "" && (
               <>
                 <div
                   className={cn(
-                    "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
+                    "p-6 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
                     "min-h-40.5",
                     fileEnter && "border-primary-red-pink-normal",
                   )}
@@ -910,20 +914,18 @@ const ThematicAccuracyAssessment = () => {
                     <>
                       <div className="space-y-3">
                         <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
-                        <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                          {t("dataTraining.dragAndDrop")} <br />
-                          {t("dataTraining.acceptedFormat", {
-                            X: ".zip (.shp, .shx, .dbf, .prj)",
-                          })}
+                        <p className="font-aptos text-md font-regular leading-6 text-neutrals-600 text-center">
+                          {t("lulcParams.predictorUploadDragDrop")} <br />
+                          {t("lulcParams.predictorUploadFormat")}
                         </p>
                       </div>
                       <Label
                         htmlFor="thematic-validation-file-upload"
-                        className="w-50 mx-auto flex flex-row justify-center mb-0"
+                        className="w-75 mx-auto flex flex-row justify-center mb-0"
                       >
-                        <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
-                          <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                            {t("dataTraining.browseFile")}
+                        <div className="rounded-full bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-2 px-4 transition-all duration-200">
+                          <p className="font-aptos text-sm font-semibold leading-5 text-primary-red-pink-normal text-center">
+                            {t("lulcParams.predictorUploadBrowse")}
                           </p>
                         </div>
                       </Label>
@@ -943,46 +945,11 @@ const ThematicAccuracyAssessment = () => {
                   id="thematic-validation-file-upload"
                   type="file"
                   className="hidden"
-                  accept=".zip"
+                  accept=".zip,.kml,.kmz"
                   multiple={false}
                   onChange={onUploadValidationFile}
                 />
               </>
-            )}
-
-          {/* Promo */}
-          {!thematicAccuracy &&
-            !isThematicAccuracyLoading &&
-            thematicAccuracyError === "" &&
-            !showUpload && (
-              <div className="p-4 rounded-md bg-text-icons-base-main space-y-4 overflow-hidden">
-                <p className="font-aptos text-lg font-bold leading-6.5 text-text-icons-on-color">
-                  {t("yourMap.thematicPromoTitle")}
-                </p>
-                <p className="font-aptos text-sm font-regular leading-5 text-text-icons-on-color opacity-80">
-                  {t("yourMap.thematicPromoCaption")}
-                </p>
-                <div className="flex flex-row justify-end">
-                  <Button
-                    variant={"secondary"}
-                    className="px-6"
-                    onClick={() => {
-                      setShowUpload(true);
-                    }}
-                  >
-                    {t("yourMap.thematicValidateMap")}
-                  </Button>
-                </div>
-                {/* Bleeds out of the card padding so it sits flush with the
-                    bottom-left edge; the card's overflow-hidden crops it. */}
-                <Image
-                  alt="thematic accuracy assessment preview"
-                  width={709}
-                  height={258}
-                  src="/images/thematic-accuracy.webp"
-                  className="w-[95%] -ml-4 -mb-4 rounded-tr-md"
-                />
-              </div>
             )}
         </div>
       </Card>

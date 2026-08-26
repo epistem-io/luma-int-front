@@ -63,6 +63,7 @@ export const LULCClassSummaryComponent = () => {
     selectedPredictors,
     numberOfTrees,
     minLeafPopulation,
+    splitRatio,
     isLULCSummaryChangeInput,
     selectedLULCSummaryEditSection,
     setSelectedLULCSummaryEditSection,
@@ -186,6 +187,14 @@ export const LULCClassSummaryComponent = () => {
                   {formattedMinLeafPopulation || "-"}
                 </p>
               </div>
+              <div>
+                <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
+                  {t("lulcParams.splitRatioSummary")}
+                </p>
+                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
+                  {splitRatio}% / {100 - splitRatio}%
+                </p>
+              </div>
             </div>
           </LULCSummarySection>
         </div>
@@ -213,6 +222,7 @@ export const LULCClassSummaryFooter = () => {
     selectedPredictors,
     numberOfTrees,
     minLeafPopulation,
+    splitRatio,
   } = useContext(MapGenerationContext);
   const { sessionId } = useContext(GlobalContext);
   const t = useTranslations("InteractivePanel");
@@ -243,6 +253,7 @@ export const LULCClassSummaryFooter = () => {
           session_id: sessionId,
           min_leaf: Number(minLeafPopulation.trim()),
           ntrees: Number(numberOfTrees.trim()),
+          split_ratio: splitRatio / 100,
           predictors: selectedPredictors,
         }),
       });

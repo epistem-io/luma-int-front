@@ -58,6 +58,7 @@ import { MapContext } from "@/contexts/mapContext";
 import {
   DataTrainingComponent,
   DataTrainingFooter,
+  DataTrainingScoreBanner,
 } from "./DataTrainingComponent";
 import { OSSComponent, OSSFooter } from "./OSSComponent";
 import { LULCParamsComponent, LULCParamsFooter } from "./LULCParamsComponent";
@@ -155,6 +156,7 @@ export const InteractivePanel = () => {
     setAreaScopingPolygonFileName,
     setAreaScopingPolygonFileSize,
     setAreaScopingPolygonUrl,
+    setAreaScopingRegency,
     setPolygonData,
     setSpatialResolution,
     selectedDefault,
@@ -165,6 +167,7 @@ export const InteractivePanel = () => {
     lucDefaultConfirmed,
     lucQuickRows,
     LUCfile,
+    isImprovementMode,
   } = useContext(MapGenerationContext);
 
   // Only the Own Classification flow guards back-navigation with the
@@ -206,6 +209,7 @@ export const InteractivePanel = () => {
             setAreaScopingPolygonFileName("");
             setAreaScopingPolygonFileSize(0);
             setAreaScopingPolygonUrl(null);
+            setAreaScopingRegency(null);
             vectorSource?.clear();
             setPolygonData(null);
             setSpatialResolution("");
@@ -280,13 +284,33 @@ export const InteractivePanel = () => {
     }, [selectedCustom, selectedDefault, isLucFlowView, lucView, hasOwnLucInputs]);
 
   const [isOpen, setIsOpen] = useState(true);
-  // const [subtitleHeight, setSubtitleHeight] = useState(0);
-  // const [footerHeight, setFooterHeight] = useState(0);
+  const isClampedSubtitleStep = stepKey === PANEL_COMPONENT_KEY.DATA_TRAINING;
+  const [isSubtitleExpanded, setIsSubtitleExpanded] = useState(false);
+  const [isSubtitleOverflowing, setIsSubtitleOverflowing] = useState(false);
+  const subtitleTextRef = useRef<HTMLParagraphElement>(null);
 
   const interactiveComponent = useMemo(() => {
     return PANEL_COMPONENT_ARRAY[stepKey];
   }, [stepKey, PANEL_COMPONENT_ARRAY]);
 
+  useEffect(() => {
+    setIsSubtitleExpanded(false);
+  }, [stepKey, interactiveComponent.subtitle]);
+
+  useEffect(() => {
+    const el = subtitleTextRef.current;
+    if (!el || !isClampedSubtitleStep) {
+      setIsSubtitleOverflowing(false);
+      return;
+    }
+    const measure = () =>
+      setIsSubtitleOverflowing(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isClampedSubtitleStep, isSubtitleExpanded, interactiveComponent.subtitle]);
+  
   // const subtitleRef = useRef<null | HTMLDivElement>(null);
   // const footerRef = useRef<null | HTMLDivElement>(null);
 
@@ -385,7 +409,7 @@ export const InteractivePanel = () => {
             "flex flex-col items-center justify-center relative px-4",
           )}
         >
-          <div ref={titleRef}>
+          <div ref={titleRef} className="w-full px-10">
             <p className="text-primary-pink text-2xl font-roboto font-bold tracking-[-0.24px] text-center">
               {interactiveComponent.title}
             </p>
@@ -430,9 +454,29 @@ export const InteractivePanel = () => {
           {interactiveComponent.subtitle && (
             <div ref={subtitleRef} className="">
               <div className="pb-4 px-4">
-                <p className="text-neutral-700-baru text-center font-aptos text-md font-regular leading-6">
+                <p
+                  ref={subtitleTextRef}
+                  className={cn(
+                    "text-neutral-700-baru text-center font-aptos text-md font-regular leading-6",
+                    isClampedSubtitleStep &&
+                      !isSubtitleExpanded &&
+                      "line-clamp-2",
+                  )}
+                >
                   {interactiveComponent.subtitle}
                 </p>
+                {isClampedSubtitleStep &&
+                  (isSubtitleOverflowing || isSubtitleExpanded) && (
+                    <button
+                      type="button"
+                      onClick={() => setIsSubtitleExpanded((prev) => !prev)}
+                      className="mx-auto block mt-1 font-aptos text-md font-semibold leading-6 text-primary-red-pink-normal hover:underline cursor-pointer"
+                    >
+                      {isSubtitleExpanded
+                        ? t("common.seeLess")
+                        : t("common.seeMore")}
+                    </button>
+                  )}
               </div>
               {/* Step-2 summary edit-mode banner: lives at the panel level
                   so it spans the full panel width, border to border. Inside
@@ -458,6 +502,33 @@ export const InteractivePanel = () => {
                     </p>
                   </div>
                 )}
+              {/* Step-4 improvement-mode banner (entered via Improve Accuracy
+                  on step 5): same panel-level, edge-to-edge treatment as the
+                  step-2 banner above, so it stays out of the scroll area. */}
+              {(stepKey === PANEL_COMPONENT_KEY.LULC_PARAMS ||
+                stepKey === PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY) &&
+                isImprovementMode && (
+                  <div className="px-4 py-3 space-y-1 mb-3 bg-amber-50">
+                    <div className="flex flex-row items-center gap-x-2">
+                      <SquarePenIcon className="size-4 text-amber-800" />
+                      <p className="font-aptos text-md font-bold leading-6 text-amber-800">
+                        {t("lulcParams.improvementMode")}
+                      </p>
+                    </div>
+                    <p className="font-aptos text-sm font-regular leading-5 text-amber-700">
+                      {t("lulcParams.improvementModeCaption")}
+                    </p>
+                  </div>
+                )}
+              {/* Step-3 score banner: pinned under the description, outside
+                  the scroll area, so Check Training Data Quality is always
+                  in view. A tall result scrolls within this wrapper instead
+                  of crushing the tabs area below. */}
+              {stepKey === PANEL_COMPONENT_KEY.DATA_TRAINING && (
+                <div className="px-4 pb-3 max-h-[45vh] overflow-y-auto">
+                  <DataTrainingScoreBanner />
+                </div>
+              )}
             </div>
           )}
           <div

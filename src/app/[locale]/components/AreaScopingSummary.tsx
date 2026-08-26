@@ -6,9 +6,11 @@ import Image from "next/image";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface Props {
   areaSizeString: string;
+  spatialResolutionString?: string;
   accordion?: boolean;
   isEditing?: boolean;
   onClickEdit?: () => void;
@@ -16,6 +18,7 @@ interface Props {
 
 export const AreaScopingSummary = ({
   areaSizeString,
+  spatialResolutionString,
   accordion = true,
   isEditing = false,
   onClickEdit,
@@ -42,7 +45,12 @@ export const AreaScopingSummary = ({
               {t("basicInformation.areaOfInterest")}
             </p>
             <div className="gap-y-5 grid grid-cols-2">
-              <div className="space-y-0 col-span-2">
+              <div
+                className={cn(
+                  "space-y-0",
+                  spatialResolutionString ? "col-span-1" : "col-span-2",
+                )}
+              >
                 <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
                   {t("basicInformation.areaOfInterestSubtitle")}
                 </p>
@@ -50,6 +58,16 @@ export const AreaScopingSummary = ({
                   {areaSizeString}
                 </p>
               </div>
+              {spatialResolutionString && (
+                <div className="space-y-0 col-span-1">
+                  <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
+                    {t("areaScoping.spatialResolution")}
+                  </p>
+                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
+                    {spatialResolutionString}
+                  </p>
+                </div>
+              )}
             </div>
             {isEditing && (
               <Button

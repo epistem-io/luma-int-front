@@ -109,6 +109,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
           areaScopingPolygonFileName: mg.areaScopingPolygonFileName,
           areaScopingPolygonFileSize: mg.areaScopingPolygonFileSize,
           polygonData: mg.polygonData,
+          areaScopingRegency: mg.areaScopingRegency,
           spatialResolution: mg.spatialResolution,
           temporalCoverage: mg.temporalCoverage,
           temporalCoverageUnit: mg.temporalCoverageUnit,
@@ -135,15 +136,20 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
               class_color,
             }),
           ),
+          // Use the stored filename/filesize, not the File object: after a
+          // restore the File is a 0-byte placeholder (new File([], name)),
+          // so re-saving from f.file.size would persist 0 → "0B" on the
+          // next refresh.
           uploadedFiles: mg.uploadedFilesArray.map((f) => ({
-            name: f.file.name,
-            size: f.file.size,
+            name: f.filename || f.file.name,
+            size: f.filesize || f.file.size,
           })),
           isTrainingDataChanged: mg.isTrainingDataChanged,
           sampleQualityConfirmed: mg.sampleQualityConfirmed,
           selectedPredictors: mg.selectedPredictors,
           numberOfTrees: mg.numberOfTrees,
           minLeafPopulation: mg.minLeafPopulation,
+          splitRatio: mg.splitRatio,
           mapGenerated: Boolean(mg.generateMapDownloadURL),
         }
       : null;
@@ -251,6 +257,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
         mg.setAreaScopingPolygonFileName(basicInfo.polygonFileName);
         mg.setAreaScopingPolygonFileSize(basicInfo.polygonFileSize);
         mg.setPolygonData(basicInfo.polygonData);
+        mg.setAreaScopingRegency(basicInfo.regency ?? null);
         mg.setSpatialResolution(basicInfo.spatialResolution);
         mg.setTemporalCoverage(basicInfo.temporalCoverage);
         mg.setTemporalCoverageUnit(basicInfo.temporalCoverageUnit);
@@ -350,6 +357,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
         mg.setSelectedPredictors(params.selectedPredictors);
         mg.setNumberOfTrees(params.numberOfTrees);
         mg.setMinLeafPopulation(params.minLeafPopulation);
+        if (typeof params.splitRatio === "number") {
+          mg.setSplitRatio(params.splitRatio);
+        }
         mg.setIsLULCParamsChanged(false);
       }
 
@@ -363,6 +373,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       if (drafts?.params) {
         mg.setSelectedPredictors(drafts.params.selectedPredictors);
         mg.setNumberOfTrees(drafts.params.numberOfTrees);
+        if (typeof drafts.params.splitRatio === "number") {
+          mg.setSplitRatio(drafts.params.splitRatio);
+        }
       }
 
       lastConfirmationSigRef.current = "";

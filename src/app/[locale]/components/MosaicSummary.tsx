@@ -19,6 +19,8 @@ import { useContext, useEffect, useState } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import {
   BASIC_INFORMATION_ACCORDION_TYPE,
+  GET_MOSAIC_DOWNLOAD_URL,
+  MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE,
   PANEL_COMPONENT_KEY,
   TEMPORAL_COVERAGE_ARRAY,
 } from "@/constants";
@@ -43,6 +45,7 @@ import {
 
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
+import { MosaicDownloadDialog } from "./MosaicDownloadDialog";
 
 export const MosaicSummary = () => {
   const { temporalCoverage, temporalCoverageUnit, polygonData } =
@@ -98,9 +101,71 @@ export const MosaicSummary = () => {
     // });
   }, []);
 
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [isFetchingDownloadUrl, setIsFetchingDownloadUrl] = useState(false);
+
   const isDownloadMosaicDisabled =
     isMosaicLoading ||
+    isFetchingDownloadUrl ||
     (!!mosaicStatistic && mosaicStatistic.download_url === "");
+
+  /**
+   * With the backend fast path, /image-mosaic returns download_url = null and
+   * the GeoTIFF link is built only when the user actually asks for it.
+   */
+  const resolveMosaicDownloadUrl = async (): Promise<string> => {
+    if (mosaicStatistic?.download_url) return mosaicStatistic.download_url;
+    if (mosaicStatistic?.download_url === "") return "";
+
+    const response = await fetch(
+      `${GET_MOSAIC_DOWNLOAD_URL}?${new URLSearchParams({ session_id: sessionId })}`,
+    );
+    const json: GetMosaicDownloadUrlRes = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        `${json?.error?.message || response.statusText}. Trace: ${json?.trace}`,
+      );
+    }
+    return json.results?.download_url ?? "";
+  };
+
+  const downloadMosaicToDevice = async () => {
+    const fileUrl = await resolveMosaicDownloadUrl();
+    if (!fileUrl) {
+      toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
+      return;
+    }
+    const response = await fetch(fileUrl);
+    const blob = await response.blob();
+    const filename = response.headers
+      .get("content-disposition")
+      ?.split("filename=")[1];
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.download = filename || "mosaic-map";
+    a.style.display = "none";
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
+
+  const handleConfirmDownload = async () => {
+    setIsFetchingDownloadUrl(true);
+    try {
+      await downloadMosaicToDevice();
+      setIsDownloadDialogOpen(false);
+    } catch (e) {
+      toast.error(`Error on downloading mosaic: ${e}`, {
+        duration: Infinity,
+        dismissible: true,
+        closeButton: true,
+      });
+    } finally {
+      setIsFetchingDownloadUrl(false);
+    }
+  };
 
   return (
     <div className="space-y-0">
@@ -216,23 +281,7 @@ export const MosaicSummary = () => {
               variant={"ghost"}
               className="p-0 hover:bg-transparent cursor-pointer ml-auto"
               disabled={isDownloadMosaicDisabled}
-              onClick={async () => {
-
-                const fileUrl = mosaicStatistic?.download_url || "";
-                const response = await fetch(fileUrl);
-                const blob = await response.blob();
-                const filename = response.headers
-                  .get("content-disposition")
-                  ?.split("filename=")[1];
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.download = filename || "mosaic-map";
-                a.style.display = "none";
-                a.href = url;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-              }}
+              onClick={() => setIsDownloadDialogOpen(true)}
             >
               <div className="">
                 <p className="text-neutral-700-baru font-aptos text-md font-regular leading-6 underline">
@@ -241,6 +290,12 @@ export const MosaicSummary = () => {
               </div>
             </Button>
           </div>
+          <MosaicDownloadDialog
+            open={isDownloadDialogOpen}
+            onOpenChange={setIsDownloadDialogOpen}
+            onConfirm={handleConfirmDownload}
+            isSubmitting={isFetchingDownloadUrl}
+          />
         </div>
       </div>
     </div>

@@ -31,6 +31,7 @@ export interface CheckpointDrafts {
   params?: {
     selectedPredictors: string[];
     numberOfTrees: string;
+    splitRatio?: number;
   };
 }
 
@@ -49,6 +50,7 @@ export interface SessionCheckpoint {
     polygonFileName: string;
     polygonFileSize: number;
     polygonData: { area_size: number; id: string } | null;
+    regency?: RegencyOption | null;
     spatialResolution: string;
     temporalCoverage: string;
     temporalCoverageUnit: string;
@@ -82,6 +84,8 @@ export interface SessionCheckpoint {
     selectedPredictors: string[];
     numberOfTrees: string;
     minLeafPopulation: string;
+    /** Optional so checkpoints saved before this field existed still load. */
+    splitRatio?: number;
   };
   mapGenerated?: boolean;
   drafts?: CheckpointDrafts;
@@ -98,6 +102,7 @@ export interface CheckpointInputs {
   areaScopingPolygonFileName: string;
   areaScopingPolygonFileSize: number;
   polygonData: { area_size: number; id: string } | null;
+  areaScopingRegency: RegencyOption | null;
   spatialResolution: string;
   temporalCoverage: string;
   temporalCoverageUnit: string;
@@ -122,6 +127,7 @@ export interface CheckpointInputs {
   selectedPredictors: string[];
   numberOfTrees: string;
   minLeafPopulation: string;
+  splitRatio: number;
   mapGenerated: boolean;
 }
 
@@ -206,6 +212,7 @@ export function buildDrafts(i: CheckpointInputs): CheckpointDrafts | undefined {
       params: {
         selectedPredictors: i.selectedPredictors,
         numberOfTrees: i.numberOfTrees,
+        splitRatio: i.splitRatio,
       },
     };
   }
@@ -235,6 +242,7 @@ export function buildCheckpoint(
       polygonFileName: i.areaScopingPolygonFileName,
       polygonFileSize: i.areaScopingPolygonFileSize,
       polygonData: i.polygonData,
+      regency: i.areaScopingRegency,
       spatialResolution: i.spatialResolution,
       temporalCoverage: i.temporalCoverage,
       temporalCoverageUnit: i.temporalCoverageUnit,
@@ -274,6 +282,7 @@ export function buildCheckpoint(
       selectedPredictors: i.selectedPredictors,
       numberOfTrees: i.numberOfTrees,
       minLeafPopulation: i.minLeafPopulation,
+      splitRatio: i.splitRatio,
     };
   }
 

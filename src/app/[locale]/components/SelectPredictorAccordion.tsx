@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ChevronDown, Upload } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext } from "react";
-import { LULC_PREDICTORS } from "./lulcPredictors";
+import { LULC_PREDICTOR_GROUPS, LULC_PREDICTORS } from "./lulcPredictors";
 
 export const SelectPredictorAccordion = () => {
   const tInteractive = useTranslations("InteractivePanel");
@@ -52,41 +52,48 @@ export const SelectPredictorAccordion = () => {
         </p>
 
         <div className="space-y-5">
-          <div className="space-y-2.5 rounded-xl border border-neutral-400 bg-white p-3">
-            {LULC_PREDICTORS.map((predictor) => {
-              const checked = selectedPredictors.includes(predictor.value);
-              const id = `predictor-${predictor.value}`;
+          <div className="space-y-5 rounded-xl border border-neutral-400 bg-white p-3">
+            {LULC_PREDICTOR_GROUPS.map((group) => (
+              <div key={group.key} className="space-y-2.5">
+                <p className="font-aptos text-base font-medium leading-6 text-neutral-700">
+                  {tInteractive(`lulcParams.predictorGroups.${group.key}`)}
+                </p>
+                {group.predictors.map((predictor) => {
+                  const checked = selectedPredictors.includes(predictor.value);
+                  const id = `predictor-${predictor.value}`;
+                  const disabled = isAutoPointsFlow || predictor.disabled;
 
-              return (
-                <label
-                  key={id}
-                  htmlFor={id}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-neutral-100"
-                >
-                  <Checkbox
-                    id={id}
-                    checked={checked}
-                    onCheckedChange={(nextChecked) =>
-                      togglePredictor(predictor.value, nextChecked === true)
-                    }
-                    disabled={isAutoPointsFlow}
-                    className={cn(
-                      "mt-0.5 border-neutral-500",
-                      checked &&
-                        "border-primary-pink data-[state=checked]:border-primary-pink data-[state=checked]:bg-primary-pink",
-                    )}
-                  />
-                  <div className="space-y-1">
-                    <p className="text-m-semibold text-text-icons-base-second">
-                      {predictor.label}
-                    </p>
-                    <p className="text-xs-regular text-text-icons-base-second">
-                      {predictor.description}
-                    </p>
-                  </div>
-                </label>
-              );
-            })}
+                  return (
+                    <label
+                      key={id}
+                      htmlFor={id}
+                      className={cn(
+                        "flex items-start gap-3 rounded-lg px-1 py-1.5 transition-colors",
+                        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-neutral-100",
+                      )}
+                    >
+                      <Checkbox
+                        id={id}
+                        checked={checked}
+                        onCheckedChange={(nextChecked) =>
+                          togglePredictor(predictor.value, nextChecked === true)
+                        }
+                        disabled={disabled}
+                        className={cn(
+                          "mt-0.5 border-neutral-500",
+                          checked &&
+                            "border-primary-pink data-[state=checked]:border-primary-pink data-[state=checked]:bg-primary-pink",
+                        )}
+                      />
+                      <div className="space-y-1">
+                        <p className="text-m-semibold text-text-icons-base-second">{predictor.label}</p>
+                        <p className="text-xs-regular text-text-icons-base-second">{predictor.description}</p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            ))}
           </div>
 
           {/* Whole disabled-upload section shares one grey container: the
