@@ -210,30 +210,28 @@ const SampleQualityResultCard = ({
         </div>
       )}
 
-      {result.problem_pairs.length > 0 && (
-        <div className="bg-white rounded-md px-3 py-2 font-aptos text-sm font-regular leading-5 text-text-icons-base-main">
-          <p className="font-bold">
-            {t("dataTraining.sampleQualityProblemPairs")}
-          </p>
-          <div className="">
-            {result.problem_pairs.map((item, index) => (
-              <div
-                className="flex flex-row gap-x-2 items-start"
-                key={`sample-quality-pair-${index}`}
-              >
-                <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
-                <p className="">
-                  {t("dataTraining.sampleQualityPair", {
-                    X: item.Class1_Name,
-                    Y: item.Class2_Name,
-                  })}
-                </p>
-              </div>
-            ))}
+      {result.problem_pairs
+        .slice()
+        .sort((a, b) => a.TD_Distance - b.TD_Distance)
+        .map((item, index) => (
+          <div
+            className="flex flex-row gap-x-2 items-start"
+            key={`sample-quality-pair-${index}`}
+          >
+            <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main"/>
+            <p className="">
+              {t("dataTraining.sampleQualityPair", {
+                X: item.Class1_Name,
+                Y: item.Class2_Name,
+              })}{" "}
+              <span className={cn("font-bold", item.TD_Distance < 1.0 ? "text-danger-800" : "text-warning-700")}>
+                {t("dataTraining.sampleQualityPairTD", {
+                  X: item.TD_Distance.toFixed(2),
+                })}
+              </span>
+            </p>
           </div>
-          <p className="">{t("dataTraining.sampleQualityAccuracyWarning")}</p>
-        </div>
-      )}
+      ))}
 
       <div className="grid grid-cols-3 gap-x-3">
         <div className="bg-white/60 rounded-md p-2 text-center space-y-1">

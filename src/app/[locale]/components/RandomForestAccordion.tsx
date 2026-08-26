@@ -122,7 +122,12 @@ export const RandomForestAccordion = () => {
             })}
           </p>
         </div>
-        <div className="rounded-md p-0 space-y-5 bg-white cursor-not-allowed">
+        <div
+          className={cn(
+            "rounded-md p-0 space-y-5 bg-white",
+            isAutoPointsFlow && "cursor-not-allowed",
+          )}
+        >
           <div className="grid grid-cols-2 space-x-5">
             <div className="space-y-2">
               <Label>
@@ -193,7 +198,9 @@ export const RandomForestAccordion = () => {
               min={0}
               max={100}
               value={[splitRatio]}
+              disabled={isAutoPointsFlow}
               trackBgColor="bg-neutral-300"
+              className="cursor-pointer data-[disabled]:cursor-not-allowed"
               onValueChange={(value) => setSplitRatio(value[0] ?? 70)}
             />
             <div className="flex flex-row justify-between">

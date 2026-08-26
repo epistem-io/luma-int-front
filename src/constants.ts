@@ -170,18 +170,24 @@ export const DEFAULT_LUC = [
 ];
 
 export const SATELLITE_OPTIONS_ARRAY = [
-  // {
-  //   value: "L1_RAW",
-  //   label: "Landsat 1",
-  // },
-  // {
-  //   value: "L2_RAW",
-  //   label: "Landsat 2",
-  // },
-  // {
-  //   value: "L3_RAW",
-  //   label: "Landsat 3",
-  // },
+  {
+    value: "L1_RAW",
+    label: "Landsat 1",
+    startYear: 1972,
+    endYear: 1978,
+  },
+  {
+    value: "L2_RAW",
+    label: "Landsat 2",
+    startYear: 1975,
+    endYear: 1982,
+  },
+  {
+    value: "L3_RAW",
+    label: "Landsat 3",
+    startYear: 1978,
+    endYear: 1983,
+  },
   {
     value: "L4_SR",
     label: "Landsat 4",

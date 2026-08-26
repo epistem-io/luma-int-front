@@ -450,6 +450,7 @@
       "sampleQualityLowSamplesCaption": "With this few pixels, the separability values for these classes may be unreliable.",
       "sampleQualityProblemPairs": "Problematic class pairs:",
       "sampleQualityPair": "Class {X} and Class {Y}",
+      "sampleQualityPairTD": "(TD {Z})",
       "sampleQualityAccuracyWarning": "This similarity may reduce classification accuracy.",
       "sampleQualityGoodTile": "Good > 1.8",
       "sampleQualityWeakTile": "Weak 1.0 - 1.8",

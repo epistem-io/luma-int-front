@@ -450,6 +450,7 @@
       "sampleQualityLowSamplesCaption": "Dengan piksel sesedikit ini, nilai keterpisahan kelas tersebut mungkin kurang dapat diandalkan.",
       "sampleQualityProblemPairs": "Pasangan yang bermasalah :",
       "sampleQualityPair": "Kelas {X} dan Kelas {Y}",
+      "sampleQualityPairTD": "(TD {Z})",
       "sampleQualityAccuracyWarning": "Kemiripan ini dapat menurunkan akurasi klasifikasi.",
       "sampleQualityGoodTile": "Good > 1.8",
       "sampleQualityWeakTile": "Weak 1.0 - 1.8",
