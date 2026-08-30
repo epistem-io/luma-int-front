@@ -29,6 +29,8 @@ import {
   buildCheckpoint,
   buildDrafts,
   type CheckpointInputs,
+  type CheckpointOwner,
+  isStep1Recorded,
   panelToWizardStep,
   type SessionCheckpoint,
   shouldOfferResume,
@@ -48,6 +50,9 @@ interface SessionCheckpointContextType {
   recordedSteps: boolean[];
   pendingResume: SessionCheckpoint | null;
   isRestoring: boolean;
+  canSaveProgress: boolean;
+  hasUnclaimedCheckpoint: boolean;
+  saveProgress: () => boolean;
   resumePendingSession: () => void;
   discardPendingSession: () => void;
   clearCheckpoint: () => void;
@@ -59,6 +64,9 @@ const DEFAULT_VALUE: SessionCheckpointContextType = {
   recordedSteps: [false, false, false, false, false],
   pendingResume: null,
   isRestoring: false,
+  canSaveProgress: false,
+  hasUnclaimedCheckpoint: false,
+  saveProgress: () => false,
   resumePendingSession: () => {},
   discardPendingSession: () => {},
   clearCheckpoint: () => {},
@@ -93,66 +101,63 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     }
   }, [mapContext.polygon]);
 
+  const baseInputs: Omit<CheckpointInputs, "owner"> = {
+    sessionId,
+    stepKey: mg.stepKey,
+    progressPanelIndex: mg.progressPanelIndex,
+    areaScopingType: mg.areaScopingType,
+    polygonGeoJSON,
+    areaScopingPolygonArea: mg.areaScopingPolygonArea,
+    areaScopingPolygonFileName: mg.areaScopingPolygonFileName,
+    areaScopingPolygonFileSize: mg.areaScopingPolygonFileSize,
+    polygonData: mg.polygonData,
+    areaScopingRegency: mg.areaScopingRegency,
+    spatialResolution: mg.spatialResolution,
+    temporalCoverage: mg.temporalCoverage,
+    temporalCoverageUnit: mg.temporalCoverageUnit,
+    satelliteSource: mg.satelliteSource,
+    maximumCloudCover: mg.maximumCloudCover,
+    lucSource: mg.lucSource,
+    lucView: mg.lucView,
+    lucCustomTab: mg.lucCustomTab,
+    lucQuickPhase: mg.lucQuickPhase,
+    lucExcelConfirmed: mg.lucExcelConfirmed,
+    lucDefaultConfirmed: mg.lucDefaultConfirmed,
+    lucQuickRows: mg.lucQuickRows,
+    defaultArray: mg.defaultArray,
+    classArray: mg.classArray,
+    LUCfilename: mg.LUCfilename,
+    LUCfilesize: mg.LUCfilesize,
+    dataTrainingActiveTab: mg.dataTrainingActiveTab,
+    markerArray: mapContext.markerArray.map(
+      ({ coordinates, id, name, class_id, class_color }) => ({
+        coordinates,
+        id,
+        name,
+        class_id,
+        class_color,
+      }),
+    ),
+    uploadedFiles: mg.uploadedFilesArray.map((f) => ({
+      name: f.filename || f.file.name,
+      size: f.filesize || f.file.size,
+    })),
+    isTrainingDataChanged: mg.isTrainingDataChanged,
+    sampleQualityConfirmed: mg.sampleQualityConfirmed,
+    selectedPredictors: mg.selectedPredictors,
+    numberOfTrees: mg.numberOfTrees,
+    minLeafPopulation: mg.minLeafPopulation,
+    splitRatio: mg.splitRatio,
+    mapGenerated: Boolean(mg.generateMapDownloadURL),
+  };
+
+  const ownerFromUser = (u: { email: string; id?: string | number }): CheckpointOwner =>
+    u.id !== undefined ? { email: u.email, id: u.id } : { email: u.email };
+
+  // Autosave stays login-gated: inputs is null while anonymous, so the
+  // confirmation/draft effects below never fire for logged-out users.
   const inputs: CheckpointInputs | null =
-    isAuthenticated && user
-      ? {
-          owner:
-            user.id !== undefined
-              ? { email: user.email, id: user.id }
-              : { email: user.email },
-          sessionId,
-          stepKey: mg.stepKey,
-          progressPanelIndex: mg.progressPanelIndex,
-          areaScopingType: mg.areaScopingType,
-          polygonGeoJSON,
-          areaScopingPolygonArea: mg.areaScopingPolygonArea,
-          areaScopingPolygonFileName: mg.areaScopingPolygonFileName,
-          areaScopingPolygonFileSize: mg.areaScopingPolygonFileSize,
-          polygonData: mg.polygonData,
-          areaScopingRegency: mg.areaScopingRegency,
-          spatialResolution: mg.spatialResolution,
-          temporalCoverage: mg.temporalCoverage,
-          temporalCoverageUnit: mg.temporalCoverageUnit,
-          satelliteSource: mg.satelliteSource,
-          maximumCloudCover: mg.maximumCloudCover,
-          lucSource: mg.lucSource,
-          lucView: mg.lucView,
-          lucCustomTab: mg.lucCustomTab,
-          lucQuickPhase: mg.lucQuickPhase,
-          lucExcelConfirmed: mg.lucExcelConfirmed,
-          lucDefaultConfirmed: mg.lucDefaultConfirmed,
-          lucQuickRows: mg.lucQuickRows,
-          defaultArray: mg.defaultArray,
-          classArray: mg.classArray,
-          LUCfilename: mg.LUCfilename,
-          LUCfilesize: mg.LUCfilesize,
-          dataTrainingActiveTab: mg.dataTrainingActiveTab,
-          markerArray: mapContext.markerArray.map(
-            ({ coordinates, id, name, class_id, class_color }) => ({
-              coordinates,
-              id,
-              name,
-              class_id,
-              class_color,
-            }),
-          ),
-          // Use the stored filename/filesize, not the File object: after a
-          // restore the File is a 0-byte placeholder (new File([], name)),
-          // so re-saving from f.file.size would persist 0 → "0B" on the
-          // next refresh.
-          uploadedFiles: mg.uploadedFilesArray.map((f) => ({
-            name: f.filename || f.file.name,
-            size: f.filesize || f.file.size,
-          })),
-          isTrainingDataChanged: mg.isTrainingDataChanged,
-          sampleQualityConfirmed: mg.sampleQualityConfirmed,
-          selectedPredictors: mg.selectedPredictors,
-          numberOfTrees: mg.numberOfTrees,
-          minLeafPopulation: mg.minLeafPopulation,
-          splitRatio: mg.splitRatio,
-          mapGenerated: Boolean(mg.generateMapDownloadURL),
-        }
-      : null;
+    isAuthenticated && user ? { owner: ownerFromUser(user), ...baseInputs } : null;
 
   const candidate = inputs
     ? buildCheckpoint(inputs, buildDrafts(inputs))
@@ -182,6 +187,32 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       ),
     [writeCheckpoint],
   );
+
+  const [hasUnclaimedCheckpoint, setHasUnclaimedCheckpoint] = useState(false);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (isAuthenticated) {
+      setHasUnclaimedCheckpoint(false);
+      return;
+    }
+    void sessionStore.load().then((cp) => {
+      setHasUnclaimedCheckpoint(cp !== null && cp.owner === null);
+    });
+  }, [isAuthenticated, isHydrated]);
+
+  const canSaveProgress = !isAuthenticated && isStep1Recorded({ owner: null, ...baseInputs})
+  const anonInputsRef = useRef<CheckpointInputs>({owner: null, ...baseInputs})
+  anonInputsRef.current = {owner: null, ...baseInputs}
+
+  const saveProgress = useCallback((): boolean => {
+    const i = anonInputsRef.current
+    const cp = buildCheckpoint(i, buildDrafts(i))
+    if (!cp) return false
+    writeCheckpoint(cp)
+    setHasUnclaimedCheckpoint(true)
+    return true
+  }, [writeCheckpoint])
 
   const lastConfirmationSigRef = useRef("");
   useEffect(() => {
@@ -238,8 +269,13 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     if (offeredEmailsRef.current.has(user.email)) return;
     offeredEmailsRef.current.add(user.email);
     void sessionStore.load().then((cp) => {
-      if (shouldOfferResume(cp, user, sessionId)) {
-        setPendingResume(cp);
+      let effective = cp;
+      if (cp && cp.owner === null) {
+        effective = { ...cp, owner: ownerFromUser(user) };
+        void sessionStore.save(effective);
+      }
+      if (shouldOfferResume(effective, user, sessionId)) {
+        setPendingResume(effective);
       }
     });
   }, [isHydrated, isAuthenticated, user, sessionId]);
@@ -437,6 +473,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       recordedSteps,
       pendingResume,
       isRestoring,
+      canSaveProgress,
+      hasUnclaimedCheckpoint,
+      saveProgress,
       resumePendingSession,
       discardPendingSession,
       clearCheckpoint,
@@ -447,6 +486,9 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       recordedSteps,
       pendingResume,
       isRestoring,
+      canSaveProgress,
+      hasUnclaimedCheckpoint,
+      saveProgress,
       resumePendingSession,
       discardPendingSession,
       clearCheckpoint,

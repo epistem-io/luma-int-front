@@ -96,6 +96,13 @@
     "fileTooBig": "The file is too big",
     "fileTooBigCaption": "File exceeds {X}. Please select another file"
   },
+  "SaveProgress": {
+    "button": "Save",
+    "savedToast": "Progress saved on this device. Log in or sign up to keep it.",
+    "bannerText": "You have saved progress on this device.",
+    "bannerAction": "Log in to restore",
+    "nothingToSaveToast": "Nothing to save yet — your progress will be saved automatically after you log in."
+  },
   "LoginModal": {
     "title": "Login",
     "description": "Enter your email below to login to your account",

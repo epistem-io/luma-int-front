@@ -11,8 +11,11 @@ function isValidCheckpoint(value: unknown): value is SessionCheckpoint {
   if (typeof value !== "object" || value === null) return false;
   const cp = value as Record<string, unknown>;
   const owner = cp.owner as Record<string, unknown> | null | undefined;
+  const ownerValid = 
+    owner === null ||
+    (typeof owner === "object" && typeof owner.email === "string");
   return (
-    cp.version === CHECKPOINT_VERSION &&
+    (cp.version === 1 || cp.version === CHECKPOINT_VERSION) &&
     typeof cp.savedAt === "string" &&
     typeof cp.sessionId === "string" &&
     typeof cp.stepKey === "string" &&
@@ -20,9 +23,7 @@ function isValidCheckpoint(value: unknown): value is SessionCheckpoint {
     typeof cp.lastStepWithData === "number" &&
     cp.lastStepWithData >= 1 &&
     cp.lastStepWithData <= 5 &&
-    typeof owner === "object" &&
-    owner !== null &&
-    typeof owner.email === "string"
+    ownerValid
   );
 }
 
@@ -55,7 +56,7 @@ export const sessionStore = {
         removeEntry();
         return null;
       }
-      return parsed;
+      return { ...parsed, version: CHECKPOINT_VERSION };
     } catch {
       removeEntry();
       return null;

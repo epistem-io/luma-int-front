@@ -4,10 +4,13 @@ import { useContext } from "react";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Save } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
+import { toast } from "sonner"
+import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import LanguageToggle from "./LanguageToggle";
 import { Button } from "./ui/button";
 import {
@@ -51,6 +54,8 @@ export function NavBar({ className }: NavBarProps) {
   const t = useTranslations("LoginModal");
   const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { setIsLoginModalOpen } = useContext(GlobalContext);
+  const tSave = useTranslations("SaveProgress");
+  const { saveProgress } = useContext(SessionCheckpointContext);
   const userInitials = getUserInitials(user?.name, user?.email);
 
   return (
@@ -150,16 +155,33 @@ export function NavBar({ className }: NavBarProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button
-                type="button"
-                variant={"outline"}
-                className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
-                onClick={() => {
-                  setIsLoginModalOpen(true);
-                }}
-              >
-                {t("title")}
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant={"ghost"}
+                  className="text-neutral-700 hover:cursor-pointer"
+                  onClick={() => {
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  {t("title")}
+                </Button>
+                <Button
+                  type="button"
+                  className="rounded-full bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90 rounded-[16px]"
+                  onClick={() => {
+                    if (saveProgress()) {
+                      toast.success(tSave("savedToast"));
+                    } else {
+                      toast.info(tSave("nothingToSaveToast"));
+                    }
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  <Save className="h-4 w-4" />
+                  {tSave("button")}
+                </Button>
+              </>
             )}
             {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button

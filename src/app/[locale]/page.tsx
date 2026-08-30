@@ -9,6 +9,7 @@ import { ProgressPanel } from "./components/ProgressPanel";
 import { SaveStatusIndicator } from "@/components/SaveStatusIndicator";
 import { SignUpPanel } from "./components/SignUpPanel";
 import { ZoomButton } from "./components/ZoomButton";
+import { RestoreProgressBanner } from "@/components/RestoreProgressBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,7 @@ export default function Home() {
       <div className="absolute z-20 top-8 right-24">
         <SaveStatusIndicator />
       </div>
+      <RestoreProgressBanner />
       <div className="flex flex-col gap-y-4 absolute right-10 top-8 ">
         <ZoomButton />
         <BasemapButton />

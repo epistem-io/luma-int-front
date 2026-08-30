@@ -96,6 +96,13 @@
     "fileTooBig": "Berkas terlalu besar",
     "fileTooBigCaption": "Ukuran berkas melebihi {X}. Silakan pilih berkas lain"
   },
+  "SaveProgress": {
+    "button": "Simpan",
+    "savedToast": "Progres tersimpan di perangkat ini. Masuk atau daftar untuk menyimpannya.",
+    "bannerText": "Anda memiliki progres tersimpan di perangkat ini.",
+    "bannerAction": "Masuk untuk melanjutkan",
+    "nothingToSaveToast": "Belum ada progres untuk disimpan — progres Anda akan tersimpan otomatis setelah masuk."
+  },
   "LoginModal": {
     "title": "Masuk",
     "description": "Masukkan email Anda di bawah untuk masuk ke akun Anda",
