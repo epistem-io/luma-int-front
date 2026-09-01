@@ -168,7 +168,7 @@ export function NavBar({ className }: NavBarProps) {
                 </Button>
                 <Button
                   type="button"
-                  className="rounded-full bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90 rounded-[16px]"
+                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
                   onClick={() => {
                     if (saveProgress()) {
                       toast.success(tSave("savedToast"));
