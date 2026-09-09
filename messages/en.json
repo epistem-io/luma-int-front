@@ -458,6 +458,7 @@
       "sampleQualityProblemPairs": "Problematic class pairs:",
       "sampleQualityPair": "Class {X} and Class {Y}",
       "sampleQualityPairTD": "(TD {Z})",
+      "sampleQualityMorePairs": "and {X} more pairs below the good threshold",
       "sampleQualityAccuracyWarning": "This similarity may reduce classification accuracy.",
       "sampleQualityGoodTile": "Good > 1.8",
       "sampleQualityWeakTile": "Weak 1.0 - 1.8",

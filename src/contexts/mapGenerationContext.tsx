@@ -528,9 +528,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   // "custom" = user-defined classes (quick table or uploaded excel). Drives
   // the outer custom-vs-default tab locking.
   const selectedCustom = lucSource === "excel" || lucSource === "quick";
-  // Flows that get default training points auto-placed (default scheme + quick
-  // table), as opposed to the manual training UI used for uploaded excel.
-  const isAutoPointsFlow = lucSource === "default" || lucSource === "quick";
+  // Only the default scheme gets reference training points auto-placed; the
+  // quick table and uploaded excel both place points manually.
+  const isAutoPointsFlow = lucSource === "default";
 
   const [isLUCLoading, setIsLUCLoading] = useState(DEFAULT_VALUE.isLUCLoading);
 

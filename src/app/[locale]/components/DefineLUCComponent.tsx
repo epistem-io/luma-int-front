@@ -1735,10 +1735,10 @@ export const DefineLUCFooter = () => {
 
     setIsLUCLoading(true);
 
-    // Quick table and default scheme both submit as JSON and get default
-    // training points auto-placed; they differ only in the class source.
-    // Quick-table class ids are user-typed strings; the backend parses them
-    // to integers, so invalid ids surface as a submit error toast.
+    // Quick table and default scheme both submit as JSON. The backend only
+    // auto-places reference training points when the classes match the
+    // default scheme; quick-table classes come back with no points and the
+    // user samples them manually on step 3.
     const classes: { id: string | number; name: string; color: string }[] =
       lucSource === "quick"
         ? validQuickRows.map((r) => ({

@@ -458,6 +458,7 @@
       "sampleQualityProblemPairs": "Pasangan yang bermasalah :",
       "sampleQualityPair": "Kelas {X} dan Kelas {Y}",
       "sampleQualityPairTD": "(TD {Z})",
+      "sampleQualityMorePairs": "dan {X} pasangan lain di bawah ambang baik",
       "sampleQualityAccuracyWarning": "Kemiripan ini dapat menurunkan akurasi klasifikasi.",
       "sampleQualityGoodTile": "Good > 1.8",
       "sampleQualityWeakTile": "Weak 1.0 - 1.8",
