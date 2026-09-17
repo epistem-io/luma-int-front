@@ -6,6 +6,8 @@ import { LUCClassTable } from "./LUCClassTable";
 import { MapContext } from "@/contexts/mapContext";
 import { PANEL_COMPONENT_KEY, POINTING_TYPE } from "@/constants";
 import { useTranslations } from "next-intl";
+import { DownloadIcon } from "lucide-react";
+import { downloadTrainingSamplesShapefile } from "@/utils/downloadTrainingSamples";
 
 export const OSSComponent = () => {
   const { pointingType, selectedClass, classArray } =
@@ -14,18 +16,10 @@ export const OSSComponent = () => {
   const { markerCursor, removeMarkerCursor, setPointingType } =
     useContext(MapContext);
 
-  // const [hasCalledMarkerCursor, setHasCalledMarkerCursor] = useState(false);
-
   useEffect(() => {
-    // if (hasCalledMarkerCursor) return;
-
-    // setHasCalledMarkerCursor(true);
-    // console.log("markerCursor", pointingType);
-    // setPointingType(pointingType);
     markerCursor(pointingType, classArray, false, selectedClass);
 
     return () => {
-      // console.log("cleanup marker cursor");
       removeMarkerCursor();
     };
   }, []);
@@ -38,7 +32,7 @@ export const OSSComponent = () => {
 };
 
 export const OSSFooter = () => {
-  const { setStepKey, setDataTrainingActiveTab } =
+  const { setStepKey, setDataTrainingActiveTab, classArray } =
     useContext(MapGenerationContext);
   const { markerArray, setMarkerId, overlay, removeMarkerCursor } =
     useContext(MapContext);
@@ -51,9 +45,6 @@ export const OSSFooter = () => {
     (item) => item.class_id !== -1,
   );
 
-  // End Pointing unlocks once at least one point exists and every point has a
-  // class; it only returns to the sampling panel — posting and the quality
-  // analysis happen there via the score banner's Generate button.
   const isNextDisabled = markerArray.length === 0 || !allMarkerClassFilled;
 
   const onClickNext = () => {
@@ -68,7 +59,16 @@ export const OSSFooter = () => {
 
   return (
     <div className="grid grid-cols-2 p-3 pt-4 gap-x-4">
-      <div></div>
+      <Button
+        variant="outline"
+        disabled={isNextDisabled}
+        onClick={() => 
+          downloadTrainingSamplesShapefile(markerArray, classArray, `training-samples-${sessionId}`)
+        }
+      >
+        <DownloadIcon className="size-4" />
+        {t("dataTraining.downloadSamples")}
+      </Button>
       <Button
         onClick={() => {
           onClickNext();

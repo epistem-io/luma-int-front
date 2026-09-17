@@ -47,6 +47,7 @@ import {
   BadgeCheck,
   ChevronDown,
   ChevronLeft,
+  DownloadIcon,
   FileTextIcon,
   Trash2Icon,
   UploadIcon,
@@ -65,6 +66,7 @@ import { Point } from "ol/geom";
 import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { Input } from "@/components/ui/input";
+import { downloadTrainingSamplesShapefile } from "@/utils/downloadTrainingSamples";
 
 // Separability analysis tuning bounds/defaults (same as LumaLite Module 4).
 const SEPARABILITY_SCALE_DEFAULT = 30;
@@ -1175,6 +1177,18 @@ export const DataTrainingComponent = () => {
                           >
                             {t("dataTraining.startPointing")}
                           </Button>
+                          {markerArray.length > 0 && (
+                            <Button
+                              variant={"outline"}
+                              disabled={markerArray.some((item) => item.class_id === -1)}
+                              onClick={() => 
+                                downloadTrainingSamplesShapefile(markerArray, classArray, `training-samples-${sessionId}`)
+                              }
+                            >
+                              <DownloadIcon className="size-4" />
+                              {t("dataTraining.downloadSamples")}
+                            </Button>
+                          )}
                         </RadioGroup>
                       </div>
                     </TabsContent>

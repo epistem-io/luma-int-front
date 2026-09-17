@@ -428,6 +428,7 @@
       "onScreenSamplingPanelDescription": "Add points or draw polygons directly on the displayed map for all land use and land cover classes in your mapping area. We recommend adding at least 25 points per LULC class to improve mapping accuracy.",
       "deletePoint": "Delete point",
       "endPointing": "End Pointing",
+      "downloadSamples": "Download sample points",
       "sampleScoreTitle": "Check your Data Training Score",
       "sampleScoreCaption": "Evaluate class separability to ensure your LULC map achieves maximum accuracy.",
       "checkScore": "Check Score",
