@@ -246,7 +246,7 @@ export const getAvailableSatelliteOptionsByYear = (year?: number) => {
       satellite.endYear === undefined || year <= satellite.endYear;
 
     return isAfterStartYear && isBeforeEndYear;
-  });
+  }).sort((a, b) => b.startYear - a.startYear);
 };
 
 export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endYear?: number) => {
@@ -257,7 +257,7 @@ export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endY
     const isBeforeEndYear = satellite.endYear === undefined || endYear <= satellite.endYear;
 
     return isAfterStartYear && isBeforeEndYear;
-  });
+  }).sort((a, b) => b.startYear - a.startYear);
 };
 
 export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";

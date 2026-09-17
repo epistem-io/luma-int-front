@@ -5,10 +5,10 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 
 import { cn } from "@/lib/utils";
 
-interface SliderProps extends React.ComponentPropsWithoutRef<
-  typeof SliderPrimitive.Root
-> {
+interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
   trackBgColor?: string;
+  rangeBgColor?: string;
+  thumbBgColor?: string;
 }
 
 function Slider({
@@ -17,7 +17,9 @@ function Slider({
   value,
   min = 0,
   max = 100,
-  trackBgColor = "bg-muted",
+  trackBgColor = "bg-gray-200",
+  rangeBgColor = "border-primary-pink bg-primary-pink",
+  thumbBgColor = "border-primary-pink bg-primary-pink",
   ...props
 }: SliderProps) {
   const _values = React.useMemo(
@@ -53,7 +55,8 @@ function Slider({
         <SliderPrimitive.Range
           data-slot="slider-range"
           className={cn(
-            "bg-primary-pink absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
+            "absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
+            rangeBgColor,
           )}
         />
       </SliderPrimitive.Track>
@@ -61,7 +64,10 @@ function Slider({
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="border-primary-pink bg-primary-pink ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+          className={cn(
+            "ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color ,box-shadow] hover:ring-4 focus-visible:ring-4 focus-none data-[disabled]:opacity-50",
+            thumbBgColor,
+          )}
         />
       ))}
     </SliderPrimitive.Root>

@@ -332,10 +332,6 @@ export const TimePeriodAccordion = () => {
                                 {label}
                               </p>
                             </Label>
-                            {/* The calendar opens over its own field row
-                                (top edge at the label), left-aligned to the
-                                field: Start Date at the panel's left edge,
-                                End Date from the right column outward. */}
                             <DatePicker
                               id={name}
                               value={field.value}

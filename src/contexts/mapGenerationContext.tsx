@@ -277,7 +277,7 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setTemporalCoverageUnit: () => {},
   isEditingSatelliteComposite: true,
   setIsEditingSatelliteComposite: () => {},
-  satelliteSource: "L8_SR",
+  satelliteSource: "",
   setSatelliteSource: () => {},
   maximumCloudCover: 30,
   setMaximumCloudCover: () => {},
