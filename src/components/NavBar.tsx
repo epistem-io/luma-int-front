@@ -1,17 +1,30 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Save } from "lucide-react";
+import { Save, Share2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { toast } from "sonner"
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
+import { listProjects, type ProjectSummary } from "@/lib/projectsApi";
 import LanguageToggle from "./LanguageToggle";
+import { SaveProjectDialog } from "./SaveProjectDialog";
+import { ShareProjectDialog } from "./ShareProjectDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -55,8 +68,67 @@ export function NavBar({ className }: NavBarProps) {
   const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { setIsLoginModalOpen } = useContext(GlobalContext);
   const tSave = useTranslations("SaveProgress");
-  const { saveProgress } = useContext(SessionCheckpointContext);
+  const tProjects = useTranslations("Projects");
+  const {
+    saveProgress,
+    activeProject,
+    canNameProject,
+    openProject,
+    isRestoring,
+    shouldOfferNaming,
+    dismissNamingOffer,
+    saveProjectNow,
+  } = useContext(SessionCheckpointContext);
   const userInitials = getUserInitials(user?.name, user?.email);
+
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
+  const [shareTargetId, setShareTargetId] = useState<string | null>(null);
+  const [pendingOpenId, setPendingOpenId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Refetch whenever the menu opens (and after a project is created/opened
+  // while it is open) so the list is never stale.
+  useEffect(() => {
+    if (!isAuthenticated || !isMenuOpen) return;
+    void listProjects()
+      .then(setProjects)
+      .catch(() => setProjects([]));
+  }, [isAuthenticated, isMenuOpen, activeProject]);
+
+  const onSaveProjectClick = async () => {
+    // Unnamed work: the first save names the project.
+    if (canNameProject) {
+      setIsSaveDialogOpen(true);
+      return;
+    }
+    if (!activeProject) {
+      toast.info(tProjects("nothingToSaveToast"));
+      return;
+    }
+    setIsSavingProject(true);
+    const result = await saveProjectNow();
+    setIsSavingProject(false);
+    if (result === "saved") toast.success(tProjects("savedToast"));
+    else if (result === "failed") toast.error(tProjects("saveFailedToast"));
+    else toast.info(tProjects("nothingToSaveToast"));
+  };
+
+  const openProjectOrToast = async (id: string) => {
+    const ok = await openProject(id);
+    if (!ok) toast.error(tProjects("openFailedToast"));
+  };
+
+  const onOpenProject = (id: string) => {
+    if (id === activeProject?.id) return;
+    // canNameProject means the current work is unnamed and would be replaced.
+    if (canNameProject) {
+      setPendingOpenId(id);
+      return;
+    }
+    void openProjectOrToast(id);
+  };
 
   return (
     <nav
@@ -135,25 +207,87 @@ export function NavBar({ className }: NavBarProps) {
             <LanguageToggle />
             {/* Language Picker */}
             {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Open user menu"
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF6FE] font-aptos text-sm font-semibold leading-5 text-primary-pink outline-none transition-colors hover:cursor-pointer hover:bg-[#FFEAFB] focus-visible:ring-2 focus-visible:ring-primary-pink focus-visible:ring-offset-2"
+              <>
+                {/* Always visible while logged in, so there is one obvious
+                    place to save: names the project the first time, then
+                    acts as a manual save on top of the auto-sync. */}
+                <Button
+                  type="button"
+                  disabled={isSavingProject}
+                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                  onClick={() => void onSaveProjectClick()}
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingProject
+                    ? tProjects("saving")
+                    : tProjects("saveProject")}
+                </Button>
+                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Open user menu"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF6FE] font-aptos text-sm font-semibold leading-5 text-primary-pink outline-none transition-colors hover:cursor-pointer hover:bg-[#FFEAFB] focus-visible:ring-2 focus-visible:ring-primary-pink focus-visible:ring-offset-2"
+                    >
+                      {userInitials || "U"}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="min-w-[16rem] max-w-[20rem]"
                   >
-                    {userInitials || "U"}
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[10rem]">
-                  <DropdownMenuItem
-                    className="font-aptos text-sm leading-5 text-primary-pink hover:cursor-pointer"
-                    onClick={logout}
-                  >
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <p className="px-2 py-1.5 font-aptos text-xs font-semibold text-neutral-500">
+                      {tProjects("myProjects")}
+                    </p>
+                    {projects.length === 0 && (
+                      <p className="px-2 pb-1.5 font-aptos text-xs text-neutral-400">
+                        {tProjects("emptyList")}
+                      </p>
+                    )}
+                    <div className="max-h-64 overflow-y-auto">
+                      {projects.map((project) => (
+                        <DropdownMenuItem
+                          key={project.id}
+                          className={cn(
+                            "flex items-center justify-between gap-x-2 font-aptos text-sm leading-5 hover:cursor-pointer",
+                            project.id === activeProject?.id && "font-semibold",
+                          )}
+                          onClick={() => onOpenProject(project.id)}
+                        >
+                          <span className="truncate">
+                            {project.name}
+                            {project.shared_from && (
+                              <span className="ml-1 text-xs font-normal text-neutral-400">
+                                ({tProjects("sharedBadge")})
+                              </span>
+                            )}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label={tProjects("share")}
+                            className="shrink-0 rounded p-1 hover:cursor-pointer hover:bg-neutral-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Close the menu first: a Dialog opened over an
+                              // open DropdownMenu fights it for focus.
+                              setIsMenuOpen(false);
+                              setShareTargetId(project.id);
+                            }}
+                          >
+                            <Share2 className="h-3.5 w-3.5 text-primary-pink" />
+                          </button>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                    <DropdownMenuItem
+                      className="font-aptos text-sm leading-5 text-primary-pink hover:cursor-pointer"
+                      onClick={logout}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
               <>
                 <Button
@@ -211,6 +345,51 @@ export function NavBar({ className }: NavBarProps) {
           </div>
         </div>
       </div>
+
+      {/* Project dialogs (all portal to <body>, so placement is layout-free) */}
+      <AlertDialog
+        open={pendingOpenId !== null}
+        onOpenChange={(o) => !o && setPendingOpenId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tProjects("unsavedSwitchTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tProjects("unsavedSwitchDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tProjects("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const id = pendingOpenId;
+                setPendingOpenId(null);
+                if (id) void openProjectOrToast(id);
+              }}
+            >
+              {tProjects("openAnyway")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <SaveProjectDialog
+        open={isSaveDialogOpen}
+        onOpenChange={setIsSaveDialogOpen}
+      />
+      {/* Post-resume offer; waits for the blocking restore overlay to clear. */}
+      <SaveProjectDialog
+        open={shouldOfferNaming && !isRestoring && canNameProject}
+        onOpenChange={(o) => !o && dismissNamingOffer()}
+        title={tProjects("keepDialogTitle")}
+      />
+      {shareTargetId && (
+        <ShareProjectDialog
+          projectId={shareTargetId}
+          open
+          onOpenChange={(o) => !o && setShareTargetId(null)}
+        />
+      )}
     </nav>
   );
 }

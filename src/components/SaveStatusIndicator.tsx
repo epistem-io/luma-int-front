@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Check, ChevronDown, CloudOff, Loader2 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -35,6 +35,16 @@ export const SaveStatusIndicator = () => {
       <div className="flex items-center gap-2 rounded-[8px] bg-primary-red-pink-light px-2.5 py-1.5 font-aptos text-sm font-bold text-primary-pink">
         <Loader2 className="h-4 w-4 animate-spin" />
         {t("saving")}
+      </div>
+    );
+  }
+
+  // Local copy is safe; only the server sync of the named project failed.
+  if (saveStatus === "error") {
+    return (
+      <div className="flex items-center gap-2 rounded-[8px] bg-warning-50 px-2.5 py-1.5 font-aptos text-sm font-bold text-warning-700">
+        <CloudOff className="h-4 w-4" />
+        {t("syncFailed")}
       </div>
     );
   }
