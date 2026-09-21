@@ -11,7 +11,7 @@ type LulcClass = { class_id: number; class_name: string };
 export const downloadTrainingSamplesShapefile = async (
   markerArray: SampleMarker[],
   classArray: LulcClass[],
-  filename: "training_samples"
+  filename: string = "training_samples",
 ) => {
 
   const classNameById = new Map(
