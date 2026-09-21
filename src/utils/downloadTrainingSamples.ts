@@ -34,7 +34,7 @@ export const downloadTrainingSamplesShapefile = async (
       }))
   };
 
-  const blob = await shpwrite.zip<Blob>(geojson, {
+  const blob = await shpwrite.zip<"blob">(geojson, {
     outputType: "blob",
     compression: "DEFLATE",
     types: { point: "training_samples" },
