@@ -92,3 +92,11 @@ export const shareProject = async (
   return { invited: Boolean(body?.invited) };
 };
 
+export const renameProject = async (
+  id: string,
+  name: string,
+): Promise<ProjectDetail> => 
+  request<ProjectDetail>(`${PROJECTS_URL}/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ name }),
+  });

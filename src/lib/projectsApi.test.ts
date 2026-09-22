@@ -9,6 +9,7 @@ import {
   createProject,
   getProject,
   listProjects,
+  renameProject,
   shareProject,
 } from "./projectsApi";
 
@@ -45,6 +46,15 @@ describe("projectsApi", () => {
     await getProject("p1");
     const [url] = fetchWithAuthMock.mock.calls[0];
     expect(String(url)).toMatch(/\/api\/v1\/projects\/p1$/);
+  });
+
+  it("renameProject PUTs only the new name", async () => {
+    fetchWithAuthMock.mockResolvedValue(jsonResponse({ id: "p1", name: "B" }));
+    await renameProject("p1", "B");
+    const [url, init] = fetchWithAuthMock.mock.calls[0];
+    expect(String(url)).toMatch(/\/api\/v1\/projects\/p1$/);
+    expect(init.method).toBe("PUT");
+    expect(JSON.parse(init.body)).toEqual({ name: "B" });
   });
 
   // The backend's error envelope (app_exception_handler) puts the real text in

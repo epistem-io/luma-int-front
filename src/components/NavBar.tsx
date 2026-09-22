@@ -5,15 +5,20 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Save, Share2 } from "lucide-react";
+import { EllipsisVertical, Pencil, Save, Share2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { toast } from "sonner"
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
-import { listProjects, type ProjectSummary } from "@/lib/projectsApi";
+import {
+  deleteProject,
+  listProjects,
+  type ProjectSummary,
+} from "@/lib/projectsApi";
 import LanguageToggle from "./LanguageToggle";
+import { RenameProjectDialog } from "./RenameProjectDialog";
 import { SaveProjectDialog } from "./SaveProjectDialog";
 import { ShareProjectDialog } from "./ShareProjectDialog";
 import {
@@ -90,12 +95,17 @@ export function NavBar({ className }: NavBarProps) {
     shouldOfferNaming,
     dismissNamingOffer,
     saveProjectNow,
+    handleProjectRenamed,
+    handleProjectDeleted,
   } = useContext(SessionCheckpointContext);
   const userInitials = getUserInitials(user?.name, user?.email);
 
   const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [shareTargetId, setShareTargetId] = useState<string | null>(null);
+  const [renameTarget, setRenameTarget] = useState<ProjectSummary | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProjectSummary | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [pendingOpenId, setPendingOpenId] = useState<string | null>(null);
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -140,6 +150,30 @@ export function NavBar({ className }: NavBarProps) {
       return;
     }
     void openProjectOrToast(id);
+  };
+
+  const onRenamed = (id: string, name: string) => {
+    handleProjectRenamed(id, name);
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, name } : p)),
+    );
+  };
+
+  const onConfirmDelete = async () => {
+    const target = deleteTarget;
+    if (!target || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(target.id);
+      handleProjectDeleted(target.id);
+      setProjects((prev) => prev.filter((p) => p.id !== target.id));
+      toast.success(tProjects("deletedToast"));
+      setDeleteTarget(null);
+    } catch {
+      toast.error(tProjects("deleteFailedToast"));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   return (
@@ -328,6 +362,46 @@ export function NavBar({ className }: NavBarProps) {
                             >
                               <Share2 className="size-6 text-primary-pink" />
                             </button>
+                            {/* modal={false}: a nested modal menu would fight
+                                the account menu's dismiss layer and close it. */}
+                            <DropdownMenu modal={false}>
+                              <DropdownMenuTrigger asChild>
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("moreActions")}
+                                  className="shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <EllipsisVertical className="size-6 text-[#9E9E9E]" />
+                                </button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-44">
+                                <DropdownMenuItem
+                                  className="hover:cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // Close the menu first: a Dialog opened over
+                                    // an open DropdownMenu fights it for focus.
+                                    setIsMenuOpen(false);
+                                    setRenameTarget(project);
+                                  }}
+                                >
+                                  <Pencil className="size-4" />
+                                  {tProjects("rename")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive hover:cursor-pointer focus:text-destructive"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setIsMenuOpen(false);
+                                    setDeleteTarget(project);
+                                  }}
+                                >
+                                  <Trash2 className="size-4" />
+                                  {tProjects("delete")}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </DropdownMenuItem>
                         );
                       })}
@@ -457,6 +531,50 @@ export function NavBar({ className }: NavBarProps) {
           onOpenChange={(o) => !o && setShareTargetId(null)}
         />
       )}
+      {/* Mounted per target so useState(currentName) prefills freshly. */}
+      {renameTarget && (
+        <RenameProjectDialog
+          projectId={renameTarget.id}
+          currentName={renameTarget.name}
+          open
+          onOpenChange={(o) => !o && setRenameTarget(null)}
+          onRenamed={onRenamed}
+        />
+      )}
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(o) => !o && !isDeleting && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {tProjects("deleteDialogTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {tProjects("deleteDialogDescription", {
+                name: deleteTarget?.name ?? "",
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {tProjects("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={(e) => {
+                // Radix closes on click by default; stay open while deleting.
+                e.preventDefault();
+                void onConfirmDelete();
+              }}
+            >
+              {isDeleting ? tProjects("deleting") : tProjects("confirmDelete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 }

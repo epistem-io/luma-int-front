@@ -67,6 +67,8 @@ interface SessionCheckpointContextType {
   openProject: (id: string) => Promise<boolean>;
   dismissNamingOffer: () => void;
   saveProjectNow: () => Promise<ManualSaveResult>;
+  handleProjectRenamed: (id: string, name: string) => void;
+  handleProjectDeleted: (id: string) => void;
 }
 
 const DEFAULT_VALUE: SessionCheckpointContextType = {
@@ -88,6 +90,8 @@ const DEFAULT_VALUE: SessionCheckpointContextType = {
   openProject: async () => false,
   dismissNamingOffer: () => {},
   saveProjectNow: async () => "nothing",
+  handleProjectRenamed: async () => {},
+  handleProjectDeleted: async () => {},
 };
 
 const SessionCheckpointContext =
@@ -594,6 +598,23 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     return (await writeCheckpoint(cp)) ? "saved" : "failed";
   }, [debouncedDraftSave, writeCheckpoint]);
 
+  const handleProjectRenamed = useCallback((id: string, name: string) => {
+    const current = activeProjectRef.current;
+    if (!current || current.id !== id) return;
+    const renamed = { ...current, name };
+    activeProjectStore.save(renamed);
+    setActiveProject(renamed);
+  }, []);
+
+  const handleProjectDeleted = useCallback((id: string) => {
+    const current = activeProjectRef.current;
+    if (!current || current.id !== id) return;
+    activeProjectStore.clear();
+    setActiveProject(null);
+    setSaveStatus("idle");
+    setShouldOfferNaming(false);
+  }, []);
+
   const recordedSteps = useMemo(
     () => [
       Boolean(lastSavedCheckpoint?.basicInfo),
@@ -625,6 +646,8 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       openProject,
       dismissNamingOffer,
       saveProjectNow,
+      handleProjectRenamed,
+      handleProjectDeleted,
     }),
     [
       saveStatus,
@@ -645,6 +668,8 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       openProject,
       dismissNamingOffer,
       saveProjectNow,
+      handleProjectRenamed,
+      handleProjectDeleted,
     ],
   );
 

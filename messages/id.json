@@ -132,7 +132,20 @@
     "emailRequired": "Masukkan email penerima",
     "sharedToast": "Proyek dibagikan",
     "invitedToast": "Undangan dikirim ke {email}. Proyek akan tersedia setelah mereka mengatur kata sandi.",
-    "keepDialogTitle": "Beri nama proyek ini untuk menyimpannya"
+    "keepDialogTitle": "Beri nama proyek ini untuk menyimpannya",
+    "moreActions": "Tindakan lainnya",
+    "rename": "Ubah nama",
+    "renaming": "Mengubah nama...",
+    "renameDialogTitle": "Ubah nama proyek",
+    "renameDialogDescription": "Beri nama baru untuk proyek ini.",
+    "renamedToast": "Nama proyek diubah",
+    "delete": "Hapus",
+    "deleting": "Menghapus...",
+    "deleteDialogTitle": "Hapus proyek ini?",
+    "deleteDialogDescription": "\"{name}\" beserta progres tersimpannya akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.",
+    "confirmDelete": "Hapus",
+    "deletedToast": "Proyek dihapus",
+    "deleteFailedToast": "Proyek tidak dapat dihapus. Silakan coba lagi."
   },
   "LoginModal": {
     "title": "Masuk",

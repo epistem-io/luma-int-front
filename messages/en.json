@@ -132,7 +132,20 @@
     "emailRequired": "Please enter the recipient's email",
     "sharedToast": "Project shared",
     "invitedToast": "Invitation sent to {email}. They'll get the project once they set a password.",
-    "keepDialogTitle": "Name this project to keep it"
+    "keepDialogTitle": "Name this project to keep it",
+    "moreActions": "More actions",
+    "rename": "Rename",
+    "renaming": "Renaming...",
+    "renameDialogTitle": "Rename project",
+    "renameDialogDescription": "Give this project a new name.",
+    "renamedToast": "Project renamed",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "deleteDialogTitle": "Delete this project?",
+    "deleteDialogDescription": "\"{name}\" and its saved progress will be permanently removed. This can't be undone.",
+    "confirmDelete": "Delete",
+    "deletedToast": "Project deleted",
+    "deleteFailedToast": "Could not delete the project. Please try again."
   },
   "LoginModal": {
     "title": "Login",
