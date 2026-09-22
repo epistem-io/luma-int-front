@@ -5,27 +5,10 @@ import { toast } from "sonner";
 
 import LoginModal from "@/components/LoginModal";
 import { LOGIN_URL } from "@/constants";
-import { AuthContext, AuthUser } from "@/contexts/authContext";
+import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
+import { type LoginResponse, normalizeLoginUser } from "@/lib/loginResponse";
 import { useTranslations } from "next-intl";
-
-interface LoginResponseUser {
-  email: string;
-  fullname?: string;
-  organization_name?: string;
-}
-
-interface LoginResponse {
-  api_key: string;
-  api_key_expires?: string;
-  user: LoginResponseUser;
-}
-
-const normalizeLoginUser = (identity: LoginResponseUser): AuthUser => ({
-  email: identity.email,
-  name: identity.fullname,
-  organizationName: identity.organization_name,
-});
 
 export const LoginPanel = () => {
   const commonT = useTranslations("InteractivePanel.common");

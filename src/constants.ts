@@ -138,7 +138,8 @@ export const FETCH_GENERATE_MAP = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/lum
 
 export const SIGNUP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/account/signup`;
 export const LOGIN_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/account/login`;
-
+export const LOGIN_CODE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/account/login-code`;
+export const PROJECTS_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects`;
 export const THOUSAND_SEPARATOR = ".";
 
 export const DEFAULT_LUC = [

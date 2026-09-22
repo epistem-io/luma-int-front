@@ -7,7 +7,7 @@ export const SESSION_STORAGE_KEY = "luma.session.v1";
 
 const canUseBrowserStorage = () => typeof window !== "undefined";
 
-function isValidCheckpoint(value: unknown): value is SessionCheckpoint {
+export function isValidCheckpoint(value: unknown): value is SessionCheckpoint {
   if (typeof value !== "object" || value === null) return false;
   const cp = value as Record<string, unknown>;
   const owner = cp.owner as Record<string, unknown> | null | undefined;

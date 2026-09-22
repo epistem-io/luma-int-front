@@ -13,7 +13,7 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 const SPLIT_RATIO_TICKS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
@@ -34,6 +34,9 @@ export const RandomForestAccordion = () => {
     setProgressPanelIndex,
     isAutoPointsFlow,
   } = useContext(MapGenerationContext);
+
+
+  const [hasSlid, setHasSlid] = useState(false);
 
   const tInteractive = useTranslations("InteractivePanel");
 
@@ -200,14 +203,20 @@ export const RandomForestAccordion = () => {
               value={[splitRatio]}
               disabled={isAutoPointsFlow}
               trackBgColor="bg-neutral-300"
+              rangeBgColor={hasSlid ? "border-primary-pink bg-primary-pink": "border-[#F2D0DD] bg-[#FFE3ED]"}
+              thumbBgColor={hasSlid ? "border-primary-pink bg-primary-pink": "border-[#F2D0DD] bg-[#FFE3ED]"}
               className="cursor-pointer data-[disabled]:cursor-not-allowed"
-              onValueChange={(value) => setSplitRatio(value[0] ?? 70)}
+              onValueChange={(value) => {
+                setSplitRatio(value[0] ?? 70);
+                setHasSlid(true);
+              }}
             />
-            <div className="flex flex-row justify-between">
+            <div className="relative mx-2 h-5">
               {SPLIT_RATIO_TICKS.map((tick) => (
                 <p
                   key={tick}
-                  className="font-aptos text-sm font-bold leading-5 text-primary-pink"
+                  className="absolute top-0 -translate-x-1/2 font-aptos text-sm font-bold leading-5 text-primary-pink"
+                  style={{left: `${tick}%`}}
                 >
                   {tick}
                 </p>

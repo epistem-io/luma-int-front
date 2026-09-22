@@ -24,7 +24,9 @@ import {
   type LucView,
   MapGenerationContext,
 } from "@/contexts/mapGenerationContext";
+import { type ActiveProject, activeProjectStore } from "@/lib/activeProjectStore";
 import { createDebounced } from "@/lib/debounce";
+import { createProject, getProject, updateProjectCheckpoint } from "@/lib/projectsApi";
 import {
   buildCheckpoint,
   buildDrafts,
@@ -35,14 +37,16 @@ import {
   type SessionCheckpoint,
   shouldOfferResume,
 } from "@/lib/sessionCheckpoint";
-import { sessionStore } from "@/lib/sessionStore";
+import { isValidCheckpoint, sessionStore } from "@/lib/sessionStore";
 import {
   getTemporalRangeDateEnd,
   getTemporalRangeDateStart,
 } from "@/lib/utils";
 import { Marker } from "@/types/marker";
 
-export type SaveStatus = "idle" | "saving" | "saved";
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+// "nothing": no named project is active or there is no recorded work yet.
+export type ManualSaveResult = "saved" | "failed" | "nothing";
 
 interface SessionCheckpointContextType {
   saveStatus: SaveStatus;
@@ -52,10 +56,19 @@ interface SessionCheckpointContextType {
   isRestoring: boolean;
   canSaveProgress: boolean;
   hasUnclaimedCheckpoint: boolean;
+  activeProject: ActiveProject | null;
+  canNameProject: boolean;
+  shouldOfferNaming: boolean;
   saveProgress: () => boolean;
   resumePendingSession: () => void;
   discardPendingSession: () => void;
   clearCheckpoint: () => void;
+  createNamedProject: (name: string) => Promise<boolean>;
+  openProject: (id: string) => Promise<boolean>;
+  dismissNamingOffer: () => void;
+  saveProjectNow: () => Promise<ManualSaveResult>;
+  handleProjectRenamed: (id: string, name: string) => void;
+  handleProjectDeleted: (id: string) => void;
 }
 
 const DEFAULT_VALUE: SessionCheckpointContextType = {
@@ -66,10 +79,19 @@ const DEFAULT_VALUE: SessionCheckpointContextType = {
   isRestoring: false,
   canSaveProgress: false,
   hasUnclaimedCheckpoint: false,
+  activeProject: null,
+  canNameProject: false,
+  shouldOfferNaming: false,
   saveProgress: () => false,
   resumePendingSession: () => {},
   discardPendingSession: () => {},
   clearCheckpoint: () => {},
+  createNamedProject: async () => false,
+  openProject: async () => false,
+  dismissNamingOffer: () => {},
+  saveProjectNow: async () => "nothing",
+  handleProjectRenamed: async () => {},
+  handleProjectDeleted: async () => {},
 };
 
 const SessionCheckpointContext =
@@ -91,6 +113,10 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
   );
   const [isRestoring, setIsRestoring] = useState(false);
   const restoreMosaicStartedRef = useRef(false);
+  const [activeProject, setActiveProject] = useState<ActiveProject | null>(null);
+  const activeProjectRef = useRef<ActiveProject | null>(null);
+  activeProjectRef.current = activeProject;
+  const [shouldOfferNaming, setShouldOfferNaming] = useState(false);
 
   const polygonGeoJSON = useMemo(() => {
     if (!mapContext.polygon) return null;
@@ -166,23 +192,47 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     ? JSON.stringify({ ...candidate, savedAt: "", drafts: null })
     : "";
   const draftSig = candidate?.drafts ? JSON.stringify(candidate.drafts) : "";
+  
+  const candidateRef = useRef<SessionCheckpoint | null>(null);
+  candidateRef.current = candidate;
 
-  const writeCheckpoint = useCallback((cp: SessionCheckpoint) => {
+  // Resolves true once the checkpoint is stored everywhere it should be
+  // (false = local copy written, server sync of the named project failed).
+  // Auto-save callers ignore the result; the manual save reports it.
+  const writeCheckpoint = useCallback((cp: SessionCheckpoint): Promise<boolean> => {
     const stamped: SessionCheckpoint = {
       ...cp,
       savedAt: new Date().toISOString(),
     };
+
+    const project = activeProjectRef.current;
+    const syncTarget = project && project.sessionId === stamped.sessionId ? project : null;
     setSaveStatus("saving");
-    void sessionStore.save(stamped).then(() => {
-      setLastSavedCheckpoint(stamped);
-      setSaveStatus("saved");
-    });
+
+    return sessionStore.save(stamped).then(() => {
+      if (!syncTarget) {
+        setLastSavedCheckpoint(stamped);
+        setSaveStatus("saved");
+        return true;
+      }
+      return updateProjectCheckpoint(syncTarget.id, stamped)
+        .then(() => {
+          setLastSavedCheckpoint(stamped);
+          setSaveStatus("saved");
+          return true;
+        })
+        .catch(() => {
+          setLastSavedCheckpoint(stamped);
+          setSaveStatus("error");
+          return false;
+        });
+    })
   }, []);
 
   const debouncedDraftSave = useMemo(
     () =>
       createDebounced(
-        (cp: SessionCheckpoint) => writeCheckpoint(cp),
+        (cp: SessionCheckpoint) => void writeCheckpoint(cp),
         DRAFT_SAVE_DELAY_MS,
       ),
     [writeCheckpoint],
@@ -209,7 +259,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     const i = anonInputsRef.current
     const cp = buildCheckpoint(i, buildDrafts(i))
     if (!cp) return false
-    writeCheckpoint(cp)
+    void writeCheckpoint(cp)
     setHasUnclaimedCheckpoint(true)
     return true
   }, [writeCheckpoint])
@@ -220,7 +270,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     if (confirmationSig === lastConfirmationSigRef.current) return;
     lastConfirmationSigRef.current = confirmationSig;
     debouncedDraftSave.cancel();
-    writeCheckpoint(candidate);
+    void writeCheckpoint(candidate);
   }, [
     confirmationSig,
     candidate,
@@ -258,6 +308,8 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     setSaveStatus("idle");
     setPendingResume(null);
     setIsRestoring(false);
+    setActiveProject(null);
+    setShouldOfferNaming(false);
 
     mapContext.resetMapState();
     mg.resetMapGenerationState();
@@ -438,12 +490,21 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
   }, [isRestoring, mapContext.isMosaicLoading]);
 
   const resumePendingSession = useCallback(() => {
-    if (pendingResume) restoreSession(pendingResume);
+    if (!pendingResume) return;
+    restoreSession(pendingResume);
+
+    const linked = activeProjectStore.loadFor(pendingResume.sessionId);
+    if (linked) {
+      setActiveProject(linked);
+    } else {
+      setShouldOfferNaming(true);
+    }
   }, [pendingResume, restoreSession]);
 
   const discardPendingSession = useCallback(() => {
     setPendingResume(null);
     void sessionStore.clear();
+    activeProjectStore.clear();
   }, []);
 
   const clearCheckpoint = useCallback(() => {
@@ -453,7 +514,106 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     setLastSavedCheckpoint(null);
     setSaveStatus("idle");
     void sessionStore.clear();
+    // Starting over detaches the project too, otherwise the fresh work would
+    // keep syncing into it. The project itself stays in the user's list.
+    activeProjectStore.clear();
+    setActiveProject(null);
+    setShouldOfferNaming(false);
   }, [debouncedDraftSave]);
+
+  const canNameProject =
+    isAuthenticated && activeProject === null && candidate !== null;
+
+  const createNamedProject = useCallback(
+    async (name: string): Promise<boolean> => {
+      const cp = candidateRef.current;
+      if (!cp || !isAuthenticated) return false;
+      try {
+        const created = await createProject(name, cp.sessionId, {
+          ...cp,
+          savedAt: new Date().toISOString(),
+        });
+        const project: ActiveProject = {
+          id: created.id,
+          name: created.name,
+          sessionId: created.session_id,
+        };
+        activeProjectStore.save(project);
+        setActiveProject(project);
+        setShouldOfferNaming(false);
+        setSaveStatus("saved");
+        return true;
+      } catch {
+        setSaveStatus("error");
+        return false;
+      }
+    },
+    [isAuthenticated],
+  );
+
+  const openProject = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const detail = await getProject(id);
+        // Validate before touching anything: a failed open must not wipe the
+        // current work.
+        if (!isValidCheckpoint(detail.checkpoint)) return false;
+
+        // Drop any draft queued for the project being left, then start from a
+        // clean slate: restoreSession only sets what the checkpoint contains,
+        // so leftovers from the previous project would leak into this one.
+        debouncedDraftSave.cancel();
+        mapContext.resetMapState();
+        mg.resetMapGenerationState();
+
+        const project: ActiveProject = {
+          id: detail.id,
+          name: detail.name,
+          sessionId: detail.session_id,
+        };
+        activeProjectStore.save(project);
+        setActiveProject(project);
+        setShouldOfferNaming(false);
+        restoreSession(detail.checkpoint);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [debouncedDraftSave, mapContext, mg, restoreSession],
+  );
+
+  const dismissNamingOffer = useCallback(
+    () => setShouldOfferNaming(false),
+    [],
+  );
+
+  // Manual save for a named project: pushes the current state right away
+  // instead of waiting for the next auto-save trigger.
+  const saveProjectNow = useCallback(async (): Promise<ManualSaveResult> => {
+    const cp = candidateRef.current;
+    if (!cp || !activeProjectRef.current) return "nothing";
+    // The candidate already contains the pending drafts.
+    debouncedDraftSave.cancel();
+    return (await writeCheckpoint(cp)) ? "saved" : "failed";
+  }, [debouncedDraftSave, writeCheckpoint]);
+
+  const handleProjectRenamed = useCallback((id: string, name: string) => {
+    const current = activeProjectRef.current;
+    if (!current || current.id !== id) return;
+    const renamed = { ...current, name };
+    activeProjectStore.save(renamed);
+    setActiveProject(renamed);
+  }, []);
+
+  const handleProjectDeleted = useCallback((id: string) => {
+    const current = activeProjectRef.current;
+    if (!current || current.id !== id) return;
+    activeProjectStore.clear();
+    setActiveProject(null);
+    setSaveStatus("idle");
+    setShouldOfferNaming(false);
+  }, []);
 
   const recordedSteps = useMemo(
     () => [
@@ -475,10 +635,19 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       isRestoring,
       canSaveProgress,
       hasUnclaimedCheckpoint,
+      activeProject,
+      canNameProject,
+      shouldOfferNaming,
       saveProgress,
       resumePendingSession,
       discardPendingSession,
       clearCheckpoint,
+      createNamedProject,
+      openProject,
+      dismissNamingOffer,
+      saveProjectNow,
+      handleProjectRenamed,
+      handleProjectDeleted,
     }),
     [
       saveStatus,
@@ -488,10 +657,19 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       isRestoring,
       canSaveProgress,
       hasUnclaimedCheckpoint,
+      activeProject,
+      canNameProject,
+      shouldOfferNaming,
       saveProgress,
       resumePendingSession,
       discardPendingSession,
       clearCheckpoint,
+      createNamedProject,
+      openProject,
+      dismissNamingOffer,
+      saveProjectNow,
+      handleProjectRenamed,
+      handleProjectDeleted,
     ],
   );
 
