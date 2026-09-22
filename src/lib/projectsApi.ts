@@ -7,6 +7,8 @@ export interface ProjectSummary {
   name: string;
   last_step: number | null;
   shared_from: string | null;
+  // Optional: absent from list responses of backends older than this field.
+  created_date?: string | null;
   modified_date: string | null;
 }
 
@@ -77,10 +79,16 @@ export const deleteProject = async (id: string): Promise<void> => {
 export const shareProject = async (
   id: string,
   email: string,
-): Promise<void> => {
-  await request(`${PROJECTS_URL}/${id}/share`, {
-    method: "POST",
-    body: JSON.stringify({ email }),
-  });
+): Promise<{ invited: boolean }> => {
+  // invited: the email had no active account yet — an invitation to set a
+  // password was emailed and the copy is already waiting for them.
+  const body = await request<{ invited?: boolean } | null>(
+    `${PROJECTS_URL}/${id}/share`,
+    {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    },
+  );
+  return { invited: Boolean(body?.invited) };
 };
 

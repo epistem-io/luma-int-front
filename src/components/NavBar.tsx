@@ -1,6 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,17 @@ const getUserInitials = (name?: string, email?: string) => {
   }
 
   return (email?.replace(/\s+/g, "").slice(0, 2) ?? "").toUpperCase();
+};
+
+// Backend dates are naive UTC ISO strings (no offset); shown as dd/mm/yyyy in
+// the viewer's local time.
+const formatProjectDate = (iso: string | null | undefined) => {
+  if (!iso) return "-";
+  const date = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`);
+  if (Number.isNaN(date.getTime())) return "-";
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${date.getFullYear()}`;
 };
 
 export function NavBar({ className }: NavBarProps) {
@@ -234,56 +246,98 @@ export function NavBar({ className }: NavBarProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
                     align="end"
-                    className="min-w-[16rem] max-w-[20rem]"
+                    sideOffset={10}
+                    className="w-[430px] max-w-[calc(100vw-2rem)] rounded-2xl border-0 p-3 font-pjs shadow-[0_8px_30px_rgba(0,0,0,0.16)]"
                   >
-                    <p className="px-2 py-1.5 font-aptos text-xs font-semibold text-neutral-500">
+                    {/* Account header */}
+                    <div className="flex items-center gap-x-5 px-1 pb-7 pt-4">
+                      <div
+                        aria-hidden="true"
+                        className="flex size-[84px] shrink-0 items-center justify-center rounded-full bg-[#FFF6FE] text-[28px] font-bold text-primary-pink"
+                      >
+                        {userInitials || "U"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-2xl font-bold leading-8 text-[#1F1F1F]">
+                          {user?.name || user?.email}
+                        </p>
+                        {user?.name && (
+                          <p className="mt-1.5 truncate text-base leading-6 text-[#4D4D4D]">
+                            {user.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="px-5 pb-2.5 text-base leading-6 text-[#5C5C5C]">
                       {tProjects("myProjects")}
                     </p>
                     {projects.length === 0 && (
-                      <p className="px-2 pb-1.5 font-aptos text-xs text-neutral-400">
+                      <p className="px-5 pb-3 text-sm leading-5 text-[#8A8A8A]">
                         {tProjects("emptyList")}
                       </p>
                     )}
-                    <div className="max-h-64 overflow-y-auto">
-                      {projects.map((project) => (
-                        <DropdownMenuItem
-                          key={project.id}
-                          className={cn(
-                            "flex items-center justify-between gap-x-2 font-aptos text-sm leading-5 hover:cursor-pointer",
-                            project.id === activeProject?.id && "font-semibold",
-                          )}
-                          onClick={() => onOpenProject(project.id)}
-                        >
-                          <span className="truncate">
-                            {project.name}
-                            {project.shared_from && (
-                              <span className="ml-1 text-xs font-normal text-neutral-400">
-                                ({tProjects("sharedBadge")})
-                              </span>
+                    <div className="max-h-[300px] space-y-0.5 overflow-y-auto">
+                      {projects.map((project) => {
+                        const isActive = project.id === activeProject?.id;
+                        return (
+                          <DropdownMenuItem
+                            key={project.id}
+                            className={cn(
+                              "flex items-center justify-between gap-x-3 rounded-xl px-5 py-3.5 hover:cursor-pointer focus:bg-[#F3F3F3]",
+                              isActive && "bg-[#F9E9EE] focus:bg-[#F9E9EE]",
                             )}
-                          </span>
-                          <button
-                            type="button"
-                            aria-label={tProjects("share")}
-                            className="shrink-0 rounded p-1 hover:cursor-pointer hover:bg-neutral-100"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Close the menu first: a Dialog opened over an
-                              // open DropdownMenu fights it for focus.
-                              setIsMenuOpen(false);
-                              setShareTargetId(project.id);
-                            }}
+                            onClick={() => onOpenProject(project.id)}
                           >
-                            <Share2 className="h-3.5 w-3.5 text-primary-pink" />
-                          </button>
-                        </DropdownMenuItem>
-                      ))}
+                            <div className="min-w-0">
+                              <p className="truncate text-xl font-medium leading-7 text-[#1F1F1F]">
+                                {project.name}
+                                {project.shared_from && (
+                                  <span className="ml-2 text-sm font-normal text-[#8A8A8A]">
+                                    ({tProjects("sharedBadge")})
+                                  </span>
+                                )}
+                              </p>
+                              <p
+                                className={cn(
+                                  "mt-0.5 text-base leading-6",
+                                  isActive
+                                    ? "text-[#333333]"
+                                    : "text-[#9E9E9E]",
+                                )}
+                              >
+                                {tProjects("createdOn", {
+                                  date: formatProjectDate(
+                                    project.created_date ??
+                                      project.modified_date,
+                                  ),
+                                })}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={tProjects("share")}
+                              className="shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Close the menu first: a Dialog opened over
+                                // an open DropdownMenu fights it for focus.
+                                setIsMenuOpen(false);
+                                setShareTargetId(project.id);
+                              }}
+                            >
+                              <Share2 className="size-6 text-primary-pink" />
+                            </button>
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </div>
+
                     <DropdownMenuItem
-                      className="font-aptos text-sm leading-5 text-primary-pink hover:cursor-pointer"
+                      className="mt-9 rounded-xl px-5 py-3 text-xl font-bold leading-7 text-primary-pink hover:cursor-pointer focus:bg-[#F3F3F3] focus:text-primary-pink"
                       onClick={logout}
                     >
-                      Logout
+                      {tProjects("logout")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -345,6 +399,19 @@ export function NavBar({ className }: NavBarProps) {
           </div>
         </div>
       </div>
+
+      {/* Dims the page while the account menu is open (design: #000 at 10%).
+          Portalled to <body> so it covers the navbar too and no parent
+          stacking context can trap it; z-40 keeps it under the menu (z-50).
+          pointer-events-none leaves outside-click dismissal to Radix. */}
+      {isMenuOpen &&
+        createPortal(
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 z-40 bg-black opacity-10 animate-in fade-in-0 duration-200"
+          />,
+          document.body,
+        )}
 
       {/* Project dialogs (all portal to <body>, so placement is layout-free) */}
       <AlertDialog

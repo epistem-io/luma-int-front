@@ -38,8 +38,11 @@ export const ShareProjectDialog = ({
     }
     setIsSharing(true);
     try {
-      await shareProject(projectId, email.trim());
-      toast.success(t("sharedToast"));
+      const recipient = email.trim();
+      const { invited } = await shareProject(projectId, recipient);
+      toast.success(
+        invited ? t("invitedToast", { email: recipient }) : t("sharedToast"),
+      );
       setEmail("");
       setError("");
       onOpenChange(false);
