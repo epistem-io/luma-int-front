@@ -104,6 +104,10 @@ export function NavBar({ className }: NavBarProps) {
   const [isSavingProject, setIsSavingProject] = useState(false);
   const [shareTargetId, setShareTargetId] = useState<string | null>(null);
   const [renameTarget, setRenameTarget] = useState<ProjectSummary | null>(null);
+  // Row whose action strip (share/rename/delete) is revealed. Plain state
+  // instead of a nested DropdownMenu: a portalled menu inside the modal
+  // account menu loses the focus fight and closes itself immediately.
+  const [actionsFor, setActionsFor] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<ProjectSummary | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [pendingOpenId, setPendingOpenId] = useState<string | null>(null);
@@ -268,7 +272,14 @@ export function NavBar({ className }: NavBarProps) {
                     ? tProjects("saving")
                     : tProjects("saveProject")}
                 </Button>
-                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                <DropdownMenu
+                  open={isMenuOpen}
+                  onOpenChange={(o) => {
+                    setIsMenuOpen(o);
+                    // No revealed action strip on the next open.
+                    if (!o) setActionsFor(null);
+                  }}
+                >
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
@@ -348,60 +359,75 @@ export function NavBar({ className }: NavBarProps) {
                                 })}
                               </p>
                             </div>
-                            <button
-                              type="button"
-                              aria-label={tProjects("share")}
-                              className="shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                // Close the menu first: a Dialog opened over
-                                // an open DropdownMenu fights it for focus.
-                                setIsMenuOpen(false);
-                                setShareTargetId(project.id);
-                              }}
-                            >
-                              <Share2 className="size-6 text-primary-pink" />
-                            </button>
-                            {/* modal={false}: a nested modal menu would fight
-                                the account menu's dismiss layer and close it. */}
-                            <DropdownMenu modal={false}>
-                              <DropdownMenuTrigger asChild>
+                            {/* Inline action strip instead of a nested menu:
+                                a portalled menu inside this modal menu loses
+                                the focus fight and closes itself instantly. */}
+                            {actionsFor === project.id && (
+                              <div className="flex shrink-0 items-center gap-0.5 animate-in fade-in-0 slide-in-from-right-2 duration-150">
                                 <button
                                   type="button"
-                                  aria-label={tProjects("moreActions")}
-                                  className="shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <EllipsisVertical className="size-6 text-[#9E9E9E]" />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-44">
-                                <DropdownMenuItem
-                                  className="hover:cursor-pointer"
+                                  aria-label={tProjects("share")}
+                                  title={tProjects("share")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    // Close the menu first: a Dialog opened over
-                                    // an open DropdownMenu fights it for focus.
+                                    // Close the menu first: a Dialog opened
+                                    // over an open DropdownMenu fights it for
+                                    // focus.
+                                    setActionsFor(null);
+                                    setIsMenuOpen(false);
+                                    setShareTargetId(project.id);
+                                  }}
+                                >
+                                  <Share2 className="size-5 text-primary-pink" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("rename")}
+                                  title={tProjects("rename")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActionsFor(null);
                                     setIsMenuOpen(false);
                                     setRenameTarget(project);
                                   }}
                                 >
-                                  <Pencil className="size-4" />
-                                  {tProjects("rename")}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-destructive hover:cursor-pointer focus:text-destructive"
+                                  <Pencil className="size-5 text-[#5C5C5C]" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("delete")}
+                                  title={tProjects("delete")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    setActionsFor(null);
                                     setIsMenuOpen(false);
                                     setDeleteTarget(project);
                                   }}
                                 >
-                                  <Trash2 className="size-4" />
-                                  {tProjects("delete")}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  <Trash2 className="size-5 text-destructive" />
+                                </button>
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              aria-label={tProjects("moreActions")}
+                              aria-expanded={actionsFor === project.id}
+                              className={cn(
+                                "shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink",
+                                actionsFor === project.id && "bg-white/70",
+                              )}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionsFor((prev) =>
+                                  prev === project.id ? null : project.id,
+                                );
+                              }}
+                            >
+                              <EllipsisVertical className="size-6 text-[#9E9E9E]" />
+                            </button>
                           </DropdownMenuItem>
                         );
                       })}
