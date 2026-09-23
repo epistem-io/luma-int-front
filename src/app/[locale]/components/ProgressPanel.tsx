@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { StepBar } from "./StepBar";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import { useContext } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export const ProgressPanel = () => {
   const { progressPanelIndex } = useContext(MapGenerationContext);
+  const { activeProject } = useContext(SessionCheckpointContext);
   const t = useTranslations("InteractivePanel");
 
   return (
@@ -34,18 +36,23 @@ export const ProgressPanel = () => {
         >
           <Button
             disabled
-            className="py-1 px-3 flex flex-row gap-2 items-center bg-gray-500 hover:cursor-pointer disabled:bg-gray-500 disabled:opacity-100 rounded-md"
+            className="py-1 px-3 flex flex-row gap-2 items-center bg-gray-500 hover:cursor-pointer disabled:bg-gray-500 disabled:opacity-100 rounded-md min-w-0 shrink"
           >
             <Image
               src="/svgs/map.svg"
               alt="map"
               width={24}
               height={24}
-              className="h-6 aspect-square text-text-icons-on-color!"
+              className="h-6 aspect-square text-text-icons-on-color! shrink-0"
             />
-            <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px]">
-              {/* Generate LULC Map */}
-              {t("finalSummary.generateLULCMap")}
+            <p
+              className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] truncate"
+              title={activeProject?.name}
+            >
+              {/* Generate LULC Map {project name} */}
+              {activeProject
+                ? `${t("finalSummary.generateLULCMap")} ${activeProject.name}`
+                : t("finalSummary.generateLULCMap")}
             </p>
           </Button>
           <Button className="py-1 px-1 aspect-square flex flex-row gap-2 items-center bg-[#313131] hover:cursor-pointer">

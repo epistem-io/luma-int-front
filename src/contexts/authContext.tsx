@@ -6,9 +6,17 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 import { authStorage } from "@/lib/authStorage";
+import {
+  exchangeLoginCode,
+  extractLoginCode,
+  stripLoginCode,
+} from "@/lib/loginCode";
+import { normalizeLoginUser } from "@/lib/loginResponse";
 
 export interface AuthUser {
   id?: string | number;
@@ -57,36 +65,6 @@ const AuthContextContainer = ({ children }: PropsWithChildren) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  useEffect(() => {
-    const storedToken = authStorage.getToken();
-    const storedTokenExpiry =
-      typeof window === "undefined"
-        ? null
-        : window.sessionStorage.getItem(AUTH_TOKEN_EXPIRY_STORAGE_KEY);
-    const storedUser =
-      typeof window === "undefined"
-        ? null
-        : window.sessionStorage.getItem(AUTH_USER_STORAGE_KEY);
-
-    if (storedToken) {
-      setAccessToken(storedToken);
-    }
-
-    if (storedTokenExpiry) {
-      setAccessTokenExpiresAt(storedTokenExpiry);
-    }
-
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser) as AuthUser);
-      } catch {
-        window.sessionStorage.removeItem(AUTH_USER_STORAGE_KEY);
-      }
-    }
-
-    setIsHydrated(true);
-  }, []);
-
   const login = useCallback(
     ({ token, expiresAt, user: nextUser }: LoginParams) => {
       authStorage.setToken(token);
@@ -124,6 +102,67 @@ const AuthContextContainer = ({ children }: PropsWithChildren) => {
       window.sessionStorage.removeItem(AUTH_USER_STORAGE_KEY);
     }
   }, []);
+
+  // Guards the exchange against React strict mode running effects twice in
+  // dev: the first run strips the code from the URL, so the second run would
+  // otherwise see "no code" and mark the context hydrated too early.
+  const loginCodeExchangeStartedRef = useRef(false);
+
+  // Hydration. Sits below `login` because its dependency array reads it.
+  useEffect(() => {
+    if (loginCodeExchangeStartedRef.current) return;
+
+    const storedToken = authStorage.getToken();
+    const storedTokenExpiry = window.sessionStorage.getItem(
+      AUTH_TOKEN_EXPIRY_STORAGE_KEY,
+    );
+    const storedUser = window.sessionStorage.getItem(AUTH_USER_STORAGE_KEY);
+
+    if (storedToken) {
+      setAccessToken(storedToken);
+    }
+
+    if (storedTokenExpiry) {
+      setAccessTokenExpiresAt(storedTokenExpiry);
+    }
+
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser) as AuthUser);
+      } catch {
+        window.sessionStorage.removeItem(AUTH_USER_STORAGE_KEY);
+      }
+    }
+
+    const loginCode = extractLoginCode(window.location.search);
+    if (!loginCode) {
+      setIsHydrated(true);
+      return;
+    }
+
+    // Arriving from the set-password page. Strip the code first so it never
+    // lingers in the address bar or history, then trade it for a session.
+    // isHydrated waits for the outcome so the save/resume logic sees the
+    // final auth state once.
+    loginCodeExchangeStartedRef.current = true;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      stripLoginCode(window.location.href),
+    );
+    void exchangeLoginCode(loginCode)
+      .then((data) => {
+        if (!data?.api_key) return;
+        const nextUser = normalizeLoginUser(data.user);
+        login({
+          token: data.api_key,
+          expiresAt: data.api_key_expires,
+          user: nextUser,
+        });
+        toast.success(`Signed in as ${nextUser.email}`);
+      })
+      .finally(() => setIsHydrated(true));
+  }, [login]);
 
   const providedValue = useMemo(
     () => ({

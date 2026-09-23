@@ -1,6 +1,6 @@
 import { AREA_SCOPING_TYPE, PANEL_COMPONENT_KEY } from "@/constants";
 
-export const CHECKPOINT_VERSION = 1;
+export const CHECKPOINT_VERSION = 2;
 
 export interface CheckpointOwner {
   email: string;
@@ -38,7 +38,7 @@ export interface CheckpointDrafts {
 export interface SessionCheckpoint {
   version: typeof CHECKPOINT_VERSION;
   savedAt: string; // ISO timestamp, stamped by the writer
-  owner: CheckpointOwner;
+  owner: CheckpointOwner | null;
   sessionId: string;
   lastStepWithData: 1 | 2 | 3 | 4 | 5;
   stepKey: PANEL_COMPONENT_KEY;
@@ -92,7 +92,7 @@ export interface SessionCheckpoint {
 }
 
 export interface CheckpointInputs {
-  owner: CheckpointOwner;
+  owner: CheckpointOwner | null;
   sessionId: string;
   stepKey: PANEL_COMPONENT_KEY;
   progressPanelIndex: number;
@@ -301,7 +301,7 @@ export function isCheckpointOwner(
   cp: SessionCheckpoint,
   user: { email: string } | null | undefined,
 ): boolean {
-  if (!user) return false;
+  if (!user || !cp.owner) return false;
   return (
     cp.owner.email.trim().toLowerCase() === user.email.trim().toLowerCase()
   );

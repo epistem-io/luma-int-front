@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, ChevronDown, Loader2 } from "lucide-react";
+import { Check, ChevronDown, CloudOff, Loader2 } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -24,9 +24,10 @@ export const SaveStatusIndicator = () => {
   const [now, setNow] = useState(() => new Date());
   useEffect(() => {
     if (saveStatus !== "saved") return;
+    setNow(new Date());
     const id = setInterval(() => setNow(new Date()), REFRESH_INTERVAL_MS);
     return () => clearInterval(id);
-  }, [saveStatus]);
+  }, [saveStatus, lastSavedAt]);
 
   if (!isAuthenticated || saveStatus === "idle") return null;
 
@@ -39,7 +40,18 @@ export const SaveStatusIndicator = () => {
     );
   }
 
+  // Local copy is safe; only the server sync of the named project failed.
+  if (saveStatus === "error") {
+    return (
+      <div className="flex items-center gap-2 rounded-[8px] bg-warning-50 px-2.5 py-1.5 font-aptos text-sm font-bold text-warning-700">
+        <CloudOff className="h-4 w-4" />
+        {t("syncFailed")}
+      </div>
+    );
+  }
+
   const savedAtDate = lastSavedAt ? new Date(lastSavedAt) : now;
+  const displaySavedAt = savedAtDate > now ? now : savedAtDate;
   const stepLabels = [
     t("step1"),
     t("step2"),
@@ -56,7 +68,7 @@ export const SaveStatusIndicator = () => {
           className="flex items-center gap-2 rounded-[8px] bg-success-50 px-2.5 py-1.5 font-aptos text-sm font-bold text-success-700 cursor-pointer"
         >
           <span className="h-2 w-2 rounded-full bg-success-700" />
-          {t("saved", { time: format.relativeTime(savedAtDate, now) })}
+          {t("saved", { time: format.relativeTime(displaySavedAt, now) })}
           <ChevronDown className="h-4 w-4" />
         </button>
       </PopoverTrigger>

@@ -518,7 +518,14 @@ const MapContextContainer = (props: PropsWithChildren) => {
   ) => {
     if (!mapInstance) return;
 
-    // console.log("runmarkercursor");
+    const cursorClassColor = classArray.find(
+      (item) => item.class_id === Number(selectedClass),
+    )?.class_color;
+
+    const cursorIconSrc =
+      pointingTypes === POINTING_TYPE.BULK && cursorClassColor
+        ? svgWithColor(cursorClassColor)
+        : "/images/marker.webp";
 
     const markerFeature = new Feature({
       geometry: new Point([0, 0]),
@@ -529,7 +536,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
       new Style({
         image: new Icon({
           anchor: [0.5, 1], // Anchor the bottom center of the icon
-          src: "/images/marker.webp", // Use your own icon URL
+          src: cursorIconSrc,
           size: [92, 117],
           height: 30,
         }),
@@ -632,8 +639,8 @@ const MapContextContainer = (props: PropsWithChildren) => {
         markerFeature.setStyle(
           new Style({
             image: new Icon({
-              anchor: [0.5, 1], // Anchor the bottom center of the icon
-              src: "/images/marker.webp", // Use your own icon URL
+              anchor: [0.5, 1],
+              src: cursorIconSrc,
               size: [92, 117],
               height: 30,
               opacity: 0,
@@ -651,14 +658,14 @@ const MapContextContainer = (props: PropsWithChildren) => {
       markerFeature.setStyle(
         new Style({
           image: new Icon({
-            anchor: [0.5, 1], // Anchor the bottom center of the icon
-            src: "/images/marker.webp", // Use your own icon URL
+            anchor: [0.5, 1],
+            src: cursorIconSrc,
             size: [92, 117],
             height: 30,
-            // opacity: 0,
           }),
         }),
       );
+
 
       mapInstance.getTargetElement().style.cursor = "";
 

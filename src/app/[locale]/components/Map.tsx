@@ -47,16 +47,14 @@ const Map1 = () => {
 
     const baseMapCarto = new TileLayer({
       source: new ImageTile({
-        url: "https://{a-c}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-        crossOrigin: "anonymous",
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
       }),
       className: "basemap",
     });
 
     const labelMapCarto = new TileLayer({
       source: new ImageTile({
-        url: "https://{a-c}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png",
-        crossOrigin: "anonymous",
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
       }),
       className: "basemap",
     });

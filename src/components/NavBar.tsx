@@ -1,14 +1,36 @@
 "use client";
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EllipsisVertical, Pencil, Save, Share2, Trash2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
+import { toast } from "sonner"
+import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
+import {
+  deleteProject,
+  listProjects,
+  type ProjectSummary,
+} from "@/lib/projectsApi";
 import LanguageToggle from "./LanguageToggle";
+import { RenameProjectDialog } from "./RenameProjectDialog";
+import { SaveProjectDialog } from "./SaveProjectDialog";
+import { ShareProjectDialog } from "./ShareProjectDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -47,11 +69,116 @@ const getUserInitials = (name?: string, email?: string) => {
   return (email?.replace(/\s+/g, "").slice(0, 2) ?? "").toUpperCase();
 };
 
+// Backend dates are naive UTC ISO strings (no offset); shown as dd/mm/yyyy in
+// the viewer's local time.
+const formatProjectDate = (iso: string | null | undefined) => {
+  if (!iso) return "-";
+  const date = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`);
+  if (Number.isNaN(date.getTime())) return "-";
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${date.getFullYear()}`;
+};
+
 export function NavBar({ className }: NavBarProps) {
   const t = useTranslations("LoginModal");
   const { isAuthenticated, logout, user } = useContext(AuthContext);
   const { setIsLoginModalOpen } = useContext(GlobalContext);
+  const tSave = useTranslations("SaveProgress");
+  const tProjects = useTranslations("Projects");
+  const {
+    saveProgress,
+    activeProject,
+    canNameProject,
+    openProject,
+    isRestoring,
+    shouldOfferNaming,
+    dismissNamingOffer,
+    saveProjectNow,
+    handleProjectRenamed,
+    handleProjectDeleted,
+  } = useContext(SessionCheckpointContext);
   const userInitials = getUserInitials(user?.name, user?.email);
+
+  const [isSaveDialogOpen, setIsSaveDialogOpen] = useState(false);
+  const [isSavingProject, setIsSavingProject] = useState(false);
+  const [shareTargetId, setShareTargetId] = useState<string | null>(null);
+  const [renameTarget, setRenameTarget] = useState<ProjectSummary | null>(null);
+  // Row whose action strip (share/rename/delete) is revealed. Plain state
+  // instead of a nested DropdownMenu: a portalled menu inside the modal
+  // account menu loses the focus fight and closes itself immediately.
+  const [actionsFor, setActionsFor] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ProjectSummary | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [pendingOpenId, setPendingOpenId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<ProjectSummary[]>([]);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Refetch whenever the menu opens (and after a project is created/opened
+  // while it is open) so the list is never stale.
+  useEffect(() => {
+    if (!isAuthenticated || !isMenuOpen) return;
+    void listProjects()
+      .then(setProjects)
+      .catch(() => setProjects([]));
+  }, [isAuthenticated, isMenuOpen, activeProject]);
+
+  const onSaveProjectClick = async () => {
+    // Unnamed work: the first save names the project.
+    if (canNameProject) {
+      setIsSaveDialogOpen(true);
+      return;
+    }
+    if (!activeProject) {
+      toast.info(tProjects("nothingToSaveToast"));
+      return;
+    }
+    setIsSavingProject(true);
+    const result = await saveProjectNow();
+    setIsSavingProject(false);
+    if (result === "saved") toast.success(tProjects("savedToast"));
+    else if (result === "failed") toast.error(tProjects("saveFailedToast"));
+    else toast.info(tProjects("nothingToSaveToast"));
+  };
+
+  const openProjectOrToast = async (id: string) => {
+    const ok = await openProject(id);
+    if (!ok) toast.error(tProjects("openFailedToast"));
+  };
+
+  const onOpenProject = (id: string) => {
+    if (id === activeProject?.id) return;
+    // canNameProject means the current work is unnamed and would be replaced.
+    if (canNameProject) {
+      setPendingOpenId(id);
+      return;
+    }
+    void openProjectOrToast(id);
+  };
+
+  const onRenamed = (id: string, name: string) => {
+    handleProjectRenamed(id, name);
+    setProjects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, name } : p)),
+    );
+  };
+
+  const onConfirmDelete = async () => {
+    const target = deleteTarget;
+    if (!target || isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await deleteProject(target.id);
+      handleProjectDeleted(target.id);
+      setProjects((prev) => prev.filter((p) => p.id !== target.id));
+      toast.success(tProjects("deletedToast"));
+      setDeleteTarget(null);
+    } catch {
+      toast.error(tProjects("deleteFailedToast"));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <nav
@@ -130,36 +257,219 @@ export function NavBar({ className }: NavBarProps) {
             <LanguageToggle />
             {/* Language Picker */}
             {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Open user menu"
-                    className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF6FE] font-aptos text-sm font-semibold leading-5 text-primary-pink outline-none transition-colors hover:cursor-pointer hover:bg-[#FFEAFB] focus-visible:ring-2 focus-visible:ring-primary-pink focus-visible:ring-offset-2"
+              <>
+                {/* Always visible while logged in, so there is one obvious
+                    place to save: names the project the first time, then
+                    acts as a manual save on top of the auto-sync. */}
+                <Button
+                  type="button"
+                  disabled={isSavingProject}
+                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                  onClick={() => void onSaveProjectClick()}
+                >
+                  <Save className="h-4 w-4" />
+                  {isSavingProject
+                    ? tProjects("saving")
+                    : tProjects("saveProject")}
+                </Button>
+                <DropdownMenu
+                  open={isMenuOpen}
+                  onOpenChange={(o) => {
+                    setIsMenuOpen(o);
+                    // No revealed action strip on the next open.
+                    if (!o) setActionsFor(null);
+                  }}
+                >
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Open user menu"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF6FE] font-aptos text-sm font-semibold leading-5 text-primary-pink outline-none transition-colors hover:cursor-pointer hover:bg-[#FFEAFB] focus-visible:ring-2 focus-visible:ring-primary-pink focus-visible:ring-offset-2"
+                    >
+                      {userInitials || "U"}
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={10}
+                    className="w-[430px] max-w-[calc(100vw-2rem)] rounded-2xl border-0 p-3 font-pjs shadow-[0_8px_30px_rgba(0,0,0,0.16)]"
                   >
-                    {userInitials || "U"}
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="min-w-[10rem]">
-                  <DropdownMenuItem
-                    className="font-aptos text-sm leading-5 text-primary-pink hover:cursor-pointer"
-                    onClick={logout}
-                  >
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    {/* Account header */}
+                    <div className="flex items-center gap-x-5 px-1 pb-7 pt-4">
+                      <div
+                        aria-hidden="true"
+                        className="flex size-[84px] shrink-0 items-center justify-center rounded-full bg-[#FFF6FE] text-[28px] font-bold text-primary-pink"
+                      >
+                        {userInitials || "U"}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-2xl font-bold leading-8 text-[#1F1F1F]">
+                          {user?.name || user?.email}
+                        </p>
+                        {user?.name && (
+                          <p className="mt-1.5 truncate text-base leading-6 text-[#4D4D4D]">
+                            {user.email}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="px-5 pb-2.5 text-base leading-6 text-[#5C5C5C]">
+                      {tProjects("myProjects")}
+                    </p>
+                    {projects.length === 0 && (
+                      <p className="px-5 pb-3 text-sm leading-5 text-[#8A8A8A]">
+                        {tProjects("emptyList")}
+                      </p>
+                    )}
+                    <div className="max-h-[300px] space-y-0.5 overflow-y-auto">
+                      {projects.map((project) => {
+                        const isActive = project.id === activeProject?.id;
+                        return (
+                          <DropdownMenuItem
+                            key={project.id}
+                            className={cn(
+                              "flex items-center justify-between gap-x-3 rounded-xl px-5 py-3.5 hover:cursor-pointer focus:bg-[#F3F3F3]",
+                              isActive && "bg-[#F9E9EE] focus:bg-[#F9E9EE]",
+                            )}
+                            onClick={() => onOpenProject(project.id)}
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-xl font-medium leading-7 text-[#1F1F1F]">
+                                {project.name}
+                                {project.shared_from && (
+                                  <span className="ml-2 text-sm font-normal text-[#8A8A8A]">
+                                    ({tProjects("sharedBadge")})
+                                  </span>
+                                )}
+                              </p>
+                              <p
+                                className={cn(
+                                  "mt-0.5 text-base leading-6",
+                                  isActive
+                                    ? "text-[#333333]"
+                                    : "text-[#9E9E9E]",
+                                )}
+                              >
+                                {tProjects("createdOn", {
+                                  date: formatProjectDate(
+                                    project.created_date ??
+                                      project.modified_date,
+                                  ),
+                                })}
+                              </p>
+                            </div>
+                            {/* Inline action strip instead of a nested menu:
+                                a portalled menu inside this modal menu loses
+                                the focus fight and closes itself instantly. */}
+                            {actionsFor === project.id && (
+                              <div className="flex shrink-0 items-center gap-0.5 animate-in fade-in-0 slide-in-from-right-2 duration-150">
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("share")}
+                                  title={tProjects("share")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // Close the menu first: a Dialog opened
+                                    // over an open DropdownMenu fights it for
+                                    // focus.
+                                    setActionsFor(null);
+                                    setIsMenuOpen(false);
+                                    setShareTargetId(project.id);
+                                  }}
+                                >
+                                  <Share2 className="size-5 text-primary-pink" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("rename")}
+                                  title={tProjects("rename")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActionsFor(null);
+                                    setIsMenuOpen(false);
+                                    setRenameTarget(project);
+                                  }}
+                                >
+                                  <Pencil className="size-5 text-[#5C5C5C]" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={tProjects("delete")}
+                                  title={tProjects("delete")}
+                                  className="rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setActionsFor(null);
+                                    setIsMenuOpen(false);
+                                    setDeleteTarget(project);
+                                  }}
+                                >
+                                  <Trash2 className="size-5 text-destructive" />
+                                </button>
+                              </div>
+                            )}
+                            <button
+                              type="button"
+                              aria-label={tProjects("moreActions")}
+                              aria-expanded={actionsFor === project.id}
+                              className={cn(
+                                "shrink-0 rounded-lg p-1.5 outline-none hover:cursor-pointer hover:bg-white/70 focus-visible:ring-2 focus-visible:ring-primary-pink",
+                                actionsFor === project.id && "bg-white/70",
+                              )}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionsFor((prev) =>
+                                  prev === project.id ? null : project.id,
+                                );
+                              }}
+                            >
+                              <EllipsisVertical className="size-6 text-[#9E9E9E]" />
+                            </button>
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </div>
+
+                    <DropdownMenuItem
+                      className="mt-9 rounded-xl px-5 py-3 text-xl font-bold leading-7 text-primary-pink hover:cursor-pointer focus:bg-[#F3F3F3] focus:text-primary-pink"
+                      onClick={logout}
+                    >
+                      {tProjects("logout")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
             ) : (
-              <Button
-                type="button"
-                variant={"outline"}
-                className="text-primary-pink hover:cursor-pointer hover:text-primary-pink"
-                onClick={() => {
-                  setIsLoginModalOpen(true);
-                }}
-              >
-                {t("title")}
-              </Button>
+              <>
+                <Button
+                  type="button"
+                  variant={"ghost"}
+                  className="text-neutral-700 hover:cursor-pointer"
+                  onClick={() => {
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  {t("title")}
+                </Button>
+                <Button
+                  type="button"
+                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                  onClick={() => {
+                    if (saveProgress()) {
+                      toast.success(tSave("savedToast"));
+                    } else {
+                      toast.info(tSave("nothingToSaveToast"));
+                    }
+                    setIsLoginModalOpen(true);
+                  }}
+                >
+                  <Save className="h-4 w-4" />
+                  {tSave("button")}
+                </Button>
+              </>
             )}
             {/* <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5">
               <button
@@ -189,6 +499,108 @@ export function NavBar({ className }: NavBarProps) {
           </div>
         </div>
       </div>
+
+      {/* Dims the page while the account menu is open (design: #000 at 10%).
+          Portalled to <body> so it covers the navbar too and no parent
+          stacking context can trap it; z-40 keeps it under the menu (z-50).
+          pointer-events-none leaves outside-click dismissal to Radix. */}
+      {isMenuOpen &&
+        createPortal(
+          <div
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 z-40 bg-black opacity-10 animate-in fade-in-0 duration-200"
+          />,
+          document.body,
+        )}
+
+      {/* Project dialogs (all portal to <body>, so placement is layout-free) */}
+      <AlertDialog
+        open={pendingOpenId !== null}
+        onOpenChange={(o) => !o && setPendingOpenId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tProjects("unsavedSwitchTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {tProjects("unsavedSwitchDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{tProjects("cancel")}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                const id = pendingOpenId;
+                setPendingOpenId(null);
+                if (id) void openProjectOrToast(id);
+              }}
+            >
+              {tProjects("openAnyway")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <SaveProjectDialog
+        open={isSaveDialogOpen}
+        onOpenChange={setIsSaveDialogOpen}
+      />
+      {/* Post-resume offer; waits for the blocking restore overlay to clear. */}
+      <SaveProjectDialog
+        open={shouldOfferNaming && !isRestoring && canNameProject}
+        onOpenChange={(o) => !o && dismissNamingOffer()}
+        title={tProjects("keepDialogTitle")}
+      />
+      {shareTargetId && (
+        <ShareProjectDialog
+          projectId={shareTargetId}
+          open
+          onOpenChange={(o) => !o && setShareTargetId(null)}
+        />
+      )}
+      {/* Mounted per target so useState(currentName) prefills freshly. */}
+      {renameTarget && (
+        <RenameProjectDialog
+          projectId={renameTarget.id}
+          currentName={renameTarget.name}
+          open
+          onOpenChange={(o) => !o && setRenameTarget(null)}
+          onRenamed={onRenamed}
+        />
+      )}
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(o) => !o && !isDeleting && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {tProjects("deleteDialogTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {tProjects("deleteDialogDescription", {
+                name: deleteTarget?.name ?? "",
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>
+              {tProjects("cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isDeleting}
+              className="bg-destructive text-white hover:bg-destructive/90"
+              onClick={(e) => {
+                // Radix closes on click by default; stay open while deleting.
+                e.preventDefault();
+                void onConfirmDelete();
+              }}
+            >
+              {isDeleting ? tProjects("deleting") : tProjects("confirmDelete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 }

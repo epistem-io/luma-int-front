@@ -51,6 +51,7 @@ export const SateliteCompositeAccordion = () => {
   const [selectedSatellite, setSelectedSatellite] = useState(satelliteSource);
   const [cloudCoverage, setCloudCoverage] = useState(maximumCloudCover);
   const [isSliding, setIsSliding] = useState(false);
+  const [hasSlid, setHasSlid] = useState(false);
   const isSubmitDisabled = !selectedSatellite || isFormDisabled;
 
   const sliderPosition = `${cloudCoverage}%`;
@@ -71,9 +72,10 @@ export const SateliteCompositeAccordion = () => {
   useEffect(() => {
     setSelectedSatellite(satelliteSource);
     setCloudCoverage(maximumCloudCover);
+    setHasSlid(false);
   }, [satelliteSource, maximumCloudCover, isEditingSatelliteComposite]);
 
-  useEffect(() => {
+  useEffect(() => {``
     if (!hasSelectedTimePeriod) return;
 
     const isCurrentSatelliteAvailable = availableSatelliteOptions.some(
@@ -157,10 +159,13 @@ export const SateliteCompositeAccordion = () => {
                 min={0}
                 max={100}
                 trackBgColor="bg-neutral-300"
+                rangeBgColor={hasSlid ? "border-primary-pink bg-primary-pink": "border-[#F2D0DD] bg-[#FFE3ED]"}
+                thumbBgColor={hasSlid ? "border-primary-pink bg-primary-pink": "border-[#F2D0DD] bg-[#FFE3ED]"}
                 disabled={isFormDisabled}
                 onValueChange={(value) => {
                   setCloudCoverage(value[0] ?? 0);
                   setIsSliding(true);
+                  setHasSlid(true);
                 }}
                 onValueCommit={() => setIsSliding(false)}
                 onPointerDown={() => setIsSliding(true)}
@@ -169,62 +174,22 @@ export const SateliteCompositeAccordion = () => {
               />
             </div>
             {/* <div className="grid grid-cols-10"></div> */}
-            <div className="flex flex-row justify-between">
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  0
+            <div className="relative mt-1 h-5">
+              {Array.from({ length: 11}, (_,index) => index * 10).map((tick) => (
+                <p
+                  key={tick}
+                  className={`absolute top-0 font-aptos text-sm font-bold leading-5 text-primary-pink ${
+                    tick === 0
+                      ? "translate-x-0"
+                      : tick === 100
+                        ? "-translate-x-full"
+                        : "-translate-x-1/2"
+                  }`}
+                  style={{ left: `${tick}%` }}
+                >
+                  {tick}
                 </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  10
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  20
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  30
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  40
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  50
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  60
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  70
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  80
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  90
-                </p>
-              </div>
-              <div className="">
-                <p className="font-aptos text-sm font-bold leading-5 text-primary-pink text-center">
-                  100
-                </p>
-              </div>
+              ))}
             </div>
           </Field>
           <Button

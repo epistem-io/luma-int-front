@@ -31,6 +31,8 @@ const OVERALL_STYLE: Record<
   },
 };
 
+const MAX_PROBLEM_PAIRS_SHOWN = 5;
+
 export const SampleQualityCard = () => {
   const t = useTranslations("InteractivePanel");
   const { sessionId } = useContext(GlobalContext);
@@ -122,6 +124,13 @@ const SampleQualityResultCard = ({
         ? t("dataTraining.sampleQualityMed")
         : t("dataTraining.sampleQualityPoor");
 
+  const lowestPairs = result.problem_pairs
+    .slice()
+    .sort((a, b) => a.TD_Distance - b.TD_Distance)
+    .slice(0, MAX_PROBLEM_PAIRS_SHOWN);
+
+  const hiddenPairCount = result.problem_pairs.length - lowestPairs.length;
+
   return (
     <div className={cn("p-3 rounded-[12px] space-y-3", style.card)}>
       <div className="flex flex-row justify-between items-start">
@@ -210,28 +219,35 @@ const SampleQualityResultCard = ({
         </div>
       )}
 
-      {result.problem_pairs
-        .slice()
-        .sort((a, b) => a.TD_Distance - b.TD_Distance)
-        .map((item, index) => (
-          <div
-            className="flex flex-row gap-x-2 items-start"
-            key={`sample-quality-pair-${index}`}
-          >
-            <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main"/>
-            <p className="">
-              {t("dataTraining.sampleQualityPair", {
-                X: item.Class1_Name,
-                Y: item.Class2_Name,
-              })}{" "}
-              <span className={cn("font-bold", item.TD_Distance < 1.0 ? "text-danger-800" : "text-warning-700")}>
-                {t("dataTraining.sampleQualityPairTD", {
-                  X: item.TD_Distance.toFixed(2),
-                })}
-              </span>
-            </p>
-          </div>
+      {lowestPairs.map((item, index) => (
+        <div
+          className="flex flex-row gap-x-2 items-start"
+          key={`sample-quality-pair-${index}`}
+        >
+          <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
+          <p className="">
+            {t("dataTraining.sampleQualityPair", {
+              X: item.Class1_Name,
+              Y: item.Class2_Name,
+            })}{" "}
+            <span
+              className={cn(
+                "font-bold",
+                item.TD_Distance < 1.0 ? "text-danger-800" : "text-warning-700",
+              )}
+            >
+              {t("dataTraining.sampleQualityPairTD", {
+                X: item.TD_Distance.toFixed(2),
+              })}
+            </span>
+          </p>
+        </div>
       ))}
+      {hiddenPairCount > 0 && (
+        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-second">
+          {t("dataTraining.sampleQualityMorePairs", { X: hiddenPairCount })}
+        </p>
+      )}
 
       <div className="grid grid-cols-3 gap-x-3">
         <div className="bg-white/60 rounded-md p-2 text-center space-y-1">
