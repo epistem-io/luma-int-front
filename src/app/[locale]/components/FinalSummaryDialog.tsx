@@ -19,7 +19,7 @@ import {
   TEMPORAL_COVERAGE_ARRAY,
 } from "@/constants";
 import { GlobalContext } from "@/contexts/globalContext";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { set } from "zod";
 import { useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
@@ -87,10 +87,10 @@ export const FinalSummaryDialog = () => {
         setSummaryData(json);
       })
       .catch((e) => {
-        toast.error(`Error fetching summary: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.loadSummaryFailed"),
+          error: e,
+          onRetry: getSummary,
         });
       })
       .finally(() => {

@@ -10,11 +10,18 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      position="bottom-right"
+      // richColors gives success/info their own green/blue; errors go through
+      // showErrorToast (components/ui/error-toast.tsx), a custom toast.
+      richColors
+      closeButton
+      toastOptions={{ className: "font-aptos" }}
       style={
         {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
+          "--width": "400px",
         } as React.CSSProperties
       }
       {...props}

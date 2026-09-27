@@ -260,7 +260,40 @@
       "retry": "Retry",
       "somethingWrongHappened": "Something went wrong. Please try again.",
       "seeMore": "See More...",
-      "seeLess": "See Less"
+      "seeLess": "See Less",
+      "errorToast": {
+        "defaultHint": "Please try again. If it keeps happening, copy the details and send them to us.",
+        "showDetails": "Show details",
+        "hideDetails": "Hide details",
+        "copy": "Copy",
+        "copied": "Copied",
+        "dismiss": "Dismiss"
+      },
+      "errors": {
+        "uploadFailed": "Upload failed",
+        "uploadHint": "Check the file and try again.",
+        "submitSamplesFailed": "Could not save your sample points",
+        "submitSamplesHint": "Your points are still on the map. Try again in a moment.",
+        "submitAreaFailed": "Could not save your mapping area",
+        "loadRegencyFailed": "Could not load the district",
+        "readFileFailed": "Could not read the file",
+        "submitClassesFailed": "Could not save your classes",
+        "loadSummaryFailed": "Could not load the summary",
+        "submitPredictorsFailed": "Could not save your parameters",
+        "downloadFailed": "Download failed",
+        "mosaicDownloadUnavailableTitle": "Mosaic download unavailable",
+        "mosaicDownloadUnavailable": "Google Earth Engine could not create a download link for this mosaic.",
+        "mosaicFailed": "Could not build the satellite mosaic",
+        "generateMapFailed": "Map generation failed",
+        "generateMapHint": "Your settings are kept. Try again in a moment.",
+        "loginRequired": "Please log in to generate your map",
+        "loginRequiredHint": "Your inputs are kept while you sign in.",
+        "loginFailed": "Sign-in failed",
+        "signUpFailed": "Sign-up failed",
+        "shareMapFailed": "Could not share the map",
+        "downloadRequestFailed": "Could not request the download",
+        "noSession": "No mapping session found. Generate a map first."
+      }
     },
     "basicInformation": {
       "basicInformationTitle": "Basic Information",

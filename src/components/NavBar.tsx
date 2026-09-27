@@ -5,12 +5,20 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EllipsisVertical, Pencil, Save, Share2, Trash2 } from "lucide-react";
+import {
+  EllipsisVertical,
+  MapIcon,
+  Pencil,
+  Save,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { toast } from "sonner"
+import { showErrorToast } from "./ui/error-toast";
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import {
   deleteProject,
@@ -137,13 +145,15 @@ export function NavBar({ className }: NavBarProps) {
     const result = await saveProjectNow();
     setIsSavingProject(false);
     if (result === "saved") toast.success(tProjects("savedToast"));
-    else if (result === "failed") toast.error(tProjects("saveFailedToast"));
+    else if (result === "failed")
+      showErrorToast({ title: tProjects("saveFailedToast"), description: null });
     else toast.info(tProjects("nothingToSaveToast"));
   };
 
   const openProjectOrToast = async (id: string) => {
     const ok = await openProject(id);
-    if (!ok) toast.error(tProjects("openFailedToast"));
+    if (!ok)
+      showErrorToast({ title: tProjects("openFailedToast"), description: null });
   };
 
   const onOpenProject = (id: string) => {
@@ -174,7 +184,10 @@ export function NavBar({ className }: NavBarProps) {
       toast.success(tProjects("deletedToast"));
       setDeleteTarget(null);
     } catch {
-      toast.error(tProjects("deleteFailedToast"));
+      showErrorToast({
+        title: tProjects("deleteFailedToast"),
+        description: null,
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -260,18 +273,45 @@ export function NavBar({ className }: NavBarProps) {
               <>
                 {/* Always visible while logged in, so there is one obvious
                     place to save: names the project the first time, then
-                    acts as a manual save on top of the auto-sync. */}
-                <Button
-                  type="button"
-                  disabled={isSavingProject}
-                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
-                  onClick={() => void onSaveProjectClick()}
-                >
-                  <Save className="h-4 w-4" />
-                  {isSavingProject
-                    ? tProjects("saving")
-                    : tProjects("saveProject")}
-                </Button>
+                    acts as a manual save on top of the auto-sync.
+                    Named project: pill with the project name and a compact
+                    Save on the right. Unnamed work: plain Save, whose first
+                    click opens the naming dialog. */}
+                {activeProject ? (
+                  <div
+                    className="flex min-w-0 max-w-[340px] items-center gap-x-2 rounded-lg bg-primary-pink-hover py-1 pl-3 pr-1"
+                    title={activeProject.name}
+                  >
+                    <MapIcon
+                      className="size-5 shrink-0 text-primary-pink"
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 truncate font-aptos text-md font-semibold leading-6 text-primary-pink">
+                      {activeProject.name}
+                    </span>
+                    <Button
+                      type="button"
+                      disabled={isSavingProject}
+                      className="h-8 shrink-0 rounded-md bg-primary-pink px-3 text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                      onClick={() => void onSaveProjectClick()}
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSavingProject ? tProjects("saving") : tSave("button")}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={isSavingProject}
+                    className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                    onClick={() => void onSaveProjectClick()}
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSavingProject
+                      ? tProjects("saving")
+                      : tProjects("saveProject")}
+                  </Button>
+                )}
                 <DropdownMenu
                   open={isMenuOpen}
                   onOpenChange={(o) => {

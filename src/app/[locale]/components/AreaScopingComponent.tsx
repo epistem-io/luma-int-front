@@ -46,7 +46,7 @@ import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Style, { GeometryFunction } from "ol/style/Style";
 import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { RegencyCombobox } from "./RegencyCombobox";
 import { SpatialResolutionSelect } from "./SpatialResolutionSelect";
 
@@ -278,10 +278,10 @@ export const AreaScopingComponent = () => {
         // setStage(POLYGON_STAGE.CONFIRMATION);
       })
       .catch((e) => {
-        toast.error(`Error on submitting polygon: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.submitAreaFailed"),
+          error: e,
+          onRetry: () => void submitPolygon(poly),
         });
       })
       .finally(() => {
@@ -987,10 +987,11 @@ export const AreaScopingFooter = () => {
         applyAoiResponse(json);
       })
       .catch((e) => {
-        toast.error(`Error on uploading file: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.uploadFailed"),
+          description: t("common.errors.uploadHint"),
+          error: e,
+          onRetry: () => void onSubmitShp(),
         });
 
         if (e?.message) {
@@ -1042,10 +1043,10 @@ export const AreaScopingFooter = () => {
         }
       })
       .catch((e) => {
-        toast.error(`Error on selecting regency: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.loadRegencyFailed"),
+          error: e,
+          onRetry: () => void onSubmitRegency(),
         });
       })
       .finally(() => {

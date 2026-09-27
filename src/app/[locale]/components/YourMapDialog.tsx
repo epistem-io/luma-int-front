@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/components/ui/error-toast";
 import DownloadOnTheWayModal from "@/components/DownloadOnTheWayModal";
 import {
   Dialog,
@@ -55,7 +56,7 @@ export const YourMapDialog = () => {
     }
 
     if (!sessionId) {
-      toast.error(commonT("somethingWrongHappened"));
+      showErrorToast({ title: commonT("errors.noSession"), description: null });
       return;
     }
 
@@ -86,11 +87,17 @@ export const YourMapDialog = () => {
         return;
       }
 
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : commonT("somethingWrongHappened"),
-      );
+      // The generic message is already the hint; only keep a real error
+      // (e.g. a network failure) for the details panel.
+      const generic = commonT("somethingWrongHappened");
+      showErrorToast({
+        title: commonT("errors.downloadRequestFailed"),
+        error:
+          error instanceof Error && error.message !== generic
+            ? error
+            : undefined,
+        onRetry: () => void handleDownload(),
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -103,7 +110,7 @@ export const YourMapDialog = () => {
     }
 
     if (!sessionId) {
-      toast.error(commonT("somethingWrongHappened"));
+      showErrorToast({ title: commonT("errors.noSession"), description: null });
       return;
     }
 

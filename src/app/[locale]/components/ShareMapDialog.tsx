@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
+import { showErrorToast } from "@/components/ui/error-toast";
 import {
   Dialog,
   DialogContent,
@@ -101,11 +102,10 @@ export const ShareMapDialog = ({ open, onOpenChange }: ShareMapDialogProps) => {
         return;
       }
 
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : commonT("somethingWrongHappened"),
-      );
+      showErrorToast({
+        title: commonT("errors.shareMapFailed"),
+        description: error instanceof Error ? error.message : null,
+      });
     }
   });
 

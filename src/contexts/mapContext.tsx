@@ -17,10 +17,10 @@ import TileLayer from "ol/layer/Tile";
 import {
   BASEMAP_TYPE,
   GET_MOSAIC_URL,
-  MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE,
   POINTING_TYPE,
 } from "@/constants";
-import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { XYZ } from "ol/source";
 import { styles, stylesTransparentFill, svgWithColor } from "@/lib/utils";
 import Feature from "ol/Feature";
@@ -229,6 +229,7 @@ const DEFAULT_VALUE: MapContextType = {
 const MapContext = createContext(DEFAULT_VALUE);
 
 const MapContextContainer = (props: PropsWithChildren) => {
+  const t = useTranslations("InteractivePanel");
   const [mapInstance, setMapInstance] = useState<Map | null>(null);
   const [polygon, setPolygon] = useState<MultiPolygon | Polygon | null>(null);
   const [vectorSource, setVectorSource] = useState<VectorSource | null>(null);
@@ -379,7 +380,10 @@ const MapContextContainer = (props: PropsWithChildren) => {
         };
 
         if (temp.download_url === "") {
-          toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
+          showErrorToast({
+            title: t("common.errors.mosaicDownloadUnavailableTitle"),
+            description: t("common.errors.mosaicDownloadUnavailable"),
+          });
         }
 
         setMosaicStatistic(temp);
@@ -387,10 +391,9 @@ const MapContextContainer = (props: PropsWithChildren) => {
         setIsLegendVisible(["legend-accordion"]);
       })
       .catch((e) => {
-        toast.error(`Error on generating image mosaic: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.mosaicFailed"),
+          error: e,
         });
       })
       .finally(() => {

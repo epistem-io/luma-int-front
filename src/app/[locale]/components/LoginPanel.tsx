@@ -4,6 +4,7 @@ import { useContext, useState } from "react";
 import { toast } from "sonner";
 
 import LoginModal from "@/components/LoginModal";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { LOGIN_URL } from "@/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
@@ -78,7 +79,12 @@ export const LoginPanel = () => {
           ? error.message
           : commonT("somethingWrongHappened");
 
-      toast.error(errorMessage);
+      // The backend's message (e.g. wrong password) is the useful part here,
+      // so it is the hint rather than a hidden detail.
+      showErrorToast({
+        title: commonT("errors.loginFailed"),
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }
