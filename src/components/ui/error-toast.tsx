@@ -26,6 +26,12 @@ export interface ErrorToastOptions {
 
 const ERROR_TOAST_DURATION = 15_000;
 
+export const errorPaletteToastStyle = {
+  "--info-bg": "rgba(255, 239, 238, 1)",
+  "--info-border": "rgba(254, 161, 155, 1)",
+  "--info-text": "rgba(144, 31, 27, 1)",
+} as React.CSSProperties;
+
 /** Turns whatever was thrown into one readable line for the details panel. */
 export const describeError = (error: unknown): string => {
   if (error === undefined || error === null || error === "") return "";

@@ -4,15 +4,20 @@ import { useContext, useState } from "react";
 import { toast } from "sonner";
 
 import LoginModal from "@/components/LoginModal";
-import { showErrorToast } from "@/components/ui/error-toast";
 import { LOGIN_URL } from "@/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { type LoginResponse, normalizeLoginUser } from "@/lib/loginResponse";
 import { useTranslations } from "next-intl";
+const LOGIN_ERROR_KEYS = {
+  ERR_EMAIL_NOT_REGISTERED: "errors.emailNotRegistered",
+  ERR_WRONG_PASSWORD: "errors.wrongPassword",
+  ERR_ACCOUNT_NOT_ACTIVATED: "errors.accountNotActivated",
+} as const;
 
 export const LoginPanel = () => {
   const commonT = useTranslations("InteractivePanel.common");
+  const t = useTranslations("LoginModal");
   const { login } = useContext(AuthContext);
   const {
     isLoginModalOpen,
@@ -20,6 +25,7 @@ export const LoginPanel = () => {
     setIsSignUpModalOpen,
   } = useContext(GlobalContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const handlePlaceholderAction = () => {
     toast.info(commonT("featureComingSoon"));
@@ -30,6 +36,7 @@ export const LoginPanel = () => {
     password: string;
   }) => {
     setIsSubmitting(true);
+    setLoginError(null);
 
     try {
       const response = await fetch(LOGIN_URL, {
@@ -44,13 +51,15 @@ export const LoginPanel = () => {
         let errorMessage = commonT("somethingWrongHappened");
 
         try {
-          const data = await response.json();
-
-          if (typeof data?.message === "string" && data.message.trim()) {
-            errorMessage = data.message;
+          const data = await response.json().catch(() => null);
+          const code: unknown = data?.error?.code;
+          if (typeof code === "string" && code in LOGIN_ERROR_KEYS) {
+            errorMessage = t(
+              LOGIN_ERROR_KEYS[code as keyof typeof LOGIN_ERROR_KEYS],
+            );
           }
         } catch {
-          // Fall back to the generic error message when the response body is absent.
+          // No JSON body: keep the generic message.
         }
 
         throw new Error(errorMessage);
@@ -60,7 +69,7 @@ export const LoginPanel = () => {
       const token = data.api_key;
 
       if (!token) {
-        throw new Error("Login succeeded but no auth token was returned.");
+        throw new Error(commonT("somethingWrongHappened"));
       }
 
       const user = normalizeLoginUser(data.user);
@@ -74,17 +83,17 @@ export const LoginPanel = () => {
       setIsLoginModalOpen(false);
       toast.success(`Signed in as ${user.email}`);
     } catch (error) {
+      // fetch rejects with a TypeError when the network is down; its text
+      // ("Failed to fetch") is not useful to show.
       const errorMessage =
-        error instanceof Error && error.message.trim()
-          ? error.message
-          : commonT("somethingWrongHappened");
+        error instanceof TypeError
+          ? t("errors.network")
+          : error instanceof Error && error.message.trim()
+            ? error.message
+            : commonT("somethingWrongHappened");
 
-      // The backend's message (e.g. wrong password) is the useful part here,
-      // so it is the hint rather than a hidden detail.
-      showErrorToast({
-        title: commonT("errors.loginFailed"),
-        description: errorMessage,
-      });
+      // Shown inside the login dialog, next to the fields, instead of a toast.
+      setLoginError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -93,17 +102,23 @@ export const LoginPanel = () => {
   return (
     <LoginModal
       open={isLoginModalOpen}
-      onOpenChange={setIsLoginModalOpen}
+      onOpenChange={(open) => {
+        setIsLoginModalOpen(open);
+        if (!open) setLoginError(null);
+      }}
       onSubmit={handleLoginSubmit}
       onGoogleLogin={async () => {
         handlePlaceholderAction();
       }}
       onForgotPassword={handlePlaceholderAction}
       onSignUp={() => {
+        setLoginError(null);
         setIsLoginModalOpen(false);
         setIsSignUpModalOpen(true);
       }}
       isSubmitting={isSubmitting}
+      errorMessage={loginError}
+      onErrorClear={() => setLoginError(null)}
     />
   );
 };
