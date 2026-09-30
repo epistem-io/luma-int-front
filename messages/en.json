@@ -116,6 +116,7 @@
     "nothingToSaveToast": "Nothing to save yet — complete the basic information first.",
     "myProjects": "My Project :",
     "createdOn": "Created : {date}",
+    "editedLabel": "Edited",
     "logout": "Logout",
     "emptyList": "No saved projects yet",
     "sharedBadge": "Shared",
@@ -161,7 +162,11 @@
     "signUp": "Sign up",
     "errors": {
       "invalidEmail": "Please enter a valid email address.",
-      "passwordMin": "Password must be at least 8 characters."
+      "passwordMin": "Password must be at least 8 characters.",
+      "emailNotRegistered": "This email isn't registered.",
+      "wrongPassword": "Incorrect password.",
+      "accountNotActivated": "Your account hasn't been activated yet. Check your email for the activation link.",
+      "network": "Can't reach the server. Check your internet connection and try again."
     }
   },
   "SignUpModal": {
@@ -259,8 +264,41 @@
       "areaTooBigErrorDesc": "The selected area exceeds the {X} limit. Please reduce your selection to process the results.",
       "retry": "Retry",
       "somethingWrongHappened": "Something went wrong. Please try again.",
-      "seeMore": "See More...",
-      "seeLess": "See Less"
+      "seeMore": "See More",
+      "seeLess": "See Less",
+      "errorToast": {
+        "defaultHint": "Please try again. If it keeps happening, copy the details and send them to us.",
+        "showDetails": "Show details",
+        "hideDetails": "Hide details",
+        "copy": "Copy",
+        "copied": "Copied",
+        "dismiss": "Dismiss"
+      },
+      "errors": {
+        "uploadFailed": "Upload failed",
+        "uploadHint": "Check the file and try again.",
+        "submitSamplesFailed": "Could not save your sample points",
+        "submitSamplesHint": "Your points are still on the map. Try again in a moment.",
+        "submitAreaFailed": "Could not save your mapping area",
+        "loadRegencyFailed": "Could not load the district",
+        "readFileFailed": "Could not read the file",
+        "submitClassesFailed": "Could not save your classes",
+        "loadSummaryFailed": "Could not load the summary",
+        "submitPredictorsFailed": "Could not save your parameters",
+        "downloadFailed": "Download failed",
+        "mosaicDownloadUnavailableTitle": "Mosaic download unavailable",
+        "mosaicDownloadUnavailable": "Google Earth Engine could not create a download link for this mosaic.",
+        "mosaicFailed": "Could not build the satellite mosaic",
+        "generateMapFailed": "Map generation failed",
+        "generateMapHint": "Your settings are kept. Try again in a moment.",
+        "loginRequired": "Please log in to generate your map",
+        "loginRequiredHint": "Your inputs are kept while you sign in.",
+        "loginFailed": "Sign-in failed",
+        "signUpFailed": "Sign-up failed",
+        "shareMapFailed": "Could not share the map",
+        "downloadRequestFailed": "Could not request the download",
+        "noSession": "No mapping session found. Generate a map first."
+      }
     },
     "basicInformation": {
       "basicInformationTitle": "Basic Information",

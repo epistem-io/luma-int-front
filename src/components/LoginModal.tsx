@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
+import { CircleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -36,6 +37,10 @@ export interface LoginModalProps {
   onSignUp?: () => void;
   isSubmitting?: boolean;
   isGoogleLoading?: boolean;
+  /** Server-side failure to show inside the dialog; null or undefined hides it. */
+  errorMessage?: string | null;
+  /** Called when the user edits a field or the form resets, so the message clears. */
+  onErrorClear?: () => void;
 }
 
 interface LoginFormValues {
@@ -55,8 +60,11 @@ export default function LoginModal({
   onSignUp,
   isSubmitting = false,
   isGoogleLoading = false,
+  errorMessage,
+  onErrorClear,
 }: LoginModalProps) {
   const t = useTranslations("LoginModal");
+  const tCommon = useTranslations("InteractivePanel.common");
 
   const loginSchema = z.object({
     email: z.email({ message: t("errors.invalidEmail") }),
@@ -76,6 +84,14 @@ export default function LoginModal({
       form.reset();
     }
   }, [form, open]);
+
+  // Any edit (or the reset on close) clears a server error, so a stale
+  // message never sits next to what the user is retyping.
+  useEffect(() => {
+    if (!errorMessage) return;
+    const subscription = form.watch(() => onErrorClear?.());
+    return () => subscription.unsubscribe();
+  }, [errorMessage, form, onErrorClear]);
 
   const handleSubmit = form.handleSubmit(async (values) => {
     await onSubmit?.(values);
@@ -97,6 +113,26 @@ export default function LoginModal({
         <form onSubmit={handleSubmit} className="flex flex-col">
           <Form {...form}>
             <div className="flex flex-col gap-4 px-6 pb-6">
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-3 rounded-xl border border-danger-200 bg-danger-50 p-3"
+                >
+                  <CircleAlert
+                    className="mt-0.5 size-5 shrink-0 text-danger-700"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="font-aptos text-sm font-bold leading-5 text-danger-800">
+                      {tCommon("errors.loginFailed")}
+                    </p>
+                    <p className="font-aptos text-sm leading-5 text-danger-800">
+                      {errorMessage}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* disabled lives on the Input, not the FormField: react-hook-form
                   excludes disabled fields from handleSubmit values, so
                   disabled={isSubmitting} on the Controller can strip

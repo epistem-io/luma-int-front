@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
+import { showErrorToast } from "./ui/error-toast";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import {
@@ -46,7 +47,7 @@ export const SaveProjectDialog = ({ open, onOpenChange, title }: Props) => {
       setError("");
       onOpenChange(false);
     } else {
-      toast.error(t("saveFailedToast"));
+      showErrorToast({ title: t("saveFailedToast"), description: null });
     }
   };
 

@@ -52,7 +52,7 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { MapContext } from "@/contexts/mapContext";
 import { useTranslations } from "next-intl";
 import {
@@ -195,10 +195,11 @@ export const DataTrainingScoreBanner = () => {
         });
       })
       .catch((e) => {
-        toast.error(`Error on submitting request: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.submitSamplesFailed"),
+          description: t("common.errors.submitSamplesHint"),
+          error: e,
+          onRetry: onConfirmSampleData,
         });
       })
       .finally(() => {
@@ -579,12 +580,12 @@ export const DataTrainingComponent = () => {
         // console.log("jjson", json);
       })
       .catch((e) => {
-        toast.error(`Error on uploading file: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.uploadFailed"),
+          description: t("common.errors.uploadHint"),
+          error: e,
+          onRetry: () => submitFile(fileObj),
         });
-        // console.log("errorr", e);
       })
       .finally(() => {
         setIsUploadingTrainingFile(false);
@@ -617,6 +618,9 @@ export const DataTrainingComponent = () => {
   const isNextDisabled =
     !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
 
+  const hasOssInput = markerArray.some((item) => item.source === "oss");
+  const isDownloadSamplesDisabled =
+    !hasOssInput || markerArray.some((item) => item.class_id === -1);
   const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
 
   useEffect(() => {
@@ -1180,15 +1184,15 @@ export const DataTrainingComponent = () => {
                           {markerArray.length > 0 && (
                             <Button
                               variant={"outline"}
-                              disabled={markerArray.some((item) => item.class_id === -1)}
-                              onClick={() => 
+                              disabled={isDownloadSamplesDisabled}
+                              onClick={() =>
                                 downloadTrainingSamplesShapefile(markerArray, classArray, `training-samples-${sessionId}`)
                               }
                             >
                               <DownloadIcon className="size-4" />
                               {t("dataTraining.downloadSamples")}
                             </Button>
-                          )}
+                            )}
                         </RadioGroup>
                       </div>
                     </TabsContent>
@@ -1326,10 +1330,11 @@ export const DataTrainingFooter = () => {
         setIsTrainingDataChanged(false);
       })
       .catch((e) => {
-        toast.error(`Error on submitting request: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.submitSamplesFailed"),
+          description: t("common.errors.submitSamplesHint"),
+          error: e,
+          onRetry: updateLULC,
         });
       })
       .finally(() => {

@@ -1,9 +1,8 @@
 "use client";
 
 import { useContext, useState } from "react";
-import { toast } from "sonner";
-
 import RegisterSuccessModal from "@/components/RegisterSuccessModal";
+import { showErrorToast } from "@/components/ui/error-toast";
 import SignUpModal from "@/components/SignUpModal";
 import { GlobalContext } from "@/contexts/globalContext";
 import { useTranslations } from "next-intl";
@@ -65,7 +64,12 @@ export const SignUpPanel = () => {
           ? error.message
           : commonT("somethingWrongHappened");
 
-      toast.error(errorMessage);
+      // The backend's message (e.g. email already registered) is the useful
+      // part here, so it is the hint rather than a hidden detail.
+      showErrorToast({
+        title: commonT("errors.signUpFailed"),
+        description: errorMessage,
+      });
     } finally {
       setIsSubmitting(false);
     }

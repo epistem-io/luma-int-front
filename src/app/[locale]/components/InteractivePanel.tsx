@@ -284,10 +284,16 @@ export const InteractivePanel = () => {
     }, [selectedCustom, selectedDefault, isLucFlowView, lucView, hasOwnLucInputs]);
 
   const [isOpen, setIsOpen] = useState(true);
-  const isClampedSubtitleStep = stepKey === PANEL_COMPONENT_KEY.DATA_TRAINING;
   const [isSubtitleExpanded, setIsSubtitleExpanded] = useState(false);
   const [isSubtitleOverflowing, setIsSubtitleOverflowing] = useState(false);
   const subtitleTextRef = useRef<HTMLParagraphElement>(null);
+  const subtitleToggleRef = useRef<HTMLButtonElement>(null);
+  const shouldRefocusSubtitleToggle = useRef(false);
+
+  const toggleSubtitle = () => {
+    shouldRefocusSubtitleToggle.current = true;
+    setIsSubtitleExpanded((prev) => !prev);
+  };
 
   const interactiveComponent = useMemo(() => {
     return PANEL_COMPONENT_ARRAY[stepKey];
@@ -299,7 +305,7 @@ export const InteractivePanel = () => {
 
   useEffect(() => {
     const el = subtitleTextRef.current;
-    if (!el || !isClampedSubtitleStep) {
+    if (!el) {
       setIsSubtitleOverflowing(false);
       return;
     }
@@ -309,7 +315,13 @@ export const InteractivePanel = () => {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [isClampedSubtitleStep, isSubtitleExpanded, interactiveComponent.subtitle]);
+  }, [isOpen, isSubtitleExpanded, interactiveComponent.subtitle]);
+
+  useEffect(() => {
+    if (!shouldRefocusSubtitleToggle.current) return;
+    shouldRefocusSubtitleToggle.current = false;
+    subtitleToggleRef.current?.focus({ preventScroll: true });
+  }, [isSubtitleExpanded]);
   
   // const subtitleRef = useRef<null | HTMLDivElement>(null);
   // const footerRef = useRef<null | HTMLDivElement>(null);
@@ -454,29 +466,47 @@ export const InteractivePanel = () => {
           {interactiveComponent.subtitle && (
             <div ref={subtitleRef} className="">
               <div className="pb-4 px-4">
-                <p
-                  ref={subtitleTextRef}
-                  className={cn(
-                    "text-neutral-700-baru text-center font-aptos text-md font-regular leading-6",
-                    isClampedSubtitleStep &&
+                {/* The toggle floats at the end of the last visible line: the
+                    ::before spacer (paragraph height minus one leading-6 line)
+                    pushes it down, and the flex wrapper gives the paragraph a
+                    definite height so the spacer's 100% resolves. */}
+                <div className="flex">
+                  <p
+                    ref={subtitleTextRef}
+                    className={cn(
+                      "w-full text-neutral-700-baru text-center font-aptos text-md font-regular leading-6",
                       !isSubtitleExpanded &&
-                      "line-clamp-2",
-                  )}
-                >
-                  {interactiveComponent.subtitle}
-                </p>
-                {isClampedSubtitleStep &&
-                  (isSubtitleOverflowing || isSubtitleExpanded) && (
-                    <button
-                      type="button"
-                      onClick={() => setIsSubtitleExpanded((prev) => !prev)}
-                      className="mx-auto block mt-1 font-aptos text-md font-semibold leading-6 text-primary-red-pink-normal hover:underline cursor-pointer"
-                    >
-                      {isSubtitleExpanded
-                        ? t("common.seeLess")
-                        : t("common.seeMore")}
-                    </button>
-                  )}
+                        "line-clamp-2 before:float-right before:h-[calc(100%-1.5rem)] before:content-['']",
+                    )}
+                  >
+                    {isSubtitleOverflowing && !isSubtitleExpanded && (
+                      <button
+                        ref={subtitleToggleRef}
+                        type="button"
+                        aria-expanded={false}
+                        onClick={toggleSubtitle}
+                        className="float-right clear-both ml-2 font-aptos text-md font-semibold leading-6 text-primary-red-pink-normal hover:underline cursor-pointer"
+                      >
+                        {t("common.seeMore")}
+                      </button>
+                    )}
+                    {interactiveComponent.subtitle}
+                    {isSubtitleExpanded && (
+                      <>
+                        {" "}
+                        <button
+                          ref={subtitleToggleRef}
+                          type="button"
+                          aria-expanded
+                          onClick={toggleSubtitle}
+                          className="font-aptos text-md font-semibold leading-6 text-primary-red-pink-normal hover:underline cursor-pointer"
+                        >
+                          {t("common.seeLess")}
+                        </button>
+                      </>
+                    )}
+                  </p>
+                </div>
               </div>
               {/* Step-2 summary edit-mode banner: lives at the panel level
                   so it spans the full panel width, border to border. Inside

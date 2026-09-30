@@ -14,7 +14,7 @@ import { LULC_PREDICTORS } from "./lulcPredictors";
 import { ConfirmDialog } from "./ConfirmDialog";
 import Image from "next/image";
 import { GlobalContext } from "@/contexts/globalContext";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 
 interface SectionWrapperProps {
   title: string;
@@ -266,10 +266,10 @@ export const LULCClassSummaryFooter = () => {
 
       setIsSummaryDialogOpen(true);
     } catch (e) {
-      toast.error(`Error submitting predictors: ${e}`, {
-        duration: Infinity,
-        dismissible: true,
-        closeButton: true,
+      showErrorToast({
+        title: t("common.errors.submitPredictorsFailed"),
+        error: e,
+        onRetry: () => void onClickNext(),
       });
     } finally {
       setIsLoading(false);

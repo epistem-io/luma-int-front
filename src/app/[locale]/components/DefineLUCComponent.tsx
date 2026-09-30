@@ -63,7 +63,7 @@ import {
 } from "@/constants";
 import { Label } from "@/components/ui/label";
 import { GlobalContext } from "@/contexts/globalContext";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 import { Marker } from "@/types/marker";
 import Feature from "ol/Feature";
 import { Point } from "ol/geom";
@@ -418,10 +418,11 @@ export const DefineLUCComponent = () => {
         setLUCFilesize(file.size);
       })
       .catch((e) => {
-        toast.error(`Error on reading file: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.readFileFailed"),
+          description: t("common.errors.uploadHint"),
+          error: e,
+          onRetry: () => importExcel(file),
         });
       })
       .finally(() => {
@@ -1839,10 +1840,10 @@ export const DefineLUCFooter = () => {
         setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
       })
       .catch((e) => {
-        toast.error(`Error on submitting request: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.submitClassesFailed"),
+          error: e,
+          onRetry: () => void onClickNext(),
         });
       })
       .finally(() => {

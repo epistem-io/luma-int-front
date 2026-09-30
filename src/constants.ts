@@ -264,9 +264,6 @@ export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endY
 export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.xlsx";
 // export const LUC_TEMPLATE_FILENAME = "classification_scheme_template.csv";
 
-export const MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE =
-  "Failed to create Mosaic image download link due to Google Earth Engine limitation";
-
 export enum POINTING_TYPE {
   EMPTY = "",
   SINGLE = "single",

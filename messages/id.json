@@ -116,6 +116,7 @@
     "nothingToSaveToast": "Belum ada yang bisa disimpan — lengkapi informasi dasar terlebih dahulu.",
     "myProjects": "Proyek Saya :",
     "createdOn": "Dibuat : {date}",
+    "editedLabel": "Diedit",
     "logout": "Keluar",
     "emptyList": "Belum ada proyek tersimpan",
     "sharedBadge": "Dibagikan",
@@ -161,7 +162,11 @@
     "signUp": "Daftar",
     "errors": {
       "invalidEmail": "Masukkan alamat email yang valid.",
-      "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter."
+      "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter.",
+      "emailNotRegistered": "Email ini belum terdaftar.",
+      "wrongPassword": "Kata sandi salah.",
+      "accountNotActivated": "Akun Anda belum diaktifkan. Periksa email Anda untuk tautan aktivasi.",
+      "network": "Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi."
     }
   },
   "SignUpModal": {
@@ -259,8 +264,41 @@
       "areaTooBigErrorDesc": "Luas wilayah yang dipilih melebihi batas {X}. Silakan perkecil wilayah Anda agar hasil dapat diproses.",
       "retry": "Coba lagi",
       "somethingWrongHappened": "Terjadi kesalahan. Silakan coba lagi.",
-      "seeMore": "Selengkapnya...",
-      "seeLess": "Sembunyikan"
+      "seeMore": "Selengkapnya",
+      "seeLess": "Sembunyikan",
+      "errorToast": {
+        "defaultHint": "Silakan coba lagi. Jika terus terjadi, salin detailnya dan kirimkan kepada kami.",
+        "showDetails": "Lihat detail",
+        "hideDetails": "Sembunyikan detail",
+        "copy": "Salin",
+        "copied": "Tersalin",
+        "dismiss": "Tutup"
+      },
+      "errors": {
+        "uploadFailed": "Unggahan gagal",
+        "uploadHint": "Periksa berkas Anda lalu coba lagi.",
+        "submitSamplesFailed": "Titik sampel tidak dapat disimpan",
+        "submitSamplesHint": "Titik Anda masih ada di peta. Coba lagi sebentar lagi.",
+        "submitAreaFailed": "Area pemetaan tidak dapat disimpan",
+        "loadRegencyFailed": "Kabupaten tidak dapat dimuat",
+        "readFileFailed": "Berkas tidak dapat dibaca",
+        "submitClassesFailed": "Kelas tidak dapat disimpan",
+        "loadSummaryFailed": "Ringkasan tidak dapat dimuat",
+        "submitPredictorsFailed": "Parameter tidak dapat disimpan",
+        "downloadFailed": "Unduhan gagal",
+        "mosaicDownloadUnavailableTitle": "Unduhan mosaik tidak tersedia",
+        "mosaicDownloadUnavailable": "Google Earth Engine tidak dapat membuat tautan unduhan untuk mosaik ini.",
+        "mosaicFailed": "Mosaik citra satelit tidak dapat dibuat",
+        "generateMapFailed": "Pembuatan peta gagal",
+        "generateMapHint": "Pengaturan Anda tersimpan. Coba lagi sebentar lagi.",
+        "loginRequired": "Masuk untuk membuat peta Anda",
+        "loginRequiredHint": "Masukan Anda tetap tersimpan selama Anda masuk.",
+        "loginFailed": "Gagal masuk",
+        "signUpFailed": "Pendaftaran gagal",
+        "shareMapFailed": "Peta tidak dapat dibagikan",
+        "downloadRequestFailed": "Permintaan unduhan tidak dapat dikirim",
+        "noSession": "Sesi pemetaan tidak ditemukan. Buat peta terlebih dahulu."
+      }
     },
     "basicInformation": {
       "basicInformationTitle": "Informasi Dasar",

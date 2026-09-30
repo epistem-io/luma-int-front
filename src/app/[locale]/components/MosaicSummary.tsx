@@ -20,7 +20,6 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import {
   BASIC_INFORMATION_ACCORDION_TYPE,
   GET_MOSAIC_DOWNLOAD_URL,
-  MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE,
   PANEL_COMPONENT_KEY,
   TEMPORAL_COVERAGE_ARRAY,
 } from "@/constants";
@@ -30,7 +29,7 @@ import { SatelliteCompositeSummary } from "./SatelliteCompositeSummary";
 import { Switch } from "@/components/ui/switch";
 import { cn, numberThousandSeparator } from "@/lib/utils";
 import { GlobalContext } from "@/contexts/globalContext";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 import TileLayer from "ol/layer/Tile";
 import { XYZ } from "ol/source";
 
@@ -132,7 +131,10 @@ export const MosaicSummary = () => {
   const downloadMosaicToDevice = async () => {
     const fileUrl = await resolveMosaicDownloadUrl();
     if (!fileUrl) {
-      toast.error(MOSAIC_DOWNLOAD_BLANK_ERROR_MESSAGE);
+      showErrorToast({
+        title: t("common.errors.mosaicDownloadUnavailableTitle"),
+        description: t("common.errors.mosaicDownloadUnavailable"),
+      });
       return;
     }
     const response = await fetch(fileUrl);
@@ -157,10 +159,10 @@ export const MosaicSummary = () => {
       await downloadMosaicToDevice();
       setIsDownloadDialogOpen(false);
     } catch (e) {
-      toast.error(`Error on downloading mosaic: ${e}`, {
-        duration: Infinity,
-        dismissible: true,
-        closeButton: true,
+      showErrorToast({
+        title: t("common.errors.downloadFailed"),
+        error: e,
+        onRetry: () => void handleConfirmDownload(),
       });
     } finally {
       setIsFetchingDownloadUrl(false);

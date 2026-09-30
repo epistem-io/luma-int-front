@@ -49,6 +49,8 @@ export const BasicInformationFooter = () => {
     setStepKey,
     polygonData,
     areaScopingPolygonArea,
+    satelliteSource,
+    isEditingSatelliteComposite,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -57,7 +59,9 @@ export const BasicInformationFooter = () => {
     !temporalCoverage ||
     !temporalCoverageUnit ||
     !polygonData ||
-    areaScopingPolygonArea >= AREA_SCOPING_POLYGON_AREA_LIMIT;
+    areaScopingPolygonArea >= AREA_SCOPING_POLYGON_AREA_LIMIT ||
+    !satelliteSource ||
+    isEditingSatelliteComposite;
 
   return (
     <div className="flex flex-row justify-end p-3 pt-2">

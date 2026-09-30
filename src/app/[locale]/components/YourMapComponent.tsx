@@ -21,7 +21,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { toast } from "sonner";
+import { showErrorToast } from "@/components/ui/error-toast";
 
 const VISUALIZATION = "visualization";
 const CALC_LULC_COMP = "calculate lulc composition";
@@ -60,6 +60,8 @@ export const YourMapComponent = () => {
     isGenerationError,
     setIsGenerationError,
   } = useContext(MapGenerationContext);
+
+  const t = useTranslations("InteractivePanel");
 
   const handleStreamMessage = (json: GenerateMapStream) => {
     // console.log("json", json);
@@ -173,18 +175,18 @@ export const YourMapComponent = () => {
       .catch((e) => {
         setIsGenerationError(true);
         if (e instanceof UnauthorizedError) {
-          toast.error("Please log in to generate your map.", {
-            duration: Infinity,
-            dismissible: true,
-            closeButton: true,
+          showErrorToast({
+            title: t("common.errors.loginRequired"),
+            description: t("common.errors.loginRequiredHint"),
           });
           return;
         }
 
-        toast.error(`Error generating map: ${e}`, {
-          duration: Infinity,
-          dismissible: true,
-          closeButton: true,
+        showErrorToast({
+          title: t("common.errors.generateMapFailed"),
+          description: t("common.errors.generateMapHint"),
+          error: e,
+          onRetry: getMapGenerationResult,
         });
       })
       .finally(() => {

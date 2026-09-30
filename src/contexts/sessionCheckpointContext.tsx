@@ -156,12 +156,13 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     LUCfilesize: mg.LUCfilesize,
     dataTrainingActiveTab: mg.dataTrainingActiveTab,
     markerArray: mapContext.markerArray.map(
-      ({ coordinates, id, name, class_id, class_color }) => ({
+      ({ coordinates, id, name, class_id, class_color, source }) => ({
         coordinates,
         id,
         name,
         class_id,
         class_color,
+        source,
       }),
     ),
     uploadedFiles: mg.uploadedFilesArray.map((f) => ({

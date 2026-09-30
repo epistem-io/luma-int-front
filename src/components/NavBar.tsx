@@ -5,12 +5,22 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 // import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { EllipsisVertical, Pencil, Save, Share2, Trash2 } from "lucide-react";
+import {
+  CalendarDays,
+  EllipsisVertical,
+  History,
+  MapIcon,
+  Pencil,
+  Save,
+  Share2,
+  Trash2,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { toast } from "sonner"
+import { errorPaletteToastStyle, showErrorToast } from "./ui/error-toast";
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import {
   deleteProject,
@@ -69,15 +79,28 @@ const getUserInitials = (name?: string, email?: string) => {
   return (email?.replace(/\s+/g, "").slice(0, 2) ?? "").toUpperCase();
 };
 
+const parseBackendDate = (iso: string | null | undefined): Date | null => {
+  if (!iso) return null;
+  const date = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 // Backend dates are naive UTC ISO strings (no offset); shown as dd/mm/yyyy in
 // the viewer's local time.
 const formatProjectDate = (iso: string | null | undefined) => {
-  if (!iso) return "-";
-  const date = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : `${iso}Z`);
-  if (Number.isNaN(date.getTime())) return "-";
+  const date = parseBackendDate(iso);
+  if (!date) return "-";
   const dd = String(date.getDate()).padStart(2, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   return `${dd}/${mm}/${date.getFullYear()}`;
+};
+
+const formatProjectTime = (iso: string | null | undefined, locale: string) => {
+  const date = parseBackendDate(iso);
+  if (!date) return "-";
+  const hh = String(date.getHours()).padStart(2, "0");
+  const min = String(date.getMinutes()).padStart(2, "0");
+  return `${hh}${locale === "id" ? "." : ":"}${min}`;
 };
 
 export function NavBar({ className }: NavBarProps) {
@@ -86,6 +109,7 @@ export function NavBar({ className }: NavBarProps) {
   const { setIsLoginModalOpen } = useContext(GlobalContext);
   const tSave = useTranslations("SaveProgress");
   const tProjects = useTranslations("Projects");
+  const locale = useLocale();
   const {
     saveProgress,
     activeProject,
@@ -137,13 +161,15 @@ export function NavBar({ className }: NavBarProps) {
     const result = await saveProjectNow();
     setIsSavingProject(false);
     if (result === "saved") toast.success(tProjects("savedToast"));
-    else if (result === "failed") toast.error(tProjects("saveFailedToast"));
+    else if (result === "failed")
+      showErrorToast({ title: tProjects("saveFailedToast"), description: null });
     else toast.info(tProjects("nothingToSaveToast"));
   };
 
   const openProjectOrToast = async (id: string) => {
     const ok = await openProject(id);
-    if (!ok) toast.error(tProjects("openFailedToast"));
+    if (!ok)
+      showErrorToast({ title: tProjects("openFailedToast"), description: null });
   };
 
   const onOpenProject = (id: string) => {
@@ -174,7 +200,10 @@ export function NavBar({ className }: NavBarProps) {
       toast.success(tProjects("deletedToast"));
       setDeleteTarget(null);
     } catch {
-      toast.error(tProjects("deleteFailedToast"));
+      showErrorToast({
+        title: tProjects("deleteFailedToast"),
+        description: null,
+      });
     } finally {
       setIsDeleting(false);
     }
@@ -260,18 +289,45 @@ export function NavBar({ className }: NavBarProps) {
               <>
                 {/* Always visible while logged in, so there is one obvious
                     place to save: names the project the first time, then
-                    acts as a manual save on top of the auto-sync. */}
-                <Button
-                  type="button"
-                  disabled={isSavingProject}
-                  className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
-                  onClick={() => void onSaveProjectClick()}
-                >
-                  <Save className="h-4 w-4" />
-                  {isSavingProject
-                    ? tProjects("saving")
-                    : tProjects("saveProject")}
-                </Button>
+                    acts as a manual save on top of the auto-sync.
+                    Named project: pill with the project name and a compact
+                    Save on the right. Unnamed work: plain Save, whose first
+                    click opens the naming dialog. */}
+                {activeProject ? (
+                  <div
+                    className="flex min-w-0 max-w-[340px] items-center gap-x-2 rounded-lg bg-primary-pink-hover py-1 pl-3 pr-1"
+                    title={activeProject.name}
+                  >
+                    <MapIcon
+                      className="size-5 shrink-0 text-primary-pink"
+                      aria-hidden="true"
+                    />
+                    <span className="min-w-0 truncate font-aptos text-md font-semibold leading-6 text-primary-pink">
+                      {activeProject.name}
+                    </span>
+                    <Button
+                      type="button"
+                      disabled={isSavingProject}
+                      className="h-8 shrink-0 rounded-md bg-primary-pink px-3 text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                      onClick={() => void onSaveProjectClick()}
+                    >
+                      <Save className="h-4 w-4" />
+                      {isSavingProject ? tProjects("saving") : tSave("button")}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={isSavingProject}
+                    className="rounded-md bg-primary-pink text-white hover:cursor-pointer hover:bg-primary-pink/90"
+                    onClick={() => void onSaveProjectClick()}
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSavingProject
+                      ? tProjects("saving")
+                      : tProjects("saveProject")}
+                  </Button>
+                )}
                 <DropdownMenu
                   open={isMenuOpen}
                   onOpenChange={(o) => {
@@ -325,6 +381,8 @@ export function NavBar({ className }: NavBarProps) {
                     <div className="max-h-[300px] space-y-0.5 overflow-y-auto">
                       {projects.map((project) => {
                         const isActive = project.id === activeProject?.id;
+                        const editedIso =
+                          project.modified_date ?? project.created_date;
                         return (
                           <DropdownMenuItem
                             key={project.id}
@@ -334,7 +392,7 @@ export function NavBar({ className }: NavBarProps) {
                             )}
                             onClick={() => onOpenProject(project.id)}
                           >
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="truncate text-xl font-medium leading-7 text-[#1F1F1F]">
                                 {project.name}
                                 {project.shared_from && (
@@ -345,18 +403,31 @@ export function NavBar({ className }: NavBarProps) {
                               </p>
                               <p
                                 className={cn(
-                                  "mt-0.5 text-base leading-6",
+                                  "mt-0.5 truncate text-base leading-6",
                                   isActive
                                     ? "text-[#333333]"
                                     : "text-[#9E9E9E]",
                                 )}
                               >
-                                {tProjects("createdOn", {
-                                  date: formatProjectDate(
-                                    project.created_date ??
-                                      project.modified_date,
-                                  ),
-                                })}
+                                {tProjects("editedLabel")}
+                                <CalendarDays
+                                  className="ml-2 mr-1 inline-block size-4.5 align-[-3px]"
+                                  strokeWidth={1.5}
+                                  absoluteStrokeWidth
+                                  aria-hidden="true"
+                                />
+                                <span className="tabular-nums">
+                                  {formatProjectDate(editedIso)}
+                                </span>
+                                <History
+                                  className="ml-2 mr-1 inline-block size-4.5 align-[-3px]"
+                                  strokeWidth={1.5}
+                                  absoluteStrokeWidth
+                                  aria-hidden="true"
+                                />
+                                <span className="tabular-nums">
+                                  {formatProjectTime(editedIso, locale)}
+                                </span>
                               </p>
                             </div>
                             {/* Inline action strip instead of a nested menu:
@@ -461,7 +532,7 @@ export function NavBar({ className }: NavBarProps) {
                     if (saveProgress()) {
                       toast.success(tSave("savedToast"));
                     } else {
-                      toast.info(tSave("nothingToSaveToast"));
+                      toast.info(tSave("nothingToSaveToast"), { style: errorPaletteToastStyle });
                     }
                     setIsLoginModalOpen(true);
                   }}
