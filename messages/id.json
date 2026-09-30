@@ -116,6 +116,7 @@
     "nothingToSaveToast": "Belum ada yang bisa disimpan — lengkapi informasi dasar terlebih dahulu.",
     "myProjects": "Proyek Saya :",
     "createdOn": "Dibuat : {date}",
+    "editedLabel": "Diedit",
     "logout": "Keluar",
     "emptyList": "Belum ada proyek tersimpan",
     "sharedBadge": "Dibagikan",

@@ -116,6 +116,7 @@
     "nothingToSaveToast": "Nothing to save yet — complete the basic information first.",
     "myProjects": "My Project :",
     "createdOn": "Created : {date}",
+    "editedLabel": "Edited",
     "logout": "Logout",
     "emptyList": "No saved projects yet",
     "sharedBadge": "Shared",
