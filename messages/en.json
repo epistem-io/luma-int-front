@@ -161,7 +161,11 @@
     "signUp": "Sign up",
     "errors": {
       "invalidEmail": "Please enter a valid email address.",
-      "passwordMin": "Password must be at least 8 characters."
+      "passwordMin": "Password must be at least 8 characters.",
+      "emailNotRegistered": "This email isn't registered.",
+      "wrongPassword": "Incorrect password.",
+      "accountNotActivated": "Your account hasn't been activated yet. Check your email for the activation link.",
+      "network": "Can't reach the server. Check your internet connection and try again."
     }
   },
   "SignUpModal": {

@@ -161,7 +161,11 @@
     "signUp": "Daftar",
     "errors": {
       "invalidEmail": "Masukkan alamat email yang valid.",
-      "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter."
+      "passwordMin": "Kata sandi harus terdiri dari minimal 8 karakter.",
+      "emailNotRegistered": "Email ini belum terdaftar.",
+      "wrongPassword": "Kata sandi salah.",
+      "accountNotActivated": "Akun Anda belum diaktifkan. Periksa email Anda untuk tautan aktivasi.",
+      "network": "Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi."
     }
   },
   "SignUpModal": {
