@@ -36,7 +36,7 @@ import {
 import { useSavingTransition } from "@/lib/hooks";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
 import { GlobalContext } from "@/contexts/globalContext";
 import {
@@ -61,6 +61,7 @@ export const BasicInformationSummaryComponent = () => {
   } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
+  const locale = useLocale();
 
   // Same wording as the resolution picker (AreaScopingAccordion /
   // SpatialResolutionSelect); falls back to the raw value for unknown ones.
@@ -106,6 +107,7 @@ export const BasicInformationSummaryComponent = () => {
               dateRange={getTemporalRangeText(
                 temporalCoverage,
                 temporalCoverageUnit,
+                locale,
               )}
               isEditing={isBasicInformationChangeInput}
               onClickEdit={() => {
