@@ -7,4 +7,5 @@ interface Marker {
   class_id: number;
   class_color: string;
   map_feature?: Feature;
+  source?: "oss";
 }

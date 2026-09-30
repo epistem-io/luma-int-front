@@ -259,7 +259,7 @@
       "areaTooBigErrorDesc": "The selected area exceeds the {X} limit. Please reduce your selection to process the results.",
       "retry": "Retry",
       "somethingWrongHappened": "Something went wrong. Please try again.",
-      "seeMore": "See More...",
+      "seeMore": "See More",
       "seeLess": "See Less",
       "errorToast": {
         "defaultHint": "Please try again. If it keeps happening, copy the details and send them to us.",

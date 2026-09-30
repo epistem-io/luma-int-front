@@ -13,6 +13,7 @@ export interface CheckpointMarker {
   name: string;
   class_id: number;
   class_color: string;
+  source?: "oss";
 }
 
 export interface CheckpointUploadedFile {

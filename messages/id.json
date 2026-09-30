@@ -259,7 +259,7 @@
       "areaTooBigErrorDesc": "Luas wilayah yang dipilih melebihi batas {X}. Silakan perkecil wilayah Anda agar hasil dapat diproses.",
       "retry": "Coba lagi",
       "somethingWrongHappened": "Terjadi kesalahan. Silakan coba lagi.",
-      "seeMore": "Selengkapnya...",
+      "seeMore": "Selengkapnya",
       "seeLess": "Sembunyikan",
       "errorToast": {
         "defaultHint": "Silakan coba lagi. Jika terus terjadi, salin detailnya dan kirimkan kepada kami.",

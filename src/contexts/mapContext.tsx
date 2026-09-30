@@ -761,6 +761,7 @@ const MapContextContainer = (props: PropsWithChildren) => {
                   (item) => item.class_id === Number(selectedClass),
                 )?.class_color || "",
           map_feature: markerFeature,
+          source: "oss",
         },
       ]);
 

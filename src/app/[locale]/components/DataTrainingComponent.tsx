@@ -618,6 +618,9 @@ export const DataTrainingComponent = () => {
   const isNextDisabled =
     !pointingType || (pointingType === POINTING_TYPE.BULK && !selectedClass);
 
+  const hasOssInput = markerArray.some((item) => item.source === "oss");
+  const isDownloadSamplesDisabled =
+    !hasOssInput || markerArray.some((item) => item.class_id === -1);
   const isFormDisabled = isUploadingTrainingFile || trainingFileError !== "";
 
   useEffect(() => {
@@ -1181,15 +1184,15 @@ export const DataTrainingComponent = () => {
                           {markerArray.length > 0 && (
                             <Button
                               variant={"outline"}
-                              disabled={markerArray.some((item) => item.class_id === -1)}
-                              onClick={() => 
+                              disabled={isDownloadSamplesDisabled}
+                              onClick={() =>
                                 downloadTrainingSamplesShapefile(markerArray, classArray, `training-samples-${sessionId}`)
                               }
                             >
                               <DownloadIcon className="size-4" />
                               {t("dataTraining.downloadSamples")}
                             </Button>
-                          )}
+                            )}
                         </RadioGroup>
                       </div>
                     </TabsContent>
