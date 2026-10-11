@@ -15,6 +15,7 @@ import { Analytics } from "@/components/Analytics";
 import { MapGenerationContextContainer } from "@/contexts/mapGenerationContext";
 import { SessionCheckpointContainer } from "@/contexts/sessionCheckpointContext";
 import { ResumeSessionDialog } from "@/app/[locale]/components/ResumeSessionDialog";
+import { OnboardingDialog } from "@/components/OnboardingDialog";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -240,6 +241,7 @@ export default async function RootLayout({
                       <NavBar />
                       {children}
                       <ResumeSessionDialog />
+                      <OnboardingDialog />
                       <Toaster />
                       <Analytics />
                     </div>
