@@ -53,7 +53,7 @@ const ITEM_LAYOUT = {
 };
 
 const ILLUSTRATION_DIR = "/images/onboarding";
-const INTRO_ILLUSTRATION = `${ILLUSTRATION_DIR}/luma_onboarding_step0_welcome.webp`;
+const INTRO_ILLUSTRATION = `${ILLUSTRATION_DIR}/luma_onboarding_step0_welcome.png`;
 
 const STEPS: OnboardingStep[] = [
   {
@@ -233,8 +233,7 @@ export const OnboardingDialog = () => {
               {t("skipAll")}
             </button>
 
-            {/* Title → dots block is vertically centred, as in the design. */}
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden">
               <div className="my-auto">
                 <div
                   key={step.key}
