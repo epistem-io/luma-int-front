@@ -34,9 +34,14 @@ interface OnboardingItem {
   icon: LucideIcon;
 }
 
+interface Illustration {
+  src: string;
+  hasBackground?: boolean;
+}
+
 interface OnboardingStep {
   key: string;
-  illustration: string;
+  illustration: Illustration;
   layout: keyof typeof ITEM_LAYOUT;
   items: OnboardingItem[];
 }
@@ -53,12 +58,18 @@ const ITEM_LAYOUT = {
 };
 
 const ILLUSTRATION_DIR = "/images/onboarding";
-const INTRO_ILLUSTRATION = `${ILLUSTRATION_DIR}/luma_onboarding_step0_welcome.png`;
+const INTRO_ILLUSTRATION: Illustration = {
+  src: `${ILLUSTRATION_DIR}/luma_onboarding_step0_welcome.png`,
+  hasBackground: false,
+} ;
 
 const STEPS: OnboardingStep[] = [
   {
     key: "basicInformation",
-    illustration: `${ILLUSTRATION_DIR}/luma_onboarding_step1_basic_information.webp`,
+    illustration: {
+      src: `${ILLUSTRATION_DIR}/luma_onboarding_step1_basic_information.png`,
+      hasBackground: true,
+    },
     layout: "list",
     items: [
       { key: "geographicArea", icon: Pentagon },
@@ -68,7 +79,10 @@ const STEPS: OnboardingStep[] = [
   },
   {
     key: "landCoverClassification",
-    illustration: `${ILLUSTRATION_DIR}/luma_onboarding_step2_lulc_classification.webp`,
+    illustration: {
+      src: `${ILLUSTRATION_DIR}/luma_onboarding_step2_lulc_classification.png`,
+      hasBackground: true,
+    },
     layout: "columns",
     items: [
       { key: "ownClassification", icon: Grid2x2Plus },
@@ -77,7 +91,10 @@ const STEPS: OnboardingStep[] = [
   },
   {
     key: "mappingSampleData",
-    illustration: `${ILLUSTRATION_DIR}/luma_onboarding_step3_mapping_sample_data.webp`,
+    illustration: {
+      src: `${ILLUSTRATION_DIR}/luma_onboarding_step3_mapping_sample_data.png`,
+      hasBackground: true,
+    },
     layout: "columns",
     items: [
       { key: "uploadSampleData", icon: Upload },
@@ -86,7 +103,10 @@ const STEPS: OnboardingStep[] = [
   },
   {
     key: "mappingParameters",
-    illustration: `${ILLUSTRATION_DIR}/luma_onboarding_step4_mapping_parameters.webp`,
+    illustration: {
+      src: `${ILLUSTRATION_DIR}/luma_onboarding_step4_mapping_parameters.png`,
+      hasBackground: false,
+    },
     layout: "list",
     items: [
       { key: "selectPredictors", icon: Layers },
@@ -95,7 +115,10 @@ const STEPS: OnboardingStep[] = [
   },
   {
     key: "yourMap",
-    illustration: `${ILLUSTRATION_DIR}/luma_onboarding_step5_your_map.webp`,
+    illustration: {
+      src: `${ILLUSTRATION_DIR}/luma_onboarding_step5_your_map.png`,
+      hasBackground: true,
+    },
     layout: "list",
     items: [
       { key: "checkResult", icon: ChartColumn },
@@ -115,18 +138,25 @@ type Translate = (key: string, values?: Record<string, unknown>) => string;
 
 const OnboardingIllustration = ({ activeSrc }: { activeSrc: string }) => (
   <div className="relative hidden w-[42%] shrink-0 overflow-hidden rounded-2xl bg-primary-red-pink-light-hover md:block">
-    {ILLUSTRATIONS.map((src) => (
-      <Image
+    {ILLUSTRATIONS.map(({ src, hasBackground }) => (
+      <div
         key={src}
-        src={src}
-        alt=""
-        fill
-        sizes="420px"
         className={cn(
-          "object-cover transition-opacity duration-300",
+          "absolute inset-4 rounded-xl transition-opacity duration-300",
+          hasBackground && "bg-[#F2F3F3]",
           src !== activeSrc && "opacity-0",
         )}
-      />
+      >
+        <div className="absolute inset-4">
+          <Image
+            src={src}
+            alt=""
+            fill
+            sizes="360px"
+            className="object-contain"
+          />
+        </div>
+      </div>
     ))}
   </div>
 );
@@ -185,7 +215,7 @@ export const OnboardingDialog = () => {
         )}
       >
         <OnboardingIllustration
-          activeSrc={step?.illustration ?? INTRO_ILLUSTRATION}
+          activeSrc={(step?.illustration ?? INTRO_ILLUSTRATION).src}
         />
 
         {step === null ? (

@@ -7,20 +7,11 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export interface ErrorToastOptions {
-  /** What failed. Already translated, e.g. t("common.errors.uploadFailed"). */
   title: string;
-  /**
-   * What the user can do. Already translated. Omit for the generic
-   * common.errorToast.defaultHint; pass null when the title already says it.
-   */
   description?: string | null;
-  /** The caught error. Shown only under "Show details", never in the headline. */
   error?: unknown;
-  /** Adds a Retry button; the toast then stays until the user acts on it. */
   onRetry?: () => void;
-  /** Auto-dismiss in ms when there is no Retry. Default 15 s. */
   duration?: number;
-  /** Stable id: the same failure replaces the toast instead of stacking. Defaults to the title. */
   id?: string;
 }
 
@@ -32,7 +23,6 @@ export const errorPaletteToastStyle = {
   "--info-text": "rgba(144, 31, 27, 1)",
 } as React.CSSProperties;
 
-/** Turns whatever was thrown into one readable line for the details panel. */
 export const describeError = (error: unknown): string => {
   if (error === undefined || error === null || error === "") return "";
   let text: string;
@@ -45,24 +35,31 @@ export const describeError = (error: unknown): string => {
       text = String(error);
     }
   }
-  // Callers used to throw new Error(JSON.stringify(`...`)), which wraps the
-  // message in quotes; strip them and a leading "Error:" prefix.
   return text
     .trim()
     .replace(/^"+|"+$/g, "")
     .replace(/^Error:\s*/i, "");
 };
 
-export const showErrorToast = ({
-  title,
-  description,
-  error,
-  onRetry,
-  duration = ERROR_TOAST_DURATION,
-  id,
-}: ErrorToastOptions) => {
-  const detail = describeError(error);
-  if (detail) console.error(`[error-toast] ${title}:`, error);
+export const showErrorToast = (options: ErrorToastOptions) => {
+  const detail = describeError(options.error);
+  if (detail) console.error(`[error-toast] ${options.title}:`, options.error);
+
+  return renderErrorToast(options, detail, false);
+}
+
+const renderErrorToast = (
+  options: ErrorToastOptions,
+  detail: string,
+  isDetailOpen: boolean,
+): string | number => {
+  const {
+    title,
+    description,
+    onRetry,
+    duration = ERROR_TOAST_DURATION,
+    id,
+  } = options;
 
   return toast.custom(
     (toastId) => (
@@ -72,6 +69,8 @@ export const showErrorToast = ({
         description={description}
         detail={detail}
         onRetry={onRetry}
+        isDetailOpen={isDetailOpen}
+        onToggleDetail={() => renderErrorToast(options, detail, !isDetailOpen)}
       />
     ),
     {
@@ -80,14 +79,15 @@ export const showErrorToast = ({
       closeButton: false,
     },
   );
-};
-
+}
 interface ErrorToastProps {
   toastId: string | number;
   title: string;
   description?: string | null;
   detail: string;
   onRetry?: () => void;
+  isDetailOpen: boolean;
+  onToggleDetail: () => void;
 }
 
 const ErrorToast = ({
@@ -96,9 +96,10 @@ const ErrorToast = ({
   description,
   detail,
   onRetry,
+  isDetailOpen,
+  onToggleDetail,
 }: ErrorToastProps) => {
   const t = useTranslations("InteractivePanel.common");
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const hint =
@@ -158,7 +159,7 @@ const ErrorToast = ({
             <button
               type="button"
               aria-expanded={isDetailOpen}
-              onClick={() => setIsDetailOpen((open) => !open)}
+              onClick={onToggleDetail}
               className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-sm font-semibold text-danger-800 transition-colors hover:cursor-pointer hover:bg-danger-100"
             >
               {isDetailOpen
