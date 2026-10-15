@@ -199,6 +199,30 @@
     "description": "Kami sedang menyiapkan peta Anda dan akan segera mengirimkannya. Anda dapat menutup jendela ini dengan aman.",
     "confirm": "Oke"
   },
+  "Onboarding": {
+    "skipTour": "Lewati Tur",
+    "letsStart": "Ayo Mulai",
+    "skipAll": "Lewati Semua",
+    "prev": "Sebelumnya",
+    "next": "Berikutnya",
+    "finish": "Mulai",
+    "goToStep": "Ke langkah {step}",
+    "footnote": "Anda bisa melewati panduan ini kapan saja dan langsung mulai memetakan.",
+    "intro": {
+      "title": "Buat Peta Tutupan Lahan Anda dalam 5 Langkah",
+      "description": "Tidak perlu keahlian GIS. Luma memandu Anda langkah demi langkah, dan Anda bisa kembali kapan saja."
+    },
+    "basicInformation": {
+      "title": "Langkah 1 – Informasi Dasar",
+      "subtitle": "Di mana, kapan, dan satelit apa?",
+      "description": "Tentukan area, waktu, dan citra satelit yang menjadi dasar peta Anda.",
+      "items": {
+        "geographicArea": { "title": "Area Geografis", "caption": "Unggah, gambar, atau pilih kabupaten" },
+        "timePeriod": { "title": "Periode Waktu", "caption": "Pilih tahun atau rentang tanggal" },
+        "satelliteImagery": { "title": "Citra Satelit", "caption": "Pilih citra satelit" }
+      }
+    }
+  },
   "InteractivePanel": {
     "resumeSession": {
       "title": "Lanjutkan Sesi Pemetaan Anda?",

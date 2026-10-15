@@ -199,6 +199,30 @@
     "description": "We’re preparing your map and will send it shortly. You can safely close this window.",
     "confirm": "Okay"
   },
+  "Onboarding": {
+    "skipTour": "Skip Tour",
+    "letsStart": "Let's Start",
+    "skipAll": "Skip All",
+    "prev": "Prev",
+    "next": "Next",
+    "finish": "Get Started",
+    "goToStep": "Go to step {step}",
+    "footnote": "You can skip this guide anytime and start mapping right away.",
+    "intro": {
+      "title": "Create Your Land Cover Map in 5 Steps",
+      "description": "No GIS skills needed. Luma guides you step by step, and you can go back anytime."
+    },
+    "basicInformation": {
+      "title": "Step 1 – Basic Information",
+      "subtitle": "Where, when, and which satellite?",
+      "description": "Define the area, time period, and satellite imagery your map is built on.",
+      "items": {
+        "geographicArea": { "title": "Geographic Area", "caption": "Upload, draw, or select a regency" },
+        "timePeriod": { "title": "Time Period", "caption": "Choose a year or a date range" },
+        "satelliteImagery": { "title": "Satellite Imagery", "caption": "Choose the satellite imagery" }
+      }
+    }
+  },
   "InteractivePanel": {
     "resumeSession": {
       "title": "Resume Your Mapping Session?",
