@@ -217,7 +217,17 @@ export const SATELLITE_OPTIONS_ARRAY = [
     label: "Landsat 9",
     startYear: 2021,
   },
+  {
+    value: "S2_SR",
+    label: "Sentinel-2",
+    startYear: 2015,
+    minSpatialResolution: 10,
+  },
 ];
+
+// Finest spatial resolution (m) a satellite supports unless it sets
+// minSpatialResolution; Landsat is 30 m, so only Sentinel-2 offers 10 m.
+const DEFAULT_MIN_SPATIAL_RESOLUTION = 30;
 
 // Year range selectable in the Time Period step: from the earliest satellite
 // start year up to the latest year with (mostly) complete imagery.
@@ -250,14 +260,22 @@ export const getAvailableSatelliteOptionsByYear = (year?: number) => {
   }).sort((a, b) => b.startYear - a.startYear);
 };
 
-export const getAvailableSatelliteOptionsByYearRange = (startYear?: number, endYear?: number) => {
+export const getAvailableSatelliteOptionsByYearRange = (
+  startYear?: number,
+  endYear?: number,
+  spatialResolution?: string,
+) => {
   if (!startYear || !endYear) return [];
 
   return SATELLITE_OPTIONS_ARRAY.filter((satellite) => {
     const isAfterStartYear = startYear >= satellite.startYear;
     const isBeforeEndYear = satellite.endYear === undefined || endYear <= satellite.endYear;
+    const supportsSpatialResolution =
+      !spatialResolution ||
+      Number(spatialResolution) >=
+        (satellite.minSpatialResolution ?? DEFAULT_MIN_SPATIAL_RESOLUTION);
 
-    return isAfterStartYear && isBeforeEndYear;
+    return isAfterStartYear && isBeforeEndYear && supportsSpatialResolution;
   }).sort((a, b) => b.startYear - a.startYear);
 };
 

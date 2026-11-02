@@ -36,6 +36,7 @@ export const SateliteCompositeAccordion = () => {
     setSatelliteSource,
     maximumCloudCover,
     setMaximumCloudCover,
+    spatialResolution,
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
@@ -43,8 +44,14 @@ export const SateliteCompositeAccordion = () => {
   const yearRange = getTemporalYearRange(temporalCoverage, temporalCoverageUnit);
   const hasSelectedTimePeriod = yearRange !== null;
   const availableSatelliteOptions = hasSelectedTimePeriod
-    ? getAvailableSatelliteOptionsByYearRange(yearRange[0], yearRange[1])
+    ? getAvailableSatelliteOptionsByYearRange(
+        yearRange[0],
+        yearRange[1],
+        spatialResolution,
+      )
     : [];
+  const hasNoSatelliteForResolution =
+    hasSelectedTimePeriod && availableSatelliteOptions.length === 0;
   const isSatelliteSelectDisabled =
     !isEditingSatelliteComposite || !hasSelectedTimePeriod;
   const isFormDisabled = !isEditingSatelliteComposite;
@@ -137,6 +144,11 @@ export const SateliteCompositeAccordion = () => {
                 ))}
               </SelectContent>
             </Select>
+            {hasNoSatelliteForResolution && (
+              <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
+                {t("satelliteComposite.noSatelliteForResolution")}
+              </p>
+            )}
           </Field>
           <Field className="space-y-2.5">
             <Label className="m-0">
