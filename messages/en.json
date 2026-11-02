@@ -615,9 +615,11 @@
       "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is.",
       "predictorGroups": {
         "landBuiltUp": "Land & built-up",
+        "terrain": "Terrain",
         "vegetation": "Vegetation",
         "waterHumidity": "Water & humidity"
       },
+      "predictorConflict": "Cannot be combined with {predictor}",
       "splitRatio": "Training / testing split",
       "splitRatioSummary": "Training / testing split",
       "improvementMode": "Improvement Mode",

@@ -615,9 +615,11 @@
       "dataValidationDesc": "Unggah data validasi untuk menguji akurasi tematik peta penggunaan dan tutupan lahan Anda. Bandingkan peta klasifikasi Anda dengan data referensi tepercaya (seperti survei lapangan atau citra resolusi tinggi) untuk mengukur tingkat akurasi peta Anda.",
       "predictorGroups": {
         "landBuiltUp": "Lahan & area terbangun",
+        "terrain": "Topografi",
         "vegetation": "Vegetasi",
         "waterHumidity": "Air & kelembapan"
       },
+      "predictorConflict": "Tidak dapat digabung dengan {predictor}",
       "splitRatio": "Pembagian data latih / uji",
       "splitRatioSummary": "Pembagian data latih / uji",
       "improvementMode": "Mode Peningkatan",

@@ -61,7 +61,13 @@ export const SelectPredictorAccordion = () => {
                 {group.predictors.map((predictor) => {
                   const checked = selectedPredictors.includes(predictor.value);
                   const id = `predictor-${predictor.value}`;
-                  const disabled = isAutoPointsFlow || predictor.disabled;
+                  const conflictingPredictor = predictor.conflictsWith?.find(
+                    (other) => selectedPredictors.includes(other),
+                  );
+                  // Still allow unchecking if both ended up selected.
+                  const isBlockedByConflict = !checked && !!conflictingPredictor;
+                  const disabled =
+                    isAutoPointsFlow || predictor.disabled || isBlockedByConflict;
 
                   return (
                     <label
@@ -88,6 +94,13 @@ export const SelectPredictorAccordion = () => {
                       <div className="space-y-1">
                         <p className="text-m-semibold text-text-icons-base-second">{predictor.label}</p>
                         <p className="text-xs-regular text-text-icons-base-second">{predictor.description}</p>
+                        {isBlockedByConflict && (
+                          <p className="text-xs-regular text-danger-600">
+                            {tInteractive("lulcParams.predictorConflict", {
+                              predictor: conflictingPredictor,
+                            })}
+                          </p>
+                        )}
                       </div>
                     </label>
                   );
