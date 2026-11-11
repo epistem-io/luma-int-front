@@ -9,14 +9,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DOWNLOAD_REQUEST_URL, GET_MOSAIC_URL } from "@/constants";
+import {
+  DOWNLOAD_REQUEST_URL,
+  GET_MOSAIC_URL,
+  REPORT_REQUEST_URL,
+} from "@/constants";
 import { AuthContext } from "@/contexts/authContext";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { SessionCheckpointContext } from "@/contexts/sessionCheckpointContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
-import { Download, Save, Share2, X } from "lucide-react";
+import { Download, FileText, Loader2, Save, Share2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
 import { toast } from "sonner";
@@ -37,6 +41,7 @@ export const YourMapDialog = () => {
   const { resetMapState } = useContext(MapContext);
   const { clearCheckpoint } = useContext(SessionCheckpointContext);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isReportLoading, setIsReportLoading] = useState(false);
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const [isDownloadOnTheWayOpen, setIsDownloadOnTheWayOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
@@ -117,6 +122,60 @@ export const YourMapDialog = () => {
     setIsShareOpen(true);
   };
 
+  const handleDownloadReport = async () => {
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (!sessionId) {
+      showErrorToast({ title: commonT("errors.noSession"), description: null });
+      return;
+    }
+
+    try {
+      setIsReportLoading(true);
+
+      const response = await fetchWithAuth(REPORT_REQUEST_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+
+      if (!response.ok) {
+        // The backend puts its message under `error`.
+        const json = await response.json().catch(() => null);
+        throw new Error(
+          json?.error?.message ||
+            json?.message ||
+            commonT("somethingWrongHappened"),
+        );
+      }
+
+      // The server sends a PDF, or the Word file where it cannot convert.
+      const blob = await response.blob();
+      const extension = blob.type === "application/pdf" ? "pdf" : "docx";
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Laporan_Luma_${sessionId}.${extension}`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        setIsLoginModalOpen(true);
+        return;
+      }
+
+      showErrorToast({
+        title: commonT("errors.reportRequestFailed"),
+        description: error instanceof Error ? error.message : null,
+      });
+    } finally {
+      setIsReportLoading(false);
+    }
+  };
+
   const handleCloseRequest = () => {
     setIsCloseConfirmVisible(true);
   };
@@ -194,6 +253,20 @@ export const YourMapDialog = () => {
             >
               <Share2 className="size-4" />
               {t("shareMap")}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDownloadReport}
+              disabled={isReportLoading}
+              variant="primary"
+              className="text-l-bold h-10 rounded-[12px] border border-primary-red-pink-normal-active shadow-[0px_1px_2px_rgba(0,0,0,0.05)] text-white"
+            >
+              {isReportLoading ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <FileText className="size-4" />
+              )}
+              {t("downloadReport")}
             </Button>
             <Button
               type="button"

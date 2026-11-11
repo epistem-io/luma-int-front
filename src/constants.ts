@@ -90,6 +90,7 @@ export const GET_MOSAIC_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/im
 export const GET_MOSAIC_DOWNLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/image-mosaic/download-url`;
 export const DOWNLOAD_REQUEST_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/download-request`;
 export const SHARE_MAP_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/share-map`;
+export const REPORT_REQUEST_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/report`;
 
 export const LUC_UPLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-classes/upload`;
 export const LUC_UPDATE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/lulc-classes`;

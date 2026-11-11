@@ -321,6 +321,7 @@
         "signUpFailed": "Sign-up failed",
         "shareMapFailed": "Could not share the map",
         "downloadRequestFailed": "Could not request the download",
+        "reportRequestFailed": "Could not create the report",
         "noSession": "No mapping session found. Generate a map first."
       }
     },
@@ -753,6 +754,7 @@
       "followUpDialogTitle": "Satisfied with your map?",
       "followUpDialogDescription": "If satisfied, export, share, or save your map.<br></br>If not, further refine parameters/input to improve accuracy.",
       "downloadMap": "Download map",
+      "downloadReport": "Download report",
       "shareMap": "Share map",
       "shareDialogDescription": "Send the mapping results to someone by email. They will receive a link to view the results.",
       "shareRecipientName": "Recipient's name",

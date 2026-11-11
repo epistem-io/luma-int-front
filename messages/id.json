@@ -321,6 +321,7 @@
         "signUpFailed": "Pendaftaran gagal",
         "shareMapFailed": "Peta tidak dapat dibagikan",
         "downloadRequestFailed": "Permintaan unduhan tidak dapat dikirim",
+        "reportRequestFailed": "Laporan tidak dapat dibuat",
         "noSession": "Sesi pemetaan tidak ditemukan. Buat peta terlebih dahulu."
       }
     },
@@ -753,6 +754,7 @@
       "followUpDialogTitle": "Sudah puas dengan peta Anda?",
       "followUpDialogDescription": "Jika ya, unduh, bagikan, atau simpan peta Anda. <br></br> Jika belum, sesuaikan pengaturan/input lebih lanjut untuk meningkatkan akurasi.",
       "downloadMap": "Unduh peta",
+      "downloadReport": "Unduh laporan",
       "shareMap": "Bagikan peta",
       "shareDialogDescription": "Kirim hasil pemetaan kepada seseorang melalui email. Mereka akan menerima tautan untuk melihat hasilnya.",
       "shareRecipientName": "Nama penerima",
