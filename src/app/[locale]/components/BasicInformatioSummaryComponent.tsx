@@ -66,6 +66,7 @@ export const BasicInformationSummaryComponent = () => {
   // Same wording as the resolution picker (AreaScopingAccordion /
   // SpatialResolutionSelect); falls back to the raw value for unknown ones.
   const spatialResolutionLabelMap: Record<string, string> = {
+    "10": t("areaScoping.10x10m2"),
     "30": t("areaScoping.30x30m2"),
     "100": t("areaScoping.100x100m2"),
     "500": t("areaScoping.500x500m2"),

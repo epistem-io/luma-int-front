@@ -375,6 +375,7 @@
       "drawPolygonSubtitle": "Click to start drawing the area you want to map. Double-click to finish.",
       "spatialResolution": "Spatial resolution",
       "spatialResolutionSubtitle": "Smallest dimension that can be distinguished in the area that you want to map. This reflects the level of detail of your map.",
+      "10x10m2": "10 m x 10 m",
       "30x30m2": "30 m x 30 m",
       "100x100m2": "100 m x 100 m",
       "500x500m2": "500 m x 500 m",
@@ -423,6 +424,7 @@
       "satellite": "Satellite imagery source",
       "satelliteSubtitle": "Choose the satellite imagery source you want to use. Available data sources depend on the time period you select. Newer satellites, such as Landsat 9, usually give more detailed images.",
       "selectSatellitePlaceholder": "Select imagery source",
+      "noSatelliteForResolution": "10 m resolution needs Sentinel-2, which is available from 2015. Choose a later time period or a coarser spatial resolution.",
       "cloudCoverage": "Maximum cloudy area",
       "cloudCoverageSubtitle": "Use the slider to choose the highest percentage of cloudy areas allowed in the satellite imagery source. Lower values give clearer images, while higher values allow more cloudy scenes.",
       "setSatelliteComposite": "Set satellite imagery",
@@ -613,9 +615,11 @@
       "dataValidationDesc": "Upload validation data to test the thematic accuracy of your  LULC map. Compare your classified map against trusted ground truth data (like field surveys or high resolution imagery) to measure how reliable your map is.",
       "predictorGroups": {
         "landBuiltUp": "Land & built-up",
+        "terrain": "Terrain",
         "vegetation": "Vegetation",
         "waterHumidity": "Water & humidity"
       },
+      "predictorConflict": "Cannot be combined with {predictor}",
       "splitRatio": "Training / testing split",
       "splitRatioSummary": "Training / testing split",
       "improvementMode": "Improvement Mode",

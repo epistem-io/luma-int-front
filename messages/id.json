@@ -375,6 +375,7 @@
       "drawPolygonSubtitle": "Klik untuk mulai menggambar wilayah yang akan Anda petakan. Klik dua kali untuk menyelesaikan.",
       "spatialResolution": "Resolusi spasial",
       "spatialResolutionSubtitle": "Dimensi terkecil yang dapat dibedakan pada wilayah yang akan Anda petakan. Resolusi spasial menentukan tingkat kerincian peta yang akan dihasilkan.",
+      "10x10m2": "10 m x 10 m",
       "30x30m2": "30 m x 30 m",
       "100x100m2": "100 m x 100 m",
       "500x500m2": "500 m x 500 m",
@@ -423,6 +424,7 @@
       "satellite": "Sumber citra satelit",
       "satelliteSubtitle": "Pilih sumber citra yang ingin Anda gunakan. Sumber data yang tersedia bergantung pada jangka waktu yang Anda pilih. Satelit yang lebih baru, seperti Landsat 9, biasanya menghasilkan citra yang lebih rinci.",
       "selectSatellitePlaceholder": "Pilih sumber citra",
+      "noSatelliteForResolution": "Resolusi 10 m memerlukan Sentinel-2, yang tersedia sejak 2015. Pilih periode waktu yang lebih baru atau resolusi spasial yang lebih kasar.",
       "cloudCoverage": "Batas maksimum area berawan",
       "cloudCoverageSubtitle": "Gunakan penggeser untuk menentukan persentase maksimum area berawan pada sumber citra satelit. Semakin rendah nilainya, semakin jelas citra yang ditampilkan.",
       "setSatelliteComposite": "Tetapkan citra satelit",
@@ -613,9 +615,11 @@
       "dataValidationDesc": "Unggah data validasi untuk menguji akurasi tematik peta penggunaan dan tutupan lahan Anda. Bandingkan peta klasifikasi Anda dengan data referensi tepercaya (seperti survei lapangan atau citra resolusi tinggi) untuk mengukur tingkat akurasi peta Anda.",
       "predictorGroups": {
         "landBuiltUp": "Lahan & area terbangun",
+        "terrain": "Topografi",
         "vegetation": "Vegetasi",
         "waterHumidity": "Air & kelembapan"
       },
+      "predictorConflict": "Tidak dapat digabung dengan {predictor}",
       "splitRatio": "Pembagian data latih / uji",
       "splitRatioSummary": "Pembagian data latih / uji",
       "improvementMode": "Mode Peningkatan",

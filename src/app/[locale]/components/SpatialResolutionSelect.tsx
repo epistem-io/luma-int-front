@@ -6,6 +6,11 @@ import { useContext } from "react";
 
 const SPATIAL_RESOLUTION_OPTIONS = [
   {
+    id: "spatial-resolution-item-10",
+    value: "10",
+    labelKey: "areaScoping.10x10m2",
+  },
+  {
     id: "spatial-resolution-item-1",
     value: "30",
     labelKey: "areaScoping.30x30m2",
@@ -14,16 +19,6 @@ const SPATIAL_RESOLUTION_OPTIONS = [
     id: "spatial-resolution-item-3",
     value: "100",
     labelKey: "areaScoping.100x100m2",
-  },
-  {
-    id: "spatial-resolution-item-2",
-    value: "500",
-    labelKey: "areaScoping.500x500m2",
-  },
-  {
-    id: "spatial-resolution-item-4",
-    value: "1000",
-    labelKey: "areaScoping.1x1km2",
   },
 ] as const;
 
