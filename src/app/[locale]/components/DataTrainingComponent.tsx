@@ -494,10 +494,39 @@ export const DataTrainingComponent = () => {
     body.append("file", fileObj.file);
     body.append("session_id", sessionId);
 
-    fetch(TRAINING_DATA_UPLOAD_URL, {
-      method: "POST",
-      body,
-    })
+    // The uploaded-classes flow keeps step 2's edits (names, ids, colours) in
+    // the browser. Send them first: the backend matches and colours the
+    // uploaded points against its own copy of the scheme.
+    const syncClasses =
+      lucSource === "excel" && classArray.length > 0
+        ? fetch(LUC_UPDATE_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              session_id: sessionId,
+              classes: classArray.map((item) => ({
+                id: item.class_id,
+                class: item.class_name,
+                color: item.class_color,
+              })),
+            }),
+          }).then(async (response) => {
+            if (!response.ok) {
+              const json = await response.json().catch(() => null);
+              throw new Error(String(json?.error?.message || response.status));
+            }
+          })
+        : Promise.resolve();
+
+    syncClasses
+      .then(() =>
+        fetch(TRAINING_DATA_UPLOAD_URL, {
+          method: "POST",
+          body,
+        }),
+      )
       .then(async (response) => {
         const json: TrainingDataUploadRes = await response.json();
 
