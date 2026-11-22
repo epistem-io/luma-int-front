@@ -10,6 +10,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { SummaryDownloadButton } from "./SummaryField";
 import Image from "next/image";
 import { TimePeriodAccordion } from "./TimePeriodAccordion";
 import { AreaScopingAccordion } from "./AreaScopingAccordion";
@@ -169,137 +170,94 @@ export const MosaicSummary = () => {
     }
   };
 
+  const headCls =
+    "h-9 px-3 text-left font-aptos text-xs font-semibold leading-4.5 text-text-icons-base-second";
+  const cellCls =
+    "px-3 py-2.5 text-left font-aptos! text-xs leading-4.5 text-text-icons-base-main";
+  const statLabelCls =
+    "font-aptos text-[13px] leading-4.5 text-text-icons-base-second";
+  const statValueCls =
+    "font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-primary-red-pink-normal-active";
+
   return (
-    <div className="space-y-0">
-      <div className="space-y-3">
-        <div className="">
-          <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-            {t("basicInformation.compositeMapGenerated")}
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <div className="flex flex-row items-center justify-between gap-x-3">
+          <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-text-icons-base-main">
+            {t("basicInformation.compositeSummaryTitle")}
           </p>
-          <div className="flex flex-row items-center justify-between">
-            <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-              {t("basicInformation.mosaicSummary")}
-            </p>
-            <div className="flex flex-row gap-x-3 items-center pb-1">
-              {/* {isMosaicLoading && (
-                // <div className="w-full h-10 flex flex-row justify-center">
-                <span className="loader sm "></span>
-                // </div>
-              )}
-              {!isMosaicLoading && (
-                <Label htmlFor="preview-mosaic-map">
-                  <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                    {t("satelliteComposite.previewMosaicMap")}
-                  </p>
-                </Label>
-              )}
-              <Switch
-                checked={isPreviewingMosaic}
-                // onCheckedChange={(val) => {
-                //   handlePreviewMosaic(val);
-                // }}
-                disabled={true}
-                id="preview-mosaic-map"
-              /> */}
-            </div>
-          </div>
-          <div className="mt-2">
-            <div className="border border-text-icons-disabled rounded-sm overflow-hidden">
-              <Table>
-                <TableHeader className="bg-purple-second">
-                  <TableRow>
-                    <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("finalSummary.featureID")} */}
-                      {t("basicInformation.numberColumn")}
-                    </TableHead>
-                    <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("finalSummary.featureID")} */}
-                      {t("basicInformation.sceneIDcolumn")}
-                    </TableHead>
-                    <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center">
-                      {/* {t("dataTraining.lulcClass")} */}
-                      {t("basicInformation.tanggalPerekamanColumn")}
-                    </TableHead>
-                    <TableHead className="text-black font-aptos text-xs font-semibold leading-4.5 text-center w-25">
-                      {/* {t("dataTraining.numberOfPoints")} */}
-                      {t("basicInformation.tutupanAwanColumn")}
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="text-black font-aptos text-xs font-regular leading-4.5 bg-white">
-                  {mosaicStatistic?.summary?.map((item, index) => (
-                    <TableRow key={`mosaic row ${index}`}>
-                      <TableCell className="font-aptos! text-center">
-                        {index + 1}
-                      </TableCell>
-                      <TableCell className="font-aptos! text-center">
-                        {item.scene_id}
-                      </TableCell>
-                      <TableCell className="font-aptos! text-center">
-                        {item.tanggal_perekaman}
-                      </TableCell>
-                      <TableCell className="font-aptos! text-center max-w-25">
-                        {item.tutupan_awan}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </div>
-        <div className="">
-          <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-            {t("basicInformation.statistikTutupanAwan")}
-          </p>
-          <div className="flex flex-row justify-between items-center">
-            <div className="">
-              <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                {t("basicInformation.minimum")}
-              </p>
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                {mosaicStatistic?.statistics?.min}%
-              </p>
-            </div>
-            <div className="">
-              <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                {t("basicInformation.rataRata")}
-              </p>
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                {mosaicStatistic?.statistics?.mean.toFixed(2)}%
-              </p>
-            </div>
-            <div className="">
-              <p className="font-pjs text-xs font-semibold leading-4.5 text-text-icons-base-second">
-                {t("basicInformation.maksimum")}
-              </p>
-              <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                {mosaicStatistic?.statistics?.max}%
-              </p>
-            </div>
-          </div>
-          <div className="w-full flex flex-row justify-end">
-            <Button
-              variant={"ghost"}
-              className="p-0 hover:bg-transparent cursor-pointer ml-auto"
-              disabled={isDownloadMosaicDisabled}
-              onClick={() => setIsDownloadDialogOpen(true)}
-            >
-              <div className="">
-                <p className="text-neutral-700-baru font-aptos text-md font-regular leading-6 underline">
-                  {t("basicInformation.downloadMosaicMap")}
-                </p>
-              </div>
-            </Button>
-          </div>
-          <MosaicDownloadDialog
-            open={isDownloadDialogOpen}
-            onOpenChange={setIsDownloadDialogOpen}
-            onConfirm={handleConfirmDownload}
-            isSubmitting={isFetchingDownloadUrl}
+          <SummaryDownloadButton
+            label={t("basicInformation.downloadMosaicMap")}
+            disabled={isDownloadMosaicDisabled}
+            onClick={() => setIsDownloadDialogOpen(true)}
           />
         </div>
+
+        <div className="rounded-lg border border-text-icons-disabled overflow-hidden">
+          <Table>
+            <TableHeader className="bg-primary-red-pink-light">
+              <TableRow className="border-0 hover:bg-transparent">
+                <TableHead className={`${headCls} w-10`}>
+                  {t("basicInformation.numberColumn")}
+                </TableHead>
+                <TableHead className={headCls}>
+                  {t("basicInformation.sceneIDcolumn")}
+                </TableHead>
+                <TableHead className={headCls}>
+                  {t("basicInformation.tanggalPerekamanColumn")}
+                </TableHead>
+                <TableHead className={headCls}>
+                  {t("basicInformation.tutupanAwanColumn")}
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {mosaicStatistic?.summary?.map((item, index) => (
+                <TableRow
+                  key={`mosaic row ${index}`}
+                  className="border-0 bg-white even:bg-text-icons-base-fourth"
+                >
+                  <TableCell className={cellCls}>{index + 1}</TableCell>
+                  <TableCell className={cellCls}>{item.scene_id}</TableCell>
+                  <TableCell className={cellCls}>
+                    {item.tanggal_perekaman}
+                  </TableCell>
+                  <TableCell className={cellCls}>{item.tutupan_awan}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
+      <div className="space-y-1">
+        <p className="font-aptos text-sm font-semibold leading-5 text-neutral-700">
+          {t("basicInformation.statistikTutupanAwan")}
+        </p>
+        <div className="flex flex-row justify-between items-center">
+          <div>
+            <p className={statLabelCls}>{t("basicInformation.minimum")}</p>
+            <p className={statValueCls}>{mosaicStatistic?.statistics?.min.toFixed(2)}%</p>
+          </div>
+          <div>
+            <p className={statLabelCls}>{t("basicInformation.rataRata")}</p>
+            <p className={statValueCls}>
+              {mosaicStatistic?.statistics?.mean.toFixed(2)}%
+            </p>
+          </div>
+          <div>
+            <p className={statLabelCls}>{t("basicInformation.maksimum")}</p>
+            <p className={statValueCls}>{mosaicStatistic?.statistics?.max.toFixed(2)}%</p>
+          </div>
+        </div>
+      </div>
+
+      <MosaicDownloadDialog
+        open={isDownloadDialogOpen}
+        onOpenChange={setIsDownloadDialogOpen}
+        onConfirm={handleConfirmDownload}
+        isSubmitting={isFetchingDownloadUrl}
+      />
     </div>
   );
 };

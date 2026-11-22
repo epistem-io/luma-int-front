@@ -14,7 +14,7 @@ const LanguageToggle = () => {
   const locale = useLocale();
 
   return (
-    <div className="flex items-center space-x-2.5 bg-[#FFF6FE] p-2.5 rounded-[8px]">
+    <div className="flex h-9 items-center gap-x-2 rounded-md bg-[#FFF6FE] px-3">
       <button
         onClick={() =>
           router.replace(
@@ -26,7 +26,7 @@ const LanguageToggle = () => {
           )
         }
         className={cn(
-          "p-0 text-md font-inter font-medium transition-colors hover:cursor-pointer",
+          "p-0 text-sm font-inter font-medium transition-colors hover:cursor-pointer",
           locale === "en"
             ? "text-[#CC4778] font-bold"
             : "text-muted-foreground hover:text-foreground",
@@ -46,7 +46,7 @@ const LanguageToggle = () => {
           )
         }
         className={cn(
-          "p-0 text-md font-inter font-medium transition-colors hover:cursor-pointer",
+          "p-0 text-sm font-inter font-medium transition-colors hover:cursor-pointer",
           locale === "id"
             ? "text-[#CC4778] font-bold"
             : "text-muted-foreground hover:text-foreground",

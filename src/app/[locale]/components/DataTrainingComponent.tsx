@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select";
 import { LUCClassTable } from "./LUCClassTable";
 import { SampleQualityCard } from "./SampleQualityCard";
+import { useStepNavigation } from "./useStepNavigation";
 import {
   DATA_TRAINING_FILE_SIZE_LIMIT,
   LUC_UPDATE_URL,
@@ -1271,7 +1272,6 @@ export const DataTrainingComponent = () => {
 export const DataTrainingFooter = () => {
   const {
     setStepKey,
-    setProgressPanelIndex,
     isUploadingTrainingFile,
     isUpdatingTrainingData,
     setIsUpdatingTrainingData,
@@ -1285,7 +1285,7 @@ export const DataTrainingFooter = () => {
 
   const { sessionId } = useContext(GlobalContext);
 
-  const { markerVectorLayer, markerArray } = useContext(MapContext);
+  const { markerArray } = useContext(MapContext);
 
   const t = useTranslations("InteractivePanel");
   const { isSaving, runWithSaving } = useSavingTransition();
@@ -1299,6 +1299,12 @@ export const DataTrainingFooter = () => {
     isSampleQualityLoading;
 
   const isBackDisabled = isUploadingTrainingFile || isUpdatingTrainingData;
+
+  // Next lands on step 3's summary screen (DataTrainingSummary), which then
+  // moves on to step 4. Markers stay visible there.
+  const goToSummary = () => {
+    setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING_SUMMARY);
+  };
 
   // Same class-sync as the Generate button: the uploaded-classes flow never
   // posted its edited scheme, and POST /training-data validates class_ids
@@ -1353,9 +1359,7 @@ export const DataTrainingFooter = () => {
           const json = await response.json().catch(() => null);
           throw new Error(String(json?.error?.message || response.status));
         }
-        setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-        markerVectorLayer?.setOpacity(0);
-        setProgressPanelIndex(3);
+        goToSummary();
         setIsTrainingDataChanged(false);
       })
       .catch((e) => {
@@ -1372,12 +1376,8 @@ export const DataTrainingFooter = () => {
   };
 
   const onClickNext = () => {
-    // console.log("istraining chaned", isTrainingDataChanged);
-    // return;
     if (!isTrainingDataChanged) {
-      setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-      markerVectorLayer?.setOpacity(0);
-      setProgressPanelIndex(3);
+      goToSummary();
       return;
     }
 
@@ -1388,18 +1388,13 @@ export const DataTrainingFooter = () => {
       return;
     }
 
-    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-    markerVectorLayer?.setOpacity(0);
-    setProgressPanelIndex(3);
+    goToSummary();
     setIsTrainingDataChanged(false);
     return;
   };
 
-  const onClickBack = () => {
-    setProgressPanelIndex(1);
-    markerVectorLayer?.setOpacity(0);
-    setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
-  };
+  const { goToStep } = useStepNavigation();
+  const onClickBack = () => goToStep(2);
 
   return (
     <div className="p-3 pt-4 gap-x-4 flex flex-row">

@@ -17,11 +17,10 @@ import { SateliteCompositeAccordion } from "./SateliteCompositeAccordion";
 import { Button } from "@/components/ui/button";
 import { useContext } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import {
-  PANEL_COMPONENT_KEY,
-  SATELLITE_OPTIONS_ARRAY,
-  TEMPORAL_COVERAGE_ARRAY,
-} from "@/constants";
+import { PANEL_COMPONENT_KEY } from "@/constants";
+import { isScoreStaleForComposite } from "@/lib/stepRules";
+import { useStepNavigation } from "./useStepNavigation";
+import { useBasicInformationLabels } from "./useSummaryLabels";
 import { AreaScopingSummary } from "./AreaScopingSummary";
 import { TimePeriodSummary } from "./TimePeriodSummary";
 import { SatelliteCompositeSummary } from "./SatelliteCompositeSummary";
@@ -30,14 +29,12 @@ import {
   cn,
   getTemporalRangeDateEnd,
   getTemporalRangeDateStart,
-  getTemporalRangeText,
   numberThousandSeparator,
 } from "@/lib/utils";
 import { useSavingTransition } from "@/lib/hooks";
 import { MosaicSummary } from "./MosaicSummary";
 import { MapContext } from "@/contexts/mapContext";
-import { useLocale, useTranslations } from "next-intl";
-import { TFunction } from "@/i18n/types";
+import { useTranslations } from "next-intl";
 import { GlobalContext } from "@/contexts/globalContext";
 import {
   goToCompositeEditFlow,
@@ -52,80 +49,68 @@ export const BasicInformationSummaryComponent = () => {
   const mapGenerationContext = useContext(MapGenerationContext);
   const {
     areaScopingPolygonArea,
-    temporalCoverage,
     temporalCoverageUnit,
     isBasicInformationChangeInput,
-    satelliteSource,
     maximumCloudCover,
-    spatialResolution,
+    hasLeftStep1,
   } = mapGenerationContext;
 
-  const t = useTranslations("InteractivePanel");
-  const locale = useLocale();
+  // Nothing is editable while viewed from Your Map; after the first Next to
+  // step 2 only the satellite section stays editable.
+  const { isViewOnly } = useStepNavigation();
+  const canEditSatellite = isBasicInformationChangeInput && !isViewOnly;
+  const canEditAreaAndPeriod = canEditSatellite && !hasLeftStep1;
 
-  // Same wording as the resolution picker (AreaScopingAccordion /
-  // SpatialResolutionSelect); falls back to the raw value for unknown ones.
-  const spatialResolutionLabelMap: Record<string, string> = {
-    "10": t("areaScoping.10x10m2"),
-    "30": t("areaScoping.30x30m2"),
-    "100": t("areaScoping.100x100m2"),
-    "500": t("areaScoping.500x500m2"),
-    "1000": t("areaScoping.1x1km2"),
-  };
-  const spatialResolutionLabel = spatialResolution
-    ? (spatialResolutionLabelMap[spatialResolution] ?? `${spatialResolution} m`)
-    : undefined;
+  const t = useTranslations("InteractivePanel");
+  const {
+    spatialResolutionLabel,
+    inputMethodLabel,
+    locationLabel,
+    temporalResolutionLabel,
+    dateRangeLabel,
+    satelliteLabel,
+  } = useBasicInformationLabels();
 
   // const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false)
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="space-y-3">
           <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
             {t("basicInformation.summaryOfBasicInformation")}
           </p>
-          <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second space-y-4">
+          <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-4">
             <AreaScopingSummary
               areaSizeString={`${numberThousandSeparator(areaScopingPolygonArea.toFixed(0))} Ha`}
               spatialResolutionString={spatialResolutionLabel}
+              inputMethodString={inputMethodLabel}
+              locationString={locationLabel}
               accordion={false}
-              isEditing={isBasicInformationChangeInput}
+              isEditing={canEditAreaAndPeriod}
               onClickEdit={() => {
                 resetAreaScopingData({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
               }}
             />
-            <div className="h-0.5 w-full bg-secondary-purple-light-active" />
+            <div className="h-px w-full bg-primary-pink/25" />
             <TimePeriodSummary
               accordion={false}
-              temporalResolutionLabel={
-                TEMPORAL_COVERAGE_ARRAY.find(
-                  (item) => item.value === temporalCoverage,
-                )?.labelFunction(t as TFunction) || "Error"
-              }
+              temporalResolutionLabel={temporalResolutionLabel}
               specificPeriod={temporalCoverageUnit}
-              dateRange={getTemporalRangeText(
-                temporalCoverage,
-                temporalCoverageUnit,
-                locale,
-              )}
-              isEditing={isBasicInformationChangeInput}
+              dateRange={dateRangeLabel}
+              isEditing={canEditAreaAndPeriod}
               onClickEdit={() => {
                 resetTimePeriodData({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
               }}
             />
-            <div className="h-0.5 w-full bg-secondary-purple-light-active" />
+            <div className="h-px w-full bg-primary-pink/25" />
             <SatelliteCompositeSummary
               accordion={false}
               cloudCoverageString={`${maximumCloudCover}%`}
-              sateliteString={
-                SATELLITE_OPTIONS_ARRAY.find(
-                  (item) => item.value === satelliteSource,
-                )?.label ?? satelliteSource
-              }
-              isEditing={isBasicInformationChangeInput}
+              sateliteString={satelliteLabel}
+              isEditing={canEditSatellite}
               onClickEdit={() => {
                 goToCompositeEditFlow({ mapContext, mapGenerationContext });
                 resetMosaicLayer();
@@ -172,6 +157,11 @@ export const BasicInformationSummaryFooter = () => {
     spatialResolution,
     satelliteSource,
     maximumCloudCover,
+    setHasLeftStep1,
+    sampleQuality,
+    sampleQualityComposite,
+    setSampleQuality,
+    setSampleQualityError,
   } = useContext(MapGenerationContext);
 
   const {
@@ -209,11 +199,25 @@ export const BasicInformationSummaryFooter = () => {
   const onNextClick = () => {
     if (isPreviewingMosaic) {
       runWithSaving(() => {
+        setHasLeftStep1(true);
         setStepKey(PANEL_COMPONENT_KEY.DEFINE_LUC);
         setProgressPanelIndex(1);
       });
 
       return;
+    }
+
+    // A new composite (other satellite or cloud cover) makes step 3's
+    // separability score stale; the samples themselves stay valid.
+    if (
+      sampleQuality &&
+      isScoreStaleForComposite(sampleQualityComposite, {
+        satelliteSource,
+        maximumCloudCover,
+      })
+    ) {
+      setSampleQuality(null);
+      setSampleQualityError("");
     }
 
     getMosaicMap({

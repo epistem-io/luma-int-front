@@ -7,6 +7,7 @@ import { PANEL_COMPONENT_KEY } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useStepNavigation } from "./useStepNavigation";
 
 export const LULCParamsComponent = () => {
   const { lulcParamsOpenAccordion, setLULCParamsOpenAccordion } =
@@ -110,10 +111,12 @@ export const LULCParamsFooter = () => {
     setProgressPanelIndex(3);
   };
 
+  // Back lands on step 3's summary; "Edit Samples" there reopens the
+  // sample-data panel.
+  const { goToStep } = useStepNavigation();
   const onClickBack = () => {
     setDataTrainingActiveTab("upload");
-    setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
-    setProgressPanelIndex(2);
+    goToStep(3);
   };
 
   return (

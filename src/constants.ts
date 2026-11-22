@@ -7,6 +7,7 @@ export enum PANEL_COMPONENT_KEY {
   BASIC_INFORMATION_SUMMARY = "basic_information_summary",
   DEFINE_LUC = "define_luc",
   DATA_TRAINING = "data_training",
+  DATA_TRAINING_SUMMARY = "data_training_summary",
   OSS = "oss",
   LULC_PARAMS = "lulc_params",
   LULC_PARAMS_SUMMARY = "lulc_params_summary",

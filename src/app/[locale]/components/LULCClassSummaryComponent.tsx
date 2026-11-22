@@ -1,224 +1,95 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  LULCParamsAccordionSection,
-  LULCSummaryEditSection,
-  MapGenerationContext,
-} from "@/contexts/mapGenerationContext";
+import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { PANEL_COMPONENT_KEY, PREDICTOR_URL } from "@/constants";
-import { type ReactNode, useContext, useMemo, useState } from "react";
+import { useContext, useState } from "react";
 import { useSavingTransition } from "@/lib/hooks";
 import { useTranslations } from "next-intl";
-import { LULC_PREDICTORS } from "./lulcPredictors";
-import { ConfirmDialog } from "./ConfirmDialog";
-import Image from "next/image";
+import { ChevronLeft } from "lucide-react";
 import { GlobalContext } from "@/contexts/globalContext";
 import { showErrorToast } from "@/components/ui/error-toast";
+import {
+  PredictorChips,
+  SummaryEditButton,
+  SummaryField,
+  SummaryHeading,
+} from "./SummaryField";
+import { useSelectedPredictorLabels } from "./useSummaryLabels";
+import { useStepNavigation } from "./useStepNavigation";
 
-interface SectionWrapperProps {
-  title: string;
-  isEditing: boolean;
-  isEditDisabled?: boolean;
-  onEdit?: () => void;
-  children: ReactNode;
-}
-
-const LULCSummarySection = ({
-  title,
-  isEditing,
-  isEditDisabled = false,
-  onEdit,
-  children,
-}: SectionWrapperProps) => {
-  return (
-    <section className="space-y-2 relative">
-      <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-        {title}
-      </p>
-      {children}
-      {isEditing && (
-        <Button
-          onClick={onEdit}
-          variant="ghost"
-          className="absolute top-0 right-0 p-1 rounded-full"
-          size="icon"
-          disabled={isEditDisabled}
-        >
-          <Image
-            src="/svgs/fa-edit.svg"
-            alt="edit"
-            width={18}
-            height={16}
-            className="h-4 w-4.5"
-          />
-        </Button>
-      )}
-    </section>
-  );
-};
-
+// Step 4's last screen: the chosen predictors, Random Forest settings and
+// training/testing split. "Edit" reopens the parameter form with the
+// current values kept.
 export const LULCClassSummaryComponent = () => {
-  const {
-    selectedPredictors,
-    numberOfTrees,
-    minLeafPopulation,
-    splitRatio,
-    isLULCSummaryChangeInput,
-    selectedLULCSummaryEditSection,
-    setSelectedLULCSummaryEditSection,
-    setSelectedPredictors,
-    setNumberOfTrees,
-    setNumberOfTreesError,
-    setMinLeafPopulation,
-    setMinLeafPopulationError,
-    setIsLULCSummaryChangeInput,
-    setLULCParamsOpenAccordion,
-    setStepKey,
-    setProgressPanelIndex,
-  } = useContext(MapGenerationContext);
+  const { numberOfTrees, minLeafPopulation, splitRatio } =
+    useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
-
-  const formattedNumberOfTrees = numberOfTrees.trim();
-  const formattedMinLeafPopulation = minLeafPopulation.trim();
-
-  const selectedPredictorDetails = useMemo(() => {
-    return LULC_PREDICTORS.filter((predictor) =>
-      selectedPredictors.includes(predictor.value),
-    );
-  }, [selectedPredictors]);
-
-  const closeConfirmDialog = () => {
-    setSelectedLULCSummaryEditSection("");
-  };
-
-  const navigateToLULCParams = (
-    accordionSection: LULCParamsAccordionSection,
-  ) => {
-    setLULCParamsOpenAccordion(accordionSection);
-    setIsLULCSummaryChangeInput(false);
-    setSelectedLULCSummaryEditSection("");
-    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
-    setProgressPanelIndex(3);
-  };
-
-  const onConfirmChangeInput = () => {
-    switch (selectedLULCSummaryEditSection) {
-      case "predictor":
-        setSelectedPredictors([]);
-        navigateToLULCParams("predictor");
-        return;
-      case "random-forest":
-        setNumberOfTrees("150");
-        setNumberOfTreesError("");
-        setMinLeafPopulation("1");
-        setMinLeafPopulationError("");
-        navigateToLULCParams("random-forest");
-        return;
-      default:
-        closeConfirmDialog();
-    }
-  };
-
-  const openSectionConfirm = (section: LULCSummaryEditSection) => {
-    setSelectedLULCSummaryEditSection(section);
-  };
+  const predictorLabels = useSelectedPredictorLabels();
 
   return (
-    <>
-      <div className="space-y-3">
-        <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-          {t("lulcParams.summaryTitle")}
-        </p>
-        <div className="space-y-4 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second px-3 py-3">
-          <LULCSummarySection
-            title={t("lulcParams.predictorSummary")}
-            isEditing={isLULCSummaryChangeInput}
-            onEdit={() => {
-              openSectionConfirm("predictor");
-            }}
-          >
-            {selectedPredictorDetails.length > 0 ? (
-              <div className="space-y-2">
-                {selectedPredictorDetails.map((predictor) => (
-                  <div key={predictor.value} className="flex gap-2">
-                    <div className="mt-2 size-2 shrink-0 rounded-full bg-secondary-purple-normal-hover" />
-                    <div className="space-y-0.5">
-                      <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                        {predictor.label}
-                      </p>
-                      <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                        {predictor.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                {t("lulcParams.noPredictorsSelected")}
-              </p>
-            )}
-          </LULCSummarySection>
+    <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-4">
+      <section className="space-y-2">
+        <SummaryHeading>{t("lulcParams.predictorSummary")}</SummaryHeading>
+        {predictorLabels.length > 0 ? (
+          <>
+            <p className="font-noto-sans text-base font-bold leading-6 text-primary-red-pink-normal-active">
+              {t("lulcParams.predictorsSelected", {
+                X: predictorLabels.length,
+              })}
+            </p>
+            <PredictorChips labels={predictorLabels} />
+          </>
+        ) : (
+          <p className="font-aptos text-[15px] leading-5.5 text-text-icons-base-second">
+            {t("lulcParams.noPredictorsSelected")}
+          </p>
+        )}
+      </section>
 
-          <div className="h-0.5 w-full bg-secondary-purple-light-active" />
+      <div className="h-px w-full bg-primary-pink/25" />
 
-          <LULCSummarySection
-            title={t("lulcParams.RFVariableSummary")}
-            isEditing={isLULCSummaryChangeInput}
-            onEdit={() => {
-              openSectionConfirm("random-forest");
-            }}
-          >
-            <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-              <div>
-                <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                  {t("lulcParams.nOfTree")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                  {formattedNumberOfTrees || "-"}
-                </p>
-              </div>
-              <div>
-                <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                  {t("lulcParams.minLeafPop")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                  {formattedMinLeafPopulation || "-"}
-                </p>
-              </div>
-              <div>
-                <p className="font-aptos text-[15px] font-semibold leading-[22px] text-text-icons-base-second">
-                  {t("lulcParams.splitRatioSummary")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-normal-hover">
-                  {splitRatio}% / {100 - splitRatio}%
-                </p>
-              </div>
-            </div>
-          </LULCSummarySection>
+      <section className="space-y-3">
+        <SummaryHeading>{t("lulcParams.RFVariableSummary")}</SummaryHeading>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+          <SummaryField
+            label={t("lulcParams.nOfTree")}
+            value={numberOfTrees.trim() || "-"}
+          />
+          <SummaryField
+            label={t("lulcParams.minLeafPop")}
+            value={minLeafPopulation.trim() || "-"}
+          />
         </div>
-      </div>
+      </section>
 
-      <ConfirmDialog
-        isVisible={selectedLULCSummaryEditSection !== ""}
-        onCancel={closeConfirmDialog}
-        onConfirm={onConfirmChangeInput}
-        title={t("common.changeInput")}
-        subtitle={t("common.confirmSubtitle")}
-        confirmButtonCaption={t("common.changeInput")}
-        cancelButtonCaption={t("common.cancelChangeInput")}
-      />
-    </>
+      <div className="h-px w-full bg-primary-pink/25" />
+
+      <section className="space-y-3">
+        <SummaryHeading>{t("lulcParams.splitRatioSummary")}</SummaryHeading>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+          <SummaryField
+            label={t("lulcParams.training")}
+            value={`${splitRatio}%`}
+          />
+          <SummaryField
+            label={t("lulcParams.testing")}
+            value={`${100 - splitRatio}%`}
+          />
+        </div>
+      </section>
+    </div>
   );
 };
 
 export const LULCClassSummaryFooter = () => {
   const {
     setIsSummaryDialogOpen,
-    isLULCSummaryChangeInput,
     setIsLULCSummaryChangeInput,
     setSelectedLULCSummaryEditSection,
+    setLULCParamsOpenAccordion,
+    setStepKey,
+    setProgressPanelIndex,
     selectedPredictors,
     numberOfTrees,
     minLeafPopulation,
@@ -229,17 +100,21 @@ export const LULCClassSummaryFooter = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isSaving, runWithSaving } = useSavingTransition();
 
-  const onChangeInputClick = () => {
-    if (isLULCSummaryChangeInput) {
-      setIsLULCSummaryChangeInput(false);
-      setSelectedLULCSummaryEditSection("");
-      return;
-    }
+  const isBusy = isLoading || isSaving;
 
-    setIsLULCSummaryChangeInput(true);
+  const { goToStep } = useStepNavigation();
+  const onClickBack = () => goToStep(3);
+
+  // Back to the parameter form; predictors and Random Forest values stay as
+  // they are (no reset), and its Next returns here.
+  const onClickEdit = () => {
+    setIsLULCSummaryChangeInput(false);
+    setSelectedLULCSummaryEditSection("");
+    setLULCParamsOpenAccordion("");
+    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS);
   };
 
-  const onClickNext = async () => {
+  const onClickGenerate = async () => {
     setIsLoading(true);
 
     try {
@@ -269,7 +144,7 @@ export const LULCClassSummaryFooter = () => {
       showErrorToast({
         title: t("common.errors.submitPredictorsFailed"),
         error: e,
-        onRetry: () => void onClickNext(),
+        onRetry: () => void onClickGenerate(),
       });
     } finally {
       setIsLoading(false);
@@ -277,24 +152,34 @@ export const LULCClassSummaryFooter = () => {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-x-4 p-3 pt-4">
-      <Button onClick={onChangeInputClick} variant="secondary">
-        {isLULCSummaryChangeInput
-          ? t("common.changeInputCancelFooter")
-          : t("common.changeInput")}
-      </Button>
+    <div className="p-3 pt-4 gap-x-2 flex flex-row">
       <Button
-        onClick={() => runWithSaving(onClickNext)}
-        variant="primary"
-        disabled={isLULCSummaryChangeInput || isLoading || isSaving}
+        disabled={isBusy}
+        onClick={onClickBack}
+        variant={"outline"}
+        size={"icon"}
+        className="shrink-0"
       >
-        {isLoading || isSaving ? (
+        <ChevronLeft className="text-primary-pink size-4" />
+      </Button>
+      <SummaryEditButton
+        label={t("lulcParams.edit")}
+        disabled={isBusy}
+        onClick={onClickEdit}
+      />
+      <Button
+        onClick={() => runWithSaving(onClickGenerate)}
+        variant="primary"
+        className="flex-1"
+        disabled={isBusy}
+      >
+        {isBusy ? (
           <>
             <span className="loader sm"></span>
             {t("common.saving")}
           </>
         ) : (
-          t("common.next")
+          t("finalSummary.generateMap")
         )}
       </Button>
     </div>

@@ -1,4 +1,5 @@
 import { AREA_SCOPING_TYPE, PANEL_COMPONENT_KEY } from "@/constants";
+import { MAP_PROGRESS_INDEX } from "./stepRules";
 
 export const CHECKPOINT_VERSION = 2;
 
@@ -44,6 +45,8 @@ export interface SessionCheckpoint {
   lastStepWithData: 1 | 2 | 3 | 4 | 5;
   stepKey: PANEL_COMPONENT_KEY;
   progressPanelIndex: number;
+  /** Furthest step reached (progress index). Optional for older checkpoints. */
+  furthestProgressIndex?: number;
   basicInfo?: {
     areaScopingType: AREA_SCOPING_TYPE;
     polygonGeoJSON: string | null;
@@ -57,6 +60,8 @@ export interface SessionCheckpoint {
     temporalCoverageUnit: string;
     satelliteSource: string;
     maximumCloudCover: number;
+    /** Optional so checkpoints saved before the step 1 lock still load. */
+    hasLeftStep1?: boolean;
   };
   luc?: {
     lucSource: "" | "quick" | "excel" | "default";
@@ -109,6 +114,8 @@ export interface CheckpointInputs {
   temporalCoverageUnit: string;
   satelliteSource: string;
   maximumCloudCover: number;
+  hasLeftStep1: boolean;
+  furthestProgressIndex: number;
   lucSource: "" | "quick" | "excel" | "default";
   lucView: string;
   lucCustomTab: string;
@@ -142,9 +149,12 @@ export const isStep3Recorded = (i: CheckpointInputs): boolean =>
   !i.isTrainingDataChanged &&
   (i.markerArray.length > 0 || i.uploadedFiles.length > 0);
 
+// Progress reaches the map index only after step 4's parameters were
+// submitted, so browsing earlier steps from Your Map still counts.
 export const isStep4Recorded = (i: CheckpointInputs): boolean =>
   i.stepKey === PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY ||
-  i.stepKey === PANEL_COMPONENT_KEY.YOUR_MAP;
+  i.stepKey === PANEL_COMPONENT_KEY.YOUR_MAP ||
+  i.progressPanelIndex >= MAP_PROGRESS_INDEX;
 
 export const isStep5Recorded = (i: CheckpointInputs): boolean => i.mapGenerated;
 
@@ -182,6 +192,7 @@ export function panelToWizardStep(
     case PANEL_COMPONENT_KEY.DEFINE_LUC:
       return 2;
     case PANEL_COMPONENT_KEY.DATA_TRAINING:
+    case PANEL_COMPONENT_KEY.DATA_TRAINING_SUMMARY:
     case PANEL_COMPONENT_KEY.OSS:
       return 3;
     case PANEL_COMPONENT_KEY.LULC_PARAMS:
@@ -194,6 +205,24 @@ export function panelToWizardStep(
       return 1;
   }
 }
+
+// Sample pins stay hidden past step 3 (same as the step 3 → 4 transition)
+// and while an earlier step is viewed from Your Map.
+export const shouldHideRestoredMarkers = (cp: SessionCheckpoint): boolean =>
+  panelToWizardStep(cp.stepKey) >= 4 ||
+  cp.progressPanelIndex >= MAP_PROGRESS_INDEX;
+
+// How far the step bar may jump forward. Older checkpoints infer it from
+// where the user was and the last step with recorded data.
+export const restoredFurthestProgressIndex = (cp: SessionCheckpoint): number =>
+  cp.furthestProgressIndex ??
+  Math.max(cp.progressPanelIndex, cp.lastStepWithData - 1);
+
+// Step 1 locks (except the satellite) once the user has moved on to step 2.
+// Checkpoints from before the flag existed infer it from how far they got.
+export const restoredHasLeftStep1 = (cp: SessionCheckpoint): boolean =>
+  cp.basicInfo?.hasLeftStep1 ??
+  (cp.lastStepWithData >= 2 || panelToWizardStep(cp.stepKey) >= 2);
 
 export function buildDrafts(i: CheckpointInputs): CheckpointDrafts | undefined {
   if (i.stepKey === PANEL_COMPONENT_KEY.DEFINE_LUC && !isStep2Recorded(i)) {
@@ -236,6 +265,7 @@ export function buildCheckpoint(
     lastStepWithData: lastStep,
     stepKey: toResumePanel(i.stepKey),
     progressPanelIndex: i.progressPanelIndex,
+    furthestProgressIndex: i.furthestProgressIndex,
     basicInfo: {
       areaScopingType: i.areaScopingType,
       polygonGeoJSON: i.polygonGeoJSON,
@@ -249,6 +279,7 @@ export function buildCheckpoint(
       temporalCoverageUnit: i.temporalCoverageUnit,
       satelliteSource: i.satelliteSource,
       maximumCloudCover: i.maximumCloudCover,
+      hasLeftStep1: i.hasLeftStep1,
     },
   };
 
