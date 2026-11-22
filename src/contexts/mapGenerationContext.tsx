@@ -6,11 +6,13 @@ import {
   POINTING_TYPE,
   TRAINING_DATA_SEPARABILITY_URL
 } from "@/constants";
+import type { CompositeKey } from "@/lib/stepRules";
 import {
   createContext,
   Dispatch,
   PropsWithChildren,
   SetStateAction,
+  useEffect,
   useState,
 } from "react";
 
@@ -239,6 +241,14 @@ export interface MapGenerationContextType {
   /** True while the user is redoing step 4 via "Improve Accuracy" from step 5. */
   isImprovementMode: boolean;
   setIsImprovementMode: Dispatch<SetStateAction<boolean>>;
+  /** Set on step 1's first Next; from then on only the satellite is editable. */
+  hasLeftStep1: boolean;
+  setHasLeftStep1: Dispatch<SetStateAction<boolean>>;
+  /** Furthest progress index reached; the step bar may jump forward to it. */
+  furthestProgressIndex: number;
+  setFurthestProgressIndex: Dispatch<SetStateAction<number>>;
+  /** Satellite + cloud cover the current sample-quality score was computed on. */
+  sampleQualityComposite: CompositeKey | null;
   resetMapGenerationState: () => void;
   quickManualSampling: boolean;
   setQuickManualSampling: Dispatch<SetStateAction<boolean>>;
@@ -412,6 +422,11 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setSplitRatio: () => {},
   isImprovementMode: false,
   setIsImprovementMode: () => {},
+  hasLeftStep1: false,
+  setHasLeftStep1: () => {},
+  furthestProgressIndex: 0,
+  setFurthestProgressIndex: () => {},
+  sampleQualityComposite: null,
   resetMapGenerationState: () => {},
   quickManualSampling: false,
   setQuickManualSampling: () => {},
@@ -630,6 +645,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   );
 
   const [sampleQuality, setSampleQuality] = useState(DEFAULT_VALUE.sampleQuality);
+  const [sampleQualityComposite, setSampleQualityComposite] = useState(
+    DEFAULT_VALUE.sampleQualityComposite,
+  );
 
   const [isSampleQualityLoading, setIsSampleQualityLoading] = useState(
     DEFAULT_VALUE.isSampleQualityLoading,
@@ -675,6 +693,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
       params.set("max_pixels_per_class", String(options.maxPixelsPerClass));
     }
 
+    // The score is only valid for the composite it ran on (see
+    // isScoreStaleForComposite); remember which one that was.
+    const composite = { satelliteSource, maximumCloudCover };
+
     fetch(`${TRAINING_DATA_SEPARABILITY_URL}?${params}`)
       .then(async (res) => {
         const json: SampleQualityRes = await res.json();
@@ -684,6 +706,7 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
         }
 
         setSampleQuality(json.sample_quality);
+        setSampleQualityComposite(composite);
         setSampleQualityGenerated(true);
       })
       .catch((err) => {
@@ -728,6 +751,18 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
   const [isImprovementMode, setIsImprovementMode] = useState(
     DEFAULT_VALUE.isImprovementMode,
   );
+
+  const [hasLeftStep1, setHasLeftStep1] = useState(DEFAULT_VALUE.hasLeftStep1);
+
+  const [furthestProgressIndex, setFurthestProgressIndex] = useState(
+    DEFAULT_VALUE.furthestProgressIndex,
+  );
+  // Moving forward raises the mark; only step resets lower it.
+  useEffect(() => {
+    setFurthestProgressIndex((furthest) =>
+      Math.max(furthest, progressPanelIndex),
+    );
+  }, [progressPanelIndex]);
 
   const resetMapGenerationState = () => {
     setProgressPanelIndex(DEFAULT_VALUE.progressPanelIndex);
@@ -813,6 +848,9 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSplitRatio(DEFAULT_VALUE.splitRatio);
     setQuickManualSampling(DEFAULT_VALUE.quickManualSampling);
     setIsImprovementMode(DEFAULT_VALUE.isImprovementMode);
+    setHasLeftStep1(DEFAULT_VALUE.hasLeftStep1);
+    setFurthestProgressIndex(DEFAULT_VALUE.furthestProgressIndex);
+    setSampleQualityComposite(DEFAULT_VALUE.sampleQualityComposite);
 
     if (typeof document === "undefined") return;
 
@@ -989,6 +1027,11 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setSplitRatio,
     isImprovementMode,
     setIsImprovementMode,
+    hasLeftStep1,
+    setHasLeftStep1,
+    furthestProgressIndex,
+    setFurthestProgressIndex,
+    sampleQualityComposite,
     resetMapGenerationState,
     quickManualSampling,
     setQuickManualSampling,

@@ -1,4 +1,11 @@
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { savingTransitionStore } from "./savingTransitionStore";
 
 function useObservedHeight<T extends HTMLElement>() {
   const observerRef = useRef<ResizeObserver | null>(null);
@@ -46,12 +53,15 @@ function useSavingTransition() {
     if (pendingRef.current) return;
     pendingRef.current = true;
     setIsSaving(true);
+    // App-wide, so navigation (the step bar) waits for this action too.
+    savingTransitionStore.begin();
     window.setTimeout(() => {
       void Promise.resolve()
         .then(() => action())
         .finally(() => {
           pendingRef.current = false;
           setIsSaving(false);
+          savingTransitionStore.end();
         });
     }, SAVING_FEEDBACK_MS);
   }, []);
@@ -59,4 +69,13 @@ function useSavingTransition() {
   return { isSaving, runWithSaving };
 }
 
-export { useObservedHeight, useSavingTransition };
+// True while any useSavingTransition action, anywhere, is still running.
+function useIsSavingTransitionPending() {
+  return useSyncExternalStore(
+    savingTransitionStore.subscribe,
+    savingTransitionStore.isPending,
+    () => false,
+  );
+}
+
+export { useIsSavingTransitionPending, useObservedHeight, useSavingTransition };

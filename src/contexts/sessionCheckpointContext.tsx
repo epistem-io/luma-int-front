@@ -33,7 +33,9 @@ import {
   type CheckpointInputs,
   type CheckpointOwner,
   isStep1Recorded,
-  panelToWizardStep,
+  restoredFurthestProgressIndex,
+  restoredHasLeftStep1,
+  shouldHideRestoredMarkers,
   type SessionCheckpoint,
   shouldOfferResume,
 } from "@/lib/sessionCheckpoint";
@@ -143,6 +145,8 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
     temporalCoverageUnit: mg.temporalCoverageUnit,
     satelliteSource: mg.satelliteSource,
     maximumCloudCover: mg.maximumCloudCover,
+    hasLeftStep1: mg.hasLeftStep1,
+    furthestProgressIndex: mg.furthestProgressIndex,
     lucSource: mg.lucSource,
     lucView: mg.lucView,
     lucCustomTab: mg.lucCustomTab,
@@ -338,6 +342,8 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
       setSessionId(cp.sessionId);
       mg.setStepKey(cp.stepKey);
       mg.setProgressPanelIndex(cp.progressPanelIndex);
+      mg.setHasLeftStep1(restoredHasLeftStep1(cp));
+      mg.setFurthestProgressIndex(restoredFurthestProgressIndex(cp));
 
       const { basicInfo } = cp;
       if (basicInfo) {
@@ -422,9 +428,7 @@ const SessionCheckpointContainer = ({ children }: { children: ReactNode }) => {
         const markers = training.markers.map((m) => ({ ...m })) as Marker[];
         mapContext.setMarkerArray(markers);
         mapContext.renderArrayToMarkerVector(markers);
-        // Past step 3 the sampling pins are hidden (same as the normal
-        // step 3 → 4 transition, see DataTrainingComponent footer).
-        if (panelToWizardStep(cp.stepKey) >= 4) {
+        if (shouldHideRestoredMarkers(cp)) {
           mapContext.markerVectorLayer?.setOpacity(0);
         }
         mg.setUploadedFilesArray(

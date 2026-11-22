@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GlobalContext } from "@/contexts/globalContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { sampleQualityOverallKey } from "./useSummaryLabels";
 
 const OVERALL_STYLE: Record<
   SampleQualityOverall,
@@ -108,7 +109,7 @@ export const SampleQualityCard = () => {
   );
 };
 
-const SampleQualityResultCard = ({
+export const SampleQualityResultCard = ({
   result,
 }: {
   result: SampleQualityResult;
@@ -117,12 +118,7 @@ const SampleQualityResultCard = ({
 
   const style = OVERALL_STYLE[result.overall];
 
-  const overallLabel =
-    result.overall === "good"
-      ? t("dataTraining.sampleQualityGood")
-      : result.overall === "med"
-        ? t("dataTraining.sampleQualityMed")
-        : t("dataTraining.sampleQualityPoor");
+  const overallLabel = t(sampleQualityOverallKey(result.overall));
 
   const lowestPairs = result.problem_pairs
     .slice()
@@ -219,34 +215,44 @@ const SampleQualityResultCard = ({
         </div>
       )}
 
-      {lowestPairs.map((item, index) => (
-        <div
-          className="flex flex-row gap-x-2 items-start"
-          key={`sample-quality-pair-${index}`}
-        >
-          <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
-          <p className="">
-            {t("dataTraining.sampleQualityPair", {
-              X: item.Class1_Name,
-              Y: item.Class2_Name,
-            })}{" "}
-            <span
-              className={cn(
-                "font-bold",
-                item.TD_Distance < 1.0 ? "text-danger-800" : "text-warning-700",
-              )}
-            >
-              {t("dataTraining.sampleQualityPairTD", {
-                X: item.TD_Distance.toFixed(2),
-              })}
-            </span>
+      {lowestPairs.length > 0 && (
+        <div className="bg-white rounded-md px-3 py-2 font-aptos text-sm font-regular leading-5 text-text-icons-base-main">
+          <p className="font-bold">
+            {t("dataTraining.sampleQualityProblemPairs")}
           </p>
+          {lowestPairs.map((item, index) => (
+            <div
+              className="flex flex-row gap-x-2 items-start"
+              key={`sample-quality-pair-${index}`}
+            >
+              <div className="size-1 aspect-square mt-2 rounded-full bg-text-icons-base-main" />
+              <p className="">
+                {t("dataTraining.sampleQualityPair", {
+                  X: item.Class1_Name,
+                  Y: item.Class2_Name,
+                })}{" "}
+                <span
+                  className={cn(
+                    "font-bold",
+                    item.TD_Distance < 1.0
+                      ? "text-danger-800"
+                      : "text-warning-700",
+                  )}
+                >
+                  {t("dataTraining.sampleQualityPairTD", {
+                    X: item.TD_Distance.toFixed(2),
+                  })}
+                </span>
+              </p>
+            </div>
+          ))}
+          {hiddenPairCount > 0 && (
+            <p className="text-text-icons-base-second">
+              {t("dataTraining.sampleQualityMorePairs", { X: hiddenPairCount })}
+            </p>
+          )}
+          <p className="">{t("dataTraining.sampleQualityAccuracyWarning")}</p>
         </div>
-      ))}
-      {hiddenPairCount > 0 && (
-        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-second">
-          {t("dataTraining.sampleQualityMorePairs", { X: hiddenPairCount })}
-        </p>
       )}
 
       <div className="grid grid-cols-3 gap-x-3">

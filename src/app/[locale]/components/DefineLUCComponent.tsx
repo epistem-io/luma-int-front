@@ -71,6 +71,27 @@ import Style from "ol/style/Style";
 import Icon from "ol/style/Icon";
 import { MapContext } from "@/contexts/mapContext";
 import { fromLonLat } from "ol/proj";
+import {
+  SummaryDownloadButton,
+  SummaryEditButton,
+  SummaryField,
+  SummaryHeading,
+} from "./SummaryField";
+import { ClassSummaryTable } from "./ClassSummaryTable";
+import { useClassificationSchemeLabels } from "./useSummaryLabels";
+import { downloadCsv } from "@/lib/csv";
+import {
+  canSkipClassSubmit,
+  getConfirmedClasses,
+  toSubmittedClass,
+} from "@/lib/lucFlow";
+import { useStepNavigation } from "./useStepNavigation";
+import { hasUserSampleWork } from "@/lib/stepRules";
+import {
+  resetClassificationInputs,
+  resetSampleData,
+} from "@/lib/interactivePanelFlowHelper";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 // const TreeBorderContainer = ({ children }: { children: React.ReactNode }) => {
 //   return (
@@ -108,61 +129,10 @@ const QUICK_TABLE_COLORS = [
 // Shared by the Reset link and the leave-confirmation dialog: wipes every
 // step-2 classification input and returns the panel to the picker.
 export const useResetDefineLUCInputs = () => {
-  const {
-    setDefaultArray,
-    setLucQuickRows,
-    setLucCustomTab,
-    setLucQuickPhase,
-    setLucDefaultConfirmed,
-    setLucView,
-    setHaveDownloadedFile,
-    setIsDefineLULCChanged,
-    setClassArray,
-    setPointingType,
-    setSelectedClass,
-    setQuickManualSampling,
-    setLUCFile,
-    setLUCFilename,
-    setLUCFilesize,
-    setLucExcelConfirmed,
-  } = useContext(MapGenerationContext);
-  const {
-    setMarkerArray,
-    setMarkerLayerVisibilityArray,
-    markerVectorSource,
-    setPointingType: setMapPointingType,
-  } = useContext(MapContext);
+  const mapGenerationContext = useContext(MapGenerationContext);
+  const mapContext = useContext(MapContext);
 
-  return () => {
-    setIsDefineLULCChanged(true);
-    setDefaultArray([]);
-    setLucQuickRows([]);
-    setLucCustomTab("quick");
-    setLucQuickPhase("editing");
-    setLucDefaultConfirmed(false);
-    setLucView("picker");
-    setHaveDownloadedFile(false);
-
-    setMarkerLayerVisibilityArray([]);
-    setMarkerArray([]);
-    markerVectorSource?.clear();
-
-    setClassArray([]);
-    setPointingType(POINTING_TYPE.EMPTY);
-    setMapPointingType(POINTING_TYPE.EMPTY);
-    setSelectedClass("");
-    setQuickManualSampling(false);
-
-    setLUCFile(null);
-    setLUCFilename("");
-    setLUCFilesize(0);
-    setLucExcelConfirmed(false);
-
-    const doc = document.getElementById(
-      "luc-template-file-upload",
-    ) as HTMLInputElement;
-    if (doc) doc.value = "";
-  };
+  return () => resetClassificationInputs({ mapContext, mapGenerationContext });
 };
 
 // Confirmation shown when the panel-header back button would leave a flow
@@ -220,6 +190,7 @@ export const DefineLUCComponent = () => {
     lucQuickPhase,
     lucDefaultConfirmed,
     lucView,
+    lucSource,
     setLucDefaultConfirmed,
     setLucView,
     isLUCLoading,
@@ -284,6 +255,8 @@ export const DefineLUCComponent = () => {
           name: r.name,
           color: r.color,
         }));
+  const { schemeLabel, inputMethodLabel } = useClassificationSchemeLabels();
+  const summaryFileName = lucSource === "excel" ? LUCfilename : "";
   const rerenderMarkers = (hiddenClassNames: string[]) => {
     if (!markerVectorSource) return;
     markerVectorSource.clear();
@@ -461,29 +434,15 @@ export const DefineLUCComponent = () => {
   const onResetInput = useResetDefineLUCInputs();
 
   const onDownloadClassesCsv = () => {
-    const escapeCsv = (value: string) =>
-      /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
-    const lines = summaryRows.map((row, index) =>
-      [
+    downloadCsv(
+      "lulc-classes.csv",
+      ["ID", "Land Cover Class", "Color"],
+      summaryRows.map((row, index) => [
         row.classId.trim() || String(index + 1),
-        escapeCsv(row.name),
+        row.name,
         row.color.toUpperCase(),
-      ].join(","),
+      ]),
     );
-    const csv = ["ID,Land Cover Class,Color", ...lines].join("\r\n");
-    const utf8Bom = String.fromCharCode(0xfeff);
-    const blob = new Blob([utf8Bom, csv], {
-      type: "text/csv;charset=utf-8",
-    });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "lulc-classes.csv";
-    a.style.display = "none";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
   };
 
   const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -774,7 +733,7 @@ export const DefineLUCComponent = () => {
             </CollapsibleTrigger>
           )}
           <CollapsibleContent className="collapsible-content-primitive space-y-6">
-        {isSummaryShown ? (
+        {isSummaryEditing ? (
           <div className="space-y-4">
             {/* The edit-mode banner renders at the panel level (in
                 InteractivePanel) so it can span the full panel width. */}
@@ -783,40 +742,17 @@ export const DefineLUCComponent = () => {
                 <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
                   {t("defineLUC.classRecordedCount", { X: summaryRows.length })}
                 </p>
-                {isSummaryEditing ? (
-                  <Button
-                    variant={"primary"}
-                    disabled={!canLockQuick}
-                    className="h-7 px-4"
-                    onClick={() => {
-                      setLucQuickPhase("confirmed");
-                      setLucExcelConfirmed(true);
-                    }}
-                  >
-                    {t("defineLUC.done")}
-                  </Button>
-                ) : (
-                  <Button
-                    variant={"ghost"}
-                    size={"icon"}
-                    className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-md"
-                    onClick={() => {
-                      // Default classes are fixed, so the pencil returns to
-                      // the accordion; own classes flip the summary into its
-                      // inline edit mode. Either way Next stays disabled
-                      // until the user re-confirms.
-                      if (lucDefaultConfirmed) {
-                        setLucDefaultConfirmed(false);
-                        setLucView("default");
-                        return;
-                      }
-                      setLucQuickPhase("locked");
-                      setLucExcelConfirmed(false);
-                    }}
-                  >
-                    <SquarePenIcon className="text-primary-red-pink-normal size-4" />
-                  </Button>
-                )}
+                <Button
+                  variant={"primary"}
+                  disabled={!canLockQuick}
+                  className="h-7 px-4"
+                  onClick={() => {
+                    setLucQuickPhase("confirmed");
+                    setLucExcelConfirmed(true);
+                  }}
+                >
+                  {t("defineLUC.done")}
+                </Button>
               </div>
               <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
                 <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
@@ -835,153 +771,153 @@ export const DefineLUCComponent = () => {
                       {t("defineLUC.colorClassHeader")}
                     </p>
                   </div>
-                  {isSummaryEditing && (
-                    <div className="w-8 shrink-0 border-l border-neutral-300" />
-                  )}
+                  <div className="w-8 shrink-0 border-l border-neutral-300" />
                 </div>
-                {isSummaryEditing
-                  ? lucQuickRows.map((row, index) => {
-                      const duplicate = isQuickRowDuplicate(row.name);
-                      return (
-                        <div
-                          key={row.id}
-                          className="flex border-b border-neutral-200 last:border-b-0"
-                        >
-                          <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                              {index + 1}
-                            </p>
-                          </div>
-                          <div className="flex-1 px-1 py-1 border-l border-neutral-200 flex flex-col justify-center">
-                            <Input
-                              value={row.name}
-                              aria-invalid={duplicate}
-                              className="h-7 text-center"
-                              onChange={(e) =>
-                                updateQuickRow(row.id, { name: e.target.value })
-                              }
-                            />
-                            {duplicate && (
-                              <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600 text-center">
-                                {t("defineLUC.duplicateClassError")}
-                              </p>
-                            )}
-                          </div>
-                          <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
-                            <Popover
-                              open={colorPopoverRowId === `summary-${row.id}`}
-                              onOpenChange={(isOpen) => {
-                                setColorPopoverRowId(
-                                  isOpen ? `summary-${row.id}` : null,
-                                );
-                              }}
-                            >
-                              <PopoverTrigger asChild>
-                                <button
-                                  type="button"
-                                  className="size-7 shrink-0 rounded-md border border-neutral-300 cursor-pointer hover:brightness-95 transition-all duration-200"
-                                  style={{ backgroundColor: row.color }}
-                                />
-                              </PopoverTrigger>
-                              <PopoverContent
-                                align="start"
-                                className="w-auto p-4 space-y-3 rounded-[12px]"
-                              >
-                                <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                                  {t("defineLUC.selectClassColor")}
-                                </p>
-                                <div className="grid grid-cols-7 gap-2">
-                                  {LULC_CLASS_COLOR_PALETTE.map((color) => (
-                                    <button
-                                      key={`summary-palette-${row.id}-${color}`}
-                                      type="button"
-                                      className={cn(
-                                        "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
-                                        row.color.toLowerCase() ===
-                                          color.toLowerCase()
-                                          ? "ring-2 ring-primary-pink ring-offset-1"
-                                          : "border border-neutral-200",
-                                      )}
-                                      style={{ backgroundColor: color }}
-                                      onClick={() => {
-                                        updateQuickRow(row.id, { color });
-                                        setColorPopoverRowId(null);
-                                      }}
-                                    />
-                                  ))}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                              {row.color.replace(/^#/, "")}
-                            </p>
-                          </div>
-                          <div className="w-8 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                            <Button
-                              variant={"ghost"}
-                              size={"icon"}
-                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                              onClick={() => {
-                                // Deleting the last row leaves nothing to
-                                // confirm, so fall back to the own flow's
-                                // empty table instead of a stuck edit mode.
-                                if (lucQuickRows.length === 1) {
-                                  setLucQuickPhase("editing");
-                                  setLucView("own");
-                                }
-                                removeQuickRow(row.id);
-                              }}
-                            >
-                              <Trash2Icon className="text-text-icons-base-third size-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  : summaryRows.map((row, index) => (
-                      <div
-                        key={`${row.classId}-${index}`}
-                        className="flex border-b border-neutral-200 last:border-b-0 hover:bg-neutral-100 transition-colors duration-150"
-                      >
-                        <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                            {index + 1}
-                          </p>
-                        </div>
-                        <div className="flex-1 px-1 py-2 border-l border-neutral-200 flex items-center justify-center">
-                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                            {row.name}
-                          </p>
-                        </div>
-                        <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
-                          <span
-                            className="size-7 shrink-0 rounded-md border border-neutral-300"
-                            style={{ backgroundColor: row.color }}
-                          />
-                          <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                            {row.color.replace(/^#/, "")}
-                          </p>
-                        </div>
+                {lucQuickRows.map((row, index) => {
+                  const duplicate = isQuickRowDuplicate(row.name);
+                  return (
+                    <div
+                      key={row.id}
+                      className="flex border-b border-neutral-200 last:border-b-0"
+                    >
+                      <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                          {index + 1}
+                        </p>
                       </div>
-                    ))}
-                {isSummaryEditing && (
-                  <button
-                    type="button"
-                    onClick={addQuickRow}
-                    className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
-                  >
-                    <PlusIcon className="size-4 text-primary-red-pink-normal" />
-                    <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
-                      {t("defineLUC.addClass")}
-                    </p>
-                  </button>
-                )}
+                      <div className="flex-1 px-1 py-1 border-l border-neutral-200 flex flex-col justify-center">
+                        <Input
+                          value={row.name}
+                          aria-invalid={duplicate}
+                          className="h-7 text-center"
+                          onChange={(e) =>
+                            updateQuickRow(row.id, { name: e.target.value })
+                          }
+                        />
+                        {duplicate && (
+                          <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600 text-center">
+                            {t("defineLUC.duplicateClassError")}
+                          </p>
+                        )}
+                      </div>
+                      <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
+                        <Popover
+                          open={colorPopoverRowId === `summary-${row.id}`}
+                          onOpenChange={(isOpen) => {
+                            setColorPopoverRowId(
+                              isOpen ? `summary-${row.id}` : null,
+                            );
+                          }}
+                        >
+                          <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              className="size-7 shrink-0 rounded-md border border-neutral-300 cursor-pointer hover:brightness-95 transition-all duration-200"
+                              style={{ backgroundColor: row.color }}
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent
+                            align="start"
+                            className="w-auto p-4 space-y-3 rounded-[12px]"
+                          >
+                            <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                              {t("defineLUC.selectClassColor")}
+                            </p>
+                            <div className="grid grid-cols-7 gap-2">
+                              {LULC_CLASS_COLOR_PALETTE.map((color) => (
+                                <button
+                                  key={`summary-palette-${row.id}-${color}`}
+                                  type="button"
+                                  className={cn(
+                                    "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
+                                    row.color.toLowerCase() ===
+                                      color.toLowerCase()
+                                      ? "ring-2 ring-primary-pink ring-offset-1"
+                                      : "border border-neutral-200",
+                                  )}
+                                  style={{ backgroundColor: color }}
+                                  onClick={() => {
+                                    updateQuickRow(row.id, { color });
+                                    setColorPopoverRowId(null);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                          {row.color.replace(/^#/, "")}
+                        </p>
+                      </div>
+                      <div className="w-8 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                        <Button
+                          variant={"ghost"}
+                          size={"icon"}
+                          className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                          onClick={() => {
+                            // Deleting the last row leaves nothing to
+                            // confirm, so fall back to the own flow's
+                            // empty table instead of a stuck edit mode.
+                            if (lucQuickRows.length === 1) {
+                              setLucQuickPhase("editing");
+                              setLucView("own");
+                            }
+                            removeQuickRow(row.id);
+                          }}
+                        >
+                          <Trash2Icon className="text-text-icons-base-third size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <button
+                  type="button"
+                  onClick={addQuickRow}
+                  className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
+                >
+                  <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                  <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                    {t("defineLUC.addClass")}
+                  </p>
+                </button>
               </div>
             </div>
-            {/* Read-only summary: file card is display-only; the trash
-                button only appears while the inline edit mode is active. */}
-            {LUCfilename &&
-              renderUploadedTemplateCard({ removable: isSummaryEditing })}
+            {/* In edit mode the file card is removable (trash button). */}
+            {LUCfilename && renderUploadedTemplateCard()}
+          </div>
+        ) : isSummaryShown ? (
+          <div className="space-y-4">
+            <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-3">
+              <SummaryHeading>{t("defineLUC.classificationScheme")}</SummaryHeading>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                <SummaryField label={t("defineLUC.scheme")} value={schemeLabel} />
+                {inputMethodLabel && (
+                  <SummaryField
+                    label={t("basicInformation.inputMethod")}
+                    value={inputMethodLabel}
+                  />
+                )}
+                {summaryFileName && (
+                  <SummaryField label={t("defineLUC.file")} value={summaryFileName} />
+                )}
+                <SummaryField
+                  label={t("defineLUC.totalClasses")}
+                  value={t("defineLUC.classCount", { X: summaryRows.length })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex flex-row items-center justify-between gap-x-3">
+                <SummaryHeading>{t("defineLUC.recordedClasses")}</SummaryHeading>
+                <SummaryDownloadButton
+                  label={t("defineLUC.downloadCsv")}
+                  onClick={onDownloadClassesCsv}
+                />
+              </div>
+              <ClassSummaryTable rows={summaryRows} />
+            </div>
           </div>
         ) : lucView === "picker" ? (
           <div className="space-y-6">
@@ -1599,21 +1535,6 @@ export const DefineLUCComponent = () => {
         </div>
       </Collapsible>
       )}
-      {!isFlowView && isSummaryShown && (
-      <Button
-        variant={"ghost"}
-        className="p-0 hover:bg-transparent cursor-pointer"
-        onClick={() => {
-          onDownloadClassesCsv();
-        }}
-      >
-        <div className="">
-          <p className="text-text-icons-base-third font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-            {t("defineLUC.downloadClassesCsv")}
-          </p>
-        </div>
-      </Button>
-      )}
       {!isFlowView && !isSummaryShown && (
       <Button
         variant={"ghost"}
@@ -1634,7 +1555,11 @@ export const DefineLUCComponent = () => {
 };
 
 export const DefineLUCFooter = () => {
+  const mapGenerationContext = useContext(MapGenerationContext);
+  const mapContext = useContext(MapContext);
   const {
+    uploadedFilesArray,
+    sampleQuality,
     setStepKey,
     setProgressPanelIndex,
     defaultArray,
@@ -1656,15 +1581,21 @@ export const DefineLUCFooter = () => {
     setDefaultArray,
     setIsDefineLULCChanged,
     setDataTrainingActiveTab,
-    isDefineLULCChanged,
-    setQuickManualSampling
-  } = useContext(MapGenerationContext);
+    classArray,
+    setQuickManualSampling,
+    setLucQuickPhase,
+    setLucExcelConfirmed,
+    setLucDefaultConfirmed,
+    setLucView,
+  } = mapGenerationContext;
 
-  const { setMarkerArray, renderArrayToMarkerVector, markerVectorSource } =
-    useContext(MapContext);
+  const { markerArray, setMarkerArray, renderArrayToMarkerVector } =
+    mapContext;
 
   const t = useTranslations("InteractivePanel");
   const { isSaving, runWithSaving } = useSavingTransition();
+  const [isResetSamplesDialogOpen, setIsResetSamplesDialogOpen] =
+    useState(false);
 
   const { sessionId } = useContext(GlobalContext);
 
@@ -1700,12 +1631,32 @@ export const DefineLUCFooter = () => {
   // Next only exists on step 2's final panel: the confirmed summary.
   const showNextButton = lucQuickPhase === "confirmed" || lucDefaultConfirmed;
 
-  const onClickNext = async () => {
-    if (!isDefineLULCChanged) {
+  // The classes step 2 would hand to step 3, in submit order.
+  const confirmedClasses = getConfirmedClasses({
+    lucSource,
+    defaultArray,
+    lucQuickRows,
+  });
+
+  const onClickNext = async ({ confirmedReset = false } = {}) => {
+    if (canSkipClassSubmit(confirmedClasses, classArray)) {
       setDataTrainingActiveTab("upload");
       setStepKey(PANEL_COMPONENT_KEY.DATA_TRAINING);
       // WIP NEED CONFIRM
       setProgressPanelIndex(2);
+      return;
+    }
+
+    // New classes invalidate step 3. Warn first when that throws away work
+    // the user did (files, on-screen points, a score); auto-placed
+    // reference points are simply placed again.
+    const hasSampleWork = hasUserSampleWork({
+      uploadedFileCount: uploadedFilesArray.length,
+      ossPointCount: markerArray.filter((m) => m.source === "oss").length,
+      hasScore: sampleQuality !== null,
+    });
+    if (hasSampleWork && !confirmedReset) {
+      setIsResetSamplesDialogOpen(true);
       return;
     }
 
@@ -1716,16 +1667,8 @@ export const DefineLUCFooter = () => {
       // Data Training step and On-Screen Sampling read it for the class list.
       // No LUC_UPDATE_URL call here: that endpoint auto-places training
       // points, and the excel flow places them manually.
-      setClassArray(
-        validQuickRows.map((r) => ({
-          class_id: Number(r.classId.trim()) || -1,
-          class_name: r.name.trim(),
-          class_color: r.color,
-        })),
-      );
-
-      setMarkerArray([]);
-      markerVectorSource?.clear();
+      resetSampleData({ mapContext, mapGenerationContext });
+      setClassArray(confirmedClasses.map(toSubmittedClass));
 
       setIsDefineLULCChanged(false);
       setProgressPanelIndex(2);
@@ -1740,23 +1683,11 @@ export const DefineLUCFooter = () => {
     // auto-places reference training points when the classes match the
     // default scheme; quick-table classes come back with no points and the
     // user samples them manually on step 3.
-    const classes: { id: string | number; name: string; color: string }[] =
-      lucSource === "quick"
-        ? validQuickRows.map((r) => ({
-            id: r.classId.trim(),
-            name: r.name.trim(),
-            color: r.color,
-          }))
-        : defaultArray
-            .map((item) => DEFAULT_LUC.find((item2) => item2.id === item))
-            .filter((item): item is (typeof DEFAULT_LUC)[number] =>
-              Boolean(item),
-            )
-            .map((item) => ({
-              id: item.id,
-              name: item.name,
-              color: item.color,
-            }));
+    const classes = confirmedClasses.map((item) => ({
+      id: typeof item.id === "string" ? item.id.trim() : item.id,
+      name: item.name.trim(),
+      color: item.color,
+    }));
 
     fetch(LUC_UPDATE_URL, {
       method: "POST",
@@ -1783,13 +1714,10 @@ export const DefineLUCFooter = () => {
           );
         }
 
-        const arr = classes.map((item) => ({
-          class_id: Number(item.id) || -1,
-          class_name: item.name || "",
-          class_color: item.color || "",
-        }));
-
-        setClassArray(arr);
+        // Clear step 3 only once the new classes are saved, so a failed
+        // request leaves the old samples in place.
+        resetSampleData({ mapContext, mapGenerationContext });
+        setClassArray(confirmedClasses.map(toSubmittedClass));
 
         const markerArr: Marker[] = json.training_data.map((item) => {
           const uuid = crypto.randomUUID();
@@ -1866,58 +1794,81 @@ export const DefineLUCFooter = () => {
     doc.value = "";
   };
 
-  const onClickBack = () => {
-    // setDefaultArray([]);
-    // clearFile();
+  const { goToStep } = useStepNavigation();
+  const onClickBack = () => goToStep(1);
 
-    setProgressPanelIndex(0);
-    setStepKey(PANEL_COMPONENT_KEY.BASIC_INFORMATION_SUMMARY);
+  // Default classes are fixed, so editing returns to the default picker;
+  // own classes switch the summary into its inline edit mode. Either way
+  // Next stays disabled until the classes are confirmed again.
+  const onClickEditClasses = () => {
+    if (lucDefaultConfirmed) {
+      setLucDefaultConfirmed(false);
+      setLucView("default");
+      return;
+    }
+    setLucQuickPhase("locked");
+    setLucExcelConfirmed(false);
   };
 
   return (
-    <div className="p-3 pt-4 gap-x-4 flex flex-row">
+    <>
+    <ConfirmDialog
+      isVisible={isResetSamplesDialogOpen}
+      onCancel={() => setIsResetSamplesDialogOpen(false)}
+      onConfirm={() => {
+        setIsResetSamplesDialogOpen(false);
+        runWithSaving(() => onClickNext({ confirmedReset: true }));
+      }}
+      title={t("defineLUC.resetSamplesTitle")}
+      subtitle={t("defineLUC.resetSamplesDescription")}
+      confirmButtonCaption={t("defineLUC.resetSamplesConfirm")}
+      cancelButtonCaption={t("common.cancel")}
+    />
+    <div className="p-3 pt-4 gap-x-2 flex flex-row">
       {showBackButton && (
         <Button
           disabled={isBackDisabled}
-          onClick={() => {
-            onClickBack();
-          }}
+          onClick={onClickBack}
           variant={"outline"}
           size={"icon"}
+          className="shrink-0"
         >
           <ChevronLeft className="text-primary-pink size-4" />
         </Button>
       )}
-      <div className="grid grid-cols-2 gap-x-4 w-full">
-        <div></div>
-        {showNextButton && isLUCLoading && (
-          <div className="w-full h-10 flex flex-row justify-center items-center">
-            <span className="loader md"></span>
-          </div>
-        )}
-        {showNextButton && !isLUCLoading && (
-          <Button
-            onClick={() => {
-              runWithSaving(onClickNext);
-            }}
-            disabled={isNextDisabled || isSaving}
-            variant="primary"
-            className=""
-          >
-            {isSaving ? (
-              <>
-                <span className="loader sm"></span>
-                {t("common.saving")}
-              </>
-            ) : (
-              <>
-                {t("common.next")}
-                <ArrowRight className="size-4" />
-              </>
-            )}
-          </Button>
-        )}
-      </div>
+      {showNextButton && (
+        <SummaryEditButton
+          label={t("defineLUC.editClasses")}
+          disabled={isLUCLoading || isSaving}
+          onClick={onClickEditClasses}
+        />
+      )}
+      {showNextButton && isLUCLoading && (
+        <div className="flex-1 h-10 flex flex-row justify-center items-center">
+          <span className="loader md"></span>
+        </div>
+      )}
+      {showNextButton && !isLUCLoading && (
+        <Button
+          onClick={() => runWithSaving(onClickNext)}
+          disabled={isNextDisabled || isSaving}
+          variant="primary"
+          className="flex-1"
+        >
+          {isSaving ? (
+            <>
+              <span className="loader sm"></span>
+              {t("common.saving")}
+            </>
+          ) : (
+            <>
+              {t("common.next")}
+              <ArrowRight className="size-4" />
+            </>
+          )}
+        </Button>
+      )}
     </div>
+    </>
   );
 };

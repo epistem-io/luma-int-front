@@ -1,16 +1,17 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { AccordionContent } from "@radix-ui/react-accordion";
 import Image from "next/image";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
+import { SummaryField, SummaryHeading } from "./SummaryField";
 
 interface Props {
   areaSizeString: string;
   spatialResolutionString?: string;
+  inputMethodString?: string;
+  locationString?: string;
   accordion?: boolean;
   isEditing?: boolean;
   onClickEdit?: () => void;
@@ -19,17 +20,18 @@ interface Props {
 export const AreaScopingSummary = ({
   areaSizeString,
   spatialResolutionString,
+  inputMethodString,
+  locationString,
   accordion = true,
   isEditing = false,
   onClickEdit,
 }: Props) => {
+  const t = useTranslations("InteractivePanel");
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
+
   if (!accordion && !onClickEdit) {
     return "Error";
   }
-
-  const t = useTranslations("InteractivePanel");
-
-  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
 
   return (
     <>
@@ -40,40 +42,37 @@ export const AreaScopingSummary = ({
       )}
       {!accordion && (
         <>
-          <div className="space-y-2 relative">
-            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {t("basicInformation.areaOfInterest")}
-            </p>
-            <div className="gap-y-5 grid grid-cols-2">
-              <div
-                className={cn(
-                  "space-y-0",
-                  spatialResolutionString ? "col-span-1" : "col-span-2",
-                )}
-              >
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
-                  {t("basicInformation.areaOfInterestSubtitle")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {areaSizeString}
-                </p>
-              </div>
+          <div className="space-y-3 relative">
+            <SummaryHeading>{t("basicInformation.areaOfInterest")}</SummaryHeading>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              {inputMethodString && (
+                <SummaryField
+                  className={locationString ? undefined : "col-span-2"}
+                  label={t("basicInformation.inputMethod")}
+                  value={inputMethodString}
+                />
+              )}
+              {locationString && (
+                <SummaryField
+                  label={t("basicInformation.location")}
+                  value={locationString}
+                />
+              )}
+              <SummaryField
+                className={spatialResolutionString ? undefined : "col-span-2"}
+                label={t("basicInformation.areaOfInterestSubtitle")}
+                value={areaSizeString}
+              />
               {spatialResolutionString && (
-                <div className="space-y-0 col-span-1">
-                  <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-second">
-                    {t("areaScoping.spatialResolution")}
-                  </p>
-                  <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                    {spatialResolutionString}
-                  </p>
-                </div>
+                <SummaryField
+                  label={t("areaScoping.spatialResolution")}
+                  value={spatialResolutionString}
+                />
               )}
             </div>
             {isEditing && (
               <Button
-                onClick={() => {
-                  setIsConfirmModalVisible(true);
-                }}
+                onClick={() => setIsConfirmModalVisible(true)}
                 variant={"ghost"}
                 className="absolute top-0 right-0 p-1 rounded-full cursor-pointer"
                 size={"icon"}
@@ -91,9 +90,7 @@ export const AreaScopingSummary = ({
 
           <ConfirmDialog
             isVisible={isConfirmModalVisible}
-            onCancel={() => {
-              setIsConfirmModalVisible(false);
-            }}
+            onCancel={() => setIsConfirmModalVisible(false)}
             onConfirm={() => {
               if (!onClickEdit) return;
               setIsConfirmModalVisible(false);

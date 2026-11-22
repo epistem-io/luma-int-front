@@ -24,6 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleAlert,
+  EyeIcon,
   SquarePenIcon,
 } from "lucide-react";
 import {
@@ -60,6 +61,10 @@ import {
   DataTrainingFooter,
   DataTrainingScoreBanner,
 } from "./DataTrainingComponent";
+import {
+  DataTrainingSummaryComponent,
+  DataTrainingSummaryFooter,
+} from "./DataTrainingSummary";
 import { OSSComponent, OSSFooter } from "./OSSComponent";
 import { LULCParamsComponent, LULCParamsFooter } from "./LULCParamsComponent";
 import {
@@ -69,6 +74,8 @@ import {
 import { YourMapComponent, YourMapFooter } from "./YourMapComponent";
 import { useTranslations } from "next-intl";
 import { useObservedHeight } from "@/lib/hooks";
+import { useStepNavigation } from "./useStepNavigation";
+import { ViewOnlyFooter } from "./ViewOnlyFooter";
 
 interface PanelComponent {
   component: JSX.Element;
@@ -146,7 +153,15 @@ interface PanelComponent {
 //   },
 // };
 
-export const InteractivePanel = () => {
+// Navbar (52, NavBar's h-13) + top offset (16) + gap under the progress
+// panel (12) + 12px bottom margin + this panel's own vertical chrome (27).
+const PANEL_RESERVED_HEIGHT = 119;
+
+interface Props {
+  progressPanelHeight: number;
+}
+
+export const InteractivePanel = ({ progressPanelHeight }: Props) => {
   const {
     stepKey,
     setStepKey,
@@ -168,6 +183,7 @@ export const InteractivePanel = () => {
     lucQuickRows,
     LUCfile,
     isImprovementMode,
+    isGenerationError,
   } = useContext(MapGenerationContext);
 
   // Only the Own Classification flow guards back-navigation with the
@@ -184,6 +200,9 @@ export const InteractivePanel = () => {
     lucView !== "picker" && lucQuickPhase === "editing" && !lucDefaultConfirmed;
 
   const t = useTranslations("InteractivePanel");
+
+  // An earlier step opened from Your Map: footer swapped, note shown.
+  const { isViewOnly } = useStepNavigation();
 
   const { vectorSource, removeMarkerCursor } = useContext(MapContext);
 
@@ -245,6 +264,16 @@ export const InteractivePanel = () => {
         [PANEL_COMPONENT_KEY.DATA_TRAINING]: {
           component: <DataTrainingComponent />,
           footer: <DataTrainingFooter />,
+          title: t("dataTraining.dataTrainingTitle"),
+          subtitle: selectedCustom
+            ? t("dataTraining.dataTrainingDescriptionOWNCLASS")
+            : selectedDefault
+              ? t("dataTraining.dataTrainingDescriptionDEFAULTCLASS")
+              : "Error",
+        },
+        [PANEL_COMPONENT_KEY.DATA_TRAINING_SUMMARY]: {
+          component: <DataTrainingSummaryComponent />,
+          footer: <DataTrainingSummaryFooter />,
           title: t("dataTraining.dataTrainingTitle"),
           subtitle: selectedCustom
             ? t("dataTraining.dataTrainingDescriptionOWNCLASS")
@@ -550,6 +579,23 @@ export const InteractivePanel = () => {
                     </p>
                   </div>
                 )}
+              {/* View-only note: an earlier step opened from Your Map. Same
+                  panel-level treatment as the banners above. */}
+              {isViewOnly && (
+                <div className="px-4 py-3 space-y-1 mb-3 bg-text-icons-base-fourth">
+                  <div className="flex flex-row items-center gap-x-2">
+                    <EyeIcon className="size-4 text-text-icons-base-second" />
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                      {t("common.viewOnly")}
+                    </p>
+                  </div>
+                  <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-second">
+                    {isGenerationError
+                      ? t("common.viewOnlyFailedCaption")
+                      : t("common.viewOnlyCaption")}
+                  </p>
+                </div>
+              )}
               {/* Step-3 score banner: pinned under the description, outside
                   the scroll area, so Check Training Data Quality is always
                   in view. A tall result scrolls within this wrapper instead
@@ -564,18 +610,16 @@ export const InteractivePanel = () => {
           <div
             className="overflow-y-auto overflow-x-hidden px-4 pb-3"
             style={{
-              // 270px = navbar + progress panel + gaps + a 12px bottom
-              // breathing margin (measured; the old constants over-reserved
-              // ~20px and needlessly clipped short content). The min() caps
-              // the whole panel at 885px on tall screens (861 = 885 minus
-              // the panel's own vertical chrome).
-              maxHeight: `calc(min(100vh - 270px, 861px) - ${titleHeight}px - ${footerHeight}px - ${subtitleHeight}px)`,
+              // Space reserved above/around the scroll area (see
+              // PANEL_RESERVED_HEIGHT) plus the measured progress panel.
+              // The min() caps the whole panel at 885px on tall screens.
+              maxHeight: `calc(min(100vh - ${PANEL_RESERVED_HEIGHT + progressPanelHeight}px, 861px) - ${titleHeight}px - ${footerHeight}px - ${subtitleHeight}px)`,
             }}
           >
             {interactiveComponent.component}
           </div>
           <div ref={footerRef} className="">
-            {interactiveComponent.footer}
+            {isViewOnly ? <ViewOnlyFooter /> : interactiveComponent.footer}
           </div>
         </CollapsibleContent>
       </div>

@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { resetTimePeriodData } from "@/lib/interactivePanelFlowHelper";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
+import { SummaryField, SummaryHeading } from "./SummaryField";
 
 interface Props {
   temporalResolutionLabel: string;
@@ -70,61 +71,51 @@ export const TimePeriodSummary = ({
                 </p>
               </div>
             </div>
-            <div className="flex flex-row justify-end">
-              <Button
-                variant={"ghost"}
-                className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
-                // disabled={isMosaicLoading}
-                onClick={async () => {
-                  // onResetInput();
-                  resetTimePeriodData({
-                    mapContext,
-                    mapGenerationContext,
-                  });
-                }}
-              >
-                <div className="">
-                  <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
-                    {t("common.changeInput")}
-                  </p>
-                </div>
-              </Button>
-            </div>
+            {/* The time period is locked once the user has moved on to
+                step 2. */}
+            {!mapGenerationContext.hasLeftStep1 && (
+              <div className="flex flex-row justify-end">
+                <Button
+                  variant={"ghost"}
+                  className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
+                  onClick={async () => {
+                    resetTimePeriodData({
+                      mapContext,
+                      mapGenerationContext,
+                    });
+                  }}
+                >
+                  <div className="">
+                    <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
+                      {t("common.changeInput")}
+                    </p>
+                  </div>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
       {!accordion && (
         <>
-          <div className="space-y-2 relative">
-            <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-text-icons-base-main">
-              {/* WIP */}
+          <div className="space-y-3 relative">
+            <SummaryHeading>
               {t("basicInformation.yourSelectedTimePeriod")}
-            </p>
-            <div className="gap-y-5 grid grid-cols-2">
-              <div className="space-y-1 col-span-1">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("basicInformation.temporalResolution")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {temporalResolutionLabel}
-                </p>
-              </div>
-              <div className="space-y-1 col-span-1">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("basicInformation.specificPeriod")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {specificPeriod}
-                </p>
-              </div>
-              <div className="space-y-1 col-span-2">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("basicInformation.satelliteInputDateRange")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {dateRange}
-                </p>
-              </div>
+            </SummaryHeading>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <SummaryField
+                label={t("basicInformation.temporalResolution")}
+                value={temporalResolutionLabel}
+              />
+              <SummaryField
+                label={t("basicInformation.specificPeriod")}
+                value={specificPeriod}
+              />
+              <SummaryField
+                className="col-span-2"
+                label={t("basicInformation.satelliteInputDateRange")}
+                value={dateRange}
+              />
             </div>
             {isEditing && (
               <Button

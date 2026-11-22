@@ -47,6 +47,7 @@ export const AreaScopingAccordion = () => {
     polygonData,
     areaScopingPolygonArea,
     spatialResolution,
+    hasLeftStep1,
   } = mapGenerationContext;
 
   const t = useTranslations("InteractivePanel");
@@ -179,26 +180,27 @@ export const AreaScopingAccordion = () => {
                 </div>
               </div>
 
-              <div className="flex flex-row justify-end">
-                <Button
-                  variant={"ghost"}
-                  className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
-                  // disabled={isMosaicLoading}
-                  onClick={async () => {
-                    // onResetInput();
-                    resetAreaScopingData({
-                      mapContext,
-                      mapGenerationContext,
-                    });
-                  }}
-                >
-                  <div className="">
-                    <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
-                      {t("common.changeInput")}
-                    </p>
-                  </div>
-                </Button>
-              </div>
+              {/* The area is locked once the user has moved on to step 2. */}
+              {!hasLeftStep1 && (
+                <div className="flex flex-row justify-end">
+                  <Button
+                    variant={"ghost"}
+                    className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
+                    onClick={async () => {
+                      resetAreaScopingData({
+                        mapContext,
+                        mapGenerationContext,
+                      });
+                    }}
+                  >
+                    <div className="">
+                      <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
+                        {t("common.changeInput")}
+                      </p>
+                    </div>
+                  </Button>
+                </div>
+              )}
             </div>
           )}
       </AccordionContent>
