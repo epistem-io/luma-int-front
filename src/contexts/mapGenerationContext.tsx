@@ -6,13 +6,24 @@ import {
   POINTING_TYPE,
   TRAINING_DATA_SEPARABILITY_URL
 } from "@/constants";
-import type { CompositeKey } from "@/lib/stepRules";
+import {
+  fetchAvailablePredictors,
+  fetchPredictorSeparability,
+  latestRecommendation,
+  type OptimizerProgress,
+  pruneSelectedPredictors,
+  recommendedAvailableIds,
+  shouldAutoApplyRecommendation,
+  streamPredictorOptimizer,
+} from "@/lib/predictorsApi";
+import { type CompositeKey, isViewOnly } from "@/lib/stepRules";
 import {
   createContext,
   Dispatch,
   PropsWithChildren,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -35,6 +46,8 @@ export type LULCParamsAccordionSection =
   | "data-validation";
 
 export type DataTrainingActiveTab = "upload" | "oss";
+
+export type PredictorOptimizerStatus = "idle" | "running" | "error";
 
 /** Optional tuning for the separability analysis (see LumaLite Module 4). */
 export interface SampleQualityOptions {
@@ -227,6 +240,27 @@ export interface MapGenerationContextType {
   setIsYourMapDialogVisible: Dispatch<SetStateAction<boolean>>;
   selectedPredictors: string[];
   setSelectedPredictors: Dispatch<SetStateAction<string[]>>;
+  /** Step 4's predictor options from the backend; null until loaded. */
+  predictorListing: PredictorListing | null;
+  isPredictorListingLoading: boolean;
+  predictorListingError: string;
+  fetchPredictorListing: (sessionId: string) => void;
+  /** Last result of the predictor optimizer; null when it has not run. */
+  predictorRecommendation: PredictorRecommendation | null;
+  predictorOptimizerStatus: PredictorOptimizerStatus;
+  /** Progress of the running optimizer; null before its first line. */
+  predictorOptimizerProgress: OptimizerProgress | null;
+  predictorOptimizerError: string;
+  startPredictorOptimizer: (sessionId: string) => void;
+  applyPredictorRecommendation: () => void;
+  /** Last separability check with predictors; null when none was run. */
+  predictorSeparability: PredictorSeparabilityResult | null;
+  isPredictorSeparabilityLoading: boolean;
+  predictorSeparabilityError: string;
+  checkPredictorSeparability: (
+    sessionId: string,
+    predictorIds: string[],
+  ) => void;
   numberOfTrees: string;
   setNumberOfTrees: Dispatch<SetStateAction<string>>;
   numberOfTreesError: string;
@@ -410,6 +444,20 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   setIsYourMapDialogVisible: () => {},
   selectedPredictors: [],
   setSelectedPredictors: () => {},
+  predictorListing: null,
+  isPredictorListingLoading: false,
+  predictorListingError: "",
+  fetchPredictorListing: () => {},
+  predictorRecommendation: null,
+  predictorOptimizerStatus: "idle",
+  predictorOptimizerProgress: null,
+  predictorOptimizerError: "",
+  startPredictorOptimizer: () => {},
+  applyPredictorRecommendation: () => {},
+  predictorSeparability: null,
+  isPredictorSeparabilityLoading: false,
+  predictorSeparabilityError: "",
+  checkPredictorSeparability: () => {},
   numberOfTrees: "150",
   setNumberOfTrees: () => {},
   numberOfTreesError: "",
@@ -724,6 +772,165 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     DEFAULT_VALUE.selectedPredictors,
   );
 
+  const [predictorListing, setPredictorListing] =
+    useState<PredictorListing | null>(DEFAULT_VALUE.predictorListing);
+  const [isPredictorListingLoading, setIsPredictorListingLoading] = useState(
+    DEFAULT_VALUE.isPredictorListingLoading,
+  );
+  const [predictorListingError, setPredictorListingError] = useState(
+    DEFAULT_VALUE.predictorListingError,
+  );
+
+  // Step 4's predictor options: what the backend says the session's
+  // satellite and period support.
+  const fetchPredictorListing = (sessionId: string) => {
+    setIsPredictorListingLoading(true);
+    setPredictorListingError("");
+
+    fetchAvailablePredictors(sessionId)
+      .then((listing) => {
+        setPredictorListing(listing);
+        // The listing also carries the session's saved optimizer result.
+        setPredictorRecommendation((current) =>
+          latestRecommendation(current, listing.recommendation),
+        );
+        // Drop what the session can no longer use (an old checkpoint, or the
+        // satellite or period changed since the selection was made).
+        setSelectedPredictors((current) =>
+          pruneSelectedPredictors(current, listing),
+        );
+      })
+      .catch((err) => {
+        // Without a fresh answer the old options may be wrong: hide them.
+        setPredictorListing(null);
+        setPredictorListingError(String(err?.message || err));
+      })
+      .finally(() => {
+        setIsPredictorListingLoading(false);
+      });
+  };
+
+  const [predictorRecommendation, setPredictorRecommendation] =
+    useState<PredictorRecommendation | null>(
+      DEFAULT_VALUE.predictorRecommendation,
+    );
+  const [predictorOptimizerStatus, setPredictorOptimizerStatus] =
+    useState<PredictorOptimizerStatus>(DEFAULT_VALUE.predictorOptimizerStatus);
+  const [predictorOptimizerProgress, setPredictorOptimizerProgress] =
+    useState<OptimizerProgress | null>(
+      DEFAULT_VALUE.predictorOptimizerProgress,
+    );
+  const [predictorOptimizerError, setPredictorOptimizerError] = useState(
+    DEFAULT_VALUE.predictorOptimizerError,
+  );
+  // The running request: a second start is ignored and a reset can stop it.
+  const predictorOptimizerAbort = useRef<AbortController | null>(null);
+  // `created` of the last result that was ticked automatically; each result
+  // is applied at most once (see shouldAutoApplyRecommendation).
+  const appliedPredictorRecommendation = useRef<string | null>(null);
+
+  // The predictor optimizer runs here rather than in the step 4 panel, so
+  // that moving between steps does not stop a run of several minutes.
+  const startPredictorOptimizer = (sessionId: string) => {
+    if (predictorOptimizerAbort.current) return;
+
+    const controller = new AbortController();
+    predictorOptimizerAbort.current = controller;
+    setPredictorOptimizerStatus("running");
+    setPredictorOptimizerProgress(null);
+    setPredictorOptimizerError("");
+
+    streamPredictorOptimizer(
+      sessionId,
+      { onProgress: setPredictorOptimizerProgress },
+      controller.signal,
+    )
+      .then((recommendation) => {
+        setPredictorRecommendation(recommendation);
+        setPredictorOptimizerStatus("idle");
+      })
+      .catch((err) => {
+        // Aborted by a session reset, which has already cleared the state.
+        if (controller.signal.aborted) return;
+        setPredictorOptimizerError(String(err?.message || err));
+        setPredictorOptimizerStatus("error");
+      })
+      .finally(() => {
+        if (predictorOptimizerAbort.current === controller) {
+          predictorOptimizerAbort.current = null;
+        }
+      });
+  };
+
+  // "Use recommended": replace the selection with the recommendation.
+  const applyPredictorRecommendation = () => {
+    if (!predictorRecommendation) return;
+    appliedPredictorRecommendation.current = predictorRecommendation.created;
+    setSelectedPredictors(
+      recommendedAvailableIds(predictorRecommendation, predictorListing),
+    );
+  };
+
+  // Pre-selection: a current recommendation is ticked for a user who has
+  // not chosen anything. Never for the default classification or once a map
+  // exists, and never over an existing selection.
+  useEffect(() => {
+    if (!predictorRecommendation || !predictorListing) return;
+    if (isAutoPointsFlow || isViewOnly(progressPanelIndex, stepKey)) return;
+    if (
+      !shouldAutoApplyRecommendation({
+        recommendation: predictorRecommendation,
+        selected: selectedPredictors,
+        appliedCreated: appliedPredictorRecommendation.current,
+      })
+    ) {
+      return;
+    }
+
+    appliedPredictorRecommendation.current = predictorRecommendation.created;
+    setSelectedPredictors(
+      recommendedAvailableIds(predictorRecommendation, predictorListing),
+    );
+  }, [predictorRecommendation, predictorListing]);
+
+  const [predictorSeparability, setPredictorSeparability] =
+    useState<PredictorSeparabilityResult | null>(
+      DEFAULT_VALUE.predictorSeparability,
+    );
+  const [isPredictorSeparabilityLoading, setIsPredictorSeparabilityLoading] =
+    useState(DEFAULT_VALUE.isPredictorSeparabilityLoading);
+  const [predictorSeparabilityError, setPredictorSeparabilityError] = useState(
+    DEFAULT_VALUE.predictorSeparabilityError,
+  );
+  // Bumped per check and on reset, so an answer to an older check is ignored.
+  const predictorSeparabilityRequest = useRef(0);
+
+  // Step 4: class separability with the ticked predictors, against the
+  // satellite bands alone. Kept here so the result survives a step change.
+  const checkPredictorSeparability = (
+    sessionId: string,
+    predictorIds: string[],
+  ) => {
+    predictorSeparabilityRequest.current += 1;
+    const current = predictorSeparabilityRequest.current;
+    setIsPredictorSeparabilityLoading(true);
+    setPredictorSeparabilityError("");
+
+    fetchPredictorSeparability(sessionId, predictorIds)
+      .then((result) => {
+        if (current !== predictorSeparabilityRequest.current) return;
+        setPredictorSeparability(result);
+      })
+      .catch((err) => {
+        if (current !== predictorSeparabilityRequest.current) return;
+        setPredictorSeparabilityError(String(err?.message || err));
+      })
+      .finally(() => {
+        if (current !== predictorSeparabilityRequest.current) return;
+        setIsPredictorSeparabilityLoading(false);
+      });
+  };
+
   const [numberOfTrees, setNumberOfTrees] = useState<string>(
     DEFAULT_VALUE.numberOfTrees,
   );
@@ -841,6 +1048,22 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsLULCParamsChanged(DEFAULT_VALUE.isLULCParamsChanged);
     setIsYourMapDialogVisible(DEFAULT_VALUE.isYourMapDialogVisible);
     setSelectedPredictors(DEFAULT_VALUE.selectedPredictors);
+    setPredictorListing(DEFAULT_VALUE.predictorListing);
+    setIsPredictorListingLoading(DEFAULT_VALUE.isPredictorListingLoading);
+    setPredictorListingError(DEFAULT_VALUE.predictorListingError);
+    predictorOptimizerAbort.current?.abort();
+    predictorOptimizerAbort.current = null;
+    appliedPredictorRecommendation.current = null;
+    setPredictorRecommendation(DEFAULT_VALUE.predictorRecommendation);
+    setPredictorOptimizerStatus(DEFAULT_VALUE.predictorOptimizerStatus);
+    setPredictorOptimizerProgress(DEFAULT_VALUE.predictorOptimizerProgress);
+    setPredictorOptimizerError(DEFAULT_VALUE.predictorOptimizerError);
+    predictorSeparabilityRequest.current += 1;
+    setPredictorSeparability(DEFAULT_VALUE.predictorSeparability);
+    setIsPredictorSeparabilityLoading(
+      DEFAULT_VALUE.isPredictorSeparabilityLoading,
+    );
+    setPredictorSeparabilityError(DEFAULT_VALUE.predictorSeparabilityError);
     setNumberOfTrees(DEFAULT_VALUE.numberOfTrees);
     setNumberOfTreesError(DEFAULT_VALUE.numberOfTreesError);
     setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
@@ -1015,6 +1238,20 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     setIsYourMapDialogVisible,
     selectedPredictors,
     setSelectedPredictors,
+    predictorListing,
+    isPredictorListingLoading,
+    predictorListingError,
+    fetchPredictorListing,
+    predictorRecommendation,
+    predictorOptimizerStatus,
+    predictorOptimizerProgress,
+    predictorOptimizerError,
+    startPredictorOptimizer,
+    applyPredictorRecommendation,
+    predictorSeparability,
+    isPredictorSeparabilityLoading,
+    predictorSeparabilityError,
+    checkPredictorSeparability,
     numberOfTrees,
     setNumberOfTrees,
     numberOfTreesError,
