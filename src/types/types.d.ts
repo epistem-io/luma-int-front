@@ -236,6 +236,135 @@ interface FileTrainingObject extends FileObject {
   >;
 }
 
+type PredictorReasonCode = "sensor" | "date" | "bands";
+
+// One entry of GET /luma/predictor/available.
+interface PredictorOption {
+  id: string;
+  label: string;
+  long_name: string;
+  description: string;
+  type: string;
+  available: boolean;
+  // Why it is unavailable (English, from the engine); "" when available.
+  reason: string;
+  reason_code: PredictorReasonCode | null;
+  conflicts_with: string[];
+}
+
+interface PredictorGroup {
+  key: string;
+  predictors: PredictorOption[];
+}
+
+interface PredictorListing {
+  groups: PredictorGroup[];
+  // The selection last saved on the backend (POST /luma/predictor).
+  selected: string[];
+  sensor: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  // Last optimizer result of the session. Optional: absent from
+  // backends without the predictor optimizer.
+  recommendation?: PredictorRecommendation | null;
+}
+
+interface PredictorRankingRow {
+  band: string;
+  // "band" = one of the satellite bands, which are always classified.
+  kind: "predictor" | "band";
+  id: string | null;
+  label: string;
+  rank: number;
+  selected: boolean;
+  importance: number;
+}
+
+interface PredictorSkipped {
+  id: string;
+  label: string;
+  reason: string;
+}
+
+// Result of the predictor optimizer (GET /luma/predictor/optimize).
+interface PredictorRecommendation {
+  recommended: string[];
+  conflict_dropped: string[];
+  ranking: PredictorRankingRow[];
+  candidates: string[];
+  skipped: PredictorSkipped[];
+  samples: { total: number; per_class: Record<string, number> };
+  created: string;
+  // True when the imagery settings or training data changed after the run.
+  stale: boolean;
+}
+
+interface PredictorPreviewClass {
+  value: number;
+  label: string;
+  color: string;
+}
+
+// One layer of GET /luma/predictor/preview.
+interface PredictorPreviewLayer {
+  id: string;
+  label: string;
+  name: string;
+  // XYZ tile URL template.
+  url: string;
+  // "classes" = a class map (landform); `classes` is then its legend.
+  kind: "continuous" | "classes";
+  min: number;
+  max: number;
+  // CSS colours, low to high.
+  palette: string[];
+  classes?: PredictorPreviewClass[];
+}
+
+// GET /luma/predictor/download-url.
+interface PredictorDownloadResult {
+  // "" when Earth Engine refuses the size of the request.
+  download_url: string;
+  bands: string[];
+  skipped: PredictorSkipped[];
+}
+
+interface PredictorSeparabilitySilhouette {
+  // Overall silhouette score, -1 to 1; higher = classes further apart.
+  overall: number;
+  level: SampleQualityOverall;
+  mean_pairwise: number;
+  min_pairwise: number;
+  // "Class A vs Class B": the pair with the lowest score.
+  worst_pair: string;
+  // Share of samples that sit closer to another class than to their own.
+  negative_sample_ratio: number;
+}
+
+interface PredictorSeparabilitySet {
+  // "composite" = satellite bands only, "with_predictors" = plus the predictors.
+  key: string;
+  bands: string[];
+  num_bands: number;
+  td: SampleQualityResult | null;
+  silhouette: PredictorSeparabilitySilhouette | null;
+}
+
+interface PredictorSeparabilityComparison {
+  sets: PredictorSeparabilitySet[];
+  // with_predictors minus composite, on the overall silhouette score.
+  silhouette_change: number | null;
+  predictors: string[];
+  skipped: PredictorSkipped[];
+}
+
+// GET /luma/training-data/separability with ?predictors=.
+interface PredictorSeparabilityResult {
+  // The usual TD summary, computed on the bands plus the predictors.
+  sample_quality: SampleQualityResult | null;
+  comparison: PredictorSeparabilityComparison;
+}
+
 interface GenerateMapStream {
   process: string;
   data: unknown;

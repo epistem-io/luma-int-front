@@ -132,6 +132,10 @@ export const LULC_CLASS_COLOR_PALETTE = [
   "#D98A00",
 ];
 export const PREDICTOR_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor`;
+export const PREDICTOR_AVAILABLE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor/available`;
+export const PREDICTOR_OPTIMIZE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor/optimize`;
+export const PREDICTOR_PREVIEW_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor/preview`;
+export const PREDICTOR_DOWNLOAD_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/predictor/download-url`;
 
 export const FETCH_INPUT_SUMMARY = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/luma/input-summary`;
 

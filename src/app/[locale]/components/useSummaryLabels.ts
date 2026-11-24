@@ -13,7 +13,7 @@ import { getTemporalRangeText } from "@/lib/utils";
 import { getClassInputMethods } from "@/lib/lucFlow";
 import { useLocale, useTranslations } from "next-intl";
 import { useContext, useMemo } from "react";
-import { LULC_PREDICTORS } from "./lulcPredictors";
+import { predictorLabels } from "@/lib/predictorsApi";
 
 // Display strings shared by the step summaries and the final summary dialog,
 // so each input is worded the same everywhere it is summarised.
@@ -144,14 +144,14 @@ export const useSampleDataSummary = () => {
 };
 
 export const useSelectedPredictorLabels = () => {
-  const { selectedPredictors } = useContext(MapGenerationContext);
+  const { selectedPredictors, predictorListing } =
+    useContext(MapGenerationContext);
 
+  // Labels come from the backend's list; before it has loaded (a resumed
+  // session opened on the summary) the ids themselves are shown.
   return useMemo(
-    () =>
-      LULC_PREDICTORS.filter((predictor) =>
-        selectedPredictors.includes(predictor.value),
-      ).map((predictor) => predictor.label),
-    [selectedPredictors],
+    () => predictorLabels(selectedPredictors, predictorListing),
+    [selectedPredictors, predictorListing],
   );
 };
 
