@@ -57,8 +57,7 @@ export const StepBar = () => {
     goToStep,
     goToYourMap,
   } = useStepNavigation();
-  // Behind the current step = done (maroon); ahead but already filled after
-  // jumping back = light pink; ahead and empty = gray.
+
   const isFilledAhead = (index: number) =>
     index !== activeStepIndex &&
     index >= stepIndex &&
@@ -71,8 +70,6 @@ export const StepBar = () => {
     !isBusy;
 
   return (
-    // The bar adapts to its own width: the panel slims to 480px on 1080p
-    // screens for steps 1-4, and is 600px otherwise.
     <div className="@container">
     <div className="flex flex-row items-center px-6 pb-7 @max-lg:pr-1.5">
       {STEPS.map((key, index) => {
@@ -123,8 +120,6 @@ export const StepBar = () => {
             <div
               className={cn(
                 "flex-1 min-w-4 h-0.5 mx-1.5",
-                // In the slim panel the line into "Your map" has no label to
-                // clear, so it gives its length to the lines between steps.
                 index === STEPS.length - 1 && "@max-lg:flex-none @max-lg:w-4",
               )}
               style={dashedLine(

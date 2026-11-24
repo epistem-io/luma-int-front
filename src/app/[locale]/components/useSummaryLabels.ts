@@ -10,6 +10,7 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { TFunction } from "@/i18n/types";
 import { formatRegencyLabel } from "@/lib/regency";
 import { getTemporalRangeText } from "@/lib/utils";
+import { getClassInputMethods } from "@/lib/lucFlow";
 import { useLocale, useTranslations } from "next-intl";
 import { useContext, useMemo } from "react";
 import { predictorLabels } from "@/lib/predictorsApi";
@@ -73,19 +74,27 @@ export const useBasicInformationLabels = () => {
 
 export const useClassificationSchemeLabels = () => {
   const t = useTranslations("InteractivePanel");
-  const { lucSource } = useContext(MapGenerationContext);
+  const { lucSource, lucQuickRows } = useContext(MapGenerationContext);
+
+  // Own classes may mix uploaded and typed rows: name every method used,
+  // e.g. "Upload Classes + Manual Input".
+  const methods = getClassInputMethods(lucQuickRows, lucSource);
+  const inputMethodLabel =
+    lucSource === "excel" || lucSource === "quick"
+      ? [
+          methods.upload && t("defineLUC.excelTemplateTab"),
+          methods.manual && t("defineLUC.quickTableTab"),
+        ]
+          .filter(Boolean)
+          .join(" + ") || undefined
+      : undefined;
 
   return {
     schemeLabel:
       lucSource === "default"
         ? t("defineLUC.useDefaultScheme")
         : t("defineLUC.classifyOwnTemplate"),
-    inputMethodLabel:
-      lucSource === "excel"
-        ? t("defineLUC.excelTemplateTab")
-        : lucSource === "quick"
-          ? t("defineLUC.quickTableTab")
-          : undefined,
+    inputMethodLabel,
   };
 };
 
