@@ -37,6 +37,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import * as z from "zod";
 import { TimePeriodSummary } from "./TimePeriodSummary";
+import { SectionTitle } from "./SummaryField";
 import { useLocale, useTranslations } from "next-intl";
 import { TFunction } from "@/i18n/types";
 
@@ -182,9 +183,10 @@ export const TimePeriodAccordion = () => {
         }
         className="hover:no-underline p-3 pb-0"
       >
-        <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("timePeriod.timePeriod")}
-        </p>
+        <SectionTitle
+          title={t("timePeriod.timePeriod")}
+          isDone={!isEditingTemporalCoverage && temporalCoverage !== ""}
+        />
       </AccordionFullTrigger>
       <AccordionContent className="mt-5 px-3 pb-0 space-y-4">
         {isEditingTemporalCoverage && (

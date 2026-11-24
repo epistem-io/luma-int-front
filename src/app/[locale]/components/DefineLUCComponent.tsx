@@ -72,6 +72,8 @@ import Icon from "ol/style/Icon";
 import { MapContext } from "@/contexts/mapContext";
 import { fromLonLat } from "ol/proj";
 import {
+  HintBox,
+  hintBold,
   SummaryDownloadButton,
   SummaryEditButton,
   SummaryField,
@@ -319,6 +321,7 @@ export const DefineLUCComponent = () => {
           classId: String(nextId),
           name: "",
           color: QUICK_TABLE_COLORS[prev.length % QUICK_TABLE_COLORS.length],
+          origin: "manual",
         },
       ];
     });
@@ -369,11 +372,15 @@ export const DefineLUCComponent = () => {
               .filter((n) => Number.isFinite(n)),
           );
 
+          // Rows already in the table keep their origin; ones saved before
+          // origins were tracked were typed unless a file was already loaded.
+          const priorOrigin = LUCfile ? "upload" : "manual";
           const adjustedPrev = prev.map((r) => {
+            const tagged = { ...r, origin: r.origin ?? priorOrigin };
             const n = parseInt(r.classId, 10);
-            if (Number.isFinite(n) && !uploadedIds.has(n)) return r;
+            if (Number.isFinite(n) && !uploadedIds.has(n)) return tagged;
             nextFallbackId += 1;
-            return { ...r, classId: String(nextFallbackId) };
+            return { ...tagged, classId: String(nextFallbackId) };
           });
 
           const uploadedRows: QuickTableRow[] = json.classes.map((item) => ({
@@ -381,6 +388,7 @@ export const DefineLUCComponent = () => {
             classId: String(item.class_id),
             name: item.class_name,
             color: item.class_color,
+            origin: "upload",
           }));
 
           return [...adjustedPrev, ...uploadedRows];
@@ -733,732 +741,741 @@ export const DefineLUCComponent = () => {
             </CollapsibleTrigger>
           )}
           <CollapsibleContent className="collapsible-content-primitive space-y-6">
-        {isSummaryEditing ? (
-          <div className="space-y-4">
-            {/* The edit-mode banner renders at the panel level (in
-                InteractivePanel) so it can span the full panel width. */}
-            <div className="space-y-2">
-              <div className="flex flex-row items-center justify-between">
-                <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
-                  {t("defineLUC.classRecordedCount", { X: summaryRows.length })}
-                </p>
-                <Button
-                  variant={"primary"}
-                  disabled={!canLockQuick}
-                  className="h-7 px-4"
-                  onClick={() => {
-                    setLucQuickPhase("confirmed");
-                    setLucExcelConfirmed(true);
-                  }}
-                >
-                  {t("defineLUC.done")}
-                </Button>
-              </div>
-              <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
-                <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
-                  <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                      {t("defineLUC.noColumnHeader")}
+            {isSummaryEditing ? (
+              <div className="space-y-4">
+                {/* The edit-mode banner renders at the panel level (in
+                    InteractivePanel) so it can span the full panel width. */}
+                <div className="space-y-2">
+                  <div className="flex flex-row items-center justify-between">
+                    <p className="font-aptos text-md font-semibold leading-6 text-text-icons-base-second">
+                      {t("defineLUC.classRecordedCount", { X: summaryRows.length })}
                     </p>
-                  </div>
-                  <div className="flex-1 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
-                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
-                      {t("defineLUC.lulcClassHeader")}
-                    </p>
-                  </div>
-                  <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
-                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
-                      {t("defineLUC.colorClassHeader")}
-                    </p>
-                  </div>
-                  <div className="w-8 shrink-0 border-l border-neutral-300" />
-                </div>
-                {lucQuickRows.map((row, index) => {
-                  const duplicate = isQuickRowDuplicate(row.name);
-                  return (
-                    <div
-                      key={row.id}
-                      className="flex border-b border-neutral-200 last:border-b-0"
+                    <Button
+                      variant={"primary"}
+                      disabled={!canLockQuick}
+                      className="h-7 px-4"
+                      onClick={() => {
+                        setLucQuickPhase("confirmed");
+                        setLucExcelConfirmed(true);
+                      }}
                     >
+                      {t("defineLUC.done")}
+                    </Button>
+                  </div>
+                  <div className="rounded-[12px] border border-neutral-400 overflow-hidden">
+                    <div className="flex bg-[#FAEDF2] border-b border-neutral-300">
                       <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
-                        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
-                          {index + 1}
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                          {t("defineLUC.noColumnHeader")}
                         </p>
                       </div>
-                      <div className="flex-1 px-1 py-1 border-l border-neutral-200 flex flex-col justify-center">
-                        <Input
-                          value={row.name}
-                          aria-invalid={duplicate}
-                          className="h-7 text-center"
-                          onChange={(e) =>
-                            updateQuickRow(row.id, { name: e.target.value })
-                          }
-                        />
-                        {duplicate && (
-                          <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600 text-center">
-                            {t("defineLUC.duplicateClassError")}
-                          </p>
-                        )}
-                      </div>
-                      <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
-                        <Popover
-                          open={colorPopoverRowId === `summary-${row.id}`}
-                          onOpenChange={(isOpen) => {
-                            setColorPopoverRowId(
-                              isOpen ? `summary-${row.id}` : null,
-                            );
-                          }}
-                        >
-                          <PopoverTrigger asChild>
-                            <button
-                              type="button"
-                              className="size-7 shrink-0 rounded-md border border-neutral-300 cursor-pointer hover:brightness-95 transition-all duration-200"
-                              style={{ backgroundColor: row.color }}
-                            />
-                          </PopoverTrigger>
-                          <PopoverContent
-                            align="start"
-                            className="w-auto p-4 space-y-3 rounded-[12px]"
-                          >
-                            <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
-                              {t("defineLUC.selectClassColor")}
-                            </p>
-                            <div className="grid grid-cols-7 gap-2">
-                              {LULC_CLASS_COLOR_PALETTE.map((color) => (
-                                <button
-                                  key={`summary-palette-${row.id}-${color}`}
-                                  type="button"
-                                  className={cn(
-                                    "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
-                                    row.color.toLowerCase() ===
-                                      color.toLowerCase()
-                                      ? "ring-2 ring-primary-pink ring-offset-1"
-                                      : "border border-neutral-200",
-                                  )}
-                                  style={{ backgroundColor: color }}
-                                  onClick={() => {
-                                    updateQuickRow(row.id, { color });
-                                    setColorPopoverRowId(null);
-                                  }}
-                                />
-                              ))}
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
-                          {row.color.replace(/^#/, "")}
+                      <div className="flex-1 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center">
+                          {t("defineLUC.lulcClassHeader")}
                         </p>
                       </div>
-                      <div className="w-8 shrink-0 border-l border-neutral-200 flex items-center justify-center">
-                        <Button
-                          variant={"ghost"}
-                          size={"icon"}
-                          className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
-                          onClick={() => {
-                            // Deleting the last row leaves nothing to
-                            // confirm, so fall back to the own flow's
-                            // empty table instead of a stuck edit mode.
-                            if (lucQuickRows.length === 1) {
-                              setLucQuickPhase("editing");
-                              setLucView("own");
-                            }
-                            removeQuickRow(row.id);
-                          }}
-                        >
-                          <Trash2Icon className="text-text-icons-base-third size-4" />
-                        </Button>
+                      <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-300 flex items-center justify-center">
+                        <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main text-center whitespace-nowrap">
+                          {t("defineLUC.colorClassHeader")}
+                        </p>
                       </div>
+                      <div className="w-8 shrink-0 border-l border-neutral-300" />
                     </div>
-                  );
-                })}
-                <button
-                  type="button"
-                  onClick={addQuickRow}
-                  className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
-                >
-                  <PlusIcon className="size-4 text-primary-red-pink-normal" />
-                  <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
-                    {t("defineLUC.addClass")}
-                  </p>
-                </button>
+                    {lucQuickRows.map((row, index) => {
+                      const duplicate = isQuickRowDuplicate(row.name);
+                      return (
+                        <div
+                          key={row.id}
+                          className="flex border-b border-neutral-200 last:border-b-0"
+                        >
+                          <div className="w-[75px] shrink-0 px-1 py-2 flex items-center justify-center">
+                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main text-center">
+                              {index + 1}
+                            </p>
+                          </div>
+                          <div className="flex-1 px-1 py-1 border-l border-neutral-200 flex flex-col justify-center">
+                            <Input
+                              value={row.name}
+                              aria-invalid={duplicate}
+                              className="h-7 text-center"
+                              onChange={(e) =>
+                                updateQuickRow(row.id, { name: e.target.value })
+                              }
+                            />
+                            {duplicate && (
+                              <p className="mt-1 font-aptos text-xs font-regular leading-4 text-danger-600 text-center">
+                                {t("defineLUC.duplicateClassError")}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-[160px] shrink-0 px-1 py-2 border-l border-neutral-200 flex items-center justify-start pl-6 gap-x-2">
+                            <Popover
+                              open={colorPopoverRowId === `summary-${row.id}`}
+                              onOpenChange={(isOpen) => {
+                                setColorPopoverRowId(
+                                  isOpen ? `summary-${row.id}` : null,
+                                );
+                              }}
+                            >
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="size-7 shrink-0 rounded-md border border-neutral-300 cursor-pointer hover:brightness-95 transition-all duration-200"
+                                  style={{ backgroundColor: row.color }}
+                                />
+                              </PopoverTrigger>
+                              <PopoverContent
+                                align="start"
+                                className="w-auto p-4 space-y-3 rounded-[12px]"
+                              >
+                                <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                                  {t("defineLUC.selectClassColor")}
+                                </p>
+                                <div className="grid grid-cols-7 gap-2">
+                                  {LULC_CLASS_COLOR_PALETTE.map((color) => (
+                                    <button
+                                      key={`summary-palette-${row.id}-${color}`}
+                                      type="button"
+                                      className={cn(
+                                        "size-9 rounded-md cursor-pointer hover:brightness-95 transition-all duration-200",
+                                        row.color.toLowerCase() ===
+                                          color.toLowerCase()
+                                          ? "ring-2 ring-primary-pink ring-offset-1"
+                                          : "border border-neutral-200",
+                                      )}
+                                      style={{ backgroundColor: color }}
+                                      onClick={() => {
+                                        updateQuickRow(row.id, { color });
+                                        setColorPopoverRowId(null);
+                                      }}
+                                    />
+                                  ))}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                            <p className="font-aptos text-sm font-regular leading-5 text-text-icons-base-main uppercase">
+                              {row.color.replace(/^#/, "")}
+                            </p>
+                          </div>
+                          <div className="w-8 shrink-0 border-l border-neutral-200 flex items-center justify-center">
+                            <Button
+                              variant={"ghost"}
+                              size={"icon"}
+                              className="p-0 hover:brightness-95 cursor-pointer size-7 rounded-full"
+                              onClick={() => {
+                                // Deleting the last row leaves nothing to
+                                // confirm, so fall back to the own flow's
+                                // empty table instead of a stuck edit mode.
+                                if (lucQuickRows.length === 1) {
+                                  setLucQuickPhase("editing");
+                                  setLucView("own");
+                                }
+                                removeQuickRow(row.id);
+                              }}
+                            >
+                              <Trash2Icon className="text-text-icons-base-third size-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={addQuickRow}
+                      className="w-full flex flex-row items-center justify-center gap-x-1.5 py-2.5 border-t border-neutral-200 hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
+                    >
+                      <PlusIcon className="size-4 text-primary-red-pink-normal" />
+                      <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal">
+                        {t("defineLUC.addClass")}
+                      </p>
+                    </button>
+                  </div>
+                </div>
+                {/* In edit mode the file card is removable (trash button). */}
+                {LUCfilename && renderUploadedTemplateCard()}
               </div>
-            </div>
-            {/* In edit mode the file card is removable (trash button). */}
-            {LUCfilename && renderUploadedTemplateCard()}
-          </div>
-        ) : isSummaryShown ? (
-          <div className="space-y-4">
-            <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-3">
-              <SummaryHeading>{t("defineLUC.classificationScheme")}</SummaryHeading>
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-                <SummaryField label={t("defineLUC.scheme")} value={schemeLabel} />
-                {inputMethodLabel && (
-                  <SummaryField
-                    label={t("basicInformation.inputMethod")}
-                    value={inputMethodLabel}
+            ) : isSummaryShown ? (
+              <div className="space-y-4">
+                <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-3">
+                  <SummaryHeading>{t("defineLUC.classificationScheme")}</SummaryHeading>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                    <SummaryField label={t("defineLUC.scheme")} value={schemeLabel} />
+                    {inputMethodLabel && (
+                      <SummaryField
+                        label={t("basicInformation.inputMethod")}
+                        value={inputMethodLabel}
+                      />
+                    )}
+                    {summaryFileName && (
+                      <SummaryField label={t("defineLUC.file")} value={summaryFileName} />
+                    )}
+                    <SummaryField
+                      label={t("defineLUC.totalClasses")}
+                      value={t("defineLUC.classCount", { X: summaryRows.length })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex flex-row items-center justify-between gap-x-3">
+                    <SummaryHeading>{t("defineLUC.recordedClasses")}</SummaryHeading>
+                    <SummaryDownloadButton
+                      label={t("defineLUC.downloadCsv")}
+                      onClick={onDownloadClassesCsv}
+                    />
+                  </div>
+                  <ClassSummaryTable rows={summaryRows} />
+                </div>
+              </div>
+            ) : lucView === "picker" ? (
+              <div className="space-y-6">
+                <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+                  {t("defineLUC.LUCHierarchyDescription")}
+                </p>
+                <div className="grid grid-cols-2 gap-x-4">
+                  <button
+                    type="button"
+                    disabled={selectedDefault}
+                    onClick={() => setLucView("own")}
+                    className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  >
+                    <div className="flex flex-row items-start justify-between">
+                      <CirclePlus className="size-8 text-primary-red-pink-normal" />
+                      <ChevronRight className="size-5 text-text-icons-base-main" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                        {t("defineLUC.classifyOwnTemplate")}
+                      </p>
+                      <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                        {t("defineLUC.classifyOwnCardCaption")}
+                      </p>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={selectedCustom || spatialResolution !== "100"}
+                    onClick={() => setLucView("default")}
+                    className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  >
+                    <div className="flex flex-row items-start justify-between">
+                      <List className="size-8 text-primary-red-pink-normal" />
+                      <ChevronRight className="size-5 text-text-icons-base-main" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                        {t("defineLUC.useDefaultScheme")}
+                      </p>
+                      <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                        {t("defineLUC.useDefaultCardCaption")}
+                      </p>
+                    </div>
+                  </button>
+                </div>
+                {/* What choosing the default scheme gives up later: step 3 uses
+                    Luma's reference samples and step 4's settings are fixed
+                    (isAutoPointsFlow in the step 3/4 components). */}
+                <HintBox>
+                  {t.rich("defineLUC.defaultSchemeHint", {
+                    b: hintBold,
+                    defaultName: t("defineLUC.useDefaultScheme"),
+                  })}
+                </HintBox>
+              </div>
+            ) : lucView === "own" ? (
+              <div className="space-y-6">
+                <div className="flex flex-row items-center gap-x-4">
+                  <CirclePlus
+                    className="size-12 shrink-0 text-primary-red-pink-normal"
+                    strokeWidth={1.5}
                   />
-                )}
-                {summaryFileName && (
-                  <SummaryField label={t("defineLUC.file")} value={summaryFileName} />
-                )}
-                <SummaryField
-                  label={t("defineLUC.totalClasses")}
-                  value={t("defineLUC.classCount", { X: summaryRows.length })}
-                />
-              </div>
-            </div>
+                  <div>
+                    <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                      {t("defineLUC.classifyOwnTemplate")}
+                    </p>
+                    <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                      {t("defineLUC.classifyOwnCardCaption")}
+                    </p>
+                  </div>
+                </div>
+                <Tabs
+                  value={lucCustomTab}
+                  onValueChange={(value) => setLucCustomTab(value as LucCustomTab)}
+                  className="gap-y-6 mb-0"
+                >
+                  <div className="px-0 py-0">
+                    <TabsList className="w-full">
+                      <TabsTrigger value="quick">
+                        {t("defineLUC.quickTableTab")}
+                      </TabsTrigger>
+                      <TabsTrigger value="excel">
+                        {t("defineLUC.excelTemplateTab")}
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
 
-            <div className="space-y-2">
-              <div className="flex flex-row items-center justify-between gap-x-3">
-                <SummaryHeading>{t("defineLUC.recordedClasses")}</SummaryHeading>
-                <SummaryDownloadButton
-                  label={t("defineLUC.downloadCsv")}
-                  onClick={onDownloadClassesCsv}
-                />
-              </div>
-              <ClassSummaryTable rows={summaryRows} />
-            </div>
-          </div>
-        ) : lucView === "picker" ? (
-          <div className="space-y-6">
-            <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-              {t("defineLUC.LUCHierarchyDescription")}
-            </p>
-            <div className="grid grid-cols-2 gap-x-4">
-              <button
-                type="button"
-                disabled={selectedDefault}
-                onClick={() => setLucView("own")}
-                className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-              >
-                <div className="flex flex-row items-start justify-between">
-                  <CirclePlus className="size-8 text-primary-red-pink-normal" />
-                  <ChevronRight className="size-5 text-text-icons-base-main" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
-                    {t("defineLUC.classifyOwnTemplate")}
-                  </p>
-                  <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
-                    {t("defineLUC.classifyOwnCardCaption")}
-                  </p>
-                </div>
-              </button>
-              <button
-                type="button"
-                disabled={selectedCustom || spatialResolution !== "100"}
-                onClick={() => setLucView("default")}
-                className="rounded-[12px] border border-primary-red-pink-normal p-4 text-left space-y-4 hover:bg-primary-pink-hover transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
-              >
-                <div className="flex flex-row items-start justify-between">
-                  <List className="size-8 text-primary-red-pink-normal" />
-                  <ChevronRight className="size-5 text-text-icons-base-main" />
-                </div>
-                <div className="space-y-1">
-                  <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
-                    {t("defineLUC.useDefaultScheme")}
-                  </p>
-                  <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
-                    {t("defineLUC.useDefaultCardCaption")}
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
-        ) : lucView === "own" ? (
-          <div className="space-y-6">
-            <div className="flex flex-row items-center gap-x-4">
-              <CirclePlus
-                className="size-12 shrink-0 text-primary-red-pink-normal"
-                strokeWidth={1.5}
-              />
-              <div>
-                <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
-                  {t("defineLUC.classifyOwnTemplate")}
-                </p>
-                <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
-                  {t("defineLUC.classifyOwnCardCaption")}
-                </p>
-              </div>
-            </div>
-            <Tabs
-              value={lucCustomTab}
-              onValueChange={(value) => setLucCustomTab(value as LucCustomTab)}
-              className="gap-y-6 mb-0"
-            >
-              <div className="px-0 py-0">
-                <TabsList className="w-full">
-                  <TabsTrigger value="quick">
-                    {t("defineLUC.quickTableTab")}
-                  </TabsTrigger>
-                  <TabsTrigger value="excel">
-                    {t("defineLUC.excelTemplateTab")}
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+                  <TabsContent value="quick">
+                    <div className="space-y-6">
+                      <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+                        {t("defineLUC.quickTableDescription")}
+                      </p>
+                      {renderQuickTable()}
+                    </div>
+                  </TabsContent>
 
-              <TabsContent value="quick">
+                  <TabsContent value="excel">
                 <div className="space-y-6">
                   <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                    {t("defineLUC.quickTableDescription")}
+                    {t("defineLUC.classifyOwnTemplateDescription")}
                   </p>
-                  {renderQuickTable()}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="excel">
-            <div className="space-y-6">
-              <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                {t("defineLUC.classifyOwnTemplateDescription")}
-              </p>
-              {haveDownloadedFile &&
-                (LUCfile ? (
-                  renderUploadedTemplateCard()
-                ) : (
-                    <div
-                      className={cn(
-                        "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
-                        "min-h-40.5",
-                        fileEnter && "border-primary-red-pink-normal",
-                      )}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        setFileEnter(true);
-                      }}
-                      onDragLeave={(e) => {
-                        setFileEnter(false);
-                      }}
-                      onDragEnd={(e) => {
-                        e.preventDefault();
-                        setFileEnter(false);
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setFileEnter(false);
-                        if (e.dataTransfer.items) {
-                          [...e.dataTransfer.items].forEach((item, i) => {
-                            if (item.kind === "file") {
-                              const file = item.getAsFile();
-                              if (file) {
-                                importExcel(file);
-                              }
-                              // console.log(`items file[${i}].name = ${file?.name}`);
+                  {haveDownloadedFile &&
+                    (LUCfile ? (
+                      renderUploadedTemplateCard()
+                    ) : (
+                        <div
+                          className={cn(
+                            "p-4 border-2 border-dashed border-secondary-purple-light-hover rounded-[12px] space-y-4 transition-all duration-200 relative",
+                            "min-h-40.5",
+                            fileEnter && "border-primary-red-pink-normal",
+                          )}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setFileEnter(true);
+                          }}
+                          onDragLeave={(e) => {
+                            setFileEnter(false);
+                          }}
+                          onDragEnd={(e) => {
+                            e.preventDefault();
+                            setFileEnter(false);
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setFileEnter(false);
+                            if (e.dataTransfer.items) {
+                              [...e.dataTransfer.items].forEach((item, i) => {
+                                if (item.kind === "file") {
+                                  const file = item.getAsFile();
+                                  if (file) {
+                                    importExcel(file);
+                                  }
+                                  // console.log(`items file[${i}].name = ${file?.name}`);
+                                }
+                              });
+                            } else {
+                              // [...e.dataTransfer.files].forEach((file, i) => {
+                              //   console.log(`… file[${i}].name = ${file.name}`);
+                              // });
                             }
-                          });
-                        } else {
-                          // [...e.dataTransfer.files].forEach((file, i) => {
-                          //   console.log(`… file[${i}].name = ${file.name}`);
-                          // });
-                        }
+                          }}
+                        >
+                          {!fileEnter && (
+                            <>
+                              <div className="space-y-3">
+                                <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
+                                <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
+                                  {/* Drag & drop your file here to upload. <br />
+                                  Accepted format .csv, .xls, .xlsx */}
+                                  {t("defineLUC.dragAndDrop")} <br />
+                                  {t("defineLUC.acceptedFormat", {
+                                    X: ".csv, .xls, .xlsx",
+                                  })}
+                                </p>
+                              </div>
+                              <Label
+                                htmlFor="luc-template-file-upload"
+                                className="w-50 mx-auto flex flex-row justify-center mb-0"
+                              >
+                                <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
+                                  <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
+                                    {t("defineLUC.browseFile")}
+                                  </p>
+                                </div>
+                              </Label>
+                            </>
+                          )}
+
+                          {fileEnter && (
+                            <>
+                              <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
+                                <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
+                                  {t("defineLUC.useDefaultSchemeDescription")}
+                                </p>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                  {!haveDownloadedFile && !LUCfile && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClickDownloadFile();
                       }}
+                      className="w-full py-2 rounded-[8px] bg-primary-pink-hover hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
                     >
-                      {!fileEnter && (
-                        <>
-                          <div className="space-y-3">
-                            <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
-                            <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
-                              {/* Drag & drop your file here to upload. <br />
-                              Accepted format .csv, .xls, .xlsx */}
-                              {t("defineLUC.dragAndDrop")} <br />
-                              {t("defineLUC.acceptedFormat", {
-                                X: ".csv, .xls, .xlsx",
-                              })}
-                            </p>
-                          </div>
-                          <Label
-                            htmlFor="luc-template-file-upload"
-                            className="w-50 mx-auto flex flex-row justify-center mb-0"
-                          >
-                            <div className="rounded-[12px] bg-primary-pink-hover hover:bg-primary-pink-hover hover:brightness-95 cursor-pointer w-full py-1.5 px-2 transition-all duration-200">
-                              <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                                {t("defineLUC.browseFile")}
-                              </p>
-                            </div>
-                          </Label>
-                        </>
-                      )}
-
-                      {fileEnter && (
-                        <>
-                          <div className="absolute flex flex-col items-center justify-center gap-y-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                            <UploadIcon className="size-8 aspect-square text-primary-pink mx-auto" />
-                            <p className="font-aptos text-[13px] font-regular leading-4.5 text-primary-pink text-center">
-                              {t("defineLUC.useDefaultSchemeDescription")}
-                            </p>
-                          </div>
-                        </>
-                      )}
+                      <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
+                        {t("defineLUC.downloadFile")}
+                      </p>
+                    </button>
+                  )}
+                  {isLUCLoading && (
+                    <div className="w-full flex flex-row justify-center items-center py-2">
+                      <span className="loader md"></span>
                     </div>
-                  ))}
-              {!haveDownloadedFile && !LUCfile && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClickDownloadFile();
-                  }}
-                  className="w-full py-2 rounded-[8px] bg-primary-pink-hover hover:bg-neutral-100 transition-all duration-200 cursor-pointer"
-                >
-                  <p className="font-aptos text-[13px] font-semibold leading-4.5 text-primary-red-pink-normal text-center">
-                    {t("defineLUC.downloadFile")}
-                  </p>
-                </button>
-              )}
-              {isLUCLoading && (
-                <div className="w-full flex flex-row justify-center items-center py-2">
-                  <span className="loader md"></span>
+                  )}
+                  {/* The class table is shared with Manual Input; keep it visible
+                      here whenever it already has rows so switching tabs never
+                      hides classes entered on the other tab. */}
+                  {(LUCfile !== null || lucQuickRows.length > 0) &&
+                    renderQuickTable()}
                 </div>
-              )}
-              {/* The class table is shared with Manual Input; keep it visible
-                  here whenever it already has rows so switching tabs never
-                  hides classes entered on the other tab. */}
-              {(LUCfile !== null || lucQuickRows.length > 0) &&
-                renderQuickTable()}
-            </div>
-              </TabsContent>
-            </Tabs>
-            <div className="flex flex-row justify-end mt-3">
-              <Button
-                variant={"primary"}
-                disabled={!canLockQuick}
-                onClick={() => {
-                  // Single-step confirm replaces the old Lock -> Confirm
-                  // two-phase flow; lucExcelConfirmed keeps gating the excel
-                  // path in the footer.
-                  setLucQuickPhase("confirmed");
-                  setIsQuickTableEditing(false);
-                  setLucExcelConfirmed(true);
-                }}
-              >
-                {t("defineLUC.confirmLULCClass")}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
-            <div className="flex flex-row items-center gap-x-4">
-              <List
-                className="size-12 shrink-0 text-primary-red-pink-normal"
-                strokeWidth={1.5}
-              />
-              <div>
-                <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
-                  {t("defineLUC.useDefaultScheme")}
+                  </TabsContent>
+                </Tabs>
+                <div className="flex flex-row justify-end mt-3">
+                  <Button
+                    variant={"primary"}
+                    disabled={!canLockQuick}
+                    onClick={() => {
+                      // Single-step confirm replaces the old Lock -> Confirm
+                      // two-phase flow; lucExcelConfirmed keeps gating the excel
+                      // path in the footer.
+                      setLucQuickPhase("confirmed");
+                      setIsQuickTableEditing(false);
+                      setLucExcelConfirmed(true);
+                    }}
+                  >
+                    {t("defineLUC.confirmLULCClass")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex flex-row items-center gap-x-4">
+                  <List
+                    className="size-12 shrink-0 text-primary-red-pink-normal"
+                    strokeWidth={1.5}
+                  />
+                  <div>
+                    <p className="font-aptos text-lg font-bold leading-6 text-text-icons-base-main">
+                      {t("defineLUC.useDefaultScheme")}
+                    </p>
+                    <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
+                      {t("defineLUC.useDefaultCardCaption")}
+                    </p>
+                  </div>
+                </div>
+                <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
+                  {t("defineLUC.useDefaultSchemeDescription")}
                 </p>
-                <p className="font-aptos text-sm font-regular leading-5 text-neutral-500">
-                  {t("defineLUC.useDefaultCardCaption")}
-                </p>
-              </div>
-            </div>
-            <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-              {t("defineLUC.useDefaultSchemeDescription")}
-            </p>
-            <div className="space-y-5">
-                <Accordion type="multiple">
-                  <AccordionItem value="vegetation-acc">
-                    <div className="flex flex-row items-center justify-between">
-                      <div className="flex flex-row items-center space-x-2.5">
-                        {/* <Switch /> */}
-                        <p className="text-l-semibold text-muted-foreground">
-                          {t("defineLUC.vegetation")}
-                        </p>
-                      </div>
-                      <AccordionTrigger className="p-2"></AccordionTrigger>
-                    </div>
-                    <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                      <Accordion type="multiple">
-                        <AccordionItem value="tree-based-system-acc">
-                          <div className="flex flex-row items-center justify-between">
-                            <div className="flex flex-row items-center space-x-2.5">
-                              {/* <Switch /> */}
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.treeBasedSystem")}
-                              </p>
-                            </div>
-                            <AccordionTrigger className="p-2"></AccordionTrigger>
+                <div className="space-y-5">
+                    <Accordion type="multiple">
+                      <AccordionItem value="vegetation-acc">
+                        <div className="flex flex-row items-center justify-between">
+                          <div className="flex flex-row items-center space-x-2.5">
+                            {/* <Switch /> */}
+                            <p className="text-l-semibold text-muted-foreground">
+                              {t("defineLUC.vegetation")}
+                            </p>
                           </div>
-                          <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                            {/* <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(9, checked);
-                                }}
-                                checked={defaultArray.includes(9)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.monoculturePlantation")}
-                              </p>
-                            </div> */}
-
-                            <Accordion type="multiple">
-                              <AccordionItem value="tree-based-system-acc">
-                                <div className="flex flex-row items-center justify-between">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    {/* <Switch /> */}
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.naturalForest")}
-                                      {/* {t("TBS")} */}
-                                    </p>
-                                  </div>
-                                  <AccordionTrigger className="p-2"></AccordionTrigger>
+                          <AccordionTrigger className="p-2"></AccordionTrigger>
+                        </div>
+                        <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                          <Accordion type="multiple">
+                            <AccordionItem value="tree-based-system-acc">
+                              <div className="flex flex-row items-center justify-between">
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  {/* <Switch /> */}
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.treeBasedSystem")}
+                                  </p>
                                 </div>
-                                <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(1, checked);
-                                      }}
-                                      checked={defaultArray.includes(1)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.undisturbedDryLandForest")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(2, checked);
-                                      }}
-                                      checked={defaultArray.includes(2)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.loggedOverDryLandForest")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(3, checked);
-                                      }}
-                                      checked={defaultArray.includes(3)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.undisturbedMangroveForest")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(4, checked);
-                                      }}
-                                      checked={defaultArray.includes(4)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.loggedOverMangroveForest")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(5, checked);
-                                      }}
-                                      checked={defaultArray.includes(5)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.undisturbedSwampForest")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(6, checked);
-                                      }}
-                                      checked={defaultArray.includes(6)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.loggedOverSwampForest")}
-                                    </p>
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
+                                <AccordionTrigger className="p-2"></AccordionTrigger>
+                              </div>
+                              <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                                {/* <div className="flex flex-row items-center space-x-2.5">
+                                  <Switch
+                                    onCheckedChange={(checked) => {
+                                      onToggleSwitch(9, checked);
+                                    }}
+                                    checked={defaultArray.includes(9)}
+                                  />
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.monoculturePlantation")}
+                                  </p>
+                                </div> */}
 
-                            <Accordion type="multiple">
-                              <AccordionItem value="tree-based-system-acc">
-                                <div className="flex flex-row items-center justify-between">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    {/* <Switch /> */}
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.monoculturePlantation")}
-                                      {/* {t("TBS")} */}
-                                    </p>
-                                  </div>
-                                  <AccordionTrigger className="p-2"></AccordionTrigger>
+                                <Accordion type="multiple">
+                                  <AccordionItem value="tree-based-system-acc">
+                                    <div className="flex flex-row items-center justify-between">
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        {/* <Switch /> */}
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.naturalForest")}
+                                          {/* {t("TBS")} */}
+                                        </p>
+                                      </div>
+                                      <AccordionTrigger className="p-2"></AccordionTrigger>
+                                    </div>
+                                    <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(1, checked);
+                                          }}
+                                          checked={defaultArray.includes(1)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.undisturbedDryLandForest")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(2, checked);
+                                          }}
+                                          checked={defaultArray.includes(2)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.loggedOverDryLandForest")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(3, checked);
+                                          }}
+                                          checked={defaultArray.includes(3)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.undisturbedMangroveForest")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(4, checked);
+                                          }}
+                                          checked={defaultArray.includes(4)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.loggedOverMangroveForest")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(5, checked);
+                                          }}
+                                          checked={defaultArray.includes(5)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.undisturbedSwampForest")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(6, checked);
+                                          }}
+                                          checked={defaultArray.includes(6)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.loggedOverSwampForest")}
+                                        </p>
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                </Accordion>
+
+                                <Accordion type="multiple">
+                                  <AccordionItem value="tree-based-system-acc">
+                                    <div className="flex flex-row items-center justify-between">
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        {/* <Switch /> */}
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.monoculturePlantation")}
+                                          {/* {t("TBS")} */}
+                                        </p>
+                                      </div>
+                                      <AccordionTrigger className="p-2"></AccordionTrigger>
+                                    </div>
+                                    <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(8, checked);
+                                          }}
+                                          checked={defaultArray.includes(8)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.treePlantation")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(9, checked);
+                                          }}
+                                          checked={defaultArray.includes(9)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.rubberPlantation")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(10, checked);
+                                          }}
+                                          checked={defaultArray.includes(10)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.oilPalmPlantation")}
+                                        </p>
+                                      </div>
+                                      <div className="flex flex-row items-center space-x-2.5">
+                                        <Switch
+                                          onCheckedChange={(checked) => {
+                                            onToggleSwitch(11, checked);
+                                          }}
+                                          checked={defaultArray.includes(11)}
+                                        />
+                                        <p className="text-l-medium text-muted-foreground">
+                                          {t("defineLUC.otherPlantation")}
+                                        </p>
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                </Accordion>
+
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  <Switch
+                                    onCheckedChange={(checked) => {
+                                      onToggleSwitch(7, checked);
+                                    }}
+                                    checked={defaultArray.includes(7)}
+                                  />
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.agroforestry")}
+                                  </p>
                                 </div>
-                                <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(8, checked);
-                                      }}
-                                      checked={defaultArray.includes(8)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.treePlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(9, checked);
-                                      }}
-                                      checked={defaultArray.includes(9)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.rubberPlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(10, checked);
-                                      }}
-                                      checked={defaultArray.includes(10)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.oilPalmPlantation")}
-                                    </p>
-                                  </div>
-                                  <div className="flex flex-row items-center space-x-2.5">
-                                    <Switch
-                                      onCheckedChange={(checked) => {
-                                        onToggleSwitch(11, checked);
-                                      }}
-                                      checked={defaultArray.includes(11)}
-                                    />
-                                    <p className="text-l-medium text-muted-foreground">
-                                      {t("defineLUC.otherPlantation")}
-                                    </p>
-                                  </div>
-                                </AccordionContent>
-                              </AccordionItem>
-                            </Accordion>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                          <Accordion type="multiple">
+                            <AccordionItem value="non-tree-based-system-acc">
+                              <div className="flex flex-row items-center justify-between">
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  {/* <Switch /> */}
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.nonTreeBasedSystem")}
+                                  </p>
+                                </div>
+                                <AccordionTrigger className="p-2"></AccordionTrigger>
+                              </div>
+                              <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  <Switch
+                                    onCheckedChange={(checked) => {
+                                      onToggleSwitch(12, checked);
+                                    }}
+                                    checked={defaultArray.includes(12)}
+                                  />
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.grassSavanna")}
+                                  </p>
+                                </div>
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  <Switch
+                                    onCheckedChange={(checked) => {
+                                      onToggleSwitch(13, checked);
+                                    }}
+                                    checked={defaultArray.includes(13)}
+                                  />
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.shrub")}
+                                  </p>
+                                </div>
+                                <div className="flex flex-row items-center space-x-2.5">
+                                  <Switch
+                                    onCheckedChange={(checked) => {
+                                      onToggleSwitch(14, checked);
+                                    }}
+                                    checked={defaultArray.includes(14)}
+                                  />
+                                  <p className="text-l-medium text-muted-foreground">
+                                    {t("defineLUC.cropland")}
+                                  </p>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
 
-                            <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(7, checked);
-                                }}
-                                checked={defaultArray.includes(7)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.agroforestry")}
-                              </p>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                      <Accordion type="multiple">
-                        <AccordionItem value="non-tree-based-system-acc">
-                          <div className="flex flex-row items-center justify-between">
-                            <div className="flex flex-row items-center space-x-2.5">
-                              {/* <Switch /> */}
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.nonTreeBasedSystem")}
-                              </p>
-                            </div>
-                            <AccordionTrigger className="p-2"></AccordionTrigger>
+                    <Accordion type="multiple">
+                      <AccordionItem value="non-vegetation-acc">
+                        <div className="flex flex-row items-center justify-between">
+                          <div className="flex flex-row items-center space-x-2.5">
+                            {/* <Switch /> */}
+                            <p className="text-l-semibold text-muted-foreground">
+                              {t("defineLUC.nonVegetation")}
+                            </p>
                           </div>
-                          <AccordionContent className="pl-[25px] mt-0 pb-0 pt-4 space-y-5">
-                            <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(12, checked);
-                                }}
-                                checked={defaultArray.includes(12)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.grassSavanna")}
-                              </p>
-                            </div>
-                            <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(13, checked);
-                                }}
-                                checked={defaultArray.includes(13)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.shrub")}
-                              </p>
-                            </div>
-                            <div className="flex flex-row items-center space-x-2.5">
-                              <Switch
-                                onCheckedChange={(checked) => {
-                                  onToggleSwitch(14, checked);
-                                }}
-                                checked={defaultArray.includes(14)}
-                              />
-                              <p className="text-l-medium text-muted-foreground">
-                                {t("defineLUC.cropland")}
-                              </p>
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-
-                <Accordion type="multiple">
-                  <AccordionItem value="non-vegetation-acc">
-                    <div className="flex flex-row items-center justify-between">
-                      <div className="flex flex-row items-center space-x-2.5">
-                        {/* <Switch /> */}
-                        <p className="text-l-semibold text-muted-foreground">
-                          {t("defineLUC.nonVegetation")}
-                        </p>
-                      </div>
-                      <AccordionTrigger className="p-2"></AccordionTrigger>
-                    </div>
-                    <AccordionContent className="pl-[25px] pt-5 space-y-5">
-                      <div className="flex flex-row items-center space-x-2.5">
-                        <Switch
-                          onCheckedChange={(checked) => {
-                            onToggleSwitch(15, checked);
-                          }}
-                          checked={defaultArray.includes(15)}
-                        />
-                        <p className="text-l-medium text-muted-foreground">
-                          {t("defineLUC.settlement")}
-                        </p>
-                      </div>
-                      <div className="flex flex-row items-center space-x-2.5">
-                        <Switch
-                          onCheckedChange={(checked) => {
-                            onToggleSwitch(16, checked);
-                          }}
-                          checked={defaultArray.includes(16)}
-                        />
-                        <p className="text-l-medium text-muted-foreground">
-                          {t("defineLUC.clearedLand")}
-                        </p>
-                      </div>
-                      <div className="flex flex-row items-center space-x-2.5">
-                        <Switch
-                          onCheckedChange={(checked) => {
-                            onToggleSwitch(17, checked);
-                          }}
-                          checked={defaultArray.includes(17)}
-                        />
-                        <p className="text-l-medium text-muted-foreground">
-                          {t("defineLUC.water")}
-                        </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </div>
-              <div className="flex flex-row justify-end mt-3">
-                <Button
-                  variant={"primary"}
-                  disabled={defaultArray.length === 0}
-                  onClick={() => setLucDefaultConfirmed(true)}
-                >
-                  {t("defineLUC.confirmLULCClass")}
-                </Button>
-              </div>
-            </div>
-        )}
+                          <AccordionTrigger className="p-2"></AccordionTrigger>
+                        </div>
+                        <AccordionContent className="pl-[25px] pt-5 space-y-5">
+                          <div className="flex flex-row items-center space-x-2.5">
+                            <Switch
+                              onCheckedChange={(checked) => {
+                                onToggleSwitch(15, checked);
+                              }}
+                              checked={defaultArray.includes(15)}
+                            />
+                            <p className="text-l-medium text-muted-foreground">
+                              {t("defineLUC.settlement")}
+                            </p>
+                          </div>
+                          <div className="flex flex-row items-center space-x-2.5">
+                            <Switch
+                              onCheckedChange={(checked) => {
+                                onToggleSwitch(16, checked);
+                              }}
+                              checked={defaultArray.includes(16)}
+                            />
+                            <p className="text-l-medium text-muted-foreground">
+                              {t("defineLUC.clearedLand")}
+                            </p>
+                          </div>
+                          <div className="flex flex-row items-center space-x-2.5">
+                            <Switch
+                              onCheckedChange={(checked) => {
+                                onToggleSwitch(17, checked);
+                              }}
+                              checked={defaultArray.includes(17)}
+                            />
+                            <p className="text-l-medium text-muted-foreground">
+                              {t("defineLUC.water")}
+                            </p>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </div>
+                  <div className="flex flex-row justify-end mt-3">
+                    <Button
+                      variant={"primary"}
+                      disabled={defaultArray.length === 0}
+                      onClick={() => setLucDefaultConfirmed(true)}
+                    >
+                      {t("defineLUC.confirmLULCClass")}
+                    </Button>
+                  </div>
+                </div>
+            )}
           </CollapsibleContent>
 
           <input
@@ -1471,85 +1488,6 @@ export const DefineLUCComponent = () => {
           />
         </div>
       </Collapsible>
-
-      {/* The AI teaser only accompanies the classification choice: it shows
-          on the picker view and disappears once a flow is open or classes
-          are confirmed. */}
-      {!isSummaryShown && lucView === "picker" && (
-      <Collapsible open={aiSectionOpen} onOpenChange={setAISectionOpen}>
-        <div
-          className="bg-aneh p-px rounded-[13px]"
-          style={{
-            boxShadow:
-              "0 4px 4px 0 rgba(243, 235, 126, 0.25), 0 2px 8px 0 rgba(249, 245, 195, 0.29)",
-          }}
-        >
-          <div className="bg-white p-3 h-fit rounded-[12px]">
-            <CollapsibleTrigger className="flex flex-row justify-between items-center w-full cursor-pointer">
-              <div className="flex flex-row space-x-2 items-center">
-                <div className="w-fit p-2 rounded-sm border border-primary-300">
-                  <Image
-                    src="/images/shimmer.svg"
-                    unoptimized
-                    alt="EPISTEM-AI"
-                    width={16}
-                    height={16}
-                    className="object-contain h-4 w-auto text-primary-500"
-                  />
-                </div>
-                <p className="text-l-bold">{t("defineLUC.tryAI")}</p>
-              </div>
-
-              <ChevronDown
-                className={cn(
-                  "h-5 w-5 text-text-icons-base-main transition-transform duration-200",
-                  aiSectionOpen ? "rotate-180" : "",
-                )}
-              />
-            </CollapsibleTrigger>
-
-            <div className="mt-3">
-              <ComingSoon />
-            </div>
-
-            <CollapsibleContent className="collapsible-content-primitive">
-              <div className="space-y-2 mt-3">
-                <Textarea
-                  className="m-0"
-                  value={aiPrompt}
-                  maxLength={500}
-                  placeholder={t("defineLUC.tryAICaptionDefaultValue")}
-                  onChange={(e) => setAIPrompt(e.target.value)}
-                />
-                <div className="flex flex-row justify-between items-center">
-                  <p className="text-xs-regular text-neutrals-600 m-0">
-                    {t("defineLUC.tryAICaptionInstruction")}
-                  </p>
-                  <Button type="button" variant={"primary"} disabled>
-                    {t("defineLUC.tryAICaptionSubmitButtonLabel")}
-                  </Button>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </div>
-        </div>
-      </Collapsible>
-      )}
-      {!isFlowView && !isSummaryShown && (
-      <Button
-        variant={"ghost"}
-        className="p-0 hover:bg-transparent cursor-pointer"
-        onClick={() => {
-          onResetInput();
-        }}
-      >
-        <div className="">
-          <p className="text-text-icons-base-third font-roboto text-[15px] font-bold tracking-[-0.15px] underline">
-            {t("defineLUC.resetInput")}
-          </p>
-        </div>
-      </Button>
-      )}
     </div>
   );
 };

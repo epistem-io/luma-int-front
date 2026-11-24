@@ -1,9 +1,89 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Download, SquarePenIcon } from "lucide-react";
+import { Check, Download, Lightbulb, SquarePenIcon } from "lucide-react";
 import { ReactNode } from "react";
 
 // Building blocks for the step summaries and the final summary dialog.
+
+// Title of a step 1 input section (area, time period, satellite), with a
+// status circle: empty pink outline until the section is filled in, then a
+// green tick.
+export const SectionTitle = ({
+  title,
+  isDone,
+}: {
+  title: string;
+  isDone: boolean;
+}) => (
+  <div className="flex flex-row items-center gap-x-2">
+    <span
+      aria-hidden="true"
+      className={cn(
+        "flex size-5 shrink-0 items-center justify-center rounded-full",
+        isDone
+          ? "bg-green-600"
+          : "border-[1.5px] border-primary-pink/70 bg-white",
+      )}
+    >
+      {isDone && <Check className="size-3.5 text-white" strokeWidth={3} />}
+    </span>
+    <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
+      {title}
+    </p>
+  </div>
+);
+
+// Yellow tip box with a lightbulb, for "good to know before you choose" notes.
+export const HintBox = ({ children }: { children: ReactNode }) => (
+  <div className="flex flex-row gap-x-2 rounded-r-md border-l-2 border-amber-400 bg-amber-50 px-3 py-2">
+    <Lightbulb className="mt-0.5 size-4 shrink-0 text-amber-500" />
+    <p className="font-aptos text-xs leading-4.5 text-text-icons-base-second">
+      {children}
+    </p>
+  </div>
+);
+
+// Bold run inside a HintBox's rich text (t.rich "b" tag).
+export const hintBold = (chunks: ReactNode) => (
+  <strong className="font-semibold text-text-icons-base-main">{chunks}</strong>
+);
+
+// Pink dashed box holding a filled section's summary fields.
+export const SummaryBox = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => (
+  <div
+    className={cn(
+      "space-y-2 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light p-3",
+      className,
+    )}
+  >
+    {children}
+  </div>
+);
+
+// Small "Change input" link at the bottom right of a SummaryBox.
+export const SummaryChangeLink = ({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) => (
+  <div className="flex flex-row justify-end">
+    <Button
+      variant={"ghost"}
+      className="h-auto p-0 cursor-pointer font-aptos text-xs font-regular leading-4.5 text-text-icons-base-third underline hover:bg-transparent hover:text-text-icons-base-second"
+      onClick={onClick}
+    >
+      {label}
+    </Button>
+  </div>
+);
 
 export const SummaryHeading = ({ children }: { children: ReactNode }) => (
   <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-text-icons-base-main">

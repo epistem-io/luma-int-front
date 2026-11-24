@@ -1231,63 +1231,6 @@ export function AnalysisPanel({
                 {t("Section3.defineLC")}
               </p>
 
-              <Collapsible>
-                <div className="bg-aneh p-[1px] [box-shadow:0_4px_4px_0_rgba(243,_235,_126,_0.25),_0_2px_8px_0_rgba(249,_245,_195,_0.29)]">
-                  <div className="bg-neutral-100 p-3 h-fit">
-                    <CollapsibleTrigger className="flex flex-row justify-between items-center w-full">
-                      <div className="flex flex-row space-x-2 items-center">
-                        <div className="w-fit p-2 rounded-sm border border-primary-300">
-                          <Image
-                            src="/images/shimmer.svg"
-                            unoptimized
-                            alt="Draw"
-                            width={16}
-                            height={16}
-                            className="object-contain h-4 w-auto text-primary-500"
-                          />
-                        </div>
-                        <p className="text-l-bold">{t("Section3.tryAI")}</p>
-                      </div>
-
-                      <ChevronDown
-                        className={cn(
-                          "h-5 w-5 text-text-icons-base-main transition-transform duration-200",
-                        )}
-                      />
-                    </CollapsibleTrigger>
-                    
-                    <CollapsibleContent>
-                      <div className="pt-4 space-y-2">
-                        <p className="text-m-medium italic">
-                          {t("Section3.tryAICaption")}
-                          <br />
-                          <b className="font-extrabold">
-                            {t("Section3.tryAICaptionCont")}
-                          </b>
-                        </p>
-                        <Textarea
-                          defaultValue={t("Section3.tryAICaptionDefaultValue")}
-                          disabled
-                        />
-                        <div className="flex flex-row justify-between items-center">
-                          <p className="text-xs-regular text-neutrals-600">
-                            {t("Section3.tryAICaptionInstruction")}
-                          </p>
-                          <button
-                            type="button"
-                            className="rounded-none bg-primary-pink py-1.5 px-2"
-                          >
-                            <p className="text-xs-semibold text-text-icons-on-color">
-                              {t("Section3.tryAICaptionSubmitButtonLabel")}
-                            </p>
-                          </button>
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                  </div>
-                </div>
-              </Collapsible>
-
               <div className="p-5 border border-neutral-400 bg-neutral-100 space-y-6">
                 <p className="text-l-bold text-text-icons-base-main">
                   {t("Section3.LUHierarchy")}

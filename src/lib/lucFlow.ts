@@ -6,6 +6,22 @@ export interface ClassCandidate {
   color: string;
 }
 
+// Which own-classification input methods the class list came from, so the
+// summary can say "Upload Classes + Manual Input" when both were used. Rows
+// saved before rows recorded their origin take it from the class source.
+export const getClassInputMethods = (
+  rows: QuickTableRow[],
+  lucSource: string,
+): { upload: boolean; manual: boolean } => {
+  const fallback = lucSource === "excel" ? "upload" : "manual";
+  const origins = new Set(
+    rows
+      .filter((row) => row.name.trim() !== "")
+      .map((row) => row.origin ?? fallback),
+  );
+  return { upload: origins.has("upload"), manual: origins.has("manual") };
+};
+
 // The classes step 2 would hand to step 3, in submit order: the switched-on
 // default classes, or the own-classification rows that have a name.
 export const getConfirmedClasses = (input: {

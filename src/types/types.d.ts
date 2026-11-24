@@ -214,6 +214,8 @@ interface QuickTableRow {
   classId: string;
   name: string;
   color: string;
+  /** Where the row came from; missing on rows saved before it was tracked. */
+  origin?: "upload" | "manual";
 }
 
 interface FileObject {

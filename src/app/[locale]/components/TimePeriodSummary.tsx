@@ -8,7 +8,12 @@ import { useTranslations } from "next-intl";
 import { resetTimePeriodData } from "@/lib/interactivePanelFlowHelper";
 import { MapContext } from "@/contexts/mapContext";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
-import { SummaryField, SummaryHeading } from "./SummaryField";
+import {
+  SummaryBox,
+  SummaryChangeLink,
+  SummaryField,
+  SummaryHeading,
+} from "./SummaryField";
 
 interface Props {
   temporalResolutionLabel: string;
@@ -39,62 +44,33 @@ export const TimePeriodSummary = ({
   return (
     <>
       {accordion && (
-        <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active bg-purple-second">
-          <div className="space-y-3">
-            <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-              {/* WIP */}
-              {t("timePeriod.yourSelectedTimePeriod")}
-            </p>
-            <div className="gap-y-5 grid grid-cols-2">
-              <div className="space-y-1 col-span-1">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.temporalResolution")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {temporalResolutionLabel}
-                </p>
-              </div>
-              <div className="space-y-1 col-span-1">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.specificPeriod")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {specificPeriod}
-                </p>
-              </div>
-              <div className="space-y-1 col-span-2">
-                <p className="font-aptos text-[15px] font-semibold leading-5.5 text-text-icons-base-third">
-                  {t("timePeriod.satelliteInputDateRange")}
-                </p>
-                <p className="font-noto-sans text-xl font-bold leading-7 tracking-[-0.2px] text-secondary-purple-dark">
-                  {dateRange}
-                </p>
-              </div>
-            </div>
-            {/* The time period is locked once the user has moved on to
-                step 2. */}
-            {!mapGenerationContext.hasLeftStep1 && (
-              <div className="flex flex-row justify-end">
-                <Button
-                  variant={"ghost"}
-                  className="p-0 hover:bg-transparent cursor-pointer ml-auto h-fit"
-                  onClick={async () => {
-                    resetTimePeriodData({
-                      mapContext,
-                      mapGenerationContext,
-                    });
-                  }}
-                >
-                  <div className="">
-                    <p className="text-text-icons-base-third font-aptos text-md font-regular leading-6 underline">
-                      {t("common.changeInput")}
-                    </p>
-                  </div>
-                </Button>
-              </div>
-            )}
+        <SummaryBox>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+            <SummaryField
+              label={t("timePeriod.temporalResolution")}
+              value={temporalResolutionLabel}
+            />
+            <SummaryField
+              label={t("timePeriod.specificPeriod")}
+              value={specificPeriod}
+            />
+            <SummaryField
+              className="col-span-2"
+              label={t("timePeriod.satelliteInputDateRange")}
+              value={dateRange}
+            />
           </div>
-        </div>
+          {/* The time period is locked once the user has moved on to
+              step 2. */}
+          {!mapGenerationContext.hasLeftStep1 && (
+            <SummaryChangeLink
+              label={t("common.changeInput")}
+              onClick={() =>
+                resetTimePeriodData({ mapContext, mapGenerationContext })
+              }
+            />
+          )}
+        </SummaryBox>
       )}
       {!accordion && (
         <>

@@ -19,18 +19,13 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import {
   cn,
   drawStyle,
-  numberThousandSeparator,
   shortenKiloByte,
   styles,
   stylesTransparentFill,
 } from "@/lib/utils";
-import {
-  AlertCircleIcon,
-  FileTextIcon,
-  Trash2Icon,
-  TrashIcon,
-  UploadIcon,
-} from "lucide-react";
+import { FileTextIcon, MapPinIcon, UploadIcon } from "lucide-react";
+import { formatRegencyLabel } from "@/lib/regency";
+import { AreaResultCard } from "./AreaResultCard";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Coordinate } from "ol/coordinate";
@@ -149,6 +144,8 @@ export const AreaScopingComponent = () => {
     setAreaScopingPolygonFileSize(0);
     setAreaScopingPolygonError("");
     setPolygonData(null);
+    // Also drop the uploaded outline from the map (same as Reselect).
+    vectorSource?.clear();
   };
 
   const onClickDraw = () => {
@@ -324,13 +321,13 @@ export const AreaScopingComponent = () => {
               alt="map"
               width={24}
               height={24}
-              className="size-16 aspect-square text-primary-pink"
+              className="size-12 shrink-0 aspect-square text-primary-pink"
             />
             <div className="space-y-2">
-              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
+              <p className="font-noto-sans text-lg font-bold leading-7 text-text-icons-base-main">
                 {t("areaScoping.uploadSHPFile")}
               </p>
-              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
+              <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
                 {/* Here to generate the current <br /> condition data. */}
                 {t.rich("areaScoping.uploadSHPFileDescription", {
                   br: () => <br></br>,
@@ -350,193 +347,66 @@ export const AreaScopingComponent = () => {
           {!isAreaScopingLoading && (
             <>
               {areaScopingPolygonUrl && areaScopingPolygonError && (
-                <>
-                  <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
-                    <div className="flex flex-row gap-x-4 items-center col-span-10">
-                      <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
-                        <FileTextIcon className="text-danger-700 size-12 aspect-square" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
-                          {areaScopingPolygonFileName}
-                        </p>
-                        <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
-                          {shortenKiloByte(areaScopingPolygonFileSize)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="col-span-2 flex flex-row justify-end">
-                      <Button
-                        variant={"ghost"}
-                        className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                        onClick={() => {
-                          onRemoveFile();
-                        }}
-                      >
-                        <Trash2Icon className="text-danger-700 size-5" />
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
-                    <div className="flex flex-row gap-x-4 items-center col-span-12">
-                      <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                        <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                      </div>
-                      <div className="">
-                        <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                          {areaScopingPolygonError}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </>
+                <AreaResultCard
+                  icon={<FileTextIcon className="size-5" />}
+                  title={areaScopingPolygonFileName}
+                  subtitle={shortenKiloByte(areaScopingPolygonFileSize)}
+                  onRemove={onRemoveFile}
+                  error={{
+                    title: t("common.errors.uploadFailed"),
+                    description: areaScopingPolygonError,
+                  }}
+                />
               )}
 
-              {areaScopingPolygonUrl &&
-                !polygonData &&
-                areaScopingPolygonFileSize <= AREA_SCOPING_FILE_SIZE_LIMIT &&
-                !areaScopingPolygonError && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light-active grid grid-cols-12 gap-x-4 items-center bg-purple-second">
-                      <div className="col-span-12 flex flex-row gap-x-4 items-center">
-                        <div className="rounded-[12px] bg-secondary-purple-light-hover aspect-square size-18 flex justify-center items-center">
-                          <FileTextIcon className="text-secondary-purple-dark size-12 aspect-square" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-aptos text-lg font-bold leading-7 text-secondary-purple-dark line-clamp-1 text-ellipsis">
-                            {areaScopingPolygonFileName}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-secondary-purple-dark">
-                            {shortenKiloByte(areaScopingPolygonFileSize)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
+              {/* The picked file, then (once uploaded) its area too. */}
               {areaScopingPolygonUrl &&
                 !areaScopingPolygonError &&
-                polygonData &&
-                areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                  </>
+                areaScopingPolygonFileSize <= AREA_SCOPING_FILE_SIZE_LIMIT &&
+                (!polygonData ||
+                  areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT) && (
+                  <AreaResultCard
+                    icon={<FileTextIcon className="size-5" />}
+                    title={areaScopingPolygonFileName}
+                    subtitle={shortenKiloByte(areaScopingPolygonFileSize)}
+                    areaHa={polygonData ? areaScopingPolygonArea : undefined}
+                    onRemove={onRemoveFile}
+                  />
                 )}
 
               {areaScopingPolygonUrl &&
                 !areaScopingPolygonError &&
                 polygonData &&
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center col-span-10">
-                        <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                          <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                        </div>
-                        <div className="">
-                          <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.areaTooBigError")}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.areaTooBigErrorDesc", {
-                              X: "1,000,000 Ha",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="col-span-2 flex flex-row justify-end">
-                        <Button
-                          variant={"ghost"}
-                          className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                        >
-                          <Trash2Icon className="text-danger-700 size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={<FileTextIcon className="size-5" />}
+                    title={areaScopingPolygonFileName}
+                    subtitle={shortenKiloByte(areaScopingPolygonFileSize)}
+                    areaHa={areaScopingPolygonArea}
+                    onRemove={onRemoveFile}
+                    error={{
+                      title: t("common.areaTooBigError"),
+                      description: t("common.areaTooBigErrorDesc", {
+                        X: "1,000,000 Ha",
+                      }),
+                    }}
+                  />
                 )}
 
               {areaScopingPolygonUrl &&
                 areaScopingPolygonFileSize > AREA_SCOPING_FILE_SIZE_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 grid grid-cols-12 gap-x-4 items-center bg-danger-50">
-                      <div className="flex flex-row gap-x-4 items-center col-span-10">
-                        <div className="rounded-[12px] bg-danger-100 aspect-square size-18 flex justify-center items-center">
-                          <FileTextIcon className="text-danger-700 size-12 aspect-square" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-aptos text-lg font-bold leading-7 text-danger-600 line-clamp-1 text-ellipsis">
-                            {areaScopingPolygonFileName}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-danger-600">
-                            {shortenKiloByte(areaScopingPolygonFileSize)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-row justify-end">
-                        <Button
-                          variant={"ghost"}
-                          className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                          onClick={() => {
-                            onRemoveFile();
-                          }}
-                        >
-                          <Trash2Icon className="text-danger-700 size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 grid grid-cols-12 gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center col-span-10">
-                        <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                          <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                        </div>
-                        <div className="">
-                          <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.fileTooBigError", { X: "500" })}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.fileTooBigErrorDesc", {
-                              limit: "500MB",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex flex-row justify-end">
-                        <Button
-                          variant={"ghost"}
-                          className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                        >
-                          <Trash2Icon className="text-danger-700 size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={<FileTextIcon className="size-5" />}
+                    title={areaScopingPolygonFileName}
+                    subtitle={shortenKiloByte(areaScopingPolygonFileSize)}
+                    onRemove={onRemoveFile}
+                    error={{
+                      title: t("common.fileTooBigError", { X: "500" }),
+                      description: t("common.fileTooBigErrorDesc", {
+                        limit: "500MB",
+                      }),
+                    }}
+                  />
                 )}
 
               {!areaScopingPolygonUrl && (
@@ -585,7 +455,7 @@ export const AreaScopingComponent = () => {
                       <>
                         <div className="space-y-3">
                           <UploadIcon className="size-8 aspect-square text-text-icons-base-third mx-auto" />
-                          <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600 text-center">
+                          <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second text-center">
                             {/* Accepted format .zip (.shp, .shx, .dbf, .prj), .kml,
                             .kmz */}
                             {t("areaScoping.dragAndDrop")} <br />
@@ -643,13 +513,13 @@ export const AreaScopingComponent = () => {
               alt="map"
               width={105}
               height={90.81}
-              className="w-30 text-primary-pink p-1"
+              className="w-20 shrink-0 text-primary-pink p-1"
             />
             <div className="space-y-2">
-              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
+              <p className="font-noto-sans text-lg font-bold leading-7 text-text-icons-base-main">
                 {t("areaScoping.drawPolygon")}
               </p>
-              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
+              <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
                 {t("areaScoping.drawPolygonSubtitle")}
               </p>
             </div>
@@ -667,65 +537,40 @@ export const AreaScopingComponent = () => {
             <>
               {polygonData &&
                 areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={
+                      <Image
+                        src="/svgs/draw-polygon.svg"
+                        alt=""
+                        width={24}
+                        height={20}
+                        className="w-6 h-auto"
+                      />
+                    }
+                    areaHa={areaScopingPolygonArea}
+                  />
                 )}
 
               {polygonData &&
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center">
-                        <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                          <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                        </div>
-                        <div className="">
-                          <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.areaTooBigError")}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.areaTooBigErrorDesc", {
-                              X: "1,000,000 Ha",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="">
-                        <Button
-                          variant={"ghost"}
-                          className="hover:brightness-95 cursor-pointer size-7 rounded-full"
-                        >
-                          <Trash2Icon className="text-danger-700 size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={
+                      <Image
+                        src="/svgs/draw-polygon.svg"
+                        alt=""
+                        width={24}
+                        height={20}
+                        className="w-6 h-auto"
+                      />
+                    }
+                    areaHa={areaScopingPolygonArea}
+                    error={{
+                      title: t("common.areaTooBigError"),
+                      description: t("common.areaTooBigErrorDesc", {
+                        X: "1,000,000 Ha",
+                      }),
+                    }}
+                  />
                 )}
             </>
           )}
@@ -740,13 +585,13 @@ export const AreaScopingComponent = () => {
               alt="select-regency"
               width={24}
               height={24}
-              className="size-16 aspect-square text-primary-pink"
+              className="size-12 shrink-0 aspect-square text-primary-pink"
             />
             <div className="space-y-2">
-              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
+              <p className="font-noto-sans text-lg font-bold leading-7 text-text-icons-base-main">
                 {t("areaScoping.selectRegency")}
               </p>
-              <p className="font-aptos text-[13px] font-regular leading-4.5 text-neutrals-600">
+              <p className="font-aptos text-[13px] font-regular leading-4.5 text-text-icons-base-second">
                 {t("areaScoping.selectRegencySubtitle")}
               </p>
             </div>
@@ -777,58 +622,32 @@ export const AreaScopingComponent = () => {
           {!isAreaScopingLoading && (
             <>
               {polygonData &&
+                areaScopingRegency &&
                 areaScopingPolygonArea <= AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-secondary-purple-light flex flex-row justify-between gap-x-4 items-center bg-purple-second">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-secondary-purple-dark">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={<MapPinIcon className="size-5" />}
+                    title={formatRegencyLabel(areaScopingRegency)}
+                    areaHa={areaScopingPolygonArea}
+                  />
                 )}
 
               {polygonData &&
                 areaScopingPolygonArea > AREA_SCOPING_POLYGON_AREA_LIMIT && (
-                  <>
-                    <div className="px-3 py-3 rounded-[12px] border-2 border-dashed border-danger-200 flex flex-row justify-between gap-x-4 items-center bg-danger-50">
-                      <div className="space-y-3 text-center w-full">
-                        <p className="font-aptos text-lg font-semibold leading-7 text-text-icons-base-main">
-                          {t("areaScoping.selectedAreaHasTotalArea")}
-                        </p>
-                        <p className="font-noto-sans text-[32px] font-bold leading-10 tracking-[-0.48px] text-danger-700">
-                          {numberThousandSeparator(
-                            areaScopingPolygonArea.toFixed(0),
-                          )}{" "}
-                          Ha
-                        </p>
-                      </div>
-                    </div>
-                    <div className="px-3 py-3 rounded-[12px] border-danger-700 flex flex-row justify-between gap-x-4 items-center bg-danger-700">
-                      <div className="flex flex-row gap-x-4 items-center">
-                        <div className="rounded-[12px] bg-danger-500 aspect-square size-18 flex justify-center items-center">
-                          <AlertCircleIcon className="text-danger-100 size-12 aspect-square" />
-                        </div>
-                        <div className="">
-                          <p className="font-aptos text-lg font-bold leading-7 text-danger-50">
-                            {t("common.areaTooBigError")}
-                          </p>
-                          <p className="font-aptos text-sm font-regular leading-5 text-danger-50">
-                            {t("common.areaTooBigErrorDesc", {
-                              X: "1,000,000 Ha",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </>
+                  <AreaResultCard
+                    icon={<MapPinIcon className="size-5" />}
+                    title={
+                      areaScopingRegency
+                        ? formatRegencyLabel(areaScopingRegency)
+                        : undefined
+                    }
+                    areaHa={areaScopingPolygonArea}
+                    error={{
+                      title: t("common.areaTooBigError"),
+                      description: t("common.areaTooBigErrorDesc", {
+                        X: "1,000,000 Ha",
+                      }),
+                    }}
+                  />
                 )}
             </>
           )}
@@ -1101,8 +920,8 @@ export const AreaScopingFooter = () => {
     <div className="grid grid-cols-2 gap-x-4 p-3 pt-2">
       <Button
         disabled={isReselectDisabled}
-        variant="secondary"
-        className=""
+        variant="primary"
+        className="bg-primary-pink/60 hover:bg-primary-pink/70"
         onClick={() => {
           onReselect();
         }}

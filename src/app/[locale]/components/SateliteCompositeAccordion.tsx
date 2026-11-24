@@ -25,6 +25,13 @@ import { getTemporalYearRange } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
+import {
+  SectionTitle,
+  SummaryBox,
+  SummaryChangeLink,
+  SummaryField,
+} from "./SummaryField";
+import { useBasicInformationLabels } from "./useSummaryLabels";
 
 export const SateliteCompositeAccordion = () => {
   const {
@@ -40,6 +47,9 @@ export const SateliteCompositeAccordion = () => {
   } = useContext(MapGenerationContext);
 
   const t = useTranslations("InteractivePanel");
+  const { satelliteLabel } = useBasicInformationLabels();
+  // Saved: the section shows its summary instead of the form.
+  const isDone = !isEditingSatelliteComposite && !!satelliteSource;
 
   const yearRange = getTemporalYearRange(temporalCoverage, temporalCoverageUnit);
   const hasSelectedTimePeriod = yearRange !== null;
@@ -105,11 +115,32 @@ export const SateliteCompositeAccordion = () => {
         }
         className="hover:no-underline p-3 pb-0"
       >
-        <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {t("satelliteComposite.satelliteComposite")}
-        </p>
+        <SectionTitle
+          title={t("satelliteComposite.satelliteComposite")}
+          isDone={isDone}
+        />
       </AccordionFullTrigger>
       <AccordionContent className="mt-2 space-y-6 px-3 pb-0">
+        {isDone ? (
+          <SummaryBox className="mt-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+              <SummaryField
+                label={t("satelliteComposite.satellite")}
+                value={satelliteLabel}
+              />
+              <SummaryField
+                label={t("satelliteComposite.cloudCoverage")}
+                value={`${maximumCloudCover}%`}
+              />
+            </div>
+            {/* Reopens the form with the saved values. */}
+            <SummaryChangeLink
+              label={t("common.changeInput")}
+              onClick={() => setIsEditingSatelliteComposite(true)}
+            />
+          </SummaryBox>
+        ) : (
+        <>
         <p className="font-aptos text-md font-regular leading-6 text-neutral-700">
           {t("satelliteComposite.satelliteCompositeDescription")}
         </p>
@@ -214,6 +245,8 @@ export const SateliteCompositeAccordion = () => {
             {t("satelliteComposite.setSatelliteComposite")}
           </Button>
         </div>
+        </>
+        )}
       </AccordionContent>
     </AccordionItem>
   );

@@ -2,6 +2,7 @@ import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useTranslations } from "next-intl";
+import { HintBox, hintBold } from "./SummaryField";
 import { useContext } from "react";
 
 const SPATIAL_RESOLUTION_OPTIONS = [
@@ -40,7 +41,7 @@ export const SpatialResolutionSelect = () => {
       <div className="">
         <RadioGroup
           disabled={isDisabled}
-          className="grid grid-cols-2 gap-x-12 gap-y-2"
+          className="flex flex-row flex-wrap justify-between gap-x-6 gap-y-2"
           value={spatialResolution}
           onValueChange={setSpatialResolution}
         >
@@ -54,7 +55,7 @@ export const SpatialResolutionSelect = () => {
               />
               <Label
                 htmlFor={option.id}
-                className="font-aptos text-md font-semibold leading-6 text-text-icons-base-third"
+                className="font-aptos text-md font-semibold leading-6 text-text-icons-base-main"
               >
                 {t(option.labelKey)}
               </Label>
@@ -62,6 +63,16 @@ export const SpatialResolutionSelect = () => {
           ))}
         </RadioGroup>
       </div>
+      {/* Which step 2 classification each resolution allows (the default
+          scheme is only offered at 100 m, see DefineLUCComponent). */}
+      <HintBox>
+        {t.rich("areaScoping.resolutionClassificationHint", {
+          b: hintBold,
+          defaultName: t("defineLUC.useDefaultScheme"),
+          ownName: t("defineLUC.classifyOwnTemplate"),
+          resolution: t("areaScoping.100x100m2"),
+        })}
+      </HintBox>
     </div>
   );
 };
