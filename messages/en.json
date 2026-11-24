@@ -494,6 +494,8 @@
       "editModeCaption": "Click any class name or color swatch to change, click done to save",
       "done": "Done",
       "noColumnHeader": "No",
+      "idColumnHeader": "ID",
+      "colorColumnHeader": "Color",
       "selectClassColor": "Select LULC Class's Color",
       "recordedLULCFeature": "Recorded LULC Feature",
       "quickTableEmptyHint": "Add your LULC class here, you can also add the class color",

@@ -494,6 +494,8 @@
       "editModeCaption": "Klik nama kelas atau kotak warna untuk mengubah, klik selesai untuk menyimpan",
       "done": "Selesai",
       "noColumnHeader": "No",
+      "idColumnHeader": "ID",
+      "colorColumnHeader": "Warna",
       "selectClassColor": "Pilih Warna Kelas LULC",
       "recordedLULCFeature": "Fitur LULC Tercatat",
       "quickTableEmptyHint": "Tambahkan kelas LULC Anda di sini, Anda juga dapat menambahkan warna kelas",

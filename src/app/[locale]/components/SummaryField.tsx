@@ -185,6 +185,24 @@ export const SummaryDownloadButton = ({
   </Button>
 );
 
+// Pink "Edit …" link that sits next to SummaryDownloadButton on a summary
+// heading row (same weight as the download link, pencil instead of arrow).
+export const SummaryEditLink = ({
+  label,
+  onClick,
+  disabled,
+}: SummaryActionProps) => (
+  <Button
+    variant={"ghost"}
+    className="h-auto p-0 gap-1.5 shrink-0 cursor-pointer hover:bg-transparent font-aptos text-sm font-semibold text-primary-red-pink-normal hover:text-primary-red-pink-normal-active"
+    disabled={disabled}
+    onClick={onClick}
+  >
+    <SquarePenIcon className="size-4" />
+    {label}
+  </Button>
+);
+
 // Light-pink "Edit …" button between Back and Next in summary footers.
 export const SummaryEditButton = ({
   label,

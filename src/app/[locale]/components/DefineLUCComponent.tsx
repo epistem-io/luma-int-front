@@ -75,7 +75,7 @@ import {
   HintBox,
   hintBold,
   SummaryDownloadButton,
-  SummaryEditButton,
+  SummaryEditLink,
   SummaryField,
   SummaryHeading,
 } from "./SummaryField";
@@ -451,6 +451,19 @@ export const DefineLUCComponent = () => {
         row.color.toUpperCase(),
       ]),
     );
+  };
+
+  // Default classes are fixed, so editing returns to the default picker;
+  // own classes switch the summary into its inline edit mode. Either way
+  // Next stays disabled until the classes are confirmed again.
+  const onClickEditClasses = () => {
+    if (lucDefaultConfirmed) {
+      setLucDefaultConfirmed(false);
+      setLucView("default");
+      return;
+    }
+    setLucQuickPhase("locked");
+    setLucExcelConfirmed(false);
   };
 
   const onUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -918,11 +931,22 @@ export const DefineLUCComponent = () => {
 
                 <div className="space-y-2">
                   <div className="flex flex-row items-center justify-between gap-x-3">
-                    <SummaryHeading>{t("defineLUC.recordedClasses")}</SummaryHeading>
-                    <SummaryDownloadButton
-                      label={t("defineLUC.downloadCsv")}
-                      onClick={onDownloadClassesCsv}
-                    />
+                    <p className="font-aptos text-md font-bold leading-6 text-text-icons-base-main">
+                      {t("defineLUC.classRecordedCount", {
+                        X: summaryRows.length,
+                      })}
+                    </p>
+                    <div className="flex flex-row items-center gap-x-4">
+                      <SummaryDownloadButton
+                        label={t("defineLUC.downloadCsv")}
+                        onClick={onDownloadClassesCsv}
+                      />
+                      <SummaryEditLink
+                        label={t("defineLUC.editClasses")}
+                        disabled={isLUCLoading}
+                        onClick={onClickEditClasses}
+                      />
+                    </div>
                   </div>
                   <ClassSummaryTable rows={summaryRows} />
                 </div>
@@ -1521,10 +1545,6 @@ export const DefineLUCFooter = () => {
     setDataTrainingActiveTab,
     classArray,
     setQuickManualSampling,
-    setLucQuickPhase,
-    setLucExcelConfirmed,
-    setLucDefaultConfirmed,
-    setLucView,
   } = mapGenerationContext;
 
   const { markerArray, setMarkerArray, renderArrayToMarkerVector } =
@@ -1735,19 +1755,6 @@ export const DefineLUCFooter = () => {
   const { goToStep } = useStepNavigation();
   const onClickBack = () => goToStep(1);
 
-  // Default classes are fixed, so editing returns to the default picker;
-  // own classes switch the summary into its inline edit mode. Either way
-  // Next stays disabled until the classes are confirmed again.
-  const onClickEditClasses = () => {
-    if (lucDefaultConfirmed) {
-      setLucDefaultConfirmed(false);
-      setLucView("default");
-      return;
-    }
-    setLucQuickPhase("locked");
-    setLucExcelConfirmed(false);
-  };
-
   return (
     <>
     <ConfirmDialog
@@ -1773,13 +1780,6 @@ export const DefineLUCFooter = () => {
         >
           <ChevronLeft className="text-primary-pink size-4" />
         </Button>
-      )}
-      {showNextButton && (
-        <SummaryEditButton
-          label={t("defineLUC.editClasses")}
-          disabled={isLUCLoading || isSaving}
-          onClick={onClickEditClasses}
-        />
       )}
       {showNextButton && isLUCLoading && (
         <div className="flex-1 h-10 flex flex-row justify-center items-center">

@@ -38,11 +38,11 @@ export const ClassSummaryTable = ({
         <thead className="sticky top-0 z-10 bg-primary-red-pink-light">
           <tr>
             <th className={cn(HEAD_CLS, "w-14")}>
-              {t("defineLUC.noColumnHeader")}
+              {t("defineLUC.idColumnHeader")}
             </th>
             <th className={HEAD_CLS}>{t("defineLUC.lulcClassHeader")}</th>
             <th className={cn(HEAD_CLS, "w-32")}>
-              {t("defineLUC.colorClassHeader")}
+              {t("defineLUC.colorColumnHeader")}
             </th>
             {showPoints && (
               <th className={cn(HEAD_CLS, "w-20")}>
@@ -55,7 +55,7 @@ export const ClassSummaryTable = ({
           {rows.map((row, index) => (
             <tr
               key={`${row.name}-${index}`}
-              className="border-t border-text-icons-base-fourth"
+              className="border-t border-text-icons-base-fourth/60 even:bg-neutral-50"
             >
               <td className={CELL_CLS}>{index + 1}</td>
               <td className={CELL_CLS}>{row.name}</td>
