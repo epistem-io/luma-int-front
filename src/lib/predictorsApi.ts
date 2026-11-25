@@ -467,3 +467,189 @@ export const isSeparabilityStale = (
 export const formatScore = (value: number) => value.toFixed(2);
 
 export const formatShare = (ratio: number) => `${Math.round(ratio * 100)}%`;
+
+// ---------------------------------------------------------------------------
+// Step 4 layout: the Predictor Selection card and the Predictor selection
+// quality card, which sets the score with predictors beside the score from
+// step 3 (both are the usual Mean TD summary).
+
+/** What the note at the top of the Predictor Selection card is about. */
+export type PredictorNoteState =
+  | "running"
+  | "failed"
+  | "outdated"
+  | "ready"
+  | "none";
+
+/** Follows the automatic choice of predictors. */
+export const predictorNoteState = (
+  status: "idle" | "running" | "error",
+  recommendation: PredictorRecommendation | null | undefined,
+): PredictorNoteState => {
+  if (status === "running") return "running";
+  if (status === "error") return "failed";
+  if (!recommendation) return "none";
+  return recommendation.stale ? "outdated" : "ready";
+};
+
+/**
+ * The groups shown open until the user opens or closes one: those that hold
+ * a ticked predictor, so an automatic choice is never hidden in a closed
+ * group, or the first group when nothing is ticked.
+ */
+export const defaultOpenPredictorGroups = (
+  groups: PredictorGroup[],
+  selected: string[],
+): string[] => {
+  const withTicks = groups
+    .filter((group) =>
+      group.predictors.some((predictor) => selected.includes(predictor.id)),
+    )
+    .map((group) => group.key);
+  if (withTicks.length > 0) return withTicks;
+  return groups.length > 0 ? [groups[0].key] : [];
+};
+
+/**
+ * The two scores the quality card compares. Before a step 4 check, the left
+ * one is the score from step 3 (when the user ran it there). A check returns
+ * the satellite-bands-only score of the same run, which then replaces it so
+ * that both sides are computed the same way.
+ */
+export const qualityScores = (
+  stepThree: SampleQualityResult | null,
+  check: PredictorSeparabilityResult | null,
+): { before: SampleQualityResult | null; after: SampleQualityResult | null } => {
+  if (!check) return { before: stepThree, after: null };
+
+  const sets = separabilitySets(check.comparison);
+  return {
+    before: sets.before?.td ?? stepThree,
+    after: sets.after?.td ?? check.sample_quality,
+  };
+};
+
+export type ScoreDirection = "up" | "same" | "down";
+
+/**
+ * The change in Mean TD from the left score to the right one, at the two
+ * decimals the scores are shown with.
+ */
+export const scoreChange = (
+  before: SampleQualityResult | null,
+  after: SampleQualityResult | null,
+): { delta: number; direction: ScoreDirection } | null => {
+  if (!before || !after) return null;
+
+  // + 0 turns a rounded -0 into 0.
+  const delta = Math.round((after.mean_td - before.mean_td) * 100) / 100 + 0;
+  return {
+    delta,
+    direction: delta > 0 ? "up" : delta < 0 ? "down" : "same",
+  };
+};
+
+/** "+0.52", "-0.12", "0.00". */
+export const formatScoreDelta = (delta: number) =>
+  `${delta > 0 ? "+" : ""}${delta.toFixed(2)}`;
+
+export type StepFourScoreState =
+  | "loading"
+  | "error"
+  | "result"
+  | "outdated"
+  | "empty";
+
+/** What the "Sample Quality from Step 4" column shows. */
+export const stepFourScoreState = (input: {
+  isLoading: boolean;
+  error: string;
+  check: PredictorSeparabilityResult | null;
+  selected: string[];
+}): StepFourScoreState => {
+  if (input.isLoading) return "loading";
+  if (input.error !== "") return "error";
+  if (!input.check) return "empty";
+  return isSeparabilityStale(input.check.comparison, input.selected)
+    ? "outdated"
+    : "result";
+};
+
+/** Why the score cannot be checked yet; null when it can. */
+export const qualityCheckBlocker = (input: {
+  /** "Set Predictor" was pressed for the current ticks. */
+  isSet: boolean;
+  selected: string[];
+}): "notSet" | "noPredictors" | null => {
+  if (!input.isSet) return "notSet";
+  if (input.selected.length === 0) return "noPredictors";
+  return null;
+};
+
+/**
+ * Reselecting: "Set Predictor & check score" needs at least one ticked
+ * predictor and a selection that differs from the one last checked.
+ */
+export const isNewSelectionToCheck = (
+  check: PredictorSeparabilityResult | null,
+  selected: string[],
+) =>
+  selected.length > 0 &&
+  (!check || isSeparabilityStale(check.comparison, selected));
+
+/**
+ * The score the user ended up with: the one with predictors when the ticked
+ * predictors were checked, otherwise the one from step 3. Null when no score
+ * was ever computed.
+ */
+export const latestScore = (
+  stepThree: SampleQualityResult | null,
+  check: PredictorSeparabilityResult | null,
+  selected: string[],
+): SampleQualityResult | null => {
+  const current =
+    check && !isSeparabilityStale(check.comparison, selected) ? check : null;
+  const { before, after } = qualityScores(stepThree, current);
+  return after ?? before;
+};
+
+/**
+ * Step 4's three cards: which are done (ticked), and whether Next may be
+ * pressed, which needs all three.
+ */
+export const stepFourProgress = (input: {
+  isAutoPointsFlow: boolean;
+  /** "Set Predictor" was pressed. */
+  isSelectionSet: boolean;
+  selected: string[];
+  /** "Yes, continue" was pressed on the score comparison. */
+  isQualityAccepted: boolean;
+  scoreState: StepFourScoreState;
+  /** "Set Variable" was pressed. */
+  isModelSet: boolean;
+}) => {
+  // The default classification fixes the predictors and the model settings.
+  if (input.isAutoPointsFlow) {
+    return { selection: true, quality: true, model: true, canContinue: true };
+  }
+
+  const selection = input.isSelectionSet;
+  // Without predictors there is no new score to compare, so none is needed.
+  const quality =
+    selection &&
+    (input.selected.length === 0 ||
+      (input.isQualityAccepted && input.scoreState === "result"));
+  const model = input.isModelSet;
+
+  return { selection, quality, model, canContinue: selection && quality && model };
+};
+
+/**
+ * A count tile's label ("Good > 1.8") as its name and its range, so the
+ * tile can show them on two lines. A label with no range, or with nothing
+ * before it, stays whole.
+ */
+export const splitScoreTileLabel = (label: string): [string, string] => {
+  const match = label.match(/^(.*?)\s*((?:[<>\u2264\u2265]=?\s*)?\d.*)$/);
+  return match && match[1] ? [match[1], match[2]] : [label, ""];
+};

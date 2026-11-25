@@ -2,17 +2,11 @@
 
 import { ComingSoon } from "@/components/ComingSoon";
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { useSavingTransition } from "@/lib/hooks";
 import { cn, shortenKiloByte, svgWithColor } from "@/lib/utils";
 import {
   ArrowRight,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   CirclePlus,
@@ -229,7 +223,6 @@ export const DefineLUCComponent = () => {
 
   const { sessionId } = useContext(GlobalContext);
 
-  const [hierarchyOpen, setHierarchyOpen] = useState(true);
   const [aiSectionOpen, setAISectionOpen] = useState(false);
   const [aiPrompt, setAIPrompt] = useState("");
   const [fileEnter, setFileEnter] = useState(false);
@@ -730,30 +723,10 @@ export const DefineLUCComponent = () => {
 
   return (
     <div className="space-y-4">
-      <Collapsible open={hierarchyOpen} onOpenChange={setHierarchyOpen}>
-        <div
-          className={cn(
-            !isFlowView &&
-              !isSummaryShown &&
-              "rounded-[12px] bg-white p-3 border border-neutral-400 space-y-6",
-          )}
-        >
-          {/* Card chrome + Hierarchy header only frame the picker; the
-              summary renders flat under the panel title like the flows. */}
-          {!isFlowView && !isSummaryShown && (
-            <CollapsibleTrigger className="w-full flex flex-row items-center justify-between cursor-pointer">
-              <p className="font-aptos text-xl font-bold leading-6 text-text-icons-base-main">
-                {t("defineLUC.LUCHierarchy")}
-              </p>
-              <ChevronDown
-                className={cn(
-                  "size-5 text-text-icons-base-main transition-transform duration-200",
-                  hierarchyOpen && "rotate-180",
-                )}
-              />
-            </CollapsibleTrigger>
-          )}
-          <CollapsibleContent className="collapsible-content-primitive space-y-6">
+        {/* Every view (scheme picker, the flows, the summary) renders flat
+            under the panel title. */}
+        <div>
+          <div className="space-y-6">
             {isSummaryEditing ? (
               <div className="space-y-4">
                 {/* The edit-mode banner renders at the panel level (in
@@ -952,10 +925,7 @@ export const DefineLUCComponent = () => {
                 </div>
               </div>
             ) : lucView === "picker" ? (
-              <div className="space-y-6">
-                <p className="font-aptos text-md font-regular leading-6 text-neutral-700-baru">
-                  {t("defineLUC.LUCHierarchyDescription")}
-                </p>
+              <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-x-4">
                   <button
                     type="button"
@@ -1500,7 +1470,7 @@ export const DefineLUCComponent = () => {
                   </div>
                 </div>
             )}
-          </CollapsibleContent>
+          </div>
 
           <input
             id="luc-template-file-upload"
@@ -1511,7 +1481,6 @@ export const DefineLUCComponent = () => {
             onChange={onUploadFile}
           />
         </div>
-      </Collapsible>
     </div>
   );
 };
@@ -1586,8 +1555,11 @@ export const DefineLUCFooter = () => {
   const showBackButton =
     lucView === "picker" || lucQuickPhase === "confirmed" || lucDefaultConfirmed;
 
-  // Next only exists on step 2's final panel: the confirmed summary.
-  const showNextButton = lucQuickPhase === "confirmed" || lucDefaultConfirmed;
+  // Next acts on step 2's final panel, the confirmed summary. The scheme
+  // picker shows it too, disabled, so the way forward is visible there.
+  const isFinalPanel = lucQuickPhase === "confirmed" || lucDefaultConfirmed;
+  const isPickerPanel = lucView === "picker" && !isFinalPanel;
+  const showNextButton = isFinalPanel || isPickerPanel;
 
   // The classes step 2 would hand to step 3, in submit order.
   const confirmedClasses = getConfirmedClasses({
@@ -1789,9 +1761,10 @@ export const DefineLUCFooter = () => {
       {showNextButton && !isLUCLoading && (
         <Button
           onClick={() => runWithSaving(onClickNext)}
-          disabled={isNextDisabled || isSaving}
+          disabled={isNextDisabled || isSaving || isPickerPanel}
           variant="primary"
-          className="flex-1"
+          // On the picker it sits at the right, as in steps 1 and 4.
+          className={isPickerPanel ? "ml-auto w-1/2" : "flex-1"}
         >
           {isSaving ? (
             <>

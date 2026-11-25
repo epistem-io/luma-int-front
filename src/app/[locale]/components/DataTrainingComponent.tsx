@@ -326,8 +326,10 @@ export const DataTrainingScoreBanner = () => {
               {t("dataTraining.separabilityParamsDescription")}
             </p>
           </div>
+          {/* Each input sits at the bottom of its column, so the two stay
+              level when one label wraps onto a second line. */}
           <div className="grid grid-cols-2 gap-x-4">
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-y-1.5">
               <Label
                 htmlFor="separability-scale"
                 className="m-0 font-aptos text-md font-regular leading-6 text-text-icons-base-main"
@@ -355,10 +357,10 @@ export const DataTrainingScoreBanner = () => {
                     ),
                   )
                 }
-                className="h-11 rounded-[8px] bg-white font-aptos text-md"
+                className="mt-auto h-11 rounded-[8px] bg-white font-aptos text-md"
               />
             </div>
-            <div className="space-y-1.5">
+            <div className="flex flex-col gap-y-1.5">
               <Label
                 htmlFor="separability-max-pixels"
                 className="m-0 font-aptos text-md font-regular leading-6 text-text-icons-base-main"
@@ -386,7 +388,7 @@ export const DataTrainingScoreBanner = () => {
                     ),
                   )
                 }
-                className="h-11 rounded-[8px] bg-white font-aptos text-md"
+                className="mt-auto h-11 rounded-[8px] bg-white font-aptos text-md"
               />
             </div>
           </div>

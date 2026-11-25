@@ -6,7 +6,7 @@ import { PANEL_COMPONENT_KEY, PREDICTOR_URL } from "@/constants";
 import { useContext, useState } from "react";
 import { useSavingTransition } from "@/lib/hooks";
 import { useTranslations } from "next-intl";
-import { ChevronLeft } from "lucide-react";
+import { ArrowRight, ChevronLeft } from "lucide-react";
 import { GlobalContext } from "@/contexts/globalContext";
 import { showErrorToast } from "@/components/ui/error-toast";
 import {
@@ -15,17 +15,33 @@ import {
   SummaryField,
   SummaryHeading,
 } from "./SummaryField";
+import { latestScore } from "@/lib/predictorsApi";
+import { QualityScoreFields } from "./PredictorQualityAccordion";
 import { useSelectedPredictorLabels } from "./useSummaryLabels";
 import { useStepNavigation } from "./useStepNavigation";
+import { useTranslateOr } from "./useTranslateOr";
 
-// Step 4's last screen: the chosen predictors, Random Forest settings and
-// training/testing split. "Edit" reopens the parameter form with the
-// current values kept.
+// Step 4's last screen: the chosen predictors, their latest score, Random
+// Forest settings and training/testing split. "Edit" reopens the parameter
+// form with the current values kept.
 export const LULCClassSummaryComponent = () => {
-  const { numberOfTrees, minLeafPopulation, splitRatio } =
-    useContext(MapGenerationContext);
+  const {
+    numberOfTrees,
+    minLeafPopulation,
+    splitRatio,
+    isAutoPointsFlow,
+    selectedPredictors,
+    sampleQuality,
+    predictorSeparability,
+  } = useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
+  const translateOr = useTranslateOr();
   const predictorLabels = useSelectedPredictorLabels();
+  // The latest score calculation: with the predictors when they were
+  // checked, otherwise the one from step 3.
+  const score = isAutoPointsFlow
+    ? null
+    : latestScore(sampleQuality, predictorSeparability, selectedPredictors);
 
   return (
     <div className="p-3 rounded-xl border-[1.5px] border-dashed border-primary-pink/40 bg-primary-red-pink-light space-y-4">
@@ -46,6 +62,22 @@ export const LULCClassSummaryComponent = () => {
           </p>
         )}
       </section>
+
+      {score && (
+        <>
+          <div className="h-px w-full bg-primary-pink/25" />
+
+          <section className="space-y-3">
+            <SummaryHeading>
+              {translateOr(
+                "lulcParams.quality.title",
+                "Predictor selection quality",
+              )}
+            </SummaryHeading>
+            <QualityScoreFields score={score} />
+          </section>
+        </>
+      )}
 
       <div className="h-px w-full bg-primary-pink/25" />
 
@@ -179,7 +211,12 @@ export const LULCClassSummaryFooter = () => {
             {t("common.saving")}
           </>
         ) : (
-          t("finalSummary.generateMap")
+          // "Next", as on the other summary screens: the map itself is
+          // started from the final summary dialog this opens.
+          <>
+            {t("common.next")}
+            <ArrowRight className="size-4" />
+          </>
         )}
       </Button>
     </div>

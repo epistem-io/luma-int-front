@@ -8,12 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { PANEL_COMPONENT_KEY } from "@/constants";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
+import {
+  SectionTitle,
+  SummaryBox,
+  SummaryChangeLink,
+  SummaryField,
+  SummaryHeading,
+} from "./SummaryField";
+import { useStepNavigation } from "./useStepNavigation";
 
 const SPLIT_RATIO_TICKS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 
@@ -29,12 +36,16 @@ export const RandomForestAccordion = () => {
     setMinLeafPopulationError,
     splitRatio,
     setSplitRatio,
-    setLULCParamsOpenAccordion,
-    setStepKey,
-    setProgressPanelIndex,
     isAutoPointsFlow,
+    isModelSettingsSet,
+    setIsModelSettingsSet,
   } = useContext(MapGenerationContext);
+  const { isViewOnly } = useStepNavigation();
 
+  // The default classification fixes these settings: nothing to set. A
+  // step opened from Your Map shows the summary, read-only.
+  const showSummary = !isAutoPointsFlow && (isModelSettingsSet || isViewOnly);
+  const isDone = isAutoPointsFlow || isModelSettingsSet || isViewOnly;
 
   const [hasSlid, setHasSlid] = useState(false);
 
@@ -69,9 +80,8 @@ export const RandomForestAccordion = () => {
     return "";
   };
 
-  // Validates and applies both fields; on success it behaves exactly like
-  // the footer's Next: collapse the accordion and open the mapping-parameter
-  // summary view.
+  // Validates and applies both fields; on success the card is ticked and
+  // shows its summary. Going on to the last screen is the footer's Next.
   const onClickSetVariable = () => {
     const treesError = validateField(
       numberOfTrees,
@@ -95,9 +105,7 @@ export const RandomForestAccordion = () => {
 
     setNumberOfTrees(numberOfTrees.trim());
     setMinLeafPopulation(minLeafPopulation.trim());
-    setLULCParamsOpenAccordion("");
-    setStepKey(PANEL_COMPONENT_KEY.LULC_PARAMS_SUMMARY);
-    setProgressPanelIndex(3);
+    setIsModelSettingsSet(true);
   };
 
   return (
@@ -113,10 +121,57 @@ export const RandomForestAccordion = () => {
         }
         className="hover:no-underline p-3 pb-0"
       >
-        <p className="font-noto-sans text-xl font-semibold leading-7 tracking-[-0.2px] text-primary-pink">
-          {tInteractive("lulcParams.RFVariable")}
-        </p>
+        <SectionTitle
+          title={tInteractive("lulcParams.RFVariable")}
+          isDone={isDone}
+        />
       </AccordionFullTrigger>
+
+      {showSummary && (
+        <AccordionContent className="mt-3 px-3 pb-0">
+          <SummaryBox className="space-y-3">
+            <SummaryHeading>
+              {tInteractive("lulcParams.RFVariableSummary")}
+            </SummaryHeading>
+            <div className="grid grid-cols-2 gap-x-4">
+              <SummaryField
+                label={tInteractive("lulcParams.nOfTree")}
+                value={numberOfTrees.trim() || "-"}
+              />
+              <SummaryField
+                label={tInteractive("lulcParams.minLeafPop")}
+                value={minLeafPopulation.trim() || "-"}
+              />
+            </div>
+            <div className="h-px w-full bg-primary-pink/25" />
+            <SummaryHeading>
+              {tInteractive("lulcParams.splitRatioSummary")}
+            </SummaryHeading>
+            <div className="relative">
+              <div className="grid grid-cols-2 gap-x-4">
+                <SummaryField
+                  label={tInteractive("lulcParams.training")}
+                  value={`${splitRatio}%`}
+                />
+                <SummaryField
+                  label={tInteractive("lulcParams.testing")}
+                  value={`${100 - splitRatio}%`}
+                />
+              </div>
+              {!isViewOnly && (
+                <div className="absolute bottom-0 right-0">
+                  <SummaryChangeLink
+                    label={tInteractive("common.changeInput")}
+                    onClick={() => setIsModelSettingsSet(false)}
+                  />
+                </div>
+              )}
+            </div>
+          </SummaryBox>
+        </AccordionContent>
+      )}
+
+      {!showSummary && (
       <AccordionContent className="mt-2 space-y-6 px-3 pb-3">
         <div className="">
           <p className="text-l-medium font-aptos text-base font-normal leading-6 text-neutral-700-baru">
@@ -254,6 +309,7 @@ export const RandomForestAccordion = () => {
           </Button>
         </div>
       </AccordionContent>
+      )}
     </AccordionItem>
   );
 };

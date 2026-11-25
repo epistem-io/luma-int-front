@@ -1,5 +1,6 @@
 import { Accordion } from "@/components/ui/accordion";
 import { SelectPredictorAccordion } from "./SelectPredictorAccordion";
+import { PredictorQualityAccordion } from "./PredictorQualityAccordion";
 import { RandomForestAccordion } from "./RandomForestAccordion";
 import { useContext } from "react";
 import { MapGenerationContext } from "@/contexts/mapGenerationContext";
@@ -7,6 +8,7 @@ import { PANEL_COMPONENT_KEY } from "@/constants";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useStepFourProgress } from "./useStepFourProgress";
 import { useStepNavigation } from "./useStepNavigation";
 
 export const LULCParamsComponent = () => {
@@ -25,6 +27,7 @@ export const LULCParamsComponent = () => {
         className="space-y-4"
       >
         <SelectPredictorAccordion />
+        <PredictorQualityAccordion />
         <RandomForestAccordion />
         {/* <AreaScopingAccordion />
         <TimePeriodAccordion />
@@ -48,7 +51,10 @@ export const LULCParamsFooter = () => {
   } = useContext(MapGenerationContext);
   const t = useTranslations("InteractivePanel");
 
-  const isNextDisabled = false;
+  // Every card of the step has to be ticked first: predictors set, their
+  // score accepted, model settings set.
+  const { canContinue } = useStepFourProgress();
+  const isNextDisabled = !canContinue;
 
   const isBackDisabled = false;
 

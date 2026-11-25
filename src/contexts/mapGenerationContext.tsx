@@ -42,6 +42,7 @@ export type LULCSummaryEditSection =
 export type LULCParamsAccordionSection =
   | ""
   | "predictor"
+  | "predictor-quality"
   | "random-forest"
   | "data-validation";
 
@@ -261,6 +262,18 @@ export interface MapGenerationContextType {
     sessionId: string,
     predictorIds: string[],
   ) => void;
+  /** "Set Predictor" was pressed for the current ticks (step 4). */
+  isPredictorSelectionSet: boolean;
+  setIsPredictorSelectionSet: Dispatch<SetStateAction<boolean>>;
+  /** Back in the predictor list after "No, try other predictors". */
+  isReselectingPredictors: boolean;
+  setIsReselectingPredictors: Dispatch<SetStateAction<boolean>>;
+  /** "Yes, continue" was pressed on the current score comparison. */
+  isPredictorQualityAccepted: boolean;
+  setIsPredictorQualityAccepted: Dispatch<SetStateAction<boolean>>;
+  /** "Set Variable" was pressed for the current model settings. */
+  isModelSettingsSet: boolean;
+  setIsModelSettingsSet: Dispatch<SetStateAction<boolean>>;
   numberOfTrees: string;
   setNumberOfTrees: Dispatch<SetStateAction<string>>;
   numberOfTreesError: string;
@@ -458,6 +471,14 @@ const DEFAULT_VALUE: MapGenerationContextType = {
   isPredictorSeparabilityLoading: false,
   predictorSeparabilityError: "",
   checkPredictorSeparability: () => {},
+  isPredictorSelectionSet: false,
+  setIsPredictorSelectionSet: () => {},
+  isReselectingPredictors: false,
+  setIsReselectingPredictors: () => {},
+  isPredictorQualityAccepted: false,
+  setIsPredictorQualityAccepted: () => {},
+  isModelSettingsSet: false,
+  setIsModelSettingsSet: () => {},
   numberOfTrees: "150",
   setNumberOfTrees: () => {},
   numberOfTreesError: "",
@@ -931,6 +952,21 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
       });
   };
 
+  // Step 4 walks through three cards: set the predictors, compare the score,
+  // then the model settings. Kept here because the cards are siblings.
+  const [isPredictorSelectionSet, setIsPredictorSelectionSet] = useState(
+    DEFAULT_VALUE.isPredictorSelectionSet,
+  );
+  const [isReselectingPredictors, setIsReselectingPredictors] = useState(
+    DEFAULT_VALUE.isReselectingPredictors,
+  );
+  const [isPredictorQualityAccepted, setIsPredictorQualityAccepted] = useState(
+    DEFAULT_VALUE.isPredictorQualityAccepted,
+  );
+  const [isModelSettingsSet, setIsModelSettingsSet] = useState(
+    DEFAULT_VALUE.isModelSettingsSet,
+  );
+
   const [numberOfTrees, setNumberOfTrees] = useState<string>(
     DEFAULT_VALUE.numberOfTrees,
   );
@@ -1064,6 +1100,10 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
       DEFAULT_VALUE.isPredictorSeparabilityLoading,
     );
     setPredictorSeparabilityError(DEFAULT_VALUE.predictorSeparabilityError);
+    setIsPredictorSelectionSet(DEFAULT_VALUE.isPredictorSelectionSet);
+    setIsReselectingPredictors(DEFAULT_VALUE.isReselectingPredictors);
+    setIsPredictorQualityAccepted(DEFAULT_VALUE.isPredictorQualityAccepted);
+    setIsModelSettingsSet(DEFAULT_VALUE.isModelSettingsSet);
     setNumberOfTrees(DEFAULT_VALUE.numberOfTrees);
     setNumberOfTreesError(DEFAULT_VALUE.numberOfTreesError);
     setMinLeafPopulation(DEFAULT_VALUE.minLeafPopulation);
@@ -1252,6 +1292,14 @@ const MapGenerationContextContainer = (props: PropsWithChildren) => {
     isPredictorSeparabilityLoading,
     predictorSeparabilityError,
     checkPredictorSeparability,
+    isPredictorSelectionSet,
+    setIsPredictorSelectionSet,
+    isReselectingPredictors,
+    setIsReselectingPredictors,
+    isPredictorQualityAccepted,
+    setIsPredictorQualityAccepted,
+    isModelSettingsSet,
+    setIsModelSettingsSet,
     numberOfTrees,
     setNumberOfTrees,
     numberOfTreesError,
