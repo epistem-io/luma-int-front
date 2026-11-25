@@ -899,7 +899,14 @@
       "followUpDialogTitle": "Satisfied with your map?",
       "followUpDialogDescription": "If satisfied, export, share, or save your map.<br></br>If not, further refine parameters/input to improve accuracy.",
       "downloadMap": "Download map",
-      "downloadReport": "Download report",
+      "downloadReport": "Download PDF Report",
+      "reportDialog": {
+        "title": "Download PDF Report",
+        "description": "Choose the language your report will be written in. You can download it again in the other language anytime.",
+        "english": "English",
+        "indonesian": "Bahasa Indonesia",
+        "download": "Download PDF Report"
+      },
       "shareMap": "Share map",
       "shareDialogDescription": "Send the mapping results to someone by email. They will receive a link to view the results.",
       "shareRecipientName": "Recipient's name",

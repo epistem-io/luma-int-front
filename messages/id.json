@@ -899,7 +899,14 @@
       "followUpDialogTitle": "Sudah puas dengan peta Anda?",
       "followUpDialogDescription": "Jika ya, unduh, bagikan, atau simpan peta Anda. <br></br> Jika belum, sesuaikan pengaturan/input lebih lanjut untuk meningkatkan akurasi.",
       "downloadMap": "Unduh peta",
-      "downloadReport": "Unduh laporan",
+      "downloadReport": "Unduh Laporan PDF",
+      "reportDialog": {
+        "title": "Unduh Laporan PDF",
+        "description": "Pilih bahasa yang digunakan untuk laporan Anda. Anda dapat mengunduhnya lagi dalam bahasa lain kapan saja.",
+        "english": "English",
+        "indonesian": "Bahasa Indonesia",
+        "download": "Unduh Laporan PDF"
+      },
       "shareMap": "Bagikan peta",
       "shareDialogDescription": "Kirim hasil pemetaan kepada seseorang melalui email. Mereka akan menerima tautan untuk melihat hasilnya.",
       "shareRecipientName": "Nama penerima",
