@@ -12,7 +12,7 @@ import { REPORT_REQUEST_URL } from "@/constants";
 import { GlobalContext } from "@/contexts/globalContext";
 import { UnauthorizedError, fetchWithAuth } from "@/lib/fetchWithAuth";
 import { cn } from "@/lib/utils";
-import { Loader2, X } from "lucide-react";
+import { Check, Loader2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import { useTranslateOr } from "./useTranslateOr";
@@ -34,19 +34,37 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-// Opened from "Download PDF Report" in the Your Map dialog: the user picks
-// the report's language, then downloads it.
+// Opened from "Download PDF Report" in the Your Map dialog. Three states:
+// choose the report's language, wait while it is built (a quarter of a
+// minute or more), and a confirmation once the file is saved.
 export const ReportDownloadDialog = ({ open, onOpenChange }: Props) => {
   const commonT = useTranslations("InteractivePanel.common");
   const translateOr = useTranslateOr();
   const { sessionId, setIsLoginModalOpen } = useContext(GlobalContext);
   const [language, setLanguage] = useState<ReportLanguage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // The report that was just saved, kept so "Download again" is instant.
+  const [downloaded, setDownloaded] = useState<{
+    filename: string;
+    blob: Blob;
+  } | null>(null);
 
-  // Each opening starts with no language chosen.
+  // Each opening starts from the language choice.
   useEffect(() => {
-    if (open) setLanguage(null);
+    if (open) {
+      setLanguage(null);
+      setDownloaded(null);
+    }
   }, [open]);
+
+  const saveFile = (file: { filename: string; blob: Blob }) => {
+    const url = URL.createObjectURL(file.blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = file.filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   const downloadReport = async () => {
     if (!language) return;
@@ -85,15 +103,13 @@ export const ReportDownloadDialog = ({ open, onOpenChange }: Props) => {
       const bytes = Uint8Array.from(atob(json.content), (char) =>
         char.charCodeAt(0),
       );
-      const blob = new Blob([bytes], { type: json.mimetype });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = json.filename;
-      link.click();
-      URL.revokeObjectURL(url);
-
-      onOpenChange(false);
+      const file = {
+        filename: json.filename,
+        blob: new Blob([bytes], { type: json.mimetype }),
+      };
+      saveFile(file);
+      // Stay open and say so: the browser may save the file without a sign.
+      setDownloaded(file);
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         setIsLoginModalOpen(true);
@@ -112,6 +128,10 @@ export const ReportDownloadDialog = ({ open, onOpenChange }: Props) => {
   const downloadLabel = translateOr(
     "yourMap.reportDialog.download",
     "Download PDF Report",
+  );
+  const preparingLabel = translateOr(
+    "yourMap.reportDialog.preparingTitle",
+    "Preparing your report…",
   );
 
   return (
@@ -139,18 +159,87 @@ export const ReportDownloadDialog = ({ open, onOpenChange }: Props) => {
           </button>
         </div>
 
+        {downloaded && (
+          <div className="space-y-5 px-5 pb-5 pt-2">
+            <div className="space-y-2 text-center" aria-live="polite">
+              <span className="mx-auto flex size-10 items-center justify-center rounded-full bg-green-600">
+                <Check className="size-6 text-white" strokeWidth={3} />
+              </span>
+              <DialogTitle className="text-2xl font-bold leading-8 tracking-[-0.24px] text-primary-pink">
+                {translateOr(
+                  "yourMap.reportDialog.doneTitle",
+                  "Your report was downloaded",
+                )}
+              </DialogTitle>
+              <DialogDescription className="text-[13px] leading-5 text-text-icons-base-second">
+                {translateOr(
+                  "yourMap.reportDialog.doneText",
+                  "Look for this file in your downloads folder:",
+                )}
+              </DialogDescription>
+              <p className="text-xs font-bold leading-5 text-text-icons-base-main [overflow-wrap:anywhere]">
+                {downloaded.filename}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-9 w-full rounded-lg"
+                onClick={() => saveFile(downloaded)}
+              >
+                {translateOr(
+                  "yourMap.reportDialog.downloadAgain",
+                  "Download again",
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                className="h-9 w-full rounded-lg"
+                onClick={() => onOpenChange(false)}
+              >
+                {translateOr("yourMap.reportDialog.close", "Close")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {!downloaded && (
         <div className="space-y-5 px-5 pb-5 pt-2">
-          <div className="space-y-2 text-center">
+          <div className="space-y-2 text-center" aria-live="polite">
             <DialogTitle className="text-2xl font-bold leading-8 tracking-[-0.24px] text-primary-pink">
-              {translateOr("yourMap.reportDialog.title", "Download PDF Report")}
+              {isLoading
+                ? preparingLabel
+                : translateOr(
+                    "yourMap.reportDialog.title",
+                    "Download PDF Report",
+                  )}
             </DialogTitle>
             <DialogDescription className="text-[13px] leading-5 text-text-icons-base-second">
-              {translateOr(
-                "yourMap.reportDialog.description",
-                "Choose the language your report will be written in. You can download it again in the other language anytime.",
-              )}
+              {isLoading
+                ? translateOr(
+                    "yourMap.reportDialog.preparingText",
+                    "We are drawing your maps and tables. This usually takes less than a minute. Please keep this window open.",
+                  )
+                : translateOr(
+                    "yourMap.reportDialog.description",
+                    "Choose the language your report will be written in. You can download it again in the other language anytime.",
+                  )}
             </DialogDescription>
           </div>
+
+          {/* A moving bar, not a percentage: the report arrives in one
+              answer, so there is no real progress to show. */}
+          {isLoading && (
+            <div
+              role="progressbar"
+              aria-label={preparingLabel}
+              className="h-1.5 w-full overflow-hidden rounded-full bg-primary-pink/20"
+            >
+              <div className="indeterminate-bar h-full w-1/4 rounded-full bg-primary-pink" />
+            </div>
+          )}
 
           <div role="radiogroup" className="grid grid-cols-2 gap-3">
             {LANGUAGES.map((option) => {
@@ -192,16 +281,22 @@ export const ReportDownloadDialog = ({ open, onOpenChange }: Props) => {
           <Button
             type="button"
             variant="primary"
-            className="h-9 w-full rounded-lg"
+            className={cn(
+              "h-9 w-full rounded-lg",
+              // Busy, not switched off: keep the colour while it works.
+              isLoading &&
+                "disabled:bg-primary-pink disabled:text-text-icons-on-color disabled:opacity-100",
+            )}
             disabled={!language || isLoading}
             onClick={() => void downloadReport()}
           >
             {isLoading && (
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
             )}
-            {downloadLabel}
+            {isLoading ? preparingLabel : downloadLabel}
           </Button>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );

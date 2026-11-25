@@ -479,3 +479,23 @@ input[type="date"].datepicker::-webkit-calendar-picker-indicator {
     animation: none;
   }
 }
+
+/* A bar that keeps moving, for a wait of unknown length (report dialog). */
+@keyframes indeterminate-bar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.indeterminate-bar {
+  animation: indeterminate-bar 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .indeterminate-bar {
+    animation: none;
+  }
+}

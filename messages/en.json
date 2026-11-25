@@ -905,7 +905,13 @@
         "description": "Choose the language your report will be written in. You can download it again in the other language anytime.",
         "english": "English",
         "indonesian": "Bahasa Indonesia",
-        "download": "Download PDF Report"
+        "download": "Download PDF Report",
+        "preparingTitle": "Preparing your report…",
+        "preparingText": "We are drawing your maps and tables. This usually takes less than a minute. Please keep this window open.",
+        "doneTitle": "Your report was downloaded",
+        "doneText": "Look for this file in your downloads folder:",
+        "downloadAgain": "Download again",
+        "close": "Close"
       },
       "shareMap": "Share map",
       "shareDialogDescription": "Send the mapping results to someone by email. They will receive a link to view the results.",

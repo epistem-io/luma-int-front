@@ -905,7 +905,13 @@
         "description": "Pilih bahasa yang digunakan untuk laporan Anda. Anda dapat mengunduhnya lagi dalam bahasa lain kapan saja.",
         "english": "English",
         "indonesian": "Bahasa Indonesia",
-        "download": "Unduh Laporan PDF"
+        "download": "Unduh Laporan PDF",
+        "preparingTitle": "Menyiapkan laporan Anda…",
+        "preparingText": "Kami sedang menggambar peta dan tabel Anda. Biasanya perlu kurang dari satu menit. Mohon jangan tutup jendela ini.",
+        "doneTitle": "Laporan Anda telah diunduh",
+        "doneText": "Cari berkas ini di folder unduhan Anda:",
+        "downloadAgain": "Unduh lagi",
+        "close": "Tutup"
       },
       "shareMap": "Bagikan peta",
       "shareDialogDescription": "Kirim hasil pemetaan kepada seseorang melalui email. Mereka akan menerima tautan untuk melihat hasilnya.",
